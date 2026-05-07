@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, ChevronLeft, Upload, Globe, Plus, Save, Loader2, Trash2 } from 'lucide-react';
 import ThumbnailCanvas from './ThumbnailCanvas';
 import { isLocalPath, generateStreamTitle, generateTimestamp } from '../utils/helpers';
-import { RAWG_API_KEY } from '../utils/constants';
+import { RAWG_API_KEY, DEFAULT_THUMBNAIL_CONFIG } from '../utils/constants';
 import { RangeControl, ColorOverride } from './common/UIComponents';
 import { ConfirmBanner } from './Notification';
 
 export default function LivestreamSetupWorkspace({ 
-  gameId, cycleName, streamData, onBack, onSave, config, setConfig, onNotify, initialStreamCount, systemFonts 
+  gameId, cycleName, streamData, onBack, onSave, config, setConfig, onNotify, initialStreamCount, systemFonts, streamNumber = null 
 }) {
   const game = streamData[gameId];
   if (!game) return null;
@@ -15,7 +15,11 @@ export default function LivestreamSetupWorkspace({
   const cycle = game.cycles?.[cycleName];
   const cycleDisplayName = cycle?.displayName || (cycleName === 'main' ? 'First Playthrough' : cycleName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
 
-  const [nC] = useState(initialStreamCount !== null ? (initialStreamCount + 1) : ((cycle?.stream_count || 0) + 1));
+  // Use provided streamNumber (if editing an existing log) else auto-increment
+  const [nC] = useState(() => {
+    if (streamNumber !== null) return streamNumber;
+    return (cycle?.stream_count || 0) + 1;
+  });
   const year = game.release_year || new Date().getFullYear();
   const cycleIsMain = cycle?.isMain || false;
   const [title] = useState(generateStreamTitle(game.game_name, year, nC, cycleDisplayName, cycleIsMain));
@@ -148,19 +152,22 @@ export default function LivestreamSetupWorkspace({
       nd[gameId].cycles[cycleName] = { stream_count: 0, timestamps: [], displayName: cycleDisplayName };
     }
 
-    if (initialStreamCount === null && !sessionSaved.current) {
+    // If we are editing an existing log (streamNumber provided), do NOT add a new timestamp
+    if (streamNumber === null && !sessionSaved.current) {
       const ts = generateTimestamp();
       nd[gameId].cycles[cycleName].stream_count = nC;
       nd[gameId].cycles[cycleName].timestamps.push(ts);
       sessionSaved.current = true;
       setHasCycleChanges(false);
       onSave(nd);
-      onNotify('Session saved & title copied!', 'success');
-    } else if (initialStreamCount !== null) {
+      onNotify('New session saved & title copied!', 'success');
+    } else if (streamNumber !== null) {
+      // Existing log – only save image gallery changes, no new timestamp
+      onSave(nd);
+      onNotify('Session settings saved (no new log added).', 'info');
+    } else {
       onSave(nd);
       onNotify('Session settings saved', 'success');
-    } else {
-      onNotify('No changes to session', 'info');
     }
   };
 

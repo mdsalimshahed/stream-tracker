@@ -74,25 +74,6 @@ export default function App() {
   const [sR, setSR] = useState([]);
   const [isS, setIsS] = useState(false);
 
-  // ---- Migration: add missing displayName to cycles ----
-  useEffect(() => {
-    let changed = false;
-    const newData = JSON.parse(JSON.stringify(streamData));
-    for (const [gameId, game] of Object.entries(newData)) {
-      if (game.cycles) {
-        for (const [cycleId, cycle] of Object.entries(game.cycles)) {
-          if (!cycle.displayName) {
-            // generate display name from cycleId
-            let displayName = cycleId === 'main' ? 'First Playthrough' : cycleId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            cycle.displayName = displayName;
-            changed = true;
-          }
-        }
-      }
-    }
-    if (changed) setStreamData(newData);
-  }, []); // runs once on mount
-
   // ---- Persistence ----
   useEffect(() => { localStorage.setItem('streamManagerData', JSON.stringify(streamData)); }, [streamData]);
   useEffect(() => { localStorage.setItem('thumbnailConfig', JSON.stringify(thumbnailConfig)); }, [thumbnailConfig]);
@@ -307,9 +288,9 @@ export default function App() {
     return true;
   };
 
-  const handleStartWorkspace = (gameId, cycleId, selectedLogIndex) => {
+  const handleStartWorkspace = (gameId, cycleId, streamNumber) => {
     setSelectedGameId(null);
-    setWCF({ gameId, cycleId, selectedLogIndex });
+    setWCF({ gameId, cycleId, streamNumber });
   };
 
   const handleExport = () => {
@@ -450,6 +431,7 @@ export default function App() {
           setConfig={setThumbnailConfig}
           onNotify={notify}
           systemFonts={systemFonts}
+          streamNumber={wCf.streamNumber}
         />
       )}
     </div>

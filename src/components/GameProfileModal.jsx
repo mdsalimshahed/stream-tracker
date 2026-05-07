@@ -41,6 +41,9 @@ export default function GameProfileModal({
   const currentCycleData = currentCycle ? cycles[currentCycle.id] : { stream_count: 0, timestamps: [] };
   const details = gameData.details || { developer: 'Unknown', publisher: 'Unknown', releaseDate: gameData.release_year, genres: 'Unknown', tags: 'Unknown' };
 
+  // Determine which stream number to pass: if a log is selected, use its number (index+1), else null
+  const selectedStreamNumber = selectedLogIndex !== null ? selectedLogIndex + 1 : null;
+
   const handleNext = () => {
     let finalCycleId = isCreatingNew && newCycleName ? newCycleName.toLowerCase().replace(/\s+/g, '_') : selectedCycleId;
     if (!finalCycleId && cycleEntries.length > 0) finalCycleId = cycleEntries[0].id;
@@ -48,12 +51,10 @@ export default function GameProfileModal({
       onNotify('Please select or create a run first', 'error');
       return;
     }
-    onStartWorkspace(gameId, finalCycleId, selectedLogIndex);
+    onStartWorkspace(gameId, finalCycleId, selectedStreamNumber);
   };
 
-  const handleBack = () => {
-    onClose();
-  };
+  const handleBack = () => onClose();
 
   const renderTimestamps = () => {
     if (!currentCycle) {

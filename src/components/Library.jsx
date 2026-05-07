@@ -31,7 +31,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
   });
 
   const handleEditClick = (game) => setEditingGame(game);
-  const handleSaveEdit = (id, newName, newYear, rawgId) => onEditGame(id, newName, newYear, rawgId);
+  const handleSaveEdit = (id, newName, newYear, rawgId, newLabel) => onEditGame(id, newName, newYear, rawgId, newLabel);
 
   const containerStyle = {
     paddingLeft: `${layoutPrefs.containerPaddingX}px`,
@@ -46,6 +46,18 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
     backdropFilter: 'blur(8px)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     transition: 'all 0.2s',
+  };
+
+  // Helper to get label style and icon
+  const getLabelStyle = (label) => {
+    switch (label) {
+      case 'Completed':
+        return { bg: 'bg-yellow-600', icon: '✓', text: 'Completed' };
+      case 'Abandoned':
+        return { bg: 'bg-red-600', icon: '✗', text: 'Abandoned' };
+      default:
+        return { bg: 'bg-green-600', icon: '', text: 'Ongoing' };
+    }
   };
 
   return (
@@ -73,6 +85,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
           {sorted.map(game => {
             const cover = game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
+            const labelInfo = getLabelStyle(game.label || 'Ongoing');
             return (
               <div
                 key={game.id}
@@ -84,7 +97,13 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                   <img src={cover} alt={game.game_name} className="w-full h-full object-cover transition duration-300 group-hover:scale-110" />
                 </div>
                 <div className="p-4">
-                  <h3 className="font-bold text-lg tracking-tight break-words" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
+                  <div className="flex justify-between items-start gap-2">
+                    <h3 className="font-bold text-lg tracking-tight break-words flex-1" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
+                    <span className={`${labelInfo.bg} text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap`}>
+                      {labelInfo.icon && <span>{labelInfo.icon}</span>}
+                      {labelInfo.text}
+                    </span>
+                  </div>
                   <p className="text-white/40 text-sm mt-1" style={{ fontSize: `${systemFonts.libYear}px` }}>{game.release_year}</p>
                   <div className="flex justify-between items-center mt-3">
                     <span className="text-xs bg-white/10 px-2 py-0.5 rounded-full">{game.totalStreams} streams</span>

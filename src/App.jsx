@@ -11,7 +11,6 @@ import { RAWG_API_KEY, DEFAULT_SYSTEM_FONTS, DEFAULT_LAYOUT_PREFS, DEFAULT_THUMB
 import { formatRunName, formatReleaseDate } from './utils/helpers';
 
 export default function App() {
-  // ---- Data states ----
   const [streamData, setStreamData] = useState(() => {
     try {
       const s = localStorage.getItem('streamManagerData');
@@ -58,7 +57,6 @@ export default function App() {
     } catch(e) { return DEFAULT_MODAL_PANEL_OPACITY; }
   });
 
-  // ---- UI states ----
   const [currentView, setCurrentView] = useState(() => {
     try {
       const s = localStorage.getItem('streamManagerData');
@@ -68,13 +66,12 @@ export default function App() {
   });
   const [toast, setToast] = useState(null);
   const [selectedGameId, setSelectedGameId] = useState(null);
-  const [initialRunIdForModal, setInitialRunIdForModal] = useState(null);
+  const [initialRunForModal, setInitialRunForModal] = useState(null);
   const [wCf, setWCF] = useState(null);
   const [sQ, setSQ] = useState('');
   const [sR, setSR] = useState([]);
   const [isS, setIsS] = useState(false);
 
-  // ---- Persistence ----
   useEffect(() => { localStorage.setItem('streamManagerData', JSON.stringify(streamData)); }, [streamData]);
   useEffect(() => { localStorage.setItem('thumbnailConfig', JSON.stringify(thumbnailConfig)); }, [thumbnailConfig]);
   useEffect(() => { localStorage.setItem('systemFonts', JSON.stringify(systemFonts)); }, [systemFonts]);
@@ -82,7 +79,6 @@ export default function App() {
   useEffect(() => { localStorage.setItem('modalBgIntensity', modalBgIntensity); }, [modalBgIntensity]);
   useEffect(() => { localStorage.setItem('modalPanelOpacity', modalPanelOpacity); }, [modalPanelOpacity]);
 
-  // ---- Auto‑fetch missing screenshots & game details ----
   useEffect(() => {
     const recovery = async () => {
       const dataCopy = JSON.parse(JSON.stringify(streamData));
@@ -121,7 +117,6 @@ export default function App() {
     if (Object.keys(streamData).length > 0) recovery();
   }, []);
 
-  // ---- Debounced search (RAWG) ----
   useEffect(() => {
     if (!sQ.trim()) { setSR([]); return; }
     const delay = setTimeout(async () => {
@@ -135,12 +130,11 @@ export default function App() {
     return () => clearTimeout(delay);
   }, [sQ]);
 
-  // ---- Helper functions ----
   const notify = (msg, type) => setToast({ message: msg, type });
 
   const openGameProfile = (gameId, runId = null) => {
     setSelectedGameId(gameId);
-    setInitialRunIdForModal(runId);
+    setInitialRunForModal(runId);
   };
 
   const handleAddGame = async (g) => {
@@ -185,7 +179,8 @@ export default function App() {
             displayName: 'First Playthrough'
           }
         },
-        details: details
+        details: details,
+        label: 'Ongoing'   // default label
       }
     });
     openGameProfile(rid);
@@ -218,11 +213,12 @@ export default function App() {
     } catch(e) { notify('Update failed', 'error'); }
   };
 
-  const editGameDetails = (gameId, newName, newYear, rawgId) => {
+  const editGameDetails = (gameId, newName, newYear, rawgId, newLabel) => {
     const nd = JSON.parse(JSON.stringify(streamData));
     if (nd[gameId]) {
       nd[gameId].game_name = newName;
       if (newYear) nd[gameId].release_year = newYear;
+      nd[gameId].label = newLabel;
       setStreamData(nd);
       notify(`Game updated to "${newName}"`, 'success');
       if (rawgId) updateGameLink(gameId, rawgId);
@@ -288,9 +284,9 @@ export default function App() {
     return true;
   };
 
-  const handleStartWorkspace = (gameId, cycleId, streamNumber) => {
+  const handleStartWorkspace = (gameId, cycleId, selectedLogIndex) => {
     setSelectedGameId(null);
-    setWCF({ gameId, cycleId, streamNumber });
+    setWCF({ gameId, cycleId, selectedLogIndex });
   };
 
   const handleExport = () => {
@@ -311,7 +307,6 @@ export default function App() {
     notify('Library restored', 'success');
   };
 
-  // ---- Render ----
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden font-sans antialiased">
       <style>{`
@@ -401,7 +396,7 @@ export default function App() {
         <GameProfileModal
           gameId={selectedGameId}
           gameData={streamData[selectedGameId]}
-          onClose={() => { setSelectedGameId(null); setInitialRunIdForModal(null); }}
+          onClose={() => { setSelectedGameId(null); setInitialRunForModal(null); }}
           onStartWorkspace={handleStartWorkspace}
           onDeleteCycle={deleteCycle}
           onDeleteTimestamp={deleteTimestamp}
@@ -409,7 +404,7 @@ export default function App() {
           systemFonts={systemFonts}
           modalBgIntensity={modalBgIntensity}
           modalPanelOpacity={modalPanelOpacity}
-          initialRunId={initialRunIdForModal}
+          initialRunId={initialRunForModal}
           onUpdateCycle={updateCycle}
           onAddCycle={addCycle}
         />
@@ -423,7 +418,7 @@ export default function App() {
           streamData={streamData}
           onBack={(returnedCycleId) => {
             setSelectedGameId(wCf.gameId);
-            setInitialRunIdForModal(returnedCycleId || wCf.cycleId);
+            setInitialRunForModal(returnedCycleId || wCf.cycleId);
             setWCF(null);
           }}
           onSave={setStreamData}
@@ -431,7 +426,6 @@ export default function App() {
           setConfig={setThumbnailConfig}
           onNotify={notify}
           systemFonts={systemFonts}
-          streamNumber={wCf.streamNumber}
         />
       )}
     </div>

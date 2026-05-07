@@ -1,130 +1,315 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, X, Gamepad2, Plus, Check, Clock, Trash2 } from 'lucide-react';
-import { formatRunName } from '../utils/helpers';
+import { X, ArrowRight, ArrowLeft, Gamepad2, Clock, Plus, Trash2, Edit3, Save, Star, ExternalLink, Check, Pencil } from 'lucide-react';
+import { formatRunName, formatReleaseDate } from '../utils/helpers';
+import { ConfirmBanner } from './Notification';
+import { EditRunModal } from './modals/EditRunModal';
 
-const GameProfileModal = ({ gameId, gameData, onClose, onStartWorkspace, onDeleteCycle, onDeleteTimestamp, onNotify }) => {
-  const [selectedCycle, setSelectedCycle] = useState('main');
+export default function GameProfileModal({ 
+  gameId, gameData, onClose, onStartWorkspace, onDeleteCycle, onDeleteTimestamp, onNotify, 
+  systemFonts, modalBgIntensity, modalPanelOpacity, initialRunId = null, onUpdateCycle, onAddCycle 
+}) {
+  const [selectedCycleId, setSelectedCycleId] = useState(initialRunId);
   const [newCycleName, setNewCycleName] = useState('');
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [selectedLogIndex, setSelectedLogIndex] = useState(null);
+  const [editingRun, setEditingRun] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState(null);
+  const [bgImageIndex, setBgImageIndex] = useState(0);
+  const [bgImages, setBgImages] = useState([]);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = 'unset'; };
-  }, []);
+    const images = gameData.thumbnail_urls?.filter(url => !url.startsWith('blob:') && url.startsWith('http')) || [];
+    setBgImages(images);
+    const interval = setInterval(() => {
+      if (images.length) setBgImageIndex(prev => (prev + 1) % images.length);
+    }, 5000);
+    return () => {
+      document.body.style.overflow = 'unset';
+      clearInterval(interval);
+    };
+  }, [gameData]);
 
   if (!gameData) return null;
-  const cycles = gameData.cycles || { main: { stream_count: 0, timestamps: [] } };
-  const cycleKeys = Object.keys(cycles);
-  
-  useEffect(() => { 
-    if (!cycleKeys.includes(selectedCycle) && cycleKeys.length > 0) {
-      setSelectedCycle(cycleKeys[0]);
-      setSelectedLogIndex(null);
-    }
-  }, [cycleKeys, selectedCycle]);
-
-  const currentCycleData = cycles[selectedCycle] || { stream_count: 0, timestamps: [] };
+  const cycles = gameData.cycles || {};
+  const cycleEntries = Object.entries(cycles).map(([id, data]) => ({
+    id,
+    displayName: data.displayName || (id === 'main' ? 'First Playthrough' : id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())),
+    ...data
+  }));
+  const currentCycle = cycleEntries.find(c => c.id === selectedCycleId) || null;
+  const currentCycleData = currentCycle ? cycles[currentCycle.id] : { stream_count: 0, timestamps: [] };
+  const details = gameData.details || { developer: 'Unknown', publisher: 'Unknown', releaseDate: gameData.release_year, genres: 'Unknown', tags: 'Unknown' };
 
   const handleNext = () => {
-    const finalCycleName = isCreatingNew && newCycleName ? formatRunName(newCycleName.trim()) : selectedCycle;
-    onStartWorkspace(gameId, finalCycleName, selectedLogIndex);
+    let finalCycleId = isCreatingNew && newCycleName ? newCycleName.toLowerCase().replace(/\s+/g, '_') : selectedCycleId;
+    if (!finalCycleId && cycleEntries.length > 0) finalCycleId = cycleEntries[0].id;
+    if (!finalCycleId) {
+      onNotify('Please select or create a run first', 'error');
+      return;
+    }
+    onStartWorkspace(gameId, finalCycleId, selectedLogIndex);
+  };
+
+  const handleBack = () => {
+    onClose();
+  };
+
+  const renderTimestamps = () => {
+    if (!currentCycle) {
+      return <div className="text-center text-white/50 py-12 text-sm">Select a run to view its logs</div>;
+    }
+    if (!currentCycleData.timestamps?.length) {
+      return <div className="text-center text-white/30 py-12 text-sm">No logs yet</div>;
+    }
+    const reversed = [...currentCycleData.timestamps].reverse();
+    return reversed.map((ts, i) => {
+      const realIdx = currentCycleData.timestamps.length - 1 - i;
+      const active = selectedLogIndex === realIdx;
+      const runName = currentCycle.displayName;
+      return (
+        <div 
+          key={i} 
+          onClick={() => setSelectedLogIndex(active ? null : realIdx)} 
+          className={`p-3 rounded-xl border-2 transition-all cursor-pointer ${active ? 'border-yellow-500' : 'border-white/10 hover:border-white/30'}`}
+        >
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="font-medium">Livestream #{realIdx + 1}</p>
+              <p className="text-xs text-white/40 mt-0.5">{ts}</p>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setConfirmDialog({
+                  title: 'Delete Log Entry',
+                  message: `Delete Livestream #${realIdx + 1} for "${runName}" run of "${gameData.game_name}"? This cannot be undone.`,
+                  onConfirm: () => {
+                    onDeleteTimestamp(gameId, currentCycle.id, realIdx, ts);
+                    setConfirmDialog(null);
+                  }
+                });
+              }}
+              className="text-red-400 hover:text-red-300 transition hover:scale-110"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+      );
+    });
+  };
+
+  const handleDeleteRun = (cycleId, displayName, streamCount) => {
+    setConfirmDialog({
+      title: 'Delete Run',
+      message: `Delete run "${displayName}" from "${gameData.game_name}"? It has ${streamCount} livestream(s). This cannot be undone.`,
+      onConfirm: () => {
+        onDeleteCycle(gameId, cycleId);
+        if (selectedCycleId === cycleId) setSelectedCycleId(null);
+        setConfirmDialog(null);
+      }
+    });
+  };
+
+  const handleEditRun = (cycle) => {
+    setEditingRun({ id: cycle.id, displayName: cycle.displayName, isMain: cycle.isMain || false, youtubePlaylist: cycle.youtubePlaylist || '' });
+  };
+
+  const handleSaveRunEdit = (newDisplayName, isMain, playlist) => {
+    onUpdateCycle(gameId, editingRun.id, newDisplayName, isMain, playlist);
+    onNotify('Run updated successfully', 'success');
+    setEditingRun(null);
+  };
+
+  const handleCycleClick = (cycleId) => {
+    if (selectedCycleId === cycleId) {
+      setSelectedCycleId(null);
+    } else {
+      setSelectedCycleId(cycleId);
+      setSelectedLogIndex(null);
+    }
+    setIsCreatingNew(false);
+  };
+
+  const handleCreateNewRun = () => {
+    if (!newCycleName.trim()) return;
+    const success = onAddCycle(gameId, newCycleName.trim());
+    if (success) {
+      setNewCycleName('');
+      setIsCreatingNew(false);
+    }
+  };
+
+  const bgImage = bgImages[bgImageIndex] || 'https://placehold.co/1280x720/1e293b/475569?text=No+Image';
+  const blurAmount = 8 + (1 - modalBgIntensity) * 12;
+  const panelStyle = { 
+    backgroundColor: `rgba(0, 0, 0, ${modalPanelOpacity})`, 
+    backdropFilter: 'blur(8px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
+    borderRadius: '1rem'
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-8 bg-slate-950/95 backdrop-blur-sm animate-in fade-in font-arial overflow-hidden" onClick={onClose}>
-      <div className="bg-slate-900 border border-slate-800 w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col relative shadow-[0_0_100px_rgba(0,0,0,0.5)]" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-black/60" style={{ opacity: 1 - modalBgIntensity }} />
+        <img src={bgImage} alt="background" className="w-full h-full object-cover transition-all duration-1000" style={{ filter: `blur(${blurAmount}px)`, opacity: modalBgIntensity }} />
+      </div>
+
+      <div className="relative w-full max-w-6xl h-full max-h-[90vh] flex flex-col lg:flex-row gap-6 mx-auto p-1" onClick={e => e.stopPropagation()}>
         
-        {/* Modal Header */}
-        <div className="px-12 py-8 border-b border-slate-800 bg-slate-900 shrink-0 flex items-center justify-between">
-          <div className="flex flex-col">
-            <h2 className="text-3xl font-bold text-white tracking-tighter">{gameData.game_name}</h2>
-            <div className="flex gap-6 mt-2">
-               <p className="text-xs font-bold text-slate-500">{gameData.release_year}</p>
-               <p className="text-xs font-bold text-slate-500 uppercase">RAWG {gameId}</p>
+        {/* LEFT COLUMN: Game Information */}
+        <div className="lg:w-1/2 flex flex-col overflow-hidden rounded-2xl" style={panelStyle}>
+          <div className="relative aspect-video rounded-t-2xl overflow-hidden bg-black/40">
+            <img src={bgImage} alt={gameData.game_name} className="w-full h-full object-cover transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+            <div className="absolute bottom-4 left-4 right-4">
+              <h2 className="text-3xl font-bold tracking-tight text-white drop-shadow-lg" style={{ fontSize: `${systemFonts.modalHeader + 4}px`, textShadow: '2px 2px 8px rgba(0,0,0,0.8)' }}>
+                {gameData.game_name}
+              </h2>
             </div>
           </div>
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={handleNext} 
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-12 py-4 text-sm flex items-center gap-4 transition-all active:scale-95 shadow-2xl"
-            >
-              Next <ArrowRight size={22}/>
-            </button>
-            <button onClick={onClose} className="p-3 bg-slate-800 hover:bg-red-600 text-slate-300 transition-all rounded-full shadow-lg"><X size={24} /></button>
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4">
+            <div className="space-y-3">
+              <div><span className="text-white/50 text-sm block">Developer</span><span className="text-white text-sm">{details.developer}</span></div>
+              <div><span className="text-white/50 text-sm block">Publisher</span><span className="text-white text-sm">{details.publisher}</span></div>
+              <div><span className="text-white/50 text-sm block">Release Date</span><span className="text-white text-sm">{formatReleaseDate(details.releaseDate)}</span></div>
+              <div><span className="text-white/50 text-sm block">Genres</span><span className="text-white text-sm">{details.genres}</span></div>
+              {details.tags && details.tags !== 'Unknown' && (
+                <div><span className="text-white/50 text-sm block">Tags</span><span className="text-white text-sm">{details.tags}</span></div>
+              )}
+            </div>
+            <div className="pt-3 border-t border-white/10">
+              <label className="text-white/50 text-sm block mb-2">YouTube Playlists</label>
+              <div className="space-y-1">
+                {cycleEntries.map(cycle => {
+                  const playlist = cycle.youtubePlaylist;
+                  if (!playlist) return null;
+                  return (
+                    <div key={cycle.id} className="flex items-center gap-2">
+                      <Star size={12} className="text-yellow-500/60" />
+                      <a href={playlist} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline text-sm break-all">
+                        {cycle.displayName}
+                      </a>
+                    </div>
+                  );
+                })}
+                {cycleEntries.every(c => !c.youtubePlaylist) && (
+                  <span className="text-white/40 text-sm italic">No playlists added. Edit a run to add one.</span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Modal Content */}
-        <div className="flex-1 overflow-hidden p-12 grid grid-cols-1 md:grid-cols-2 gap-16 bg-slate-900/50">
-            
-            {/* LEFT: Independent Scrollable Playthroughs */}
-            <div className="flex flex-col h-full overflow-hidden">
-              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-8 shrink-0 flex items-center gap-3"><Gamepad2 size={20}/> Select Run</h3>
-              <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 space-y-3">
-                {cycleKeys.map(cycle => (
-                  <div key={cycle} onClick={() => { setSelectedCycle(cycle); setIsCreatingNew(false); }} className={`p-6 border transition-all flex justify-between items-center group ${selectedCycle === cycle && !isCreatingNew ? 'border-blue-600 bg-blue-600/10 scale-[1.02]' : 'border-slate-800 bg-slate-950 hover:border-slate-700'}`}>
-                    <div>
-                      <h4 className="font-bold text-white text-lg tracking-tight">{cycle === 'main' ? 'First Playthrough' : cycle}</h4>
-                      <p className="text-xs font-bold text-slate-500 mt-2">{cycles[cycle].stream_count} Streams</p>
+        {/* RIGHT COLUMN: Runs and Logs */}
+        <div className="lg:w-1/2 flex flex-col gap-6 h-full min-h-0">
+          {/* Runs panel */}
+          <div className="flex flex-col rounded-2xl overflow-hidden flex-1 min-h-0" style={panelStyle}>
+            <div className="flex justify-between items-center p-4 pb-0 shrink-0">
+              <h3 className="text-sm font-semibold text-white/50 flex items-center gap-2"><Gamepad2 size={16} /> Runs</h3>
+              <div className="flex gap-2">
+                <button onClick={handleBack} className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition" title="Back">
+                  <ArrowLeft size={16} />
+                </button>
+                <button onClick={handleNext} className="bg-blue-600 hover:bg-blue-500 p-2 rounded-lg transition" title="Continue to thumbnail setup">
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 pt-2 space-y-2">
+              {cycleEntries.map(cycle => {
+                const streamCount = cycle.stream_count || 0;
+                const isSelected = selectedCycleId === cycle.id;
+                return (
+                  <div
+                    key={cycle.id}
+                    onClick={() => handleCycleClick(cycle.id)}
+                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${isSelected ? 'border-yellow-500 shadow-lg' : 'border-white/10 hover:border-white/30'}`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-white">{cycle.displayName}</span>
+                        {cycle.isMain && <Star size={14} className="text-yellow-400" />}
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleEditRun(cycle); }} 
+                          className="p-1 text-blue-400 hover:text-blue-300 transition hover:scale-110 drop-shadow-md"
+                          title="Edit run"
+                        >
+                          <Edit3 size={14} />
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleDeleteRun(cycle.id, cycle.displayName, streamCount); }} 
+                          className="p-1 text-red-400 hover:text-red-300 transition hover:scale-110 drop-shadow-md"
+                          title="Delete run"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                       {cycle !== 'main' && <button onClick={(e) => { e.stopPropagation(); onDeleteCycle(gameId, cycle); }} className="p-2 text-red-500 hover:bg-red-500/10 transition-colors"><Trash2 size={20}/></button>}
-                       {selectedCycle === cycle && !isCreatingNew && <Check className="text-blue-500" size={28} strokeWidth={5}/>}
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-white/40">{streamCount} streams</span>
                     </div>
                   </div>
-                ))}
-                <div onClick={() => setIsCreatingNew(true)} className={`p-6 border transition-all ${isCreatingNew ? 'border-purple-600 bg-purple-600/10' : 'border-slate-800 bg-slate-950 hover:border-slate-700'}`}>
-                  <div className="flex items-center gap-3 text-slate-600 font-bold text-xs uppercase mb-4"><Plus size={18}/> Create New</div>
-                  {isCreatingNew && (
+                );
+              })}
+              <div onClick={() => setIsCreatingNew(true)} className={`p-4 rounded-xl border border-dashed cursor-pointer ${isCreatingNew ? 'bg-purple-500/20 border-purple-500' : 'border-white/20 hover:border-white/40'}`}>
+                <div className="flex items-center gap-2 text-sm"><Plus size={16} /> New Run</div>
+                {isCreatingNew && (
+                  <div className="mt-3 flex gap-2">
                     <input 
                       type="text" 
-                      placeholder="Enter run name..." 
+                      placeholder="Run name (e.g., Speedrun, NG+)" 
                       value={newCycleName} 
-                      onChange={(e) => setNewCycleName(formatRunName(e.target.value))} 
-                      className="w-full bg-slate-900 border-b-2 border-purple-600 p-4 text-white text-lg font-bold outline-none placeholder:text-slate-800" 
+                      onChange={(e) => setNewCycleName(e.target.value)}
+                      className="flex-1 bg-black/40 border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500"
                       autoFocus 
                       onClick={e => e.stopPropagation()} 
                     />
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT: Independent Scrollable Timeline */}
-            <div className="flex flex-col h-full overflow-hidden border-l border-slate-800 pl-16">
-              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-8 shrink-0 flex items-center gap-3"><Clock size={20}/> Logs</h3>
-              <div className="flex-1 bg-slate-950 border border-slate-800 overflow-y-auto custom-scrollbar p-4 shadow-inner">
-                {currentCycleData.timestamps?.length > 0 ? (
-                  <div className="space-y-3">
-                    {[...currentCycleData.timestamps].reverse().map((ts, i) => {
-                      const realIndex = currentCycleData.timestamps.length - 1 - i;
-                      const active = selectedLogIndex === realIndex;
-                      return (
-                        <div 
-                          key={i} 
-                          onClick={() => setSelectedLogIndex(active ? null : realIndex)}
-                          className={`px-6 py-5 cursor-pointer border transition-all flex items-center justify-between group shadow-xl ${active ? 'bg-emerald-600/20 border-emerald-500' : 'bg-slate-900 border-transparent hover:border-slate-700'}`}
-                        >
-                          <div className="flex flex-col">
-                             <span className="text-white text-2xl font-bold tracking-tighter">Livestream #{realIndex + 1}</span>
-                             <span className="text-xs font-bold text-slate-500 font-mono mt-1">{ts}</span>
-                          </div>
-                          <div className="flex items-center gap-4">
-                             <button onClick={(e) => { e.stopPropagation(); onDeleteTimestamp(gameId, selectedCycle, realIndex, ts); }} className="p-2 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-500/10 transition-all"><Trash2 size={20}/></button>
-                             {active && <Check className="text-emerald-500" size={24} strokeWidth={5}/>}
-                          </div>
-                        </div>
-                      );
-                    })}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleCreateNewRun(); }}
+                      className="bg-blue-600 hover:bg-blue-500 px-3 rounded-lg text-sm"
+                    >
+                      Create
+                    </button>
                   </div>
-                ) : <div className="h-full flex items-center justify-center text-slate-800 text-sm font-bold uppercase tracking-widest">No History</div>}
+                )}
               </div>
             </div>
+          </div>
+
+          {/* Logs panel */}
+          <div className="flex flex-col rounded-2xl overflow-hidden flex-1 min-h-0" style={panelStyle}>
+            <h3 className="text-sm font-semibold text-white/50 flex items-center gap-2 p-4 pb-0 shrink-0"><Clock size={16} /> Session Logs</h3>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 pt-2 space-y-2">
+              {renderTimestamps()}
+            </div>
+          </div>
         </div>
       </div>
+
+      {editingRun && (
+        <EditRunModal
+          runName={editingRun.displayName}
+          isMain={editingRun.isMain}
+          youtubePlaylist={editingRun.youtubePlaylist}
+          onSave={handleSaveRunEdit}
+          onClose={() => setEditingRun(null)}
+        />
+      )}
+
+      {confirmDialog && (
+        <ConfirmBanner
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+        />
+      )}
     </div>
   );
-};
-
-export default GameProfileModal;
+}

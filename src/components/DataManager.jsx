@@ -1,54 +1,184 @@
 import React from 'react';
-import { Upload, Download } from 'lucide-react';
+import { Type, Layout, Eye } from 'lucide-react';
+import { RangeControl } from './common/UIComponents';
 
-const DataManager = ({ streamData, setStreamData }) => {
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const json = JSON.parse(event.target.result);
-        setStreamData(json);
-      } catch (err) { alert("Error."); }
-    };
-    reader.readAsText(file);
-  };
+const Toggle = ({ label, description, value, onChange }) => (
+  <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+    <div className="flex justify-between items-center">
+      <div>
+        <div className="text-sm font-medium text-white">{label}</div>
+        <div className="text-xs text-white/40 mt-0.5">{description}</div>
+      </div>
+      <button
+        onClick={() => onChange(!value)}
+        className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+          value ? 'bg-blue-600 text-white' : 'bg-white/10 text-white/60'
+        }`}
+      >
+        {value ? 'Enabled' : 'Disabled'}
+      </button>
+    </div>
+  </div>
+);
 
-  const handleDownload = () => {
-    const dataStr = JSON.stringify(streamData, null, 4);
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = "livestream_info.json";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+export default function DataManager({
+  systemFonts,
+  setSystemFonts,
+  layoutPrefs,
+  setLayoutPrefs,
+  modalBgIntensity,
+  setModalBgIntensity,
+  modalPanelOpacity,
+  setModalPanelOpacity,
+}) {
+  const updateFont = (key, val) => setSystemFonts((prev) => ({ ...prev, [key]: val }));
+  const updateLayout = (key, val) => setLayoutPrefs((prev) => ({ ...prev, [key]: val }));
 
   return (
-    <div className="max-w-4xl mx-auto mt-12 px-4 animate-in fade-in font-arial h-full overflow-y-auto custom-scrollbar pb-32">
-      <div className="bg-slate-900 border border-slate-800 p-12 shadow-2xl">
-        <h2 className="text-2xl font-bold text-white mb-10 text-center">Storage Center</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <label className="cursor-pointer group flex-1">
-            <input type="file" accept=".json" className="hidden" onChange={handleFileUpload} />
-            <div className="bg-slate-800 border border-slate-700 p-12 flex flex-col items-center justify-center hover:bg-blue-600 transition-all">
-              <Upload className="text-blue-400 mb-2 h-10 w-10 group-hover:text-white" />
-              <span className="text-sm font-bold text-blue-400 group-hover:text-white">Import JSON</span>
-            </div>
-          </label>
-          <button onClick={handleDownload} className="flex-1">
-            <div className="bg-slate-800 border border-slate-700 p-12 flex flex-col items-center justify-center hover:bg-emerald-600 transition-all h-full">
-              <Download className="text-emerald-400 mb-2 h-10 w-10" />
-              <span className="text-sm font-bold text-emerald-400">Export JSON</span>
-            </div>
-          </button>
+    <div className="h-full overflow-y-auto custom-scrollbar px-6 py-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Typography */}
+        <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2">
+          <Type size={24} /> Typography
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+          <RangeControl
+            label="Game Title (Card)"
+            description="Font size of game name"
+            value={systemFonts.libTitle}
+            min={10}
+            max={60}
+            onChange={(v) => updateFont('libTitle', v)}
+          />
+          <RangeControl
+            label="Release Year (Card)"
+            description="Font size of the year"
+            value={systemFonts.libYear}
+            min={10}
+            max={40}
+            onChange={(v) => updateFont('libYear', v)}
+          />
+          <RangeControl
+            label="Modal Game Name"
+            description="Header inside game profile"
+            value={systemFonts.modalHeader}
+            min={16}
+            max={80}
+            onChange={(v) => updateFont('modalHeader', v)}
+          />
+          <RangeControl
+            label="Log Entry Title"
+            description="'Livestream #X' text"
+            value={systemFonts.logTitle}
+            min={12}
+            max={60}
+            onChange={(v) => updateFont('logTitle', v)}
+          />
+          <RangeControl
+            label="Log Timestamp"
+            description="Date/time below each log"
+            value={systemFonts.logSub}
+            min={8}
+            max={24}
+            onChange={(v) => updateFont('logSub', v)}
+          />
+          <RangeControl
+            label="Search Input Text"
+            description="Font size of search bar"
+            value={systemFonts.searchBar}
+            min={16}
+            max={60}
+            onChange={(v) => updateFont('searchBar', v)}
+          />
+        </div>
+
+        {/* Layout & Spacing */}
+        <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2">
+          <Layout size={24} /> Layout & Spacing
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+          <RangeControl
+            label="Card Padding"
+            description="Space inside card (text area)"
+            value={layoutPrefs.cardPadding}
+            min={8}
+            max={48}
+            onChange={(v) => updateLayout('cardPadding', v)}
+          />
+          <RangeControl
+            label="Card Gap"
+            description="Space between cards"
+            value={layoutPrefs.cardGap}
+            min={8}
+            max={48}
+            onChange={(v) => updateLayout('cardGap', v)}
+          />
+          <RangeControl
+            label="Card Max Width"
+            description="Maximum width of each card"
+            value={layoutPrefs.cardMaxWidth}
+            min={160}
+            max={500}
+            onChange={(v) => updateLayout('cardMaxWidth', v)}
+          />
+          <RangeControl
+            label="Page Horizontal Padding"
+            description="Left/right margin of content"
+            value={layoutPrefs.containerPaddingX}
+            min={12}
+            max={48}
+            onChange={(v) => updateLayout('containerPaddingX', v)}
+          />
+          <RangeControl
+            label="Page Vertical Padding"
+            description="Top/bottom margin of content"
+            value={layoutPrefs.containerPaddingY}
+            min={12}
+            max={48}
+            onChange={(v) => updateLayout('containerPaddingY', v)}
+          />
+          <Toggle
+            label="Rounded Cards"
+            description="Enable rounded corners on cards"
+            value={layoutPrefs.cardRounded}
+            onChange={(v) => updateLayout('cardRounded', v)}
+          />
+          <RangeControl
+            label="Card Border Radius"
+            description="How rounded the cards are"
+            value={layoutPrefs.cardRadius}
+            min={4}
+            max={32}
+            onChange={(v) => updateLayout('cardRadius', v)}
+            disabled={!layoutPrefs.cardRounded}
+          />
+        </div>
+
+        {/* Modal Appearance */}
+        <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2">
+          <Eye size={24} /> Modal Appearance
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <RangeControl
+            label="Background Intensity"
+            description="0 = fully dimmed, 1 = full image visibility"
+            value={modalBgIntensity}
+            min={0}
+            max={1}
+            step={0.01}
+            onChange={setModalBgIntensity}
+          />
+          <RangeControl
+            label="Panel Opacity"
+            description="Transparency of Runs & Logs panels"
+            value={modalPanelOpacity}
+            min={0.5}
+            max={1}
+            step={0.01}
+            onChange={setModalPanelOpacity}
+          />
         </div>
       </div>
     </div>
   );
-};
-
-export default DataManager;
+}

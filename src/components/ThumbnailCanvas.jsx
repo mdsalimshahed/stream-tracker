@@ -1,15 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
-const ThumbnailCanvas = ({ 
-  bgImageUrl, 
-  gameName, 
-  cycleName, 
-  streamCount,
-  config,      
-  customFont,
-  canvasRef 
-}) => {
+export default function ThumbnailCanvas({ bgImageUrl, gameName, cycleName, streamCount, config, customFont, canvasRef }) {
   const [isDrawing, setIsDrawing] = useState(true);
 
   useEffect(() => {
@@ -18,8 +10,7 @@ const ThumbnailCanvas = ({
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const targetW = 1280, targetH = 720;
-    
-    const fontFace = customFont ? `"${customFont}", serif` : '"Book Antiqua", "Palatino Linotype", Palatino, serif';
+    const fontFace = customFont ? `"${customFont}", serif` : '"Book Antiqua", system-ui, sans-serif';
 
     const getScaledFont = (text, initialSize, maxWidth) => {
       let size = initialSize;
@@ -50,11 +41,7 @@ const ThumbnailCanvas = ({
 
     const drawCanvas = (imgToDraw) => {
       ctx.clearRect(0, 0, targetW, targetH);
-      const tr = targetW / targetH, ir = imgToDraw.width / imgToDraw.height;
-      let sx, sy, sW, sH;
-      if (ir > tr) { sH = imgToDraw.height; sW = sH * tr; sx = (imgToDraw.width - sW) / 2; sy = 0; }
-      else { sW = imgToDraw.width; sH = sW / tr; sx = 0; sy = (imgToDraw.height - sH) / 2; }
-      ctx.drawImage(imgToDraw, sx, sy, sW, sH, 0, 0, targetW, targetH);
+      ctx.drawImage(imgToDraw, 0, 0, targetW, targetH);
       
       let parts = [gameName];
       if (config.splitTitle && gameName.includes(":")) { 
@@ -77,7 +64,6 @@ const ThumbnailCanvas = ({
         let lum = 0; for (let i = 0; i < d_.length; i += 4) lum += (0.299*d_[i] + 0.587*d_[i+1] + 0.114*d_[i+2]);
         mL = (lum / (d_.length / 4)) / 255;
       } catch (e) {}
-
       let isL = (mL >= 0.45);
       if (config.forceInvertTitle) isL = !isL;
 
@@ -94,7 +80,6 @@ const ThumbnailCanvas = ({
       ctx.font = `900 ${config.streamCountSize}px ${fontFace}`;
       const sm = ctx.measureText(sT_), sA = sm.actualBoundingBoxAscent, sH_ = sA + sm.actualBoundingBoxDescent, sDY = targetH - sH_ - config.bottomPaddingY + sA;
       const sh = config.showBottomShadow ? { x: 5, y: 5, color: "rgba(0,0,0,0.7)" } : null;
-      
       renderTextCleanly(sT_, bX, sDY, config.streamCountSize, config.bottomAlign, config.manualColors.streamCount ? config.colors.streamStroke : "rgba(0,0,0,0.78)", config.manualColors.streamCount ? config.colors.streamFill : "#FFF", 6, sh);
       if (cT_) {
         ctx.font = `900 ${config.cycleSize}px ${fontFace}`;
@@ -111,11 +96,14 @@ const ThumbnailCanvas = ({
   }, [bgImageUrl, gameName, cycleName, streamCount, config, customFont, canvasRef]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center bg-black font-arial">
-        {isDrawing && <div className="absolute inset-0 z-10 bg-slate-900/95 flex flex-col items-center justify-center text-white"><Loader2 className="animate-spin text-blue-500 mb-4 h-12 w-12"/><span className="font-bold text-sm uppercase tracking-widest text-slate-500">Mastering...</span></div>}
-        <canvas ref={canvasRef} width={1280} height={720} className="w-auto h-auto max-w-full max-h-full object-contain" />
+    <div className="relative w-full h-full flex items-center justify-center bg-black">
+      {isDrawing && (
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+          <Loader2 className="animate-spin text-blue-400 mb-3" size={32} />
+          <span className="text-sm text-white/50">Rendering thumbnail...</span>
+        </div>
+      )}
+      <canvas ref={canvasRef} width={1280} height={720} className="max-w-full max-h-full object-contain shadow-2xl" />
     </div>
   );
-};
-
-export default ThumbnailCanvas;
+}

@@ -1,36 +1,87 @@
 import React from 'react';
-import { Video, Clock, BookOpen, Plus, Database } from 'lucide-react';
+import { Video, Clock, BookOpen, Plus, Settings, Upload, Download } from 'lucide-react';
 
-const NavButton = ({ view, current, onClick, icon, label }) => {
-  const active = current === view;
+export default function Header({ currentView, onViewChange, onImport, onExport }) {
+  const fileInputRef = React.useRef(null);
+
+  const handleImportClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target.result);
+        onImport(json);
+        alert('Library imported successfully');
+      } catch (err) {
+        alert('Invalid JSON file');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
-    <button 
-      onClick={() => onClick(view)}
-      className={`px-5 py-2 text-xs font-bold transition-all flex items-center gap-2 ${active ? 'bg-slate-700 text-white shadow-inner ring-1 ring-slate-600' : 'text-slate-400 hover:text-white hover:bg-slate-700/50'}`}
-    >
-      {icon} <span>{label}</span>
-    </button>
-  );
-};
+    <header className="sticky top-0 z-40 bg-black/60 backdrop-blur-md border-b border-white/10">
+      <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        {/* Logo */}
+        <button onClick={() => onViewChange('library')} className="flex items-center gap-3 hover:opacity-80 transition">
+          <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-2 rounded-lg shadow-md">
+            <Video size={18} className="text-white" />
+          </div>
+          <h1 className="text-xl font-semibold tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+            StreamTracker
+          </h1>
+        </button>
 
-const Header = ({ currentView, onViewChange }) => (
-  <header className="bg-slate-900 text-white p-5 shadow-md border-b border-slate-800 sticky top-0 z-40 font-arial">
-    <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-      <div className="flex items-center gap-4">
-        <div className="bg-purple-600 p-2 shadow-lg">
-          <Video size={20} className="text-white" />
+        <div className="flex items-center gap-3">
+          {/* Import: Download icon (bring data in) */}
+          <button
+            onClick={handleImportClick}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition text-white/80 hover:text-white"
+            title="Import backup (JSON)"
+          >
+            <Download size={16} /> Import
+          </button>
+
+          {/* Export: Upload icon (send data out) */}
+          <button
+            onClick={onExport}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition text-white/80 hover:text-white"
+            title="Export all data as JSON"
+          >
+            <Upload size={16} /> Export
+          </button>
+
+          <nav className="flex gap-1 ml-2">
+            {[
+              { id: 'dashboard', label: 'History', icon: Clock },
+              { id: 'library', label: 'Library', icon: BookOpen },
+              { id: 'search', label: 'Add Game', icon: Plus },
+              { id: 'data', label: 'Styles', icon: Settings }
+            ].map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => onViewChange(id)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                  currentView === id
+                    ? 'bg-white/10 text-white shadow-sm'
+                    : 'text-white/50 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Icon size={16} />
+                {label}
+              </button>
+            ))}
+          </nav>
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-white">StreamManager</h1>
-      </div>
-      
-      <div className="flex flex-wrap items-center justify-center gap-1 bg-slate-800 p-1 border border-slate-700">
-        <NavButton view="dashboard" current={currentView} onClick={onViewChange} icon={<Clock size={16}/>} label="History" />
-        <NavButton view="library" current={currentView} onClick={onViewChange} icon={<BookOpen size={16}/>} label="Library" />
-        <NavButton view="search" current={currentView} onClick={onViewChange} icon={<Plus size={16}/>} label="Add Game" />
-        <NavButton view="data" current={currentView} onClick={onViewChange} icon={<Database size={16}/>} label="Storage" />
-      </div>
-    </div>
-  </header>
-);
 
-export default Header;
+        <input type="file" accept=".json" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
+      </div>
+    </header>
+  );
+}

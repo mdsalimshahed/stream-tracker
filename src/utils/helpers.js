@@ -1,4 +1,3 @@
-// Sentence Case (Every Word) formatter
 export const formatRunName = (str) => {
   if (!str) return str;
   return str
@@ -32,13 +31,27 @@ export const parseCustomTimestamp = (ts) => {
   return new Date(0);
 };
 
-export const generateStreamTitle = (gameName, year, count, cycleName) => {
-  const isMain = cycleName === "main" || cycleName === "First Playthrough";
-  const cyclePart = isMain ? "" : ` — [${cycleName}]`;
-  return `${gameName} (${year})${cyclePart} Gameplay Livestream #${count}`;
+export const generateStreamTitle = (gameName, year, count, cycleName, isMainCycle = false) => {
+  if (isMainCycle || cycleName === "main" || cycleName === "First Playthrough") {
+    return `${gameName} (${year}) — Gameplay Livestream #${count}`;
+  } else {
+    return `${gameName} (${year}) — [${cycleName}] Gameplay Livestream #${count}`;
+  }
 };
 
 export const isLocalPath = (url) => {
   if (!url) return false;
   return !url.startsWith('http') && !url.startsWith('blob:') && !url.startsWith('data:');
+};
+
+export const formatReleaseDate = (dateString) => {
+  if (!dateString) return 'Unknown';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
+  const day = date.getDate();
+  const month = date.toLocaleString('en-US', { month: 'long' });
+  const year = date.getFullYear();
+  const suffix = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+  const dayStr = `${day}${suffix[day % 10]}`;
+  return `${dayStr} ${month} ${year}`;
 };

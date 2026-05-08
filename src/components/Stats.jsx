@@ -86,34 +86,31 @@ const STYLES = `
   .stats-scroll::-webkit-scrollbar-track { background: transparent; }
   .stats-scroll::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 2px; }
 
-  /* Mosaic set as fixed global background layer underneath stats */
-  .mosaic-wrap {
-    position: fixed; inset: 0; z-index: -10; overflow: hidden; pointer-events: none;
-  }
+  .mosaic-wrap { position: fixed; inset: 0; z-index: -10; overflow: hidden; pointer-events: none; }
   .mosaic-rows { display: flex; flex-direction: column; height: 100%; }
   .mosaic-row { flex: 1; display: flex; align-items: stretch; will-change: transform; }
   .mosaic-img { flex-shrink: 0; width: 110px; height: 100%; object-fit: cover; display: block; }
   .mosaic-overlay {
     position: absolute; inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0.85) 0%,
-      rgba(0,0,0,0.70) 40%,
-      rgba(0,0,0,0.95) 100%
-    );
+    background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.70) 40%, rgba(0,0,0,0.95) 100%);
   }
 
-  .divider { height: 1px; background: linear-gradient(to right, var(--c-accent), transparent); margin: 0 24px 18px 24px; opacity: 0.5; }
+  .divider { height: 1px; background: linear-gradient(to right, var(--c-accent), transparent); margin: 0 12px 18px 12px; opacity: 0.5; }
+  @media (min-width: 768px) { .divider { margin: 0 24px 18px 24px; } }
   
   .stats-top-row {
-    display: flex; flex-wrap: wrap; gap: 1px; margin: 0 24px;
+    display: flex; flex-direction: column; gap: 1px; margin: 0 12px;
     background: var(--c-border); border: 1px solid var(--c-border); border-radius: 2px; overflow: hidden;
   }
-  .stats-left-col { flex: 1; display: flex; flex-direction: column; background: var(--c-border); gap: 1px; }
-  .stats-right-col { flex: 1; background: rgba(13,17,23,0.35); backdrop-filter: blur(8px); position: relative; overflow: hidden; }
+  @media (min-width: 768px) { .stats-top-row { flex-direction: row; margin: 0 24px; } }
+
+  .stats-left-col { flex: 1; display: flex; flex-direction: row; flex-wrap: wrap; background: var(--c-border); gap: 1px; }
+  
+  /* Given a solid min-height on mobile to anchor the image and text properly */
+  .stats-right-col { flex: 1; background: rgba(13,17,23,0.35); position: relative; overflow: hidden; min-height: 250px; }
 
   .stat-card {
-    background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 18px 16px; position: relative; overflow: hidden; transition: background 0.25s;
+    flex: 1 1 40%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 18px 16px; position: relative; overflow: hidden; transition: background 0.25s;
   }
   .stat-card:hover { background: rgba(20,26,36,0.8); }
   .stat-card::before {
@@ -122,38 +119,27 @@ const STYLES = `
   }
   .stat-card:hover::before { opacity: 1; }
   
-  .stat-number {
-    font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--c-text); transition: color 0.2s;
-    text-shadow: 0 4px 16px rgba(0,0,0,0.8);
-  }
+  .stat-number { font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--c-text); transition: color 0.2s; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
   .stat-card:hover .stat-number { color: var(--c-accent); }
-  .stat-label {
-    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 6px;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-  }
-  .stat-sub {
-    font-size: 11px; color: var(--c-accent2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-  }
+  .stat-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 6px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  .stat-sub { font-size: 11px; color: var(--c-accent2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
 
-  .latest-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-  .latest-content {
-    position: relative; z-index: 1; padding: 18px 16px; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-    height: 100%; display: flex; flex-direction: column; justify-content: center;
-  }
-
-  .cat-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 18px 24px; }
-  @media (min-width: 640px) { .cat-row { grid-template-columns: repeat(3, 1fr); } }
+  .latest-bg { position: absolute; inset: 0; z-index: 0; }
   
-  .cat-card {
-    position: relative; overflow: hidden; border: 1px solid var(--c-border); border-radius: 2px;
-    aspect-ratio: 16/9; cursor: default; transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* STRICTLY anchored to bottom left with NO BLUR */
+  .latest-content { 
+    position: absolute; inset: 0; z-index: 1; padding: 24px; 
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); 
+    display: flex; flex-direction: column; justify-content: flex-end; 
   }
+
+  .cat-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 18px 12px; }
+  @media (min-width: 640px) { .cat-row { grid-template-columns: repeat(3, 1fr); margin: 18px 24px; } }
+  
+  .cat-card { position: relative; overflow: hidden; border: 1px solid var(--c-border); border-radius: 2px; aspect-ratio: 16/9; cursor: default; transition: transform 0.3s ease, box-shadow 0.3s ease; }
   .cat-card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.8); }
   .cat-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 60%); }
-  .cat-content {
-    position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px 14px;
-  }
+  .cat-content { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px 14px; }
   .cat-count { font-weight: 600; font-size: 44px; line-height: 1; letter-spacing: -0.02em; color: #fff; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
   .cat-name { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
   
@@ -161,11 +147,7 @@ const STYLES = `
   .cat-completed .cat-name { color: var(--c-orange); }
   .cat-abandoned .cat-name { color: var(--c-red); }
   
-  .game-name-overlay {
-    position: absolute; top: 12px; left: 12px; z-index: 3;
-    background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px;
-    font-size: 12px; font-weight: 500; color: white; pointer-events: none; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1);
-  }
+  .game-name-overlay { position: absolute; top: 12px; left: 12px; z-index: 3; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; color: white; pointer-events: none; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up  { animation: fadeUp 0.6s ease both; }
@@ -285,11 +267,11 @@ const CategoryCard = ({ title, games, cssClass }) => {
   const gameName = imageEntries[currentIdx]?.gameName || '';
 
   return (
-    <div className={`cat-card ${cssClass} shadow-xl`}>
+    <div className={`cat-card ${cssClass} shadow-xl group`}>
       <CrossfadeImage 
         src={currentSrc} 
         className="absolute inset-0 w-full h-full" 
-        imgClassName="hover:scale-105 transition-transform duration-700" 
+        imgClassName="group-hover:scale-105" 
       />
       <div className="cat-overlay" />
       {gameName && <div className="game-name-overlay">{gameName}</div>}
@@ -371,7 +353,7 @@ export default function Stats({ streamData }) {
     <div className="stats-root" style={{ position: 'relative', height: '100%', width: '100%', overflow: 'hidden' }}>
       <MosaicBackground allImages={allImages} />
 
-      <div className="stats-scroll" style={{ position: 'relative', zIndex: 10, height: '100%', overflowY: 'auto', paddingTop: '24px' }}>
+      <div className="stats-scroll" style={{ position: 'relative', zIndex: 10, height: '100%', overflowY: 'auto', paddingTop: '16px' }}>
         <div className="divider fade-up" />
 
         <div className="stats-top-row fade-up delay-1 shadow-2xl">
@@ -392,7 +374,7 @@ export default function Stats({ streamData }) {
 
           <div className="stats-right-col">
             <div className="latest-bg">
-              <CrossfadeImage src={latestBgImage} alt="latest game" className="w-full h-full" />
+              <CrossfadeImage src={latestBgImage} alt="latest game" className="w-full h-full" imgClassName="object-cover" />
             </div>
             <div className="latest-content">
               <div className="stat-number drop-shadow-xl" style={{ fontSize: 'clamp(20px, 2.5vw, 32px)', fontWeight: 600, marginBottom: '4px' }}>

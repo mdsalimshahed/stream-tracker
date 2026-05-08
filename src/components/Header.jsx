@@ -26,11 +26,11 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-transparent pointer-events-none border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-transparent pointer-events-none border-b border-white/5 shrink-0">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
         
-        {/* Left Side Glass Pod */}
-        <div className="pointer-events-auto bg-black/40 backdrop-blur-md rounded-2xl shadow-lg border border-white/10 px-4 py-2">
+        {/* Left Side Glass Pod (Mobile Title + Actions) */}
+        <div className="pointer-events-auto w-full md:w-auto bg-black/60 backdrop-blur-xl rounded-2xl shadow-lg border border-white/10 px-4 py-2 flex justify-between items-center shrink-0">
           <button onClick={() => onViewChange('library')} className="flex items-center gap-3 hover:opacity-80 transition">
             <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-1.5 rounded-lg shadow-md">
               <Video size={16} className="text-white" />
@@ -39,44 +39,57 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
               StreamTracker
             </h1>
           </button>
+
+          {/* Mobile Import/Export Icons */}
+          <div className="flex md:hidden items-center gap-2">
+            <button onClick={handleImportClick} className="p-1.5 bg-white/5 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition" title="Import">
+              <Download size={16} />
+            </button>
+            <button onClick={onExport} className="p-1.5 bg-white/5 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition" title="Export">
+              <Upload size={16} />
+            </button>
+          </div>
         </div>
 
-        {/* Right Side Glass Pod */}
-        <div className="pointer-events-auto bg-black/40 backdrop-blur-md rounded-2xl shadow-lg border border-white/10 px-4 py-1.5 flex items-center gap-3">
-          <button
-            onClick={handleImportClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition text-white/80 hover:text-white"
-            title="Import backup (JSON)"
-          >
-            <Download size={14} /> Import
-          </button>
-          <button
-            onClick={onExport}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition text-white/80 hover:text-white"
-            title="Export all data as JSON"
-          >
-            <Upload size={14} /> Export
-          </button>
+        {/* Right Side Glass Pod (Wrapping Nav) */}
+        <div className="pointer-events-auto w-full md:w-auto bg-black/60 backdrop-blur-xl rounded-2xl shadow-lg border border-white/10 px-2 sm:px-4 py-2 flex flex-wrap items-center justify-center gap-2 md:gap-3">
+          
+          {/* Desktop Import/Export */}
+          <div className="hidden md:flex items-center gap-2 pr-3 border-r border-white/10 shrink-0">
+            <button
+              onClick={handleImportClick}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition text-white/80 hover:text-white whitespace-nowrap"
+            >
+              <Download size={14} /> Import
+            </button>
+            <button
+              onClick={onExport}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition text-white/80 hover:text-white whitespace-nowrap"
+            >
+              <Upload size={14} /> Export
+            </button>
+          </div>
 
-          <nav className="flex gap-1 ml-2 border-l border-white/10 pl-3">
+          {/* Wrapping Nav for all screens */}
+          <nav className="flex flex-wrap justify-center gap-1 sm:gap-2 shrink-0">
             {[
               { id: 'dashboard', label: 'History', icon: Clock },
               { id: 'library', label: 'Library', icon: BookOpen },
-              { id: 'search', label: 'Add Game', icon: Plus },
+              { id: 'search', label: 'Add', icon: Plus },
               { id: 'data', label: 'Styles', icon: Settings },
               { id: 'stats', label: 'Stats', icon: BarChart3 }
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => onViewChange(id)}
-                className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 whitespace-nowrap ${
                   currentView === id
                     ? 'bg-white/20 text-white shadow-sm'
-                    : 'text-white/50 hover:text-white hover:bg-white/10'
+                    : 'text-white/60 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <Icon size={16} />
-                {label}
+                <Icon size={14} />
+                <span>{label}</span>
               </button>
             ))}
           </nav>

@@ -31,10 +31,10 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
   }, [streamData]);
 
   const containerStyle = {
-    paddingLeft: `${layoutPrefs.containerPaddingX}px`,
-    paddingRight: `${layoutPrefs.containerPaddingX}px`,
-    paddingTop: `${layoutPrefs.containerPaddingY}px`,
-    paddingBottom: `${layoutPrefs.containerPaddingY}px`,
+    paddingLeft: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,
+    paddingRight: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,
+    paddingTop: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
+    paddingBottom: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
   };
 
   const cardStyle = {
@@ -48,13 +48,17 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
   return (
     <div className="overflow-y-auto h-full custom-scrollbar" style={containerStyle}>
       {recentStreams.length === 0 && (
-        <div className="bg-black/40 backdrop-blur-md rounded-xl p-12 text-center text-white/60 shadow-lg">No streams recorded yet. Add a game and start a session.</div>
+        <div className="bg-black/40 backdrop-blur-md rounded-xl p-8 sm:p-12 text-center text-white/60 shadow-lg max-w-2xl mx-auto">
+          No streams recorded yet. Add a game and start a session.
+        </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" style={{ gap: `${layoutPrefs.cardGap}px` }}>
+      
+      {/* Responsive Grid: Forces at least 2 columns on mobile so images are never massive,
+        scaling up cleanly to 5 columns on ultrawide monitors.
+      */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" style={{ gap: `clamp(12px, ${layoutPrefs.cardGap}px, 24px)` }}>
         {recentStreams.map((stream, idx) => {
           const uniqueCardId = `${stream.appId}-${stream.cycleName}`;
-          
-          // Check if THIS SPECIFIC CARD is the one being hovered
           const isHovered = hoverState.cardId === uniqueCardId;
           const activeImg = (isHovered && stream.allThumbnails.includes(globalImage)) ? globalImage : stream.cover;
 
@@ -64,28 +68,28 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
               onClick={() => openGameProfile(stream.appId, stream.cycleName)}
               onMouseEnter={() => onHoverGame(uniqueCardId, stream.appId)}
               onMouseLeave={() => onHoverGame(null, null)}
-              className="group cursor-pointer overflow-hidden shadow-xl"
+              className="group cursor-pointer overflow-hidden shadow-xl flex flex-col"
               style={cardStyle}
             >
-              <div className="relative overflow-hidden aspect-video bg-black/40">
+              <div className="relative overflow-hidden aspect-video bg-black/40 shrink-0">
                 <CrossfadeImage 
                   src={activeImg} 
                   alt={stream.gameName} 
                   className="absolute inset-0 w-full h-full" 
                   imgClassName="object-cover group-hover:scale-110" 
                 />
-                <div className="absolute bottom-2 right-2 bg-blue-600/80 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold text-white pointer-events-none shadow z-20">
+                <div className="absolute bottom-2 right-2 bg-blue-600/80 backdrop-blur-sm px-2 py-1 rounded-full text-[10px] sm:text-xs font-semibold text-white pointer-events-none shadow z-20">
                   Resume
                 </div>
               </div>
-              <div className="p-3" style={{ padding: `${layoutPrefs.cardPadding}px` }}>
-                <h3 className="font-bold text-white leading-tight break-words drop-shadow-md" style={{ fontSize: `${systemFonts.libTitle}px` }}>
+              <div className="p-3 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
+                <h3 className="font-bold text-white leading-tight break-words drop-shadow-md text-sm sm:text-base" style={{ fontSize: `clamp(14px, ${systemFonts.libTitle}px, 22px)` }}>
                   {stream.gameName}
                 </h3>
-                <p className="text-white/80 text-sm mt-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libYear}px` }}>
+                <p className="text-white/80 text-[10px] sm:text-xs mt-1 drop-shadow-md mb-auto" style={{ fontSize: `clamp(10px, ${systemFonts.libYear}px, 16px)` }}>
                   {stream.cycleDisplayName} • Session #{stream.count}
                 </p>
-                <p className="text-white/50 text-xs mt-1 font-mono drop-shadow-md">{stream.lastTimeStr}</p>
+                <p className="text-white/50 text-[10px] mt-3 font-mono drop-shadow-md hidden min-[400px]:block">{stream.lastTimeStr}</p>
               </div>
             </div>
           );

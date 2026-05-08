@@ -103,7 +103,6 @@ export default function App() {
   const [sR, setSR] = useState([]);
   const [isS, setIsS] = useState(false);
 
-  // Global Background & Unique Hover State
   const [globalImage, setGlobalImage] = useState('');
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const hoverTimeoutRef = useRef(null);
@@ -117,7 +116,6 @@ export default function App() {
   useEffect(() => { localStorage.setItem('mosaicXGap', mosaicXGap); }, [mosaicXGap]);
   useEffect(() => { localStorage.setItem('mosaicYGap', mosaicYGap); }, [mosaicYGap]);
 
-  // Debounced Hover Handler (using cardId to target single unique cards)
   const handleHoverGame = (cardId, gameId) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => {
@@ -125,13 +123,11 @@ export default function App() {
     }, 150);
   };
 
-  // CORRECTED GLOBAL BACKGROUND ENGINE - PURE RANDOMNESS
   useEffect(() => {
     let pool = [];
     const gameId = hoverState.gameId;
     const isHovering = Boolean(gameId && streamData[gameId]);
     
-    // If hovering, ONLY use that game's images. If not, use ALL images in the library.
     if (isHovering) {
       pool = streamData[gameId].thumbnail_urls || [];
     } else {
@@ -141,25 +137,18 @@ export default function App() {
     pool = [...new Set(pool.filter(Boolean))];
     if (pool.length === 0) return;
 
-    // Ensure the current image is valid when switching context
     setGlobalImage(prev => pool.includes(prev) ? prev : pool[Math.floor(Math.random() * pool.length)]);
 
-    // Pause cycling if interacting in a modal or on the stats page
     const isPaused = selectedGameId || wCf || currentView === 'stats';
     if (isPaused) return;
 
-    // Speed up cycle to 1.5s when hovering so the effect is immediately noticeable
     const intervalTime = isHovering ? 1500 : (layoutPrefs.cycleInterval || 4000);
 
     const intervalId = setInterval(() => {
       setGlobalImage(prev => {
         if (pool.length <= 1) return pool[0]; 
-        
-        // PURE RANDOMNESS! Pick a random image out of the entire pool.
         let nextImg = pool[Math.floor(Math.random() * pool.length)];
         let attempts = 0;
-        
-        // Try up to 10 times to pick an image that isn't the exact same one showing right now
         while (nextImg === prev && attempts < 10) {
           nextImg = pool[Math.floor(Math.random() * pool.length)];
           attempts++;
@@ -171,7 +160,6 @@ export default function App() {
     return () => clearInterval(intervalId);
   }, [hoverState.gameId, streamData, selectedGameId, wCf, currentView, layoutPrefs.cycleInterval]);
 
-  // Data Recovery
   useEffect(() => {
     const recovery = async () => {
       const dataCopy = JSON.parse(JSON.stringify(streamData));
@@ -210,7 +198,6 @@ export default function App() {
     if (Object.keys(streamData).length > 0) recovery();
   }, []);
 
-  // Live RAWG Search
   useEffect(() => {
     if (!sQ.trim()) { setSR([]); return; }
     const delay = setTimeout(async () => {
@@ -406,8 +393,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen text-white font-sans antialiased relative bg-black overflow-hidden flex flex-col">
+      {/* CRITICAL FIX: 
+        Added height explicitly to horizontal scrollbar to ensure it renders on all screens.
+      */}
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #555; border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #888; }
@@ -415,7 +405,6 @@ export default function App() {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      {/* THE GLOBAL BACKGROUND (z-0) */}
       {currentView !== 'stats' && (
         <div className="absolute inset-0 z-0 pointer-events-none">
           <CrossfadeImage 
@@ -423,7 +412,6 @@ export default function App() {
             className="absolute inset-0 w-full h-full"
             imgClassName="object-cover" 
           />
-          {/* Global Dimming Overlay */}
           <div 
             className="absolute inset-0 bg-black transition-opacity duration-300" 
             style={{ opacity: layoutPrefs.bgDimming ?? 0.5 }} 
@@ -431,7 +419,6 @@ export default function App() {
         </div>
       )}
 
-      {/* THE FOREGROUND UI (z-10) */}
       <div className="relative z-10 flex flex-col h-screen">
         <Header currentView={currentView} onViewChange={setCurrentView} onImport={handleImport} onExport={handleExport} />
 
@@ -499,15 +486,15 @@ export default function App() {
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-6">
-                <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="max-w-7xl mx-auto grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))' }}>
                   {sR.map(g => (
-                    <div key={g.id} className="bg-black/60 border border-white/10 rounded-2xl overflow-hidden hover:border-blue-500/50 transition group shadow-lg backdrop-blur-md">
-                      <div className="aspect-video bg-black/40 overflow-hidden relative">
+                    <div key={g.id} className="bg-black/60 border border-white/10 rounded-2xl overflow-hidden hover:border-blue-500/50 transition group shadow-lg backdrop-blur-md flex flex-col">
+                      <div className="aspect-video bg-black/40 overflow-hidden relative shrink-0">
                         <img src={g.background_image} alt={g.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       </div>
-                      <div className="p-5">
+                      <div className="p-5 flex flex-col flex-1">
                         <h3 className="font-bold text-xl">{g.name}</h3>
-                        <p className="text-white/60 text-sm mt-1">{g.released || 'Unreleased'}</p>
+                        <p className="text-white/60 text-sm mt-1 mb-auto">{g.released || 'Unreleased'}</p>
                         <button onClick={() => handleAddGame(g)} className="mt-4 w-full bg-white/10 hover:bg-white/20 py-2 rounded-xl font-medium flex items-center justify-center gap-2 transition">
                           <Plus size={18} /> Add to Library
                         </button>

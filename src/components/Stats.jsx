@@ -6,20 +6,23 @@ import { parseCustomTimestamp } from '../utils/helpers';
 const getLatestRunWithTimestamp = (cycles) => {
   let latestRun = null;
   let latestDate = null;
-  Object.entries(cycles).forEach(([runId, run]) => {
+  let latestCycleId = null;
+  Object.entries(cycles).forEach(([cycleId, run]) => {
     const timestamps = run.timestamps || [];
     if (timestamps.length > 0) {
       const lastTimestampStr = timestamps[timestamps.length - 1];
       const date = parseCustomTimestamp(lastTimestampStr);
       if (!latestDate || date > latestDate) {
         latestDate = date;
-        latestRun = { run, timestamp: lastTimestampStr, date };
+        latestRun = run;
+        latestCycleId = cycleId;
       }
     } else if (!latestDate && run.stream_count > 0) {
-      latestRun = { run, timestamp: null, date: null };
+      latestRun = run;
+      latestCycleId = cycleId;
     }
   });
-  return latestRun;
+  return { run: latestRun, timestamp: latestRun?.timestamps?.length ? latestRun.timestamps[latestRun.timestamps.length - 1] : null, date: latestDate, cycleId: latestCycleId };
 };
 
 const useDynamicTime = (timestampMs) => {
@@ -123,7 +126,7 @@ const STYLES = `
   .divider {
     height: 1px;
     background: linear-gradient(to right, var(--c-accent), transparent);
-    margin: 18px 24px;
+    margin: 0 24px 18px 24px;
     opacity: 0.5;
   }
   .stats-top-row {
@@ -151,7 +154,6 @@ const STYLES = `
     overflow: hidden;
   }
 
-  /* ── Stat cards (highly transparent) ── */
   .stat-card {
     background: rgba(13,17,23,0.35);
     backdrop-filter: blur(4px);
@@ -196,7 +198,6 @@ const STYLES = `
     text-overflow: ellipsis;
   }
 
-  /* ── Latest card ── */
   .latest-bg {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     z-index: 0;
@@ -216,7 +217,6 @@ const STYLES = `
     justify-content: center;
   }
 
-  /* ── Category cards ── */
   .cat-row {
     display: grid;
     grid-template-columns: 1fr;
@@ -277,7 +277,6 @@ const STYLES = `
     pointer-events: none; white-space: nowrap;
   }
 
-  /* ── Animations ── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -305,7 +304,7 @@ const MosaicBackground = ({ allImages }) => {
       const base = Array.from({ length: IMGS_PER_ROW }, (_, i) => shuffled[i % shuffled.length]);
       return [...base, ...base];
     });
-  }, []);
+  }, [allImages]);
 
   useEffect(() => {
     const STRIP_W = IMGS_PER_ROW * IMG_W;
@@ -468,10 +467,20 @@ export default function Stats({
       const cycles = data.cycles || {};
       const totalStreams = Object.values(cycles).reduce((acc, c) => acc + (c.stream_count || 0), 0);
       const latestRunInfo = getLatestRunWithTimestamp(cycles);
-      const latestRunLabel = latestRunInfo ? (latestRunInfo.run.label || 'Ongoing') : 'Ongoing';
-      const lastStreamTimestampMs = latestRunInfo?.date ? latestRunInfo.date.getTime() : null;
-      const lastStreamTimestampRaw = latestRunInfo?.timestamp || null;
-      const latestRunName = latestRunInfo?.run.displayName || (latestRunInfo?.run.id === 'main' ? 'First Playthrough' : latestRunInfo?.run.id?.replace(/_/g, ' '));
+      const latestRunLabel = latestRunInfo.run ? (latestRunInfo.run.label || 'Ongoing') : 'Ongoing';
+      const lastStreamTimestampMs = latestRunInfo.date ? latestRunInfo.date.getTime() : null;
+      const lastStreamTimestampRaw = latestRunInfo.timestamp;
+      
+      // Get run display name
+      let latestRunName = '';
+      if (latestRunInfo.run) {
+        if (latestRunInfo.run.displayName) {
+          latestRunName = latestRunInfo.run.displayName;
+        } else if (latestRunInfo.cycleId) {
+          latestRunName = latestRunInfo.cycleId === 'main' ? 'First Playthrough' : latestRunInfo.cycleId.replace(/_/g, ' ');
+        }
+      }
+
       return {
         id,
         ...data,

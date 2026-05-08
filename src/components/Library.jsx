@@ -24,7 +24,7 @@ const getLatestRun = (cycles) => {
   return latestRun;
 };
 
-export default function Library({ streamData, openGameProfile, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, globalImage, hoverState, onHoverGame }) {
+export default function Library({ streamData, openGameProfile, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, globalImage, hoveredImage, hoverState, onHoverGame }) {
   const [sortBy, setSortBy] = useState('recent');
   const [searchFilter, setSearchFilter] = useState('');
   const [editingGame, setEditingGame] = useState(null);
@@ -78,7 +78,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
     transition: 'all 0.2s',
     maxWidth: `${layoutPrefs.cardMaxWidth || 320}px`,
     width: '100%',
-    margin: '0 auto' // Centers the card within its grid cell if cell is larger
+    margin: '0 auto'
   };
 
   const getLabelStyle = (label) => {
@@ -115,7 +115,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
           {sorted.map(game => {
             const cover = game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
             const isHovered = hoverState.cardId === game.id;
-            const activeImg = (isHovered && (game.thumbnail_urls || []).includes(globalImage)) ? globalImage : cover;
+            const activeImg = (isHovered && hoveredImage) ? hoveredImage : cover;
             const labelInfo = getLabelStyle(game.label);
             
             return (

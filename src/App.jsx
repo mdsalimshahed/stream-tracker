@@ -104,6 +104,7 @@ export default function App() {
   const [isS, setIsS] = useState(false);
 
   const [globalImage, setGlobalImage] = useState('');
+  const [hoveredImage, setHoveredImage] = useState(null);
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const hoverTimeoutRef = useRef(null);
 
@@ -120,16 +121,15 @@ export default function App() {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     
     if (cardId === null) {
-      // Longer delay when leaving a card so that jumping between cards 
-      // doesn't cause a jarring flash to a random background image.
       hoverTimeoutRef.current = setTimeout(() => {
         setHoverState({ cardId: null, gameId: null });
-      }, 400);
+      }, 300);
     } else {
-      // Delay before triggering hover to ignore frantic mouse movements.
+      // INCREASED DELAY: Must rest on the card for 600ms to count as a deliberate hover.
+      // Quick swiping will clear the timeout before this ever fires.
       hoverTimeoutRef.current = setTimeout(() => {
         setHoverState({ cardId, gameId });
-      }, 250);
+      }, 600);
     }
   };
 
@@ -147,14 +147,13 @@ export default function App() {
     pool = [...new Set(pool.filter(Boolean))];
     if (pool.length === 0) return;
 
-    // Set global image safely. If hovering, strictly start from the cover (pool[0]) to prevent abrupt flash.
-    setGlobalImage(prev => {
-      if (isHovering) {
-        return prev !== pool[0] ? pool[0] : prev;
-      } else {
-        return pool.includes(prev) ? prev : pool[Math.floor(Math.random() * pool.length)];
-      }
-    });
+    if (isHovering) {
+      setHoveredImage(pool[0]);
+      setGlobalImage(prev => prev !== pool[0] ? pool[0] : prev);
+    } else {
+      setHoveredImage(null);
+      setGlobalImage(prev => pool.includes(prev) ? prev : pool[Math.floor(Math.random() * pool.length)]);
+    }
 
     const isPaused = selectedGameId || wCf || currentView === 'stats';
     if (isPaused) return;
@@ -162,16 +161,22 @@ export default function App() {
     const intervalTime = isHovering ? 2500 : (layoutPrefs.cycleInterval || 4000);
 
     const intervalId = setInterval(() => {
-      setGlobalImage(prev => {
-        if (pool.length <= 1) return pool[0]; 
-        
-        if (isHovering) {
-          // Sequential cycling for hovered card to avoid repeats
-          const currIdx = pool.indexOf(prev);
+      if (pool.length <= 1) {
+        if (isHovering) setHoveredImage(pool[0]);
+        setGlobalImage(pool[0]);
+        return;
+      }
+      
+      if (isHovering) {
+        setHoveredImage(prevHover => {
+          const currIdx = pool.indexOf(prevHover);
           const nextIdx = currIdx === -1 ? 0 : (currIdx + 1) % pool.length;
-          return pool[nextIdx];
-        } else {
-          // Smooth random cycling for idle state without consecutive repeats
+          const nextImg = pool[nextIdx];
+          setGlobalImage(nextImg); // Keep global image perfectly in sync with the card
+          return nextImg;
+        });
+      } else {
+        setGlobalImage(prev => {
           let nextImg = pool[Math.floor(Math.random() * pool.length)];
           let attempts = 0;
           while (nextImg === prev && attempts < 10) {
@@ -179,8 +184,8 @@ export default function App() {
             attempts++;
           }
           return nextImg;
-        }
-      });
+        });
+      }
     }, intervalTime);
 
     return () => clearInterval(intervalId);
@@ -419,9 +424,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen text-white font-sans antialiased relative bg-black overflow-hidden flex flex-col">
-      {/* CRITICAL FIX: 
-        Added height explicitly to horizontal scrollbar to ensure it renders on all screens.
-      */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -470,6 +472,7 @@ export default function App() {
               systemFonts={systemFonts}
               layoutPrefs={layoutPrefs}
               globalImage={globalImage}
+              hoveredImage={hoveredImage}
               hoverState={hoverState}
               onHoverGame={handleHoverGame}
             />
@@ -484,6 +487,7 @@ export default function App() {
               systemFonts={systemFonts}
               layoutPrefs={layoutPrefs}
               globalImage={globalImage}
+              hoveredImage={hoveredImage}
               hoverState={hoverState}
               onHoverGame={handleHoverGame}
             />

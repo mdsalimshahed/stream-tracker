@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { parseCustomTimestamp } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
 
-export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs, globalImage, hoverState, onHoverGame }) {
+export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs, globalImage, hoveredImage, hoverState, onHoverGame }) {
   const [recentStreams, setRecentStreams] = useState([]);
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
         {recentStreams.map((stream) => {
           const uniqueCardId = `${stream.appId}-${stream.cycleName}`;
           const isHovered = hoverState.cardId === uniqueCardId;
-          const activeImg = (isHovered && stream.allThumbnails.includes(globalImage)) ? globalImage : stream.cover;
+          const activeImg = (isHovered && hoveredImage) ? hoveredImage : stream.cover;
 
           return (
             <div

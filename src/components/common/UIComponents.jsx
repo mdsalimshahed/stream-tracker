@@ -67,30 +67,41 @@ export const ColorOverride = ({ title, element, config, toggle, onChange }) => {
   );
 };
 
-// Rock-solid dual-layer crossfade component with STRICT inline transitions to prevent CSS conflicts
 export const CrossfadeImage = ({ src, alt, className, imgClassName, style }) => {
   const [images, setImages] = useState([src, src]);
   const [activeIndex, setActiveIndex] = useState(1);
   const prevSrcRef = useRef(src);
 
   useEffect(() => {
-    // Bail out if src is identical or empty to prevent unnecessary updates
     if (!src || src === prevSrcRef.current) return;
-    prevSrcRef.current = src;
 
-    // Flip index securely and update the image array
-    setActiveIndex(prev => {
-      const nextIndex = prev === 0 ? 1 : 0;
-      setImages(currImages => {
-        const newArr = [...currImages];
-        newArr[nextIndex] = src;
-        return newArr;
+    let isMounted = true;
+
+    // Load the image in memory FIRST before trying to fade to it
+    const img = new Image();
+    const handleLoadOrError = () => {
+      if (!isMounted) return;
+      prevSrcRef.current = src;
+      setActiveIndex(prev => {
+        const nextIndex = prev === 0 ? 1 : 0;
+        setImages(currImages => {
+          const newArr = [...currImages];
+          newArr[nextIndex] = src;
+          return newArr;
+        });
+        return nextIndex;
       });
-      return nextIndex;
-    });
+    };
+
+    img.onload = handleLoadOrError;
+    img.onerror = handleLoadOrError;
+    img.src = src;
+
+    return () => {
+      isMounted = false;
+    };
   }, [src]);
 
-  // Using strict inline styles guarantees that the opacity fade and the hover-zoom happen together perfectly.
   const imgStyle = {
     transition: 'opacity 1s ease-in-out, transform 1s ease-in-out'
   };

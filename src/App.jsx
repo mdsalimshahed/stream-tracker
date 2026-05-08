@@ -118,19 +118,9 @@ export default function App() {
 
   const handleHoverGame = (cardId, gameId) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    
-    if (cardId === null) {
-      // Longer delay when leaving a card so that jumping between cards 
-      // doesn't cause a jarring flash to a random background image.
-      hoverTimeoutRef.current = setTimeout(() => {
-        setHoverState({ cardId: null, gameId: null });
-      }, 400);
-    } else {
-      // Delay before triggering hover to ignore frantic mouse movements.
-      hoverTimeoutRef.current = setTimeout(() => {
-        setHoverState({ cardId, gameId });
-      }, 250);
-    }
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoverState({ cardId, gameId });
+    }, 150);
   };
 
   useEffect(() => {
@@ -147,39 +137,23 @@ export default function App() {
     pool = [...new Set(pool.filter(Boolean))];
     if (pool.length === 0) return;
 
-    // Set global image safely. If hovering, strictly start from the cover (pool[0]) to prevent abrupt flash.
-    setGlobalImage(prev => {
-      if (isHovering) {
-        return prev !== pool[0] ? pool[0] : prev;
-      } else {
-        return pool.includes(prev) ? prev : pool[Math.floor(Math.random() * pool.length)];
-      }
-    });
+    setGlobalImage(prev => pool.includes(prev) ? prev : pool[Math.floor(Math.random() * pool.length)]);
 
     const isPaused = selectedGameId || wCf || currentView === 'stats';
     if (isPaused) return;
 
-    const intervalTime = isHovering ? 2500 : (layoutPrefs.cycleInterval || 4000);
+    const intervalTime = isHovering ? 1500 : (layoutPrefs.cycleInterval || 4000);
 
     const intervalId = setInterval(() => {
       setGlobalImage(prev => {
         if (pool.length <= 1) return pool[0]; 
-        
-        if (isHovering) {
-          // Sequential cycling for hovered card to avoid repeats
-          const currIdx = pool.indexOf(prev);
-          const nextIdx = currIdx === -1 ? 0 : (currIdx + 1) % pool.length;
-          return pool[nextIdx];
-        } else {
-          // Smooth random cycling for idle state without consecutive repeats
-          let nextImg = pool[Math.floor(Math.random() * pool.length)];
-          let attempts = 0;
-          while (nextImg === prev && attempts < 10) {
-            nextImg = pool[Math.floor(Math.random() * pool.length)];
-            attempts++;
-          }
-          return nextImg;
+        let nextImg = pool[Math.floor(Math.random() * pool.length)];
+        let attempts = 0;
+        while (nextImg === prev && attempts < 10) {
+          nextImg = pool[Math.floor(Math.random() * pool.length)];
+          attempts++;
         }
+        return nextImg;
       });
     }, intervalTime);
 
@@ -460,6 +434,7 @@ export default function App() {
                 setModalBgIntensity={setModalBgIntensity}
                 modalPanelOpacity={modalPanelOpacity}
                 setModalPanelOpacity={setModalPanelOpacity}
+                thumbnailConfig={thumbnailConfig}
               />
             </div>
           )}

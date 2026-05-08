@@ -129,7 +129,7 @@ export default function App() {
       // Quick swiping will clear the timeout before this ever fires.
       hoverTimeoutRef.current = setTimeout(() => {
         setHoverState({ cardId, gameId });
-      }, 1499);
+      }, 900);
     }
   };
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { parseCustomTimestamp } from '../utils/helpers';
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+import { CrossfadeImage } from './common/UIComponents';
 
 const getLatestRunWithTimestamp = (cycles) => {
   let latestRun = null;
@@ -67,8 +66,6 @@ const useCountUp = (target, duration = 1200) => {
   return count;
 };
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const STYLES = `
   .stats-root {
     --c-bg:      #080a0f;
@@ -77,12 +74,11 @@ const STYLES = `
     --c-accent:  #e8c87a;
     --c-accent2: #6eb5ff;
     --c-text:    #f0ece4;
-    --c-muted:   rgba(240,236,228,0.45);
+    --c-muted:   rgba(240,236,228,0.7);
     --c-green:   #3ddc84;
     --c-orange:  #f5a623;
     --c-red:     #ff5c5c;
     font-family: 'Inter', system-ui, sans-serif;
-    background: var(--c-bg);
     color: var(--c-text);
   }
   .stats-root * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -90,207 +86,95 @@ const STYLES = `
   .stats-scroll::-webkit-scrollbar-track { background: transparent; }
   .stats-scroll::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 2px; }
 
-  /* ── Mosaic strip ── */
+  /* Mosaic set as fixed global background layer underneath stats */
   .mosaic-wrap {
-    position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+    position: fixed; inset: 0; z-index: -10; overflow: hidden; pointer-events: none;
   }
-  .mosaic-rows {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-  .mosaic-row {
-    flex: 1;
-    display: flex;
-    align-items: stretch;
-    will-change: transform;
-  }
-  .mosaic-img {
-    flex-shrink: 0;
-    width: 110px;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
+  .mosaic-rows { display: flex; flex-direction: column; height: 100%; }
+  .mosaic-row { flex: 1; display: flex; align-items: stretch; will-change: transform; }
+  .mosaic-img { flex-shrink: 0; width: 110px; height: 100%; object-fit: cover; display: block; }
   .mosaic-overlay {
     position: absolute; inset: 0;
     background: linear-gradient(
       to bottom,
-      rgba(8,10,15,0.82) 0%,
-      rgba(8,10,15,0.70) 40%,
-      rgba(8,10,15,0.88) 100%
+      rgba(0,0,0,0.85) 0%,
+      rgba(0,0,0,0.70) 40%,
+      rgba(0,0,0,0.95) 100%
     );
   }
 
-  /* ── Layout ── */
-  .divider {
-    height: 1px;
-    background: linear-gradient(to right, var(--c-accent), transparent);
-    margin: 0 24px 18px 24px;
-    opacity: 0.5;
-  }
+  .divider { height: 1px; background: linear-gradient(to right, var(--c-accent), transparent); margin: 0 24px 18px 24px; opacity: 0.5; }
+  
   .stats-top-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1px;
-    margin: 0 24px;
-    background: var(--c-border);
-    border: 1px solid var(--c-border);
-    border-radius: 2px;
-    overflow: hidden;
+    display: flex; flex-wrap: wrap; gap: 1px; margin: 0 24px;
+    background: var(--c-border); border: 1px solid var(--c-border); border-radius: 2px; overflow: hidden;
   }
-  .stats-left-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: var(--c-border);
-    gap: 1px;
-  }
-  .stats-right-col {
-    flex: 1;
-    background: rgba(13,17,23,0.35);
-    backdrop-filter: blur(4px);
-    position: relative;
-    overflow: hidden;
-  }
+  .stats-left-col { flex: 1; display: flex; flex-direction: column; background: var(--c-border); gap: 1px; }
+  .stats-right-col { flex: 1; background: rgba(13,17,23,0.35); backdrop-filter: blur(8px); position: relative; overflow: hidden; }
 
   .stat-card {
-    background: rgba(13,17,23,0.35);
-    backdrop-filter: blur(4px);
-    padding: 18px 16px;
-    position: relative;
-    overflow: hidden;
-    transition: background 0.25s;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 18px 16px; position: relative; overflow: hidden; transition: background 0.25s;
   }
-  .stat-card:hover {
-    background: rgba(20,26,36,0.5);
-  }
+  .stat-card:hover { background: rgba(20,26,36,0.8); }
   .stat-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(to right, var(--c-accent), transparent);
-    opacity: 0;
-    transition: opacity 0.25s;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(to right, var(--c-accent), transparent); opacity: 0; transition: opacity 0.25s;
   }
   .stat-card:hover::before { opacity: 1; }
+  
   .stat-number {
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    color: var(--c-text);
-    transition: color 0.2s;
+    font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--c-text); transition: color 0.2s;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.8);
   }
   .stat-card:hover .stat-number { color: var(--c-accent); }
   .stat-label {
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--c-muted);
-    margin-top: 6px;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 6px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
   }
   .stat-sub {
-    font-size: 11px;
-    color: var(--c-accent2);
-    margin-top: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 11px; color: var(--c-accent2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
   }
 
-  .latest-bg {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 0;
-  }
-  .latest-bg img {
-    width: 100%; height: 100%; object-fit: cover;
-    transition: opacity 0.8s ease;
-  }
+  .latest-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
   .latest-content {
-    position: relative; z-index: 1;
-    padding: 18px 16px;
-    background: rgba(0,0,0,0.3);
-    backdrop-filter: blur(2px);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    position: relative; z-index: 1; padding: 18px 16px; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+    height: 100%; display: flex; flex-direction: column; justify-content: center;
   }
 
-  .cat-row {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin: 18px 24px;
-  }
+  .cat-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 18px 24px; }
   @media (min-width: 640px) { .cat-row { grid-template-columns: repeat(3, 1fr); } }
+  
   .cat-card {
-    position: relative; overflow: hidden;
-    border: 1px solid var(--c-border);
-    border-radius: 2px;
-    aspect-ratio: 16/9;
-    cursor: default;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative; overflow: hidden; border: 1px solid var(--c-border); border-radius: 2px;
+    aspect-ratio: 16/9; cursor: default; transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
-  .cat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 16px 48px rgba(0,0,0,0.6);
-  }
-  .cat-img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%; object-fit: cover;
-  }
-  .cat-img-next {
-    opacity: 0;
-    transition: opacity 0.8s ease;
-  }
-  .cat-card.fading .cat-img-next { opacity: 1; }
-  .cat-card:hover .cat-img-current {
-    transform: scale(1.04);
-    transition: transform 0.6s ease;
-  }
-  .cat-overlay {
-    position: absolute; inset: 0; z-index: 1;
-    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%);
-  }
+  .cat-card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.8); }
+  .cat-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 60%); }
   .cat-content {
-    position: absolute; inset: 0; z-index: 2;
-    display: flex; flex-direction: column;
-    justify-content: flex-end; padding: 12px 14px;
+    position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px 14px;
   }
-  .cat-count {
-    font-weight: 600; font-size: 44px;
-    line-height: 1; letter-spacing: -0.02em; color: #fff;
-  }
-  .cat-name {
-    font-size: 10px; letter-spacing: 0.2em;
-    text-transform: uppercase; margin-top: 2px;
-  }
+  .cat-count { font-weight: 600; font-size: 44px; line-height: 1; letter-spacing: -0.02em; color: #fff; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
+  .cat-name { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  
   .cat-ongoing .cat-name   { color: var(--c-green); }
   .cat-completed .cat-name { color: var(--c-orange); }
   .cat-abandoned .cat-name { color: var(--c-red); }
+  
   .game-name-overlay {
     position: absolute; top: 12px; left: 12px; z-index: 3;
-    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-    padding: 4px 12px; border-radius: 20px;
-    font-size: 12px; font-weight: 500; color: white;
-    pointer-events: none; white-space: nowrap;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 500; color: white; pointer-events: none; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1);
   }
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up  { animation: fadeUp 0.6s ease both; }
   .delay-1  { animation-delay: 0.1s; }
   .delay-2  { animation-delay: 0.2s; }
-  .delay-3  { animation-delay: 0.3s; }
 `;
 
-// ─── MosaicBackground ─────────────────────────────────────────────────────────
-
-const ROW_COUNT    = 6;
-const IMG_W        = 110;
+const ROW_COUNT = 6;
+const IMG_W = 110;
 const IMGS_PER_ROW = 16;
 
 const MosaicBackground = ({ allImages }) => {
@@ -311,12 +195,12 @@ const MosaicBackground = ({ allImages }) => {
     const state = Array.from({ length: ROW_COUNT }, (_, i) => {
       const base = 0.18 + Math.random() * 0.14;
       return {
-        dir:           i % 2 === 0 ? -1 : 1,
-        pos:           i % 2 === 0 ? 0 : -STRIP_W,
-        speed:         base,
-        targetSpeed:   base,
-        baseSpeed:     base,
-        pauseTimer:    Math.floor(Math.random() * 300),
+        dir: i % 2 === 0 ? -1 : 1,
+        pos: i % 2 === 0 ? 0 : -STRIP_W,
+        speed: base,
+        targetSpeed: base,
+        baseSpeed: base,
+        pauseTimer: Math.floor(Math.random() * 300),
         pauseCountdown: 0,
       };
     });
@@ -361,11 +245,7 @@ const MosaicBackground = ({ allImages }) => {
     <div className="mosaic-wrap">
       <div className="mosaic-rows">
         {rows.map((imgs, ri) => (
-          <div
-            key={ri}
-            className="mosaic-row"
-            ref={el => { rowRefs.current[ri] = el; }}
-          >
+          <div key={ri} className="mosaic-row" ref={el => { rowRefs.current[ri] = el; }}>
             {imgs.map((src, ii) => (
               <img key={ii} className="mosaic-img" src={src} alt="" loading="lazy" />
             ))}
@@ -377,13 +257,8 @@ const MosaicBackground = ({ allImages }) => {
   );
 };
 
-// ─── CategoryCard ─────────────────────────────────────────────────────────────
-
 const CategoryCard = ({ title, games, cssClass }) => {
-  const eligible = useMemo(
-    () => games.filter(g => g.latestRunLabel === title),
-    [games, title]
-  );
+  const eligible = useMemo(() => games.filter(g => g.latestRunLabel === title), [games, title]);
 
   const imageEntries = useMemo(() => {
     const map = new Map();
@@ -396,42 +271,26 @@ const CategoryCard = ({ title, games, cssClass }) => {
   }, [eligible]);
 
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [nextIdx,    setNextIdx]    = useState(1);
-  const [fading,     setFading]     = useState(false);
-  const currentIdxRef = useRef(0);
-
-  useEffect(() => {
-    setCurrentIdx(0);
-    setNextIdx(imageEntries.length > 1 ? 1 : 0);
-    setFading(false);
-    currentIdxRef.current = 0;
-  }, [imageEntries]);
 
   useEffect(() => {
     if (imageEntries.length < 2) return;
     const id = setInterval(() => {
-      const cur  = currentIdxRef.current;
-      const next = (cur + 1) % imageEntries.length;
-      setNextIdx(next);
-      setFading(true);
-      setTimeout(() => {
-        currentIdxRef.current = next;
-        setCurrentIdx(next);
-        setFading(false);
-      }, 900);
+      setCurrentIdx(prev => (prev + 1) % imageEntries.length);
     }, 4000);
     return () => clearInterval(id);
   }, [imageEntries]);
 
-  const fallback   = 'https://placehold.co/480x270/0d1117/1e2938?text=';
-  const currentSrc = imageEntries[currentIdx]?.url  || fallback;
-  const nextSrc    = imageEntries[nextIdx]?.url      || fallback;
-  const gameName   = imageEntries[currentIdx]?.gameName || '';
+  const fallback = 'https://placehold.co/480x270/0d1117/1e2938?text=';
+  const currentSrc = imageEntries[currentIdx]?.url || fallback;
+  const gameName = imageEntries[currentIdx]?.gameName || '';
 
   return (
-    <div className={`cat-card ${cssClass}${fading ? ' fading' : ''}`}>
-      <img className="cat-img cat-img-current" src={currentSrc} alt={title} />
-      <img className="cat-img cat-img-next"    src={nextSrc}    alt="" />
+    <div className={`cat-card ${cssClass} shadow-xl`}>
+      <CrossfadeImage 
+        src={currentSrc} 
+        className="absolute inset-0 w-full h-full" 
+        imgClassName="hover:scale-105 transition-transform duration-700" 
+      />
       <div className="cat-overlay" />
       {gameName && <div className="game-name-overlay">{gameName}</div>}
       <div className="cat-content">
@@ -442,15 +301,7 @@ const CategoryCard = ({ title, games, cssClass }) => {
   );
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
-export default function Stats({
-  streamData,
-  mosaicXGap = 0,
-  mosaicYGap = 0,
-  statsCardRadius = 12,
-  statsCardPadding = 12,
-}) {
+export default function Stats({ streamData }) {
   const styleInjected = useRef(false);
   const [latestBgIndex, setLatestBgIndex] = useState(0);
 
@@ -471,7 +322,6 @@ export default function Stats({
       const lastStreamTimestampMs = latestRunInfo.date ? latestRunInfo.date.getTime() : null;
       const lastStreamTimestampRaw = latestRunInfo.timestamp;
       
-      // Get run display name
       let latestRunName = '';
       if (latestRunInfo.run) {
         if (latestRunInfo.run.displayName) {
@@ -482,22 +332,13 @@ export default function Stats({
       }
 
       return {
-        id,
-        ...data,
-        totalStreams,
-        latestRunLabel,
-        lastStreamTimestampMs,
-        lastStreamTimestampRaw,
-        latestRunName,
-        thumbnail_urls: data.thumbnail_urls || []
+        id, ...data, totalStreams, latestRunLabel, lastStreamTimestampMs,
+        lastStreamTimestampRaw, latestRunName, thumbnail_urls: data.thumbnail_urls || []
       };
     }),
   [streamData]);
 
-  const allImages = useMemo(
-    () => games.flatMap(g => g.thumbnail_urls || []).filter(Boolean),
-    [games]
-  );
+  const allImages = useMemo(() => games.flatMap(g => g.thumbnail_urls || []).filter(Boolean), [games]);
 
   const totalStreams = useMemo(() => games.reduce((s, g) => s + g.totalStreams, 0), [games]);
   const totalGames  = games.length;
@@ -523,19 +364,17 @@ export default function Stats({
     return () => clearInterval(interval);
   }, [latestGameImages]);
 
-  const heroThumb     = allImages[0] || '';
+  const heroThumb = allImages[0] || '';
   const latestBgImage = latestGameImages[latestBgIndex] || heroThumb;
 
   return (
     <div className="stats-root" style={{ position: 'relative', height: '100%', width: '100%', overflow: 'hidden' }}>
-
       <MosaicBackground allImages={allImages} />
 
-      <div className="stats-scroll" style={{ position: 'relative', zIndex: 10, height: '100%', overflowY: 'auto' }}>
-
+      <div className="stats-scroll" style={{ position: 'relative', zIndex: 10, height: '100%', overflowY: 'auto', paddingTop: '24px' }}>
         <div className="divider fade-up" />
 
-        <div className="stats-top-row fade-up delay-1">
+        <div className="stats-top-row fade-up delay-1 shadow-2xl">
           <div className="stats-left-col">
             <div className="stat-card">
               <div className="stat-number" style={{ fontSize: 'clamp(32px, 5vw, 56px)' }}>
@@ -553,10 +392,10 @@ export default function Stats({
 
           <div className="stats-right-col">
             <div className="latest-bg">
-              <img src={latestBgImage} alt="latest game" />
+              <CrossfadeImage src={latestBgImage} alt="latest game" className="w-full h-full" />
             </div>
             <div className="latest-content">
-              <div className="stat-number" style={{ fontSize: 'clamp(20px, 2.5vw, 32px)', fontWeight: 600, marginBottom: '4px' }}>
+              <div className="stat-number drop-shadow-xl" style={{ fontSize: 'clamp(20px, 2.5vw, 32px)', fontWeight: 600, marginBottom: '4px' }}>
                 {mostRecentGame?.game_name || '—'}
               </div>
               <div className="stat-sub" style={{ color: 'var(--c-text)', fontSize: '13px', marginTop: '4px' }}>
@@ -577,7 +416,6 @@ export default function Stats({
           <CategoryCard title="Completed" games={games} cssClass="cat-completed" />
           <CategoryCard title="Abandoned" games={games} cssClass="cat-abandoned" />
         </div>
-
       </div>
     </div>
   );

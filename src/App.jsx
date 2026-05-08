@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Loader2, Plus } from 'lucide-react';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
@@ -8,10 +8,10 @@ import GameProfileModal from './components/GameProfileModal';
 import LivestreamSetupWorkspace from './components/LivestreamSetupWorkspace';
 import Stats from './components/Stats';
 import { Notification } from './components/Notification';
+import { CrossfadeImage } from './components/common/UIComponents';
 import { RAWG_API_KEY, DEFAULT_SYSTEM_FONTS, DEFAULT_LAYOUT_PREFS, DEFAULT_THUMBNAIL_CONFIG, DEFAULT_MODAL_BG_INTENSITY, DEFAULT_MODAL_PANEL_OPACITY } from './utils/constants';
 import { formatRunName, formatReleaseDate } from './utils/helpers';
 
-// Helper to migrate old game-level labels to first run
 const migrateLabels = (data) => {
   let changed = false;
   const newData = JSON.parse(JSON.stringify(data));
@@ -65,7 +65,7 @@ export default function App() {
   const [layoutPrefs, setLayoutPrefs] = useState(() => {
     try {
       const s = localStorage.getItem('layoutPrefs');
-      return s ? JSON.parse(s) : DEFAULT_LAYOUT_PREFS;
+      return s ? { ...DEFAULT_LAYOUT_PREFS, ...JSON.parse(s) } : DEFAULT_LAYOUT_PREFS;
     } catch(e) { return DEFAULT_LAYOUT_PREFS; }
   });
   const [modalBgIntensity, setModalBgIntensity] = useState(() => {
@@ -94,6 +94,7 @@ export default function App() {
     } catch(e) {}
     return 'data';
   });
+  
   const [toast, setToast] = useState(null);
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [initialRunForModal, setInitialRunForModal] = useState(null);
@@ -101,6 +102,11 @@ export default function App() {
   const [sQ, setSQ] = useState('');
   const [sR, setSR] = useState([]);
   const [isS, setIsS] = useState(false);
+
+  // Global Background & Unique Hover State
+  const [globalImage, setGlobalImage] = useState('');
+  const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
+  const hoverTimeoutRef = useRef(null);
 
   useEffect(() => { localStorage.setItem('streamManagerData', JSON.stringify(streamData)); }, [streamData]);
   useEffect(() => { localStorage.setItem('thumbnailConfig', JSON.stringify(thumbnailConfig)); }, [thumbnailConfig]);
@@ -111,6 +117,61 @@ export default function App() {
   useEffect(() => { localStorage.setItem('mosaicXGap', mosaicXGap); }, [mosaicXGap]);
   useEffect(() => { localStorage.setItem('mosaicYGap', mosaicYGap); }, [mosaicYGap]);
 
+  // Debounced Hover Handler (using cardId to target single unique cards)
+  const handleHoverGame = (cardId, gameId) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoverState({ cardId, gameId });
+    }, 150);
+  };
+
+  // CORRECTED GLOBAL BACKGROUND ENGINE - PURE RANDOMNESS
+  useEffect(() => {
+    let pool = [];
+    const gameId = hoverState.gameId;
+    const isHovering = Boolean(gameId && streamData[gameId]);
+    
+    // If hovering, ONLY use that game's images. If not, use ALL images in the library.
+    if (isHovering) {
+      pool = streamData[gameId].thumbnail_urls || [];
+    } else {
+      pool = Object.values(streamData).flatMap(g => g.thumbnail_urls || []);
+    }
+    
+    pool = [...new Set(pool.filter(Boolean))];
+    if (pool.length === 0) return;
+
+    // Ensure the current image is valid when switching context
+    setGlobalImage(prev => pool.includes(prev) ? prev : pool[Math.floor(Math.random() * pool.length)]);
+
+    // Pause cycling if interacting in a modal or on the stats page
+    const isPaused = selectedGameId || wCf || currentView === 'stats';
+    if (isPaused) return;
+
+    // Speed up cycle to 1.5s when hovering so the effect is immediately noticeable
+    const intervalTime = isHovering ? 1500 : (layoutPrefs.cycleInterval || 4000);
+
+    const intervalId = setInterval(() => {
+      setGlobalImage(prev => {
+        if (pool.length <= 1) return pool[0]; 
+        
+        // PURE RANDOMNESS! Pick a random image out of the entire pool.
+        let nextImg = pool[Math.floor(Math.random() * pool.length)];
+        let attempts = 0;
+        
+        // Try up to 10 times to pick an image that isn't the exact same one showing right now
+        while (nextImg === prev && attempts < 10) {
+          nextImg = pool[Math.floor(Math.random() * pool.length)];
+          attempts++;
+        }
+        return nextImg;
+      });
+    }, intervalTime);
+
+    return () => clearInterval(intervalId);
+  }, [hoverState.gameId, streamData, selectedGameId, wCf, currentView, layoutPrefs.cycleInterval]);
+
+  // Data Recovery
   useEffect(() => {
     const recovery = async () => {
       const dataCopy = JSON.parse(JSON.stringify(streamData));
@@ -149,6 +210,7 @@ export default function App() {
     if (Object.keys(streamData).length > 0) recovery();
   }, []);
 
+  // Live RAWG Search
   useEffect(() => {
     if (!sQ.trim()) { setSR([]); return; }
     const delay = setTimeout(async () => {
@@ -343,102 +405,121 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden font-sans antialiased">
+    <div className="min-h-screen text-white font-sans antialiased relative bg-black overflow-hidden flex flex-col">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #1a1a1a; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b3b3b; border-radius: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #555; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #555; border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #888; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <Header currentView={currentView} onViewChange={setCurrentView} onImport={handleImport} onExport={handleExport} />
+      {/* THE GLOBAL BACKGROUND (z-0) */}
+      {currentView !== 'stats' && (
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <CrossfadeImage 
+            src={globalImage || 'https://placehold.co/1920x1080/1a1a1a/333333?text=Loading'} 
+            className="absolute inset-0 w-full h-full"
+            imgClassName="object-cover" 
+          />
+          {/* Global Dimming Overlay */}
+          <div 
+            className="absolute inset-0 bg-black transition-opacity duration-300" 
+            style={{ opacity: layoutPrefs.bgDimming ?? 0.5 }} 
+          />
+        </div>
+      )}
 
-      <main className="w-full h-[calc(100vh-73px)] overflow-hidden flex flex-col">
-        {currentView === 'data' && (
-          <DataManager
-            systemFonts={systemFonts}
-            setSystemFonts={setSystemFonts}
-            layoutPrefs={layoutPrefs}
-            setLayoutPrefs={setLayoutPrefs}
-            modalBgIntensity={modalBgIntensity}
-            setModalBgIntensity={setModalBgIntensity}
-            modalPanelOpacity={modalPanelOpacity}
-            setModalPanelOpacity={setModalPanelOpacity}
-            mosaicXGap={mosaicXGap}
-            setMosaicXGap={setMosaicXGap}
-            mosaicYGap={mosaicYGap}
-            setMosaicYGap={setMosaicYGap}
-          />
-        )}
-        {currentView === 'dashboard' && (
-          <Dashboard
-            streamData={streamData}
-            openGameProfile={openGameProfile}
-            systemFonts={systemFonts}
-            layoutPrefs={layoutPrefs}
-          />
-        )}
-        {currentView === 'library' && (
-          <Library
-            streamData={streamData}
-            openGameProfile={openGameProfile}
-            onDeleteGame={deleteGame}
-            onUpdateGameLink={updateGameLink}
-            onEditGame={editGameDetails}
-            systemFonts={systemFonts}
-            layoutPrefs={layoutPrefs}
-          />
-        )}
-        {currentView === 'stats' && (
-          <Stats 
-            streamData={streamData} 
-            mosaicXGap={mosaicXGap} 
-            mosaicYGap={mosaicYGap} 
-            statsCardRadius={layoutPrefs.statsCardRadius || 12} 
-            statsCardPadding={layoutPrefs.statsCardPadding || 12}
-            leftColWidth={layoutPrefs.statsLeftWidth || 2}
-            rightColWidth={layoutPrefs.statsRightWidth || 1}
-          />
-        )}
-        {currentView === 'search' && (
-          <div className="flex flex-col h-full overflow-hidden">
-            <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-sm border-b border-white/10 px-6 py-4">
-              <div className="max-w-4xl mx-auto relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={22} />
-                <input
-                  type="text"
-                  style={{ fontSize: `${systemFonts.searchBar}px` }}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-24 text-lg focus:outline-none focus:border-blue-500 transition"
-                  placeholder="Search RAWG database..."
-                  value={sQ}
-                  onChange={(e) => setSQ(e.target.value)}
-                />
-                {isS && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 animate-spin text-blue-400" size={22} />}
+      {/* THE FOREGROUND UI (z-10) */}
+      <div className="relative z-10 flex flex-col h-screen">
+        <Header currentView={currentView} onViewChange={setCurrentView} onImport={handleImport} onExport={handleExport} />
+
+        <main className="flex-1 overflow-hidden flex flex-col relative">
+          {currentView === 'data' && (
+            <div className="flex flex-col h-full overflow-hidden bg-black/40 backdrop-blur-xl">
+              <DataManager
+                systemFonts={systemFonts}
+                setSystemFonts={setSystemFonts}
+                layoutPrefs={layoutPrefs}
+                setLayoutPrefs={setLayoutPrefs}
+                modalBgIntensity={modalBgIntensity}
+                setModalBgIntensity={setModalBgIntensity}
+                modalPanelOpacity={modalPanelOpacity}
+                setModalPanelOpacity={setModalPanelOpacity}
+              />
+            </div>
+          )}
+          {currentView === 'dashboard' && (
+            <Dashboard
+              streamData={streamData}
+              openGameProfile={openGameProfile}
+              systemFonts={systemFonts}
+              layoutPrefs={layoutPrefs}
+              globalImage={globalImage}
+              hoverState={hoverState}
+              onHoverGame={handleHoverGame}
+            />
+          )}
+          {currentView === 'library' && (
+            <Library
+              streamData={streamData}
+              openGameProfile={openGameProfile}
+              onDeleteGame={deleteGame}
+              onUpdateGameLink={updateGameLink}
+              onEditGame={editGameDetails}
+              systemFonts={systemFonts}
+              layoutPrefs={layoutPrefs}
+              globalImage={globalImage}
+              hoverState={hoverState}
+              onHoverGame={handleHoverGame}
+            />
+          )}
+          {currentView === 'stats' && (
+            <Stats 
+              streamData={streamData} 
+              mosaicXGap={mosaicXGap} 
+              mosaicYGap={mosaicYGap} 
+            />
+          )}
+          {currentView === 'search' && (
+            <div className="flex flex-col h-full overflow-hidden bg-black/40 backdrop-blur-xl">
+              <div className="sticky top-0 z-10 border-b border-white/10 px-6 py-4">
+                <div className="max-w-4xl mx-auto relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={22} />
+                  <input
+                    type="text"
+                    style={{ fontSize: `${systemFonts.searchBar}px` }}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-24 text-lg focus:outline-none focus:border-blue-500 transition shadow-inner"
+                    placeholder="Search RAWG database..."
+                    value={sQ}
+                    onChange={(e) => setSQ(e.target.value)}
+                  />
+                  {isS && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 animate-spin text-blue-400" size={22} />}
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-6">
+                <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {sR.map(g => (
+                    <div key={g.id} className="bg-black/60 border border-white/10 rounded-2xl overflow-hidden hover:border-blue-500/50 transition group shadow-lg backdrop-blur-md">
+                      <div className="aspect-video bg-black/40 overflow-hidden relative">
+                        <img src={g.background_image} alt={g.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      </div>
+                      <div className="p-5">
+                        <h3 className="font-bold text-xl">{g.name}</h3>
+                        <p className="text-white/60 text-sm mt-1">{g.released || 'Unreleased'}</p>
+                        <button onClick={() => handleAddGame(g)} className="mt-4 w-full bg-white/10 hover:bg-white/20 py-2 rounded-xl font-medium flex items-center justify-center gap-2 transition">
+                          <Plus size={18} /> Add to Library
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-6">
-              <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
-                {sR.map(g => (
-                  <div key={g.id} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-blue-500/30 transition group">
-                    <div className="aspect-video bg-black/40 overflow-hidden">
-                      <img src={g.background_image} alt={g.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-                    </div>
-                    <div className="p-5">
-                      <h3 className="font-bold text-xl">{g.name}</h3>
-                      <p className="text-white/40 text-sm mt-1">{g.released || 'Unreleased'}</p>
-                      <button onClick={() => handleAddGame(g)} className="mt-4 w-full bg-white/10 hover:bg-white/20 py-2 rounded-xl font-medium flex items-center justify-center gap-2 transition">
-                        <Plus size={18} /> Add to Library
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
+          )}
+        </main>
+      </div>
 
       {toast && <Notification message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
@@ -457,6 +538,7 @@ export default function App() {
           initialRunId={initialRunForModal}
           onUpdateCycle={updateCycle}
           onAddCycle={addCycle}
+          layoutPrefs={layoutPrefs}
         />
       )}
 

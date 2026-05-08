@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-// Expanded ranges for all sliders
-export const RangeControl = ({ label, value, min, max, step = 1, onChange, disabled = false }) => (
+export const RangeControl = ({ label, description, value, min, max, step = 1, onChange, disabled = false }) => (
   <div className={`space-y-1 ${disabled ? 'opacity-50' : ''}`}>
-    <div className="flex justify-between text-xs text-white/50">
-      <span>{label}</span>
+    <div className="flex justify-between text-xs text-white/50 mb-1">
+      <div>
+        <span className="block font-medium text-white">{label}</span>
+        {description && <span className="block text-white/40 mt-0.5">{description}</span>}
+      </div>
       <span className="font-mono text-white/80">{typeof value === 'number' ? value.toFixed(step < 1 ? 2 : 0) : value}</span>
     </div>
     <input
@@ -15,7 +17,7 @@ export const RangeControl = ({ label, value, min, max, step = 1, onChange, disab
       value={value}
       onChange={(e) => onChange(parseFloat(e.target.value))}
       disabled={disabled}
-      className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+      className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-blue-500 disabled:cursor-not-allowed disabled:opacity-50 shadow-inner"
     />
   </div>
 );
@@ -34,14 +36,13 @@ export const ColorPicker = ({ label, value, onChange }) => {
   );
 };
 
-// ColorOverride remains the same, but we'll adapt to new element names
 export const ColorOverride = ({ title, element, config, toggle, onChange }) => {
   const a = config.manualColors[element];
   return (
     <div className="pt-4 border-t border-white/10">
       <div className="flex justify-between items-center mb-3">
         <span className="text-sm font-medium">{title}</span>
-        <button onClick={toggle} className={`text-xs px-3 py-1 rounded-full transition ${a ? 'bg-amber-600' : 'bg-white/10'}`}>
+        <button onClick={toggle} className={`text-xs px-3 py-1 rounded-full transition shadow ${a ? 'bg-amber-600' : 'bg-white/10 hover:bg-white/20'}`}>
           {a ? 'Manual' : 'Auto'}
         </button>
       </div>
@@ -56,12 +57,58 @@ export const ColorOverride = ({ title, element, config, toggle, onChange }) => {
               onChange(element, 'Fill', currentStroke);
               onChange(element, 'Stroke', currentFill);
             }}
-            className="w-full mt-2 py-1 text-xs bg-white/10 rounded hover:bg-white/20"
+            className="w-full mt-2 py-1.5 text-xs bg-white/10 rounded-md hover:bg-white/20 transition shadow-inner"
           >
             Swap Fill & Stroke
           </button>
         </div>
       )}
+    </div>
+  );
+};
+
+// Rock-solid dual-layer crossfade component with STRICT inline transitions to prevent CSS conflicts
+export const CrossfadeImage = ({ src, alt, className, imgClassName, style }) => {
+  const [images, setImages] = useState([src, src]);
+  const [activeIndex, setActiveIndex] = useState(1);
+  const prevSrcRef = useRef(src);
+
+  useEffect(() => {
+    // Bail out if src is identical or empty to prevent unnecessary updates
+    if (!src || src === prevSrcRef.current) return;
+    prevSrcRef.current = src;
+
+    // Flip index securely and update the image array
+    setActiveIndex(prev => {
+      const nextIndex = prev === 0 ? 1 : 0;
+      setImages(currImages => {
+        const newArr = [...currImages];
+        newArr[nextIndex] = src;
+        return newArr;
+      });
+      return nextIndex;
+    });
+  }, [src]);
+
+  // Using strict inline styles guarantees that the opacity fade and the hover-zoom happen together perfectly.
+  const imgStyle = {
+    transition: 'opacity 1s ease-in-out, transform 1s ease-in-out'
+  };
+
+  return (
+    <div className={`relative overflow-hidden ${className || ''}`} style={style}>
+      <img 
+        src={images[0] || ''} 
+        alt={alt || ''} 
+        style={imgStyle}
+        className={`absolute inset-0 w-full h-full ${activeIndex === 0 ? 'opacity-100' : 'opacity-0'} ${imgClassName || ''}`} 
+      />
+      <img 
+        src={images[1] || ''} 
+        alt={alt || ''} 
+        style={imgStyle}
+        className={`absolute inset-0 w-full h-full ${activeIndex === 1 ? 'opacity-100' : 'opacity-0'} ${imgClassName || ''}`} 
+      />
     </div>
   );
 };

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { parseCustomTimestamp } from '../utils/helpers';
+import { CrossfadeImage } from './common/UIComponents';
 
-export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs }) {
+export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs, globalImage, hoverState, onHoverGame }) {
   const [recentStreams, setRecentStreams] = useState([]);
 
   useEffect(() => {
@@ -19,6 +20,7 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
             lastTimeStr: timestamps[timestamps.length - 1],
             lastTimeDate: parseCustomTimestamp(timestamps[timestamps.length - 1]),
             cover: game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover',
+            allThumbnails: game.thumbnail_urls || [],
             cycleDisplayName: cycleData.displayName || (cycleName === 'main' ? 'First Playthrough' : cycleName.replace(/_/g, ' '))
           });
         }
@@ -37,7 +39,7 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
 
   const cardStyle = {
     borderRadius: layoutPrefs.cardRounded ? `${layoutPrefs.cardRadius}px` : '0px',
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: `rgba(0, 0, 0, ${layoutPrefs.panelFillOpacity ?? 0.1})`,
     backdropFilter: 'blur(8px)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     transition: 'all 0.2s',
@@ -46,35 +48,48 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
   return (
     <div className="overflow-y-auto h-full custom-scrollbar" style={containerStyle}>
       {recentStreams.length === 0 && (
-        <div className="bg-white/5 rounded-xl p-12 text-center text-white/40">No streams recorded yet. Add a game and start a session.</div>
+        <div className="bg-black/40 backdrop-blur-md rounded-xl p-12 text-center text-white/60 shadow-lg">No streams recorded yet. Add a game and start a session.</div>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" style={{ gap: `${layoutPrefs.cardGap}px` }}>
-        {recentStreams.map((stream, idx) => (
-          <div
-            key={idx}
-            onClick={() => openGameProfile(stream.appId, stream.cycleName)}
-            className="group cursor-pointer transition-transform duration-200 hover:scale-105 overflow-hidden"
-            style={cardStyle}
-          >
-            <div className="relative overflow-hidden">
-              <div className="aspect-video bg-black/40">
-                <img src={stream.cover} alt={stream.gameName} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
+        {recentStreams.map((stream, idx) => {
+          const uniqueCardId = `${stream.appId}-${stream.cycleName}`;
+          
+          // Check if THIS SPECIFIC CARD is the one being hovered
+          const isHovered = hoverState.cardId === uniqueCardId;
+          const activeImg = (isHovered && stream.allThumbnails.includes(globalImage)) ? globalImage : stream.cover;
+
+          return (
+            <div
+              key={uniqueCardId}
+              onClick={() => openGameProfile(stream.appId, stream.cycleName)}
+              onMouseEnter={() => onHoverGame(uniqueCardId, stream.appId)}
+              onMouseLeave={() => onHoverGame(null, null)}
+              className="group cursor-pointer overflow-hidden shadow-xl"
+              style={cardStyle}
+            >
+              <div className="relative overflow-hidden aspect-video bg-black/40">
+                <CrossfadeImage 
+                  src={activeImg} 
+                  alt={stream.gameName} 
+                  className="absolute inset-0 w-full h-full" 
+                  imgClassName="object-cover group-hover:scale-110" 
+                />
+                <div className="absolute bottom-2 right-2 bg-blue-600/80 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold text-white pointer-events-none shadow z-20">
+                  Resume
+                </div>
               </div>
-              <div className="absolute bottom-2 right-2 bg-blue-600/80 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold text-white pointer-events-none">
-                Resume
+              <div className="p-3" style={{ padding: `${layoutPrefs.cardPadding}px` }}>
+                <h3 className="font-bold text-white leading-tight break-words drop-shadow-md" style={{ fontSize: `${systemFonts.libTitle}px` }}>
+                  {stream.gameName}
+                </h3>
+                <p className="text-white/80 text-sm mt-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libYear}px` }}>
+                  {stream.cycleDisplayName} • Session #{stream.count}
+                </p>
+                <p className="text-white/50 text-xs mt-1 font-mono drop-shadow-md">{stream.lastTimeStr}</p>
               </div>
             </div>
-            <div className="p-3" style={{ padding: `${layoutPrefs.cardPadding}px` }}>
-              <h3 className="font-bold text-white leading-tight break-words" style={{ fontSize: `${systemFonts.libTitle}px` }}>
-                {stream.gameName}
-              </h3>
-              <p className="text-white/60 text-sm mt-1" style={{ fontSize: `${systemFonts.libYear}px` }}>
-                {stream.cycleDisplayName} • Session #{stream.count}
-              </p>
-              <p className="text-white/40 text-xs mt-1 font-mono">{stream.lastTimeStr}</p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

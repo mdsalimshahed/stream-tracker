@@ -14,17 +14,15 @@ export const DEFAULT_LAYOUT_PREFS = {
   cardPadding: 20,
   cardGap: 20,
   cardRadius: 16,
-  cardMaxWidth: 300,
+  cardMaxWidth: 500,
   containerPaddingX: 24,
   containerPaddingY: 24,
   cardRounded: true,
-  statsCardRadius: 12,
-  statsCardPadding: 12,
-  statsLeftWidth: 2,   // fraction: 2 parts of 3
-  statsRightWidth: 1   // fraction: 1 part of 3
+  panelFillOpacity: 0.1, // Controls card background opacity
+  bgDimming: 0.5,        // Controls the dark overlay on the global background
+  cycleInterval: 4000    // Frequency of the global background slide
 };
 
-// Original monolithic thumbnail config
 export const DEFAULT_THUMBNAIL_CONFIG = {
   titleSize: 110,
   subtitleSize: 80,

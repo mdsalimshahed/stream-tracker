@@ -37,12 +37,23 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
     paddingBottom: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
   };
 
+  const gridStyle = {
+    display: 'grid',
+    gridTemplateColumns: window.innerWidth > 768 
+      ? `repeat(${layoutPrefs.cardsPerRow || 5}, 1fr)` 
+      : 'repeat(auto-fill, minmax(160px, 1fr))',
+    gap: `${layoutPrefs.cardGap}px`
+  };
+
   const cardStyle = {
     borderRadius: layoutPrefs.cardRounded ? `${layoutPrefs.cardRadius}px` : '0px',
     backgroundColor: `rgba(0, 0, 0, ${layoutPrefs.panelFillOpacity ?? 0.1})`,
     backdropFilter: 'blur(8px)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     transition: 'all 0.2s',
+    maxWidth: `${layoutPrefs.cardMaxWidth || 320}px`,
+    width: '100%',
+    margin: '0 auto'
   };
 
   return (
@@ -53,11 +64,8 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
         </div>
       )}
       
-      {/* Responsive Grid: Forces at least 2 columns on mobile so images are never massive,
-        scaling up cleanly to 5 columns on ultrawide monitors.
-      */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" style={{ gap: `clamp(12px, ${layoutPrefs.cardGap}px, 24px)` }}>
-        {recentStreams.map((stream, idx) => {
+      <div style={gridStyle}>
+        {recentStreams.map((stream) => {
           const uniqueCardId = `${stream.appId}-${stream.cycleName}`;
           const isHovered = hoverState.cardId === uniqueCardId;
           const activeImg = (isHovered && stream.allThumbnails.includes(globalImage)) ? globalImage : stream.cover;
@@ -83,10 +91,10 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
                 </div>
               </div>
               <div className="p-3 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
-                <h3 className="font-bold text-white leading-tight break-words drop-shadow-md text-sm sm:text-base" style={{ fontSize: `clamp(14px, ${systemFonts.libTitle}px, 22px)` }}>
+                <h3 className="font-bold text-white leading-tight break-words drop-shadow-md" style={{ fontSize: `${systemFonts.libTitle}px` }}>
                   {stream.gameName}
                 </h3>
-                <p className="text-white/80 text-[10px] sm:text-xs mt-1 drop-shadow-md mb-auto" style={{ fontSize: `clamp(10px, ${systemFonts.libYear}px, 16px)` }}>
+                <p className="text-white/80 mt-1 drop-shadow-md mb-auto" style={{ fontSize: `${systemFonts.libYear}px` }}>
                   {stream.cycleDisplayName} • Session #{stream.count}
                 </p>
                 <p className="text-white/50 text-[10px] mt-3 font-mono drop-shadow-md hidden min-[400px]:block">{stream.lastTimeStr}</p>

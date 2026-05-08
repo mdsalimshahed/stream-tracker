@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ChevronLeft, Upload, Globe, Plus, Save, Loader2, Trash2 } from 'lucide-react';
+import { X, ChevronLeft, ImagePlus, Globe, Plus, Save, Loader2, Trash2 } from 'lucide-react';
 import ThumbnailCanvas from './ThumbnailCanvas';
 import { isLocalPath, generateStreamTitle, generateTimestamp } from '../utils/helpers';
 import { RAWG_API_KEY } from '../utils/constants';
@@ -189,7 +189,6 @@ export default function LivestreamSetupWorkspace({
           </div>
         </div>
 
-        {/* Change overflow-hidden to overflow-y-auto so the mobile layout can scroll all the way down! */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
           
           {/* Top/Left gallery */}
@@ -197,7 +196,7 @@ export default function LivestreamSetupWorkspace({
             <div className="p-3 lg:p-4 space-y-3 lg:space-y-4 shrink-0">
               <div className="flex gap-2">
                 <label className="flex-1 bg-white/5 hover:bg-white/10 rounded-lg p-2 text-center cursor-pointer transition">
-                  <Upload size={16} className="mx-auto" />
+                  <ImagePlus size={16} className="mx-auto" />
                   <input type="file" accept="image/*" className="hidden" onChange={handleUp} />
                 </label>
                 <button onClick={handleFindOnline} className="flex-1 bg-white/5 hover:bg-white/10 rounded-lg p-2 transition">
@@ -210,7 +209,6 @@ export default function LivestreamSetupWorkspace({
               </div>
             </div>
             
-            {/* The magic fix: overflow-x-auto combined with custom-scrollbar renders a touch/mouse horizontal scroll track */}
             <div className="flex-1 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto custom-scrollbar px-3 lg:px-4 pb-3 lg:pb-4 flex flex-row lg:flex-col gap-3 lg:space-y-3 min-h-[140px] lg:min-h-0 items-center lg:items-stretch">
               {loadingS ? (
                 <div className="flex w-full h-full items-center justify-center py-6"><Loader2 className="animate-spin text-white/40" size={28} /></div>
@@ -225,13 +223,13 @@ export default function LivestreamSetupWorkspace({
             </div>
           </div>
 
-          {/* Center: Canvas */}
-          <div className="flex-1 flex flex-col bg-black min-h-[300px] shrink-0 lg:min-h-0">
+          {/* Center: Canvas – now clipped to prevent bleeding */}
+          <div className="flex-1 flex flex-col bg-black min-h-[300px] shrink-0 lg:min-h-0 overflow-hidden">
             <div className="mx-4 sm:mx-8 mt-4 p-2 sm:p-3 bg-white/10 rounded-lg text-center cursor-pointer hover:bg-white/20 transition" onClick={() => handleCopy(false)}>
               <p className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wider">Stream Title (Click to Copy)</p>
               <p className="text-white font-medium text-xs sm:text-sm break-all mt-1">{title}</p>
             </div>
-            <div className="flex-1 flex items-center justify-center p-4">
+            <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
               {selImg ? (
                 <ThumbnailCanvas
                   canvasRef={workspaceCanvasRef}
@@ -248,7 +246,7 @@ export default function LivestreamSetupWorkspace({
             </div>
           </div>
 
-          {/* Bottom/Right panel: Controls. Height removed on mobile to let it flow down naturally. */}
+          {/* Bottom/Right panel: Controls */}
           <div className="w-full lg:w-1/4 xl:w-1/4 lg:min-w-[280px] lg:max-w-[400px] border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col bg-neutral-900/50 shrink-0 lg:h-full">
             <div className="p-3 lg:p-4 border-b border-white/10 shrink-0">
               <select value={selEl} onChange={(e) => setSelEl(e.target.value)} className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-sm outline-none focus:border-blue-500 shadow-inner">

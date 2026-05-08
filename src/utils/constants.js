@@ -1,26 +1,28 @@
 export const RAWG_API_KEY = "9fba73b06e6549dab7044ebd9b630b0f";
 
 export const DEFAULT_SYSTEM_FONTS = {
-  libTitle: 28,
-  libYear: 20,
-  libBadge: 14,
-  modalHeader: 32,
-  logTitle: 24,
+  libTitle: 22,
+  libYear: 14,
+  libBadge: 10,
+  modalHeader: 36,
+  logTitle: 18,
   logSub: 12,
-  searchBar: 30
+  searchBar: 20
 };
 
 export const DEFAULT_LAYOUT_PREFS = {
-  cardPadding: 20,
-  cardGap: 20,
-  cardRadius: 16,
-  cardMaxWidth: 500,
-  containerPaddingX: 24,
-  containerPaddingY: 24,
+  cardPadding: 16,
+  cardGap: 16,
+  cardRadius: 12,
+  cardMaxWidth: 320,
+  cardsPerRow: 5,        // Default cards in a row for large screens
+  modalSplitRatio: 0.6,  // 60% left, 40% right for the modal
+  containerPaddingX: 40,
+  containerPaddingY: 32,
   cardRounded: true,
-  panelFillOpacity: 0.1, // Controls card background opacity
-  bgDimming: 0.5,        // Controls the dark overlay on the global background
-  cycleInterval: 4000    // Frequency of the global background slide
+  panelFillOpacity: 0.2, 
+  bgDimming: 0.6,        
+  cycleInterval: 4000    
 };
 
 export const DEFAULT_THUMBNAIL_CONFIG = {

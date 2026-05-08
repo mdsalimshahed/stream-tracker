@@ -73,8 +73,8 @@ export default function GameProfileModal({
         >
           <div className="flex justify-between items-center">
             <div>
-              <p className="font-medium" style={{ fontSize: `clamp(14px, ${systemFonts.logTitle}px, 20px)` }}>Livestream #{realIdx + 1}</p>
-              <p className="text-white/40 mt-0.5" style={{ fontSize: `clamp(10px, ${systemFonts.logSub}px, 14px)` }}>{ts}</p>
+              <p className="font-medium" style={{ fontSize: `${systemFonts.logTitle}px` }}>Livestream #{realIdx + 1}</p>
+              <p className="text-white/40 mt-0.5" style={{ fontSize: `${systemFonts.logSub}px` }}>{ts}</p>
             </div>
             <button
               onClick={(e) => {
@@ -163,9 +163,13 @@ export default function GameProfileModal({
     boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.5)',
   };
 
+  // DYNAMIC COLUMN CALCULATION
+  const isLargeScreen = window.innerWidth > 1024;
+  const leftWidth = isLargeScreen ? `${(layoutPrefs.modalSplitRatio || 0.6) * 100}%` : '100%';
+  const rightWidth = isLargeScreen ? `${(1 - (layoutPrefs.modalSplitRatio || 0.6)) * 100}%` : '100%';
+
   return (
     <>
-      {/* 1. FIXED BACKGROUND LAYER */}
       <div className="fixed inset-0 z-[40] pointer-events-none overflow-hidden">
         <div className="absolute -inset-[100px] transform scale-110">
           <div className="absolute inset-0 bg-black/80 z-10" style={{ opacity: 1 - modalBgIntensity }} />
@@ -178,27 +182,24 @@ export default function GameProfileModal({
         </div>
       </div>
 
-      {/* 2. SCROLLABLE OVERLAY LAYER */}
-      <div className="fixed inset-0 z-[50] overflow-y-auto custom-scrollbar" onClick={onClose}>
+      {/* Main modal container with hidden overflow on large screens */}
+      <div className="fixed inset-0 z-[50] overflow-y-auto lg:overflow-hidden custom-scrollbar" onClick={onClose}>
         
-        {/* Ensures modal centers vertically if small, or scrolls if taller than screen */}
-        <div className="min-h-full flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        {/* Ensures inner container fills the screen up to padding */}
+        <div className="min-h-full lg:h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
           
-          {/* THE MODAL WRAPPER */}
-          {/* max-w-7xl allows the modal to be wider on huge screens, and the grid uses lg:w-7/12 (58%) for the left side and lg:w-5/12 (41%) for the right side */}
           <div 
-            className="relative w-full max-w-7xl flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6 mx-auto cursor-auto" 
+            className="relative w-full max-w-7xl flex flex-col lg:flex-row lg:items-stretch gap-4 lg:gap-6 mx-auto cursor-auto lg:max-h-full" 
             onClick={e => e.stopPropagation()}
           >
             
             {/* LEFT COLUMN: Image & Details */}
-            {/* Changed lg:w-1/2 to lg:w-7/12 to give the game cover and details much more prominent space */}
-            <div className="flex flex-col lg:w-7/12 w-full rounded-2xl shadow-2xl overflow-hidden" style={panelStyle}>
+            <div className="flex flex-col rounded-2xl shadow-2xl overflow-hidden shrink-0 lg:min-h-0" style={{ ...panelStyle, width: leftWidth }}>
               <div className="relative shrink-0 aspect-video bg-black/40 border-b border-white/10">
                 <CrossfadeImage src={bgImage} className="w-full h-full" imgClassName="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10" />
                 <div className="absolute bottom-4 left-4 right-4 z-20">
-                  <h2 className="font-bold tracking-tight text-white drop-shadow-2xl" style={{ fontSize: `clamp(24px, ${systemFonts.modalHeader}px, 48px)`, textShadow: '0 4px 12px rgba(0,0,0,0.9)' }}>
+                  <h2 className="font-bold tracking-tight text-white drop-shadow-2xl" style={{ fontSize: `${systemFonts.modalHeader}px`, textShadow: '0 4px 12px rgba(0,0,0,0.9)' }}>
                     {gameData.game_name}
                   </h2>
                 </div>
@@ -207,7 +208,8 @@ export default function GameProfileModal({
                 </button>
               </div>
               
-              <div className="p-6 space-y-4">
+              {/* Internal overflow for details panel */}
+              <div className="p-6 space-y-4 overflow-y-auto custom-scrollbar lg:min-h-0">
                 <div className="space-y-3">
                   <div><span className="text-white/50 text-sm block">Developer</span><span className="text-white text-sm">{details.developer}</span></div>
                   <div><span className="text-white/50 text-sm block">Publisher</span><span className="text-white text-sm">{details.publisher}</span></div>
@@ -240,11 +242,10 @@ export default function GameProfileModal({
             </div>
 
             {/* RIGHT COLUMN: Runs & Logs */}
-            {/* Changed lg:w-1/2 to lg:w-5/12, tightening the list panels so they match their content better */}
-            <div className="flex flex-col lg:w-5/12 w-full gap-4 lg:gap-6">
+            <div className="flex flex-col gap-4 lg:gap-6 shrink-0 lg:min-h-0" style={{ width: rightWidth }}>
               
               {/* RUNS PANEL */}
-              <div className="flex flex-col rounded-2xl shadow-xl overflow-hidden" style={panelStyle}>
+              <div className="flex flex-col rounded-2xl shadow-xl overflow-hidden lg:flex-1 lg:min-h-0" style={panelStyle}>
                 <div className="shrink-0 flex justify-between items-center p-4 border-b border-white/5">
                   <h3 className="text-sm font-semibold text-white/50 flex items-center gap-2"><Gamepad2 size={16} /> Runs</h3>
                   <div className="flex gap-2">
@@ -257,8 +258,8 @@ export default function GameProfileModal({
                   </div>
                 </div>
                 
-                {/* max-h-[350px] forces a cap at ~4 to 5 entries before it introduces a scrollbar */}
-                <div className="overflow-y-auto custom-scrollbar p-4 pt-2 space-y-2 max-h-[350px]">
+                {/* Dynamic height allocation with internal scrolling */}
+                <div className="overflow-y-auto custom-scrollbar p-4 pt-2 space-y-2 max-h-[350px] lg:max-h-none lg:flex-1 lg:min-h-0">
                   {cycleEntries.map(cycle => {
                     const streamCount = cycle.stream_count || 0;
                     const isSelected = selectedCycleId === cycle.id;
@@ -327,10 +328,10 @@ export default function GameProfileModal({
               </div>
 
               {/* LOGS PANEL */}
-              <div className="flex flex-col rounded-2xl shadow-xl overflow-hidden" style={panelStyle}>
+              <div className="flex flex-col rounded-2xl shadow-xl overflow-hidden lg:flex-1 lg:min-h-0" style={panelStyle}>
                 <h3 className="shrink-0 text-sm font-semibold text-white/50 flex items-center gap-2 p-4 border-b border-white/5"><Clock size={16} /> Session Logs</h3>
-                {/* Same 350px limit guarantees it never blows up past ~5 entries */}
-                <div className="overflow-y-auto custom-scrollbar p-4 pt-2 space-y-2 max-h-[350px]">
+                {/* Dynamic height allocation with internal scrolling */}
+                <div className="overflow-y-auto custom-scrollbar p-4 pt-2 space-y-2 max-h-[350px] lg:max-h-none lg:flex-1 lg:min-h-0">
                   {renderTimestamps()}
                 </div>
               </div>

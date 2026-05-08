@@ -62,12 +62,23 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
     paddingBottom: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
   };
 
+  const gridStyle = {
+    display: 'grid',
+    gridTemplateColumns: window.innerWidth > 768 
+      ? `repeat(${layoutPrefs.cardsPerRow || 5}, 1fr)` 
+      : 'repeat(auto-fill, minmax(160px, 1fr))',
+    gap: `${layoutPrefs.cardGap}px`
+  };
+
   const cardStyle = {
     borderRadius: layoutPrefs.cardRounded ? `${layoutPrefs.cardRadius}px` : '0px',
     backgroundColor: `rgba(0, 0, 0, ${layoutPrefs.panelFillOpacity ?? 0.1})`,
     backdropFilter: 'blur(8px)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     transition: 'all 0.2s',
+    maxWidth: `${layoutPrefs.cardMaxWidth || 320}px`,
+    width: '100%',
+    margin: '0 auto' // Centers the card within its grid cell if cell is larger
   };
 
   const getLabelStyle = (label) => {
@@ -100,8 +111,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar" style={containerStyle}>
-        {/* Responsive Grid: Minimum 2 columns on mobile so cards are never physically huge */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" style={{ gap: `clamp(12px, ${layoutPrefs.cardGap}px, 24px)` }}>
+        <div style={gridStyle}>
           {sorted.map(game => {
             const cover = game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
             const isHovered = hoverState.cardId === game.id;
@@ -127,13 +137,13 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                 </div>
                 <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
                   <div className="flex justify-between items-start gap-2">
-                    <h3 className="font-bold text-sm sm:text-base tracking-tight break-words flex-1 drop-shadow-md" style={{ fontSize: `clamp(14px, ${systemFonts.libTitle}px, 22px)` }}>{game.game_name}</h3>
+                    <h3 className="font-bold tracking-tight break-words flex-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
                     <span className={`${labelInfo.bg} text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
                       {labelInfo.icon && <span className="hidden min-[400px]:block">{labelInfo.icon}</span>}
                       {labelInfo.text}
                     </span>
                   </div>
-                  <p className="text-white/60 text-xs mt-1 drop-shadow-md mb-auto" style={{ fontSize: `clamp(10px, ${systemFonts.libYear}px, 16px)` }}>{game.release_year}</p>
+                  <p className="text-white/60 mt-1 drop-shadow-md mb-auto" style={{ fontSize: `${systemFonts.libYear}px` }}>{game.release_year}</p>
                   <div className="flex justify-between items-center mt-3">
                     <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full shadow z-20">{game.totalStreams} streams</span>
                   </div>

@@ -360,7 +360,7 @@ export default function Stats({ streamData }) {
               <div className="stat-number" style={{ fontSize: 'clamp(32px, 5vw, 56px)' }}>
                 {totalGamesCount}
               </div>
-              <div className="stat-label">Library</div>
+              <div className="stat-label">Games in Library</div>
             </div>
           </div>
 

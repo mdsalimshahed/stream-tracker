@@ -17,7 +17,11 @@ export const DEFAULT_LAYOUT_PREFS = {
   cardMaxWidth: 300,
   containerPaddingX: 24,
   containerPaddingY: 24,
-  cardRounded: true
+  cardRounded: true,
+  statsCardRadius: 12,
+  statsCardPadding: 12,
+  statsLeftWidth: 2,   // fraction: 2 parts of 3
+  statsRightWidth: 1   // fraction: 1 part of 3
 };
 
 // Original monolithic thumbnail config

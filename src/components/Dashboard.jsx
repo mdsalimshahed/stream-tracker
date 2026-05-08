@@ -45,7 +45,6 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
 
   return (
     <div className="overflow-y-auto h-full custom-scrollbar" style={containerStyle}>
-      <h2 className="text-2xl font-bold tracking-tight mb-8">Recent Streams</h2>
       {recentStreams.length === 0 && (
         <div className="bg-white/5 rounded-xl p-12 text-center text-white/40">No streams recorded yet. Add a game and start a session.</div>
       )}

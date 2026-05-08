@@ -4,6 +4,26 @@ import { isLocalPath, parseCustomTimestamp } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditGameModal } from './modals/EditGameModal';
 
+// Helper to get the run with the most recent timestamp
+const getLatestRun = (cycles) => {
+  let latestRun = null;
+  let latestDate = null;
+  Object.values(cycles).forEach(run => {
+    const timestamps = run.timestamps || [];
+    if (timestamps.length > 0) {
+      const lastTimestamp = timestamps[timestamps.length - 1];
+      const date = new Date(lastTimestamp);
+      if (!latestDate || date > latestDate) {
+        latestDate = date;
+        latestRun = run;
+      }
+    } else if (!latestDate && run.stream_count > 0) {
+      latestRun = run;
+    }
+  });
+  return latestRun;
+};
+
 export default function Library({ streamData, openGameProfile, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs }) {
   const [sortBy, setSortBy] = useState('recent');
   const [searchFilter, setSearchFilter] = useState('');
@@ -18,7 +38,9 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
       const d = parseCustomTimestamp(c.timestamps[c.timestamps.length - 1]);
       return d > latest ? d : latest;
     }, new Date(0));
-    return { id, ...data, totalStreams, lastStreamDate };
+    const latestRun = getLatestRun(cycles);
+    const label = latestRun?.label || 'Ongoing';
+    return { id, ...data, totalStreams, lastStreamDate, label };
   });
 
   const filtered = games.filter(g => g.game_name?.toLowerCase().includes(searchFilter.toLowerCase()));
@@ -31,7 +53,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
   });
 
   const handleEditClick = (game) => setEditingGame(game);
-  const handleSaveEdit = (id, newName, newYear, rawgId, newLabel) => onEditGame(id, newName, newYear, rawgId, newLabel);
+  const handleSaveEdit = (id, newName, newYear, rawgId) => onEditGame(id, newName, newYear, rawgId);
 
   const containerStyle = {
     paddingLeft: `${layoutPrefs.containerPaddingX}px`,
@@ -48,7 +70,6 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
     transition: 'all 0.2s',
   };
 
-  // Helper to get label style and icon
   const getLabelStyle = (label) => {
     switch (label) {
       case 'Completed':
@@ -85,7 +106,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
           {sorted.map(game => {
             const cover = game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
-            const labelInfo = getLabelStyle(game.label || 'Ongoing');
+            const labelInfo = getLabelStyle(game.label);
             return (
               <div
                 key={game.id}
@@ -122,7 +143,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                       e.stopPropagation();
                       setConfirmDialog({
                         title: 'Delete Game',
-                        message: `Delete "${game.game_name}"? It has ${game.totalStreams} livestream(s) across ${Object.keys(game.cycles).length} run(s). This cannot be undone.`,
+                        message: `Delete "${game.game_name}"? It has ${game.totalStreams} livestream(s). This cannot be undone.`,
                         onConfirm: () => {
                           onDeleteGame(game.id, game.game_name);
                           setConfirmDialog(null);

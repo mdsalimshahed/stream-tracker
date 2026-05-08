@@ -6,16 +6,40 @@ import Library from './components/Library';
 import DataManager from './components/DataManager';
 import GameProfileModal from './components/GameProfileModal';
 import LivestreamSetupWorkspace from './components/LivestreamSetupWorkspace';
+import Stats from './components/Stats';
 import { Notification } from './components/Notification';
 import { RAWG_API_KEY, DEFAULT_SYSTEM_FONTS, DEFAULT_LAYOUT_PREFS, DEFAULT_THUMBNAIL_CONFIG, DEFAULT_MODAL_BG_INTENSITY, DEFAULT_MODAL_PANEL_OPACITY } from './utils/constants';
 import { formatRunName, formatReleaseDate } from './utils/helpers';
+
+// Helper to migrate old game-level labels to first run
+const migrateLabels = (data) => {
+  let changed = false;
+  const newData = JSON.parse(JSON.stringify(data));
+  for (const [gameId, game] of Object.entries(newData)) {
+    if (game.label && game.cycles) {
+      const firstRunKey = game.cycles['main'] ? 'main' : Object.keys(game.cycles)[0];
+      if (firstRunKey && game.cycles[firstRunKey]) {
+        game.cycles[firstRunKey].label = game.label;
+        changed = true;
+      }
+      delete game.label;
+    }
+  }
+  return { data: newData, changed };
+};
 
 export default function App() {
   const [streamData, setStreamData] = useState(() => {
     try {
       const s = localStorage.getItem('streamManagerData');
-      return s ? JSON.parse(s) : {};
-    } catch (e) { return {}; }
+      if (s) {
+        const parsed = JSON.parse(s);
+        const { data, changed } = migrateLabels(parsed);
+        if (changed) return data;
+        return parsed;
+      }
+    } catch (e) {}
+    return {};
   });
   const [thumbnailConfig, setThumbnailConfig] = useState(() => {
     try {
@@ -56,6 +80,12 @@ export default function App() {
       return s !== null ? parseFloat(s) : DEFAULT_MODAL_PANEL_OPACITY;
     } catch(e) { return DEFAULT_MODAL_PANEL_OPACITY; }
   });
+  const [mosaicXGap, setMosaicXGap] = useState(() => {
+    try { const s = localStorage.getItem('mosaicXGap'); return s !== null ? parseInt(s) : 0; } catch(e) { return 0; }
+  });
+  const [mosaicYGap, setMosaicYGap] = useState(() => {
+    try { const s = localStorage.getItem('mosaicYGap'); return s !== null ? parseInt(s) : 0; } catch(e) { return 0; }
+  });
 
   const [currentView, setCurrentView] = useState(() => {
     try {
@@ -78,6 +108,8 @@ export default function App() {
   useEffect(() => { localStorage.setItem('layoutPrefs', JSON.stringify(layoutPrefs)); }, [layoutPrefs]);
   useEffect(() => { localStorage.setItem('modalBgIntensity', modalBgIntensity); }, [modalBgIntensity]);
   useEffect(() => { localStorage.setItem('modalPanelOpacity', modalPanelOpacity); }, [modalPanelOpacity]);
+  useEffect(() => { localStorage.setItem('mosaicXGap', mosaicXGap); }, [mosaicXGap]);
+  useEffect(() => { localStorage.setItem('mosaicYGap', mosaicYGap); }, [mosaicYGap]);
 
   useEffect(() => {
     const recovery = async () => {
@@ -176,11 +208,11 @@ export default function App() {
             timestamps: [],
             isMain: true,
             youtubePlaylist: '',
-            displayName: 'First Playthrough'
+            displayName: 'First Playthrough',
+            label: 'Ongoing'
           }
         },
-        details: details,
-        label: 'Ongoing'   // default label
+        details: details
       }
     });
     openGameProfile(rid);
@@ -213,12 +245,11 @@ export default function App() {
     } catch(e) { notify('Update failed', 'error'); }
   };
 
-  const editGameDetails = (gameId, newName, newYear, rawgId, newLabel) => {
+  const editGameDetails = (gameId, newName, newYear, rawgId) => {
     const nd = JSON.parse(JSON.stringify(streamData));
     if (nd[gameId]) {
       nd[gameId].game_name = newName;
       if (newYear) nd[gameId].release_year = newYear;
-      nd[gameId].label = newLabel;
       setStreamData(nd);
       notify(`Game updated to "${newName}"`, 'success');
       if (rawgId) updateGameLink(gameId, rawgId);
@@ -247,7 +278,7 @@ export default function App() {
     notify(`Deleted log entry`, 'error');
   };
 
-  const updateCycle = (gameId, oldCycleId, newDisplayName, isMain, youtubePlaylist) => {
+  const updateCycle = (gameId, oldCycleId, newDisplayName, isMain, youtubePlaylist, newLabel) => {
     const nd = JSON.parse(JSON.stringify(streamData));
     const cycles = nd[gameId].cycles;
     if (!cycles[oldCycleId]) return;
@@ -260,6 +291,7 @@ export default function App() {
     cycles[newId].displayName = newDisplayName;
     cycles[newId].isMain = isMain;
     cycles[newId].youtubePlaylist = youtubePlaylist || '';
+    if (newLabel) cycles[newId].label = newLabel;
     setStreamData(nd);
     notify(`Run updated to "${newDisplayName}"`, 'success');
   };
@@ -277,16 +309,17 @@ export default function App() {
       timestamps: [],
       isMain: false,
       youtubePlaylist: '',
-      displayName: formattedName
+      displayName: formattedName,
+      label: 'Ongoing'
     };
     setStreamData(nd);
     notify(`Run "${formattedName}" created`, 'success');
     return true;
   };
 
-  const handleStartWorkspace = (gameId, cycleId, selectedLogIndex) => {
+  const handleStartWorkspace = (gameId, cycleId, selectedStreamNumber) => {
     setSelectedGameId(null);
-    setWCF({ gameId, cycleId, selectedLogIndex });
+    setWCF({ gameId, cycleId, selectedStreamNumber });
   };
 
   const handleExport = () => {
@@ -303,8 +336,10 @@ export default function App() {
   };
 
   const handleImport = (importedData) => {
-    setStreamData(importedData);
-    notify('Library restored', 'success');
+    const { data, changed } = migrateLabels(importedData);
+    setStreamData(data);
+    if (changed) notify('Old labels migrated to first run.', 'info');
+    else notify('Library restored', 'success');
   };
 
   return (
@@ -331,6 +366,10 @@ export default function App() {
             setModalBgIntensity={setModalBgIntensity}
             modalPanelOpacity={modalPanelOpacity}
             setModalPanelOpacity={setModalPanelOpacity}
+            mosaicXGap={mosaicXGap}
+            setMosaicXGap={setMosaicXGap}
+            mosaicYGap={mosaicYGap}
+            setMosaicYGap={setMosaicYGap}
           />
         )}
         {currentView === 'dashboard' && (
@@ -350,6 +389,17 @@ export default function App() {
             onEditGame={editGameDetails}
             systemFonts={systemFonts}
             layoutPrefs={layoutPrefs}
+          />
+        )}
+        {currentView === 'stats' && (
+          <Stats 
+            streamData={streamData} 
+            mosaicXGap={mosaicXGap} 
+            mosaicYGap={mosaicYGap} 
+            statsCardRadius={layoutPrefs.statsCardRadius || 12} 
+            statsCardPadding={layoutPrefs.statsCardPadding || 12}
+            leftColWidth={layoutPrefs.statsLeftWidth || 2}
+            rightColWidth={layoutPrefs.statsRightWidth || 1}
           />
         )}
         {currentView === 'search' && (
@@ -414,7 +464,6 @@ export default function App() {
         <LivestreamSetupWorkspace
           gameId={wCf.gameId}
           cycleName={wCf.cycleId}
-          initialStreamCount={null}
           streamData={streamData}
           onBack={(returnedCycleId) => {
             setSelectedGameId(wCf.gameId);
@@ -425,6 +474,7 @@ export default function App() {
           config={thumbnailConfig}
           setConfig={setThumbnailConfig}
           onNotify={notify}
+          selectedStreamNumber={wCf.selectedStreamNumber}
           systemFonts={systemFonts}
         />
       )}

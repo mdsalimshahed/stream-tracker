@@ -1,5 +1,5 @@
 import React from 'react';
-import { Video, Clock, BookOpen, Plus, Settings, Upload, Download } from 'lucide-react';
+import { Video, Clock, BookOpen, Plus, Settings, Upload, Download, BarChart3 } from 'lucide-react';
 
 export default function Header({ currentView, onViewChange, onImport, onExport }) {
   const fileInputRef = React.useRef(null);
@@ -28,7 +28,6 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
   return (
     <header className="sticky top-0 z-40 bg-black/60 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-        {/* Logo */}
         <button onClick={() => onViewChange('library')} className="flex items-center gap-3 hover:opacity-80 transition">
           <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-2 rounded-lg shadow-md">
             <Video size={18} className="text-white" />
@@ -39,7 +38,6 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
         </button>
 
         <div className="flex items-center gap-3">
-          {/* Import: Download icon (bring data in) */}
           <button
             onClick={handleImportClick}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition text-white/80 hover:text-white"
@@ -47,8 +45,6 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
           >
             <Download size={16} /> Import
           </button>
-
-          {/* Export: Upload icon (send data out) */}
           <button
             onClick={onExport}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition text-white/80 hover:text-white"
@@ -62,7 +58,8 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
               { id: 'dashboard', label: 'History', icon: Clock },
               { id: 'library', label: 'Library', icon: BookOpen },
               { id: 'search', label: 'Add Game', icon: Plus },
-              { id: 'data', label: 'Styles', icon: Settings }
+              { id: 'data', label: 'Styles', icon: Settings },
+              { id: 'stats', label: 'Stats', icon: BarChart3 }
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}

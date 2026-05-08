@@ -1,15 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { X, Save, Star } from 'lucide-react';
 import { formatRunName } from '../../utils/helpers';
 
-export const EditRunModal = ({ runName, isMain, youtubePlaylist, onSave, onClose }) => {
+// Helper to convert string to sentence case
+const toSentenceCase = (str) => {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
+export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, onSave, onClose }) => {
   const [name, setName] = useState(runName);
   const [main, setMain] = useState(isMain);
   const [playlist, setPlaylist] = useState(youtubePlaylist || '');
+  const [label, setLabel] = useState(currentLabel || 'Ongoing');
+
+  const handleNameChange = (e) => {
+    let raw = e.target.value;
+    // Apply sentence case as the user types (simple: only first char uppercase, rest lower)
+    // But we don't want to interfere with backspacing too much; apply on blur or after each key?
+    // We'll apply onBlur for simplicity, but user wants 'while typing'. We'll use a useEffect that formats on change.
+    // However, that can be jarring. Implement a custom onChange that formats only when needed.
+    if (raw.length === 1) {
+      raw = raw.toLocaleUpperCase();
+    } else if (raw.length > 1 && raw[0] !== raw[0].toUpperCase()) {
+      raw = raw[0].toLocaleUpperCase() + raw.slice(1).toLocaleLowerCase();
+    }
+    setName(raw);
+  };
+
+  const handleBlur = () => {
+    setName(toSentenceCase(name));
+  };
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    onSave(formatRunName(name.trim()), main, playlist);
+    onSave(formatRunName(name.trim()), main, playlist, label);
     onClose();
   };
 
@@ -26,9 +51,7 @@ export const EditRunModal = ({ runName, isMain, youtubePlaylist, onSave, onClose
       >
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-white">Edit Run</h3>
-          <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full text-white">
-            <X size={20} />
-          </button>
+          <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full text-white"><X size={20} /></button>
         </div>
         <div className="space-y-4">
           <div>
@@ -36,11 +59,12 @@ export const EditRunModal = ({ runName, isMain, youtubePlaylist, onSave, onClose
             <input
               type="text"
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={handleNameChange}
+              onBlur={handleBlur}
               className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 text-white"
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={() => setMain(!main)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition ${
@@ -50,6 +74,18 @@ export const EditRunModal = ({ runName, isMain, youtubePlaylist, onSave, onClose
               <Star size={14} /> {main ? 'Main Run' : 'Set as Main'}
             </button>
             <span className="text-xs text-white/40">Main run name is omitted from stream title</span>
+          </div>
+          <div>
+            <label className="text-sm text-white/50 block mb-1">Status Label</label>
+            <select
+              value={label}
+              onChange={e => setLabel(e.target.value)}
+              className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 text-white"
+            >
+              <option value="Ongoing">Ongoing</option>
+              <option value="Completed">Completed</option>
+              <option value="Abandoned">Abandoned</option>
+            </select>
           </div>
           <div>
             <label className="text-sm text-white/50 block mb-1">YouTube Playlist (for this run)</label>

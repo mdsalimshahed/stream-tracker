@@ -41,9 +41,6 @@ export default function GameProfileModal({
   const currentCycleData = currentCycle ? cycles[currentCycle.id] : { stream_count: 0, timestamps: [] };
   const details = gameData.details || { developer: 'Unknown', publisher: 'Unknown', releaseDate: gameData.release_year, genres: 'Unknown', tags: 'Unknown' };
 
-  // Determine which stream number to pass: if a log is selected, use its number (index+1), else null
-  const selectedStreamNumber = selectedLogIndex !== null ? selectedLogIndex + 1 : null;
-
   const handleNext = () => {
     let finalCycleId = isCreatingNew && newCycleName ? newCycleName.toLowerCase().replace(/\s+/g, '_') : selectedCycleId;
     if (!finalCycleId && cycleEntries.length > 0) finalCycleId = cycleEntries[0].id;
@@ -51,10 +48,13 @@ export default function GameProfileModal({
       onNotify('Please select or create a run first', 'error');
       return;
     }
+    const selectedStreamNumber = selectedLogIndex !== null ? selectedLogIndex + 1 : null;
     onStartWorkspace(gameId, finalCycleId, selectedStreamNumber);
   };
 
-  const handleBack = () => onClose();
+  const handleBack = () => {
+    onClose();
+  };
 
   const renderTimestamps = () => {
     if (!currentCycle) {
@@ -114,11 +114,17 @@ export default function GameProfileModal({
   };
 
   const handleEditRun = (cycle) => {
-    setEditingRun({ id: cycle.id, displayName: cycle.displayName, isMain: cycle.isMain || false, youtubePlaylist: cycle.youtubePlaylist || '' });
+    setEditingRun({
+      id: cycle.id,
+      displayName: cycle.displayName,
+      isMain: cycle.isMain || false,
+      youtubePlaylist: cycle.youtubePlaylist || '',
+      label: cycle.label || 'Ongoing'
+    });
   };
 
-  const handleSaveRunEdit = (newDisplayName, isMain, playlist) => {
-    onUpdateCycle(gameId, editingRun.id, newDisplayName, isMain, playlist);
+  const handleSaveRunEdit = (newDisplayName, isMain, playlist, newLabel) => {
+    onUpdateCycle(gameId, editingRun.id, newDisplayName, isMain, playlist, newLabel);
     onNotify('Run updated successfully', 'success');
     setEditingRun(null);
   };
@@ -139,6 +145,17 @@ export default function GameProfileModal({
     if (success) {
       setNewCycleName('');
       setIsCreatingNew(false);
+    }
+  };
+
+  const getLabelStyle = (label) => {
+    switch (label) {
+      case 'Completed':
+        return { bg: 'bg-yellow-600', icon: '✓', text: 'Completed' };
+      case 'Abandoned':
+        return { bg: 'bg-red-600', icon: '✗', text: 'Abandoned' };
+      default:
+        return { bg: 'bg-green-600', icon: '', text: 'Ongoing' };
     }
   };
 
@@ -224,6 +241,7 @@ export default function GameProfileModal({
               {cycleEntries.map(cycle => {
                 const streamCount = cycle.stream_count || 0;
                 const isSelected = selectedCycleId === cycle.id;
+                const labelInfo = getLabelStyle(cycle.label || 'Ongoing');
                 return (
                   <div
                     key={cycle.id}
@@ -231,9 +249,12 @@ export default function GameProfileModal({
                     className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${isSelected ? 'border-yellow-500 shadow-lg' : 'border-white/10 hover:border-white/30'}`}
                   >
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-1">
                         <span className="font-medium text-white">{cycle.displayName}</span>
-                        {cycle.isMain && <Star size={14} className="text-yellow-400" />}
+                        <span className={`${labelInfo.bg} text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap`}>
+                          {labelInfo.icon && <span>{labelInfo.icon}</span>}
+                          {labelInfo.text}
+                        </span>
                       </div>
                       <div className="flex gap-2">
                         <button 
@@ -298,6 +319,7 @@ export default function GameProfileModal({
           runName={editingRun.displayName}
           isMain={editingRun.isMain}
           youtubePlaylist={editingRun.youtubePlaylist}
+          currentLabel={editingRun.label}
           onSave={handleSaveRunEdit}
           onClose={() => setEditingRun(null)}
         />

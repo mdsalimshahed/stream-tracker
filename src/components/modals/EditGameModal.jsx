@@ -5,11 +5,10 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
   const [name, setName] = useState(game.game_name);
   const [year, setYear] = useState(game.release_year);
   const [rawgId, setRawgId] = useState('');
-  const [label, setLabel] = useState(game.label || 'Ongoing');
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    onSave(game.id, name.trim(), year.trim(), rawgId.trim(), label);
+    onSave(game.id, name.trim(), year.trim(), rawgId.trim());
     onClose();
   };
 
@@ -52,18 +51,6 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
               className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 text-white"
               placeholder="e.g., 2024"
             />
-          </div>
-          <div>
-            <label className="text-sm text-white/50 block mb-1">Game Label</label>
-            <select
-              value={label}
-              onChange={e => setLabel(e.target.value)}
-              className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 text-white"
-            >
-              <option value="Ongoing">Ongoing</option>
-              <option value="Completed">Completed ✓</option>
-              <option value="Abandoned">Abandoned ✗</option>
-            </select>
           </div>
           <div>
             <label className="text-sm text-white/50 block mb-1">RAWG ID (optional – to refresh metadata)</label>

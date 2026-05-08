@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, ChevronLeft, Upload, Globe, Plus, Save, Loader2, Trash2 } from 'lucide-react';
 import ThumbnailCanvas from './ThumbnailCanvas';
 import { isLocalPath, generateStreamTitle, generateTimestamp } from '../utils/helpers';
-import { RAWG_API_KEY, DEFAULT_THUMBNAIL_CONFIG } from '../utils/constants';
+import { RAWG_API_KEY } from '../utils/constants';
 import { RangeControl, ColorOverride } from './common/UIComponents';
 import { ConfirmBanner } from './Notification';
 
 export default function LivestreamSetupWorkspace({ 
-  gameId, cycleName, streamData, onBack, onSave, config, setConfig, onNotify, initialStreamCount, systemFonts, streamNumber = null 
+  gameId, cycleName, streamData, onBack, onSave, config, setConfig, onNotify, systemFonts, selectedStreamNumber = null 
 }) {
   const game = streamData[gameId];
   if (!game) return null;
@@ -15,9 +15,13 @@ export default function LivestreamSetupWorkspace({
   const cycle = game.cycles?.[cycleName];
   const cycleDisplayName = cycle?.displayName || (cycleName === 'main' ? 'First Playthrough' : cycleName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
 
-  // Use provided streamNumber (if editing an existing log) else auto-increment
+  // Correct increment logic:
+  // If a specific log was selected (selectedStreamNumber > 0), use that exact number.
+  // Otherwise, use next number (current stream_count + 1)
   const [nC] = useState(() => {
-    if (streamNumber !== null) return streamNumber;
+    if (selectedStreamNumber !== null && selectedStreamNumber > 0) {
+      return selectedStreamNumber;
+    }
     return (cycle?.stream_count || 0) + 1;
   });
   const year = game.release_year || new Date().getFullYear();
@@ -107,7 +111,6 @@ export default function LivestreamSetupWorkspace({
     setSelImg(urlInput.trim());
     setUrlInput('');
     saveImagesToStorage(newImages);
-    onNotify('Image added successfully', 'success');
   };
 
   const handleFindOnline = () => {
@@ -152,19 +155,19 @@ export default function LivestreamSetupWorkspace({
       nd[gameId].cycles[cycleName] = { stream_count: 0, timestamps: [], displayName: cycleDisplayName };
     }
 
-    // If we are editing an existing log (streamNumber provided), do NOT add a new timestamp
-    if (streamNumber === null && !sessionSaved.current) {
+    // Only add a new timestamp if no specific stream was selected (i.e., increment case)
+    if (selectedStreamNumber === null && !sessionSaved.current) {
       const ts = generateTimestamp();
       nd[gameId].cycles[cycleName].stream_count = nC;
       nd[gameId].cycles[cycleName].timestamps.push(ts);
       sessionSaved.current = true;
       setHasCycleChanges(false);
       onSave(nd);
-      onNotify('New session saved & title copied!', 'success');
-    } else if (streamNumber !== null) {
-      // Existing log – only save image gallery changes, no new timestamp
+      onNotify('Session saved & title copied!', 'success');
+    } else if (selectedStreamNumber !== null) {
+      // Editing an existing log: do not add timestamp, but save any image changes
       onSave(nd);
-      onNotify('Session settings saved (no new log added).', 'info');
+      onNotify('Session settings saved (no new log added)', 'info');
     } else {
       onSave(nd);
       onNotify('Session settings saved', 'success');

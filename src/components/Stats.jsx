@@ -284,16 +284,7 @@ const CategoryCard = ({ title, games, cssClass }) => {
 };
 
 export default function Stats({ streamData }) {
-  const styleInjected = useRef(false);
   const [latestBgIndex, setLatestBgIndex] = useState(0);
-
-  useEffect(() => {
-    if (styleInjected.current) return;
-    styleInjected.current = true;
-    const el = document.createElement('style');
-    el.textContent = STYLES;
-    document.head.appendChild(el);
-  }, []);
 
   const games = useMemo(() =>
     Object.entries(streamData).map(([id, data]) => {
@@ -351,6 +342,7 @@ export default function Stats({ streamData }) {
 
   return (
     <div className="stats-root" style={{ position: 'relative', height: '100%', width: '100%', overflow: 'hidden' }}>
+      <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <MosaicBackground allImages={allImages} />
 
       <div className="stats-scroll" style={{ position: 'relative', zIndex: 10, height: '100%', overflowY: 'auto', paddingTop: '16px' }}>
@@ -368,7 +360,7 @@ export default function Stats({ streamData }) {
               <div className="stat-number" style={{ fontSize: 'clamp(32px, 5vw, 56px)' }}>
                 {totalGamesCount}
               </div>
-              <div className="stat-label">Games in Library</div>
+              <div className="stat-label">Library</div>
             </div>
           </div>
 

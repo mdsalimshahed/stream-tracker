@@ -1,11 +1,26 @@
-import React, { useEffect } from 'react';
+// src/components/Notification.jsx
+import React, { useEffect, useRef } from 'react';
 import { Check, AlertCircle, X } from 'lucide-react';
 
 export const Notification = ({ message, type, onClose }) => {
+  const onCloseRef = useRef(onClose);
+
+  // Keep the ref updated with the latest onClose callback
   useEffect(() => {
-    const timer = setTimeout(onClose, 3000);
-    return () => clearTimeout(timer);
+    onCloseRef.current = onClose;
   }, [onClose]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (onCloseRef.current) {
+        onCloseRef.current();
+      }
+    }, 3000);
+    
+    // Only restart the timer if the message or type changes, 
+    // rather than on every render cycle.
+    return () => clearTimeout(timer);
+  }, [message, type]);
 
   const colors = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-emerald-600' : 'bg-blue-600';
 

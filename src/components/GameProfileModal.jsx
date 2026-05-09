@@ -15,8 +15,11 @@ export default function GameProfileModal({
   const [selectedLogIndex, setSelectedLogIndex] = useState(null);
   const [editingRun, setEditingRun] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(null);
+  
+  // Initialize synchronously to prevent the "No Image" crossfade flash
+  const initialImages = gameData?.thumbnail_urls?.filter(url => !url.startsWith('blob:') && url.startsWith('http')) || [];
   const [bgImageIndex, setBgImageIndex] = useState(0);
-  const [bgImages, setBgImages] = useState([]);
+  const [bgImages, setBgImages] = useState(initialImages);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';

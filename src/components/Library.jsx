@@ -26,7 +26,7 @@ const getLatestRun = (cycles) => {
   return latestRun;
 };
 
-export default function Library({ streamData, openGameProfile, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, globalImage, hoveredImage, hoverState, onHoverGame }) {
+export default function Library({ streamData, openGameProfile, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, globalImage, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
   const [sortBy, setSortBy] = useState('recent');
   const [searchFilter, setSearchFilter] = useState('');
   const [editingGame, setEditingGame] = useState(null);
@@ -103,109 +103,129 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-center relative z-10">
-        <div className="relative w-full sm:w-80 flex-shrink-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
-          <input 
-            type="text" 
-            placeholder="Filter games..." 
-            value={searchFilter} 
-            onChange={(e) => setSearchFilter(e.target.value)} 
-            className="w-full bg-black/60 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-yellow-500 shadow-inner text-white transition-colors" 
-          />
-        </div>
-        <div className="flex w-full sm:w-auto bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl p-1 gap-1 shadow-inner overflow-x-auto no-scrollbar shrink-0">
-          {[
-            { id: 'recent', label: 'Recent', icon: Clock },
-            { id: 'alpha', label: 'A-Z', icon: SortAsc },
-            { id: 'high', label: 'Most', icon: Maximize },
-            { id: 'low', label: 'Least', icon: SortDesc }
-          ].map(opt => (
-            <button key={opt.id} onClick={() => handleSortClick(opt.id)} className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium flex items-center justify-center gap-1.5 transition whitespace-nowrap ${sortBy === opt.id ? 'bg-white/20 text-white shadow' : 'text-white/60 hover:text-white'}`}>
-              <opt.icon size={14} className="hidden min-[360px]:block" /> {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto custom-scrollbar" style={containerStyle}>
-        <div style={gridStyle}>
-          {sorted.map(game => {
-            const cover = game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
-            const isHovered = hoverState.cardId === game.id;
-            const activeImg = (isHovered && hoveredImage) ? hoveredImage : cover;
-            const labelInfo = getLabelStyle(game.label);
-            
-            return (
-              <div
-                key={game.id}
-                onClick={() => openGameProfile(game.id)}
-                onMouseEnter={() => onHoverGame(game.id, game.id)}
-                onMouseLeave={() => onHoverGame(null, null)}
-                className="group relative cursor-pointer overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300"
-                style={{
-                  ...cardStyle,
-                  viewTransitionName: `game-card-${game.id.toString().replace(/[^a-zA-Z0-9]/g, '-')}`
-                }}
-              >
-                <div className="aspect-video overflow-hidden bg-black/40 relative shrink-0">
-                  <CrossfadeImage 
-                    src={activeImg} 
-                    alt={game.game_name} 
-                    className="absolute inset-0 w-full h-full" 
-                    imgClassName="object-cover" 
-                  />
-                  {/* Status tag overlaid on bottom-right of the image */}
-                  <span className={`${labelInfo.bg} absolute bottom-2 right-2 text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
-                    {labelInfo.icon && <span className="hidden min-[400px]:block">{labelInfo.icon}</span>}
-                    {labelInfo.text}
-                  </span>
-                  {/* Yellow Gradient Line at the bottom of the image */}
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30" />
-                </div>
-                <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
-                  <div className="flex flex-wrap justify-between items-start gap-2">
-                    <h3 className="font-bold tracking-tight flex-1 drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
-                  </div>
-                  <p className="text-white/80 mt-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libYear}px` }}>
-                    {game.details?.developer || 'Unknown Developer'}
-                  </p>
-                  <p className="text-white/60 mt-1 mb-auto" style={{ fontSize: `${Math.max(10, systemFonts.libYear - 2)}px` }}>{game.release_year}</p>
-                  <div className="flex justify-between items-center mt-3">
-                    <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full shadow z-20">{game.totalStreams} streams</span>
-                  </div>
-                </div>
-                <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition z-30">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleEditClick(game); }}
-                    className="p-1.5 rounded-full bg-blue-500/80 backdrop-blur text-white hover:bg-blue-600 shadow"
-                    title="Edit game details"
-                  >
-                    <Edit3 size={14} />
+      {Object.keys(streamData).length === 0 ? (
+        <div className="overflow-y-auto h-full custom-scrollbar flex flex-col" style={containerStyle}>
+          <div className="flex flex-col items-center pt-16 sm:pt-24 w-full">
+            <div className="bg-black/40 backdrop-blur-md rounded-xl p-8 sm:p-12 text-center text-white/60 shadow-lg max-w-2xl w-full flex flex-col items-center gap-5 border border-white/5">
+              <p className="text-lg text-white/80">There is no stream data to show here. Would you like to import default data?</p>
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <button onClick={() => onImportDefault('full')} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-bold transition-colors shadow-lg whitespace-nowrap">
+                  Import Stream Data + Settings
+                </button>
+                {!hasCustomSettings && (
+                  <button onClick={() => onImportDefault('settings')} className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white px-6 py-2.5 rounded-lg font-bold transition-colors shadow-lg border border-white/10 whitespace-nowrap">
+                    Import Settings Only
                   </button>
-                  <button
-                    onClick={(e) => { 
-                      e.stopPropagation();
-                      setConfirmDialog({
-                        title: 'Delete Game',
-                        message: `Delete "${game.game_name}"? It has ${game.totalStreams} livestream(s). This cannot be undone.`,
-                        onConfirm: () => {
-                          onDeleteGame(game.id, game.game_name);
-                          setConfirmDialog(null);
-                        }
-                      });
-                    }}
-                    className="p-1.5 rounded-full bg-red-500/80 backdrop-blur text-white hover:bg-red-600 shadow"
-                    title="Delete game"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
+                )}
               </div>
-            );
-          })}
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-center relative z-10">
+            <div className="relative w-full sm:w-80 flex-shrink-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+              <input 
+                type="text" 
+                placeholder="Filter games..." 
+                value={searchFilter} 
+                onChange={(e) => setSearchFilter(e.target.value)} 
+                className="w-full bg-black/60 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-yellow-500 shadow-inner text-white transition-colors" 
+              />
+            </div>
+            <div className="flex w-full sm:w-auto bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl p-1 gap-1 shadow-inner overflow-x-auto no-scrollbar shrink-0">
+              {[
+                { id: 'recent', label: 'Recent', icon: Clock },
+                { id: 'alpha', label: 'A-Z', icon: SortAsc },
+                { id: 'high', label: 'Most', icon: Maximize },
+                { id: 'low', label: 'Least', icon: SortDesc }
+              ].map(opt => (
+                <button key={opt.id} onClick={() => handleSortClick(opt.id)} className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium flex items-center justify-center gap-1.5 transition whitespace-nowrap ${sortBy === opt.id ? 'bg-white/20 text-white shadow' : 'text-white/60 hover:text-white'}`}>
+                  <opt.icon size={14} className="hidden min-[360px]:block" /> {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto custom-scrollbar" style={containerStyle}>
+            <div style={gridStyle}>
+              {sorted.map(game => {
+                const cover = game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
+                const isHovered = hoverState.cardId === game.id;
+                const activeImg = (isHovered && hoveredImage) ? hoveredImage : cover;
+                const labelInfo = getLabelStyle(game.label);
+                
+                return (
+                  <div
+                    key={game.id}
+                    onClick={() => openGameProfile(game.id)}
+                    onMouseEnter={() => onHoverGame(game.id, game.id)}
+                    onMouseLeave={() => onHoverGame(null, null)}
+                    className="group relative cursor-pointer overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300"
+                    style={{
+                      ...cardStyle,
+                      viewTransitionName: `game-card-${game.id.toString().replace(/[^a-zA-Z0-9]/g, '-')}`
+                    }}
+                  >
+                    <div className="aspect-video overflow-hidden bg-black/40 relative shrink-0">
+                      <CrossfadeImage 
+                        src={activeImg} 
+                        alt={game.game_name} 
+                        className="absolute inset-0 w-full h-full" 
+                        imgClassName="object-cover" 
+                      />
+                      <span className={`${labelInfo.bg} absolute bottom-2 right-2 text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
+                        {labelInfo.icon && <span className="hidden min-[400px]:block">{labelInfo.icon}</span>}
+                        {labelInfo.text}
+                      </span>
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30" />
+                    </div>
+                    <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
+                      <div className="flex flex-wrap justify-between items-start gap-2">
+                        <h3 className="font-bold tracking-tight flex-1 drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
+                      </div>
+                      <p className="text-white/80 mt-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libYear}px` }}>
+                        {game.details?.developer || 'Unknown Developer'}
+                      </p>
+                      <p className="text-white/60 mt-1 mb-auto" style={{ fontSize: `${Math.max(10, systemFonts.libYear - 2)}px` }}>{game.release_year}</p>
+                      <div className="flex justify-between items-center mt-3">
+                        <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full shadow z-20">{game.totalStreams} streams</span>
+                      </div>
+                    </div>
+                    <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition z-30">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleEditClick(game); }}
+                        className="p-1.5 rounded-full bg-blue-500/80 backdrop-blur text-white hover:bg-blue-600 shadow"
+                        title="Edit game details"
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => { 
+                          e.stopPropagation();
+                          setConfirmDialog({
+                            title: 'Delete Game',
+                            message: `Delete "${game.game_name}"? It has ${game.totalStreams} livestream(s). This cannot be undone.`,
+                            onConfirm: () => {
+                              onDeleteGame(game.id, game.game_name);
+                              setConfirmDialog(null);
+                            }
+                          });
+                        }}
+                        className="p-1.5 rounded-full bg-red-500/80 backdrop-blur text-white hover:bg-red-600 shadow"
+                        title="Delete game"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       {editingGame && (
         <EditGameModal

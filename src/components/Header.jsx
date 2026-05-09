@@ -16,9 +16,8 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
       try {
         const json = JSON.parse(event.target.result);
         onImport(json);
-        alert('Library imported successfully');
       } catch (err) {
-        alert('Invalid JSON file');
+        console.error('Invalid JSON file', err);
       }
     };
     reader.readAsText(file);

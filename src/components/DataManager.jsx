@@ -1,6 +1,6 @@
 // src/components/DataManager.jsx
-import React from 'react';
-import { Type, Layout, Eye, Download } from 'lucide-react';
+import React, { useState } from 'react';
+import { Type, Layout, Eye, AlertTriangle, Trash2, X } from 'lucide-react';
 import { RangeControl } from './common/UIComponents';
 
 const Toggle = ({ label, description, value, onChange }) => (
@@ -19,14 +19,17 @@ export default function DataManager({
   layoutPrefs, setLayoutPrefs, 
   modalBgIntensity, setModalBgIntensity, 
   modalPanelOpacity, setModalPanelOpacity,
-  persistSettings, setPersistSettings
+  persistSettings, setPersistSettings,
+  onWipeData
 }) {
+  const [showWipeModal, setShowWipeModal] = useState(false);
+
   const updateFont = (key, val) => setSystemFonts(prev => ({ ...prev, [key]: val }));
   const updateLayout = (key, val) => setLayoutPrefs(prev => ({ ...prev, [key]: val }));
 
   return (
     <div className="h-full overflow-y-auto custom-scrollbar px-6 py-8">
-      <div className="max-w-7xl mx-auto relative">
+      <div className="max-w-7xl mx-auto relative pb-20">
         
         {/* Persistence Toggle */}
         <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5 mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-lg">
@@ -89,8 +92,39 @@ export default function DataManager({
           <RangeControl label="Modal Background Dimming" description="0 = fully dimmed, 1 = full visibility" value={modalBgIntensity} min={0} max={1} step={0.01} onChange={setModalBgIntensity} />
           <RangeControl label="Background Cycle Speed" description="Image slideshow interval (ms)" value={layoutPrefs.cycleInterval ?? 4000} min={1000} max={20000} step={500} onChange={v => updateLayout('cycleInterval', v)} />
         </div>
-        
+
+        {/* Danger Zone */}
+        <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2 text-red-500 mt-16"><AlertTriangle size={24} /> Danger Zone</h2>
+        <div className="bg-red-900/20 border border-red-500/30 rounded-xl p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-lg">
+          <div>
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">Wipe Application Data</h3>
+            <p className="text-sm text-red-200/70 mt-1">Permanently delete your stream history, settings, or both. A backup will be downloaded automatically before deletion.</p>
+          </div>
+          <button 
+            onClick={() => setShowWipeModal(true)} 
+            className="px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-md whitespace-nowrap shrink-0 bg-red-600 hover:bg-red-500 text-white"
+          >
+            <Trash2 size={16} className="inline mr-2" /> Delete Data
+          </button>
+        </div>
+
       </div>
+
+      {showWipeModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowWipeModal(false)}>
+          <div className="rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl flex flex-col gap-3 bg-red-950/90 border border-red-500/30" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2"><AlertTriangle size={20} className="text-red-400"/> Delete Data</h3>
+              <button onClick={() => setShowWipeModal(false)} className="p-1 hover:bg-white/10 rounded-full text-white transition-colors"><X size={20} /></button>
+            </div>
+            <p className="text-sm text-white/70 mb-4">Choose what you want to delete. <strong className="text-white">A backup will be saved to your device first.</strong></p>
+            <button onClick={() => { onWipeData('full'); setShowWipeModal(false); }} className="w-full bg-red-600 hover:bg-red-500 py-3 rounded-lg font-medium text-white transition-colors shadow-lg">Delete Stream Data + Settings</button>
+            <button onClick={() => { onWipeData('stream'); setShowWipeModal(false); }} className="w-full bg-red-800/60 hover:bg-red-700/60 py-3 rounded-lg font-medium text-white transition-colors border border-red-500/30">Delete Stream Data Only</button>
+            <button onClick={() => { onWipeData('settings'); setShowWipeModal(false); }} className="w-full bg-red-800/60 hover:bg-red-700/60 py-3 rounded-lg font-medium text-white transition-colors border border-red-500/30">Delete Settings Only</button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

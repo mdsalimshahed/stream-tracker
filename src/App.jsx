@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Loader2, Plus } from 'lucide-react';
+import { Search, Loader2, Plus, X } from 'lucide-react';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import Library from './components/Library';
@@ -123,11 +123,18 @@ export default function App() {
   const [sQ, setSQ] = useState('');
   const [sR, setSR] = useState([]);
   const [isS, setIsS] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const [globalImage, setGlobalImage] = useState('');
   const [hoveredImage, setHoveredImage] = useState(null);
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const hoverTimeoutRef = useRef(null);
+
+  // Determine if settings have been changed or imported
+  const hasCustomSettings = 
+    JSON.stringify(systemFonts) !== JSON.stringify(DEFAULT_SYSTEM_FONTS) || 
+    JSON.stringify(layoutPrefs) !== JSON.stringify(DEFAULT_LAYOUT_PREFS) ||
+    JSON.stringify(thumbnailConfig) !== JSON.stringify(DEFAULT_THUMBNAIL_CONFIG);
 
   // Persistence Effects
   useEffect(() => { localStorage.setItem('streamManagerData', JSON.stringify(streamData)); }, [streamData]);
@@ -208,8 +215,7 @@ export default function App() {
     const isPaused = selectedGameId || wCf || currentView === 'stats';
     if (isPaused) return;
 
-    // Smoother crossfade needs a slightly longer interval to breathe
-    const intervalTime = isHovering ? 3000 : (layoutPrefs.cycleInterval || 4000);
+    const intervalTime = isHovering ? 2500 : (layoutPrefs.cycleInterval || 4000);
 
     const intervalId = setInterval(() => {
       if (pool.length <= 1) {
@@ -314,6 +320,25 @@ export default function App() {
   const openGameProfile = (gameId, runId = null) => {
     setSelectedGameId(gameId);
     setInitialRunForModal(runId);
+  };
+
+  const handleImportDefault = (type = 'full') => {
+    fetch('defaultData.json')
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error('Default file not found');
+      })
+      .then(data => {
+        if (type === 'settings') {
+          data.type = 'settings_only';
+        } else {
+          data.type = 'full_backup';
+        }
+        handleImport(data);
+      })
+      .catch(() => {
+        notify('Could not find defaultData.json in repository', 'error');
+      });
   };
 
   const handleAddGame = async (g) => {
@@ -469,41 +494,92 @@ export default function App() {
     setWCF({ gameId, cycleId, selectedStreamNumber });
   };
 
-  const handleExport = () => {
-    const exportData = {
-      version: "2.0.0",
-      streamData,
-      thumbnailConfig,
-      systemFonts,
-      layoutPrefs,
-      modalBgIntensity,
-      modalPanelOpacity,
-      mosaicXGap,
-      mosaicYGap,
-      exportDate: new Date().toISOString()
-    };
+  const handleExport = (type) => {
+    let exportData;
+    let fileNameStr;
+    const dateStr = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+
+    if (type === 'stream') {
+      exportData = streamData;
+      fileNameStr = `streamtracker_data_${dateStr}.json`;
+    } else if (type === 'settings') {
+      exportData = {
+        version: "2.0.0",
+        type: "settings_only",
+        thumbnailConfig,
+        systemFonts,
+        layoutPrefs,
+        modalBgIntensity,
+        modalPanelOpacity,
+        mosaicXGap,
+        mosaicYGap,
+        exportDate: new Date().toISOString()
+      };
+      fileNameStr = `streamtracker_settings_${dateStr}.json`;
+    } else {
+      exportData = {
+        version: "2.0.0",
+        type: "full_backup",
+        streamData,
+        thumbnailConfig,
+        systemFonts,
+        layoutPrefs,
+        modalBgIntensity,
+        modalPanelOpacity,
+        mosaicXGap,
+        mosaicYGap,
+        exportDate: new Date().toISOString()
+      };
+      fileNameStr = `streamtracker_full_backup_${dateStr}.json`;
+    }
     
     const dataStr = JSON.stringify(exportData, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `streamtracker_full_backup_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+    link.download = fileNameStr;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    notify('Full backup (Library + Styles) exported', 'success');
+    
+    setShowExportModal(false);
+  };
+
+  const handleWipeData = (type) => {
+    handleExport(type);
+    
+    setTimeout(() => {
+      if (type === 'stream' || type === 'full') {
+        setStreamData({});
+      }
+      if (type === 'settings' || type === 'full') {
+        setThumbnailConfig(DEFAULT_THUMBNAIL_CONFIG);
+        setSystemFonts(DEFAULT_SYSTEM_FONTS);
+        setLayoutPrefs(DEFAULT_LAYOUT_PREFS);
+        setModalBgIntensity(DEFAULT_MODAL_BG_INTENSITY);
+        setModalPanelOpacity(DEFAULT_MODAL_PANEL_OPACITY);
+        setMosaicXGap(0);
+        setMosaicYGap(0);
+      }
+      notify(`Deleted and backed up ${type === 'full' ? 'all' : type} data.`, 'success');
+    }, 500); 
   };
 
   const handleImport = (importedData) => {
     try {
-      const isNewFormat = importedData.streamData !== undefined;
-      const streamContent = isNewFormat ? importedData.streamData : importedData;
+      const isSettingsOnly = importedData.type === 'settings_only';
+      // Force isFullBackup to false if we explicitly requested settings_only
+      const isFullBackup = !isSettingsOnly && (importedData.type === 'full_backup' || importedData.streamData !== undefined);
+      const isClassic = !isSettingsOnly && !isFullBackup;
 
-      const { data, changed } = migrateLabels(streamContent);
-      setStreamData(data);
+      if (isFullBackup || isClassic) {
+        const streamContent = isFullBackup ? importedData.streamData : importedData;
+        const { data } = migrateLabels(streamContent);
+        setStreamData(data);
+      }
 
-      if (isNewFormat) {
+      if (isFullBackup || isSettingsOnly) {
         if (importedData.thumbnailConfig) setThumbnailConfig(importedData.thumbnailConfig);
         if (importedData.systemFonts) setSystemFonts(importedData.systemFonts);
         if (importedData.layoutPrefs) setLayoutPrefs(importedData.layoutPrefs);
@@ -511,19 +587,15 @@ export default function App() {
         if (importedData.modalPanelOpacity !== undefined) setModalPanelOpacity(importedData.modalPanelOpacity);
         if (importedData.mosaicXGap !== undefined) setMosaicXGap(importedData.mosaicXGap);
         if (importedData.mosaicYGap !== undefined) setMosaicYGap(importedData.mosaicYGap);
-        
-        notify('Library and Style settings restored completely', 'success');
-      } else {
-        if (changed) notify('Old labels migrated to first run.', 'info');
-        else notify('Library restored (Classic format)', 'success');
       }
+
     } catch (e) {
       notify('Failed to parse import file', 'error');
     }
   };
 
   return (
-    <div className="min-h-screen text-white font-sans antialiased relative bg-black overflow-hidden flex flex-col">
+    <div className="min-h-screen text-white antialiased relative bg-black overflow-hidden flex flex-col font-sans">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -539,7 +611,7 @@ export default function App() {
             src={globalImage || 'https://placehold.co/1920x1080/1a1a1a/333333?text=Loading'} 
             className="absolute inset-0 w-full h-full bg-black"
             imgClassName="object-cover" 
-            duration={1500} /* Super smooth background crossfade */
+            duration={1500}
           />
           <div 
             className="absolute inset-0 bg-black transition-opacity duration-1000" 
@@ -549,7 +621,7 @@ export default function App() {
       )}
 
       <div className="relative z-10 flex flex-col h-screen">
-        <Header currentView={currentView} onViewChange={setCurrentView} onImport={handleImport} onExport={handleExport} />
+        <Header currentView={currentView} onViewChange={setCurrentView} onImport={handleImport} onExport={() => setShowExportModal(true)} />
 
         <main className="flex-1 overflow-hidden flex flex-col relative">
           {currentView === 'data' && (
@@ -565,6 +637,7 @@ export default function App() {
                 setModalPanelOpacity={setModalPanelOpacity}
                 persistSettings={persistSettings}
                 setPersistSettings={setPersistSettings}
+                onWipeData={handleWipeData}
               />
             </div>
           )}
@@ -578,6 +651,8 @@ export default function App() {
               hoveredImage={hoveredImage}
               hoverState={hoverState}
               onHoverGame={handleHoverGame}
+              onImportDefault={handleImportDefault}
+              hasCustomSettings={hasCustomSettings}
             />
           )}
           {currentView === 'library' && (
@@ -593,6 +668,8 @@ export default function App() {
               hoveredImage={hoveredImage}
               hoverState={hoverState}
               onHoverGame={handleHoverGame}
+              onImportDefault={handleImportDefault}
+              hasCustomSettings={hasCustomSettings}
             />
           )}
           {currentView === 'stats' && (
@@ -688,6 +765,21 @@ export default function App() {
           })()}
         </main>
       </div>
+
+      {showExportModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(4px)' }} onClick={() => setShowExportModal(false)}>
+          <div className="rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl flex flex-col gap-3" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255, 255, 255, 0.1)' }} onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-xl font-bold text-white">Export Options</h3>
+              <button onClick={() => setShowExportModal(false)} className="p-1 hover:bg-white/10 rounded-full text-white transition-colors"><X size={20} /></button>
+            </div>
+            <p className="text-sm text-white/70 mb-2">Choose what you want to back up or share:</p>
+            <button onClick={() => handleExport('full')} className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-medium text-white transition-colors shadow-lg">Stream Data + Settings (Full)</button>
+            <button onClick={() => handleExport('stream')} className="w-full bg-white/10 hover:bg-white/20 py-3 rounded-lg font-medium text-white transition-colors border border-white/5">Stream Data Only (Classic)</button>
+            <button onClick={() => handleExport('settings')} className="w-full bg-white/10 hover:bg-white/20 py-3 rounded-lg font-medium text-white transition-colors border border-white/5">Settings Only</button>
+          </div>
+        </div>
+      )}
 
       {toast && <Notification message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 

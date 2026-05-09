@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Search, Clock, SortAsc, SortDesc, Maximize, Trash2, Edit3 } from 'lucide-react';
 import { isLocalPath, parseCustomTimestamp } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
@@ -52,6 +53,24 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
     return 0;
   });
 
+  // Modern browser native smooth reordering
+  const handleSortClick = (newSort) => {
+    if (sortBy === newSort) return;
+    
+    // Fallback for unsupported browsers
+    if (!document.startViewTransition) {
+      setSortBy(newSort);
+      return;
+    }
+
+    // Triggers the automatic layout morph/slide animation
+    document.startViewTransition(() => {
+      flushSync(() => {
+        setSortBy(newSort);
+      });
+    });
+  };
+
   const handleEditClick = (game) => setEditingGame(game);
   const handleSaveEdit = (id, newName, newYear, rawgId) => onEditGame(id, newName, newYear, rawgId);
 
@@ -103,7 +122,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
             { id: 'high', label: 'Most', icon: Maximize },
             { id: 'low', label: 'Least', icon: SortDesc }
           ].map(opt => (
-            <button key={opt.id} onClick={() => setSortBy(opt.id)} className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium flex items-center justify-center gap-1.5 transition whitespace-nowrap ${sortBy === opt.id ? 'bg-white/20 text-white shadow' : 'text-white/60 hover:text-white'}`}>
+            <button key={opt.id} onClick={() => handleSortClick(opt.id)} className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium flex items-center justify-center gap-1.5 transition whitespace-nowrap ${sortBy === opt.id ? 'bg-white/20 text-white shadow' : 'text-white/60 hover:text-white'}`}>
               <opt.icon size={14} className="hidden min-[360px]:block" /> {opt.label}
             </button>
           ))}
@@ -125,7 +144,11 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                 onMouseEnter={() => onHoverGame(game.id, game.id)}
                 onMouseLeave={() => onHoverGame(null, null)}
                 className="group relative cursor-pointer overflow-hidden shadow-xl flex flex-col"
-                style={cardStyle}
+                style={{
+                  ...cardStyle,
+                  // The unique name tells the browser how to track this element's start/end positions during transition
+                  viewTransitionName: `game-card-${game.id.toString().replace(/[^a-zA-Z0-9]/g, '-')}`
+                }}
               >
                 <div className="aspect-video overflow-hidden bg-black/40 relative shrink-0">
                   <CrossfadeImage 

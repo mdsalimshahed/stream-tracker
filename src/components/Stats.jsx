@@ -96,21 +96,23 @@ const STYLES = `
   }
 
   .divider { height: 1px; background: linear-gradient(to right, var(--c-accent), transparent); margin: 0 12px 18px 12px; opacity: 0.5; }
-  @media (min-width: 768px) { .divider { margin: 0 24px 18px 24px; } }
+  @media (min-aspect-ratio: 1/1) and (min-width: 768px) { .divider { margin: 0 24px 18px 24px; } }
   
   .stats-top-row {
     display: flex; flex-direction: column; gap: 1px; margin: 0 12px;
     background: var(--c-border); border: 1px solid var(--c-border); border-radius: 2px; overflow: hidden;
   }
-  @media (min-width: 768px) { .stats-top-row { flex-direction: row; margin: 0 24px; } }
+  @media (min-aspect-ratio: 1/1) and (min-width: 768px) { .stats-top-row { flex-direction: row; margin: 0 24px; } }
 
-  .stats-left-col { flex: 1; display: flex; flex-direction: row; flex-wrap: wrap; background: var(--c-border); gap: 1px; }
+  /* Stack items vertically on portrait/mobile, horizontally only if landscape and wide enough */
+  .stats-left-col { flex: 1; display: flex; flex-direction: column; background: var(--c-border); gap: 1px; }
+  @media (min-aspect-ratio: 1/1) and (min-width: 768px) { .stats-left-col { flex-direction: row; } }
   
-  /* Given a solid min-height on mobile to anchor the image and text properly */
-  .stats-right-col { flex: 1; background: rgba(13,17,23,0.35); position: relative; overflow: hidden; min-height: 250px; }
+  .stats-right-col { flex: 1; background: rgba(13,17,23,0.35); position: relative; overflow: hidden; min-height: 350px; }
 
+  /* Stat cards expand fully and center their content vertically/horizontally */
   .stat-card {
-    flex: 1 1 40%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 18px 16px; position: relative; overflow: hidden; transition: background 0.25s;
+    flex: 1; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 32px 24px; position: relative; overflow: hidden; transition: background 0.25s; display: flex; flex-direction: column; justify-content: center; min-height: 180px;
   }
   .stat-card:hover { background: rgba(20,26,36,0.8); }
   .stat-card::before {
@@ -121,8 +123,8 @@ const STYLES = `
   
   .stat-number { font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--c-text); transition: color 0.2s; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
   .stat-card:hover .stat-number { color: var(--c-accent); }
-  .stat-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 6px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
-  .stat-sub { font-size: 11px; color: var(--c-accent2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  .stat-label { font-size: clamp(12px, 3vw, 18px); letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  .stat-sub { font-size: clamp(12px, 2vw, 16px); color: var(--c-accent2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
 
   .latest-bg { position: absolute; inset: 0; z-index: 0; }
   
@@ -134,25 +136,47 @@ const STYLES = `
   }
 
   .cat-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 18px 12px; }
-  @media (min-width: 640px) { .cat-row { grid-template-columns: repeat(3, 1fr); margin: 18px 24px; } }
+  @media (min-aspect-ratio: 1/1) and (min-width: 768px) { .cat-row { grid-template-columns: repeat(3, 1fr); margin: 18px 24px; } }
   
   .cat-card { position: relative; overflow: hidden; border: 1px solid var(--c-border); border-radius: 2px; aspect-ratio: 16/9; cursor: default; transition: transform 0.3s ease, box-shadow 0.3s ease; }
   .cat-card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.8); }
   .cat-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 60%); }
   .cat-content { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px 14px; }
-  .cat-count { font-weight: 600; font-size: 44px; line-height: 1; letter-spacing: -0.02em; color: #fff; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
-  .cat-name { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  .cat-count { font-weight: 600; font-size: clamp(48px, 12vw, 96px); line-height: 1; letter-spacing: -0.02em; color: #fff; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
+  .cat-name { font-size: clamp(12px, 3vw, 20px); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
   
   .cat-ongoing .cat-name   { color: var(--c-green); }
   .cat-completed .cat-name { color: var(--c-orange); }
   .cat-abandoned .cat-name { color: var(--c-red); }
   
-  .game-name-overlay { position: absolute; top: 12px; left: 12px; z-index: 3; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; color: white; pointer-events: none; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); }
+  .game-name-overlay { position: absolute; top: clamp(12px, 2vw, 24px); left: clamp(12px, 2vw, 24px); z-index: 3; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); padding: clamp(4px, 1vw, 12px) clamp(12px, 3vw, 24px); border-radius: 30px; font-size: clamp(12px, 3vw, 28px); font-weight: 500; color: white; pointer-events: none; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up  { animation: fadeUp 0.6s ease both; }
   .delay-1  { animation-delay: 0.1s; }
   .delay-2  { animation-delay: 0.2s; }
+
+  /* Font scale classes for Mobile/Portrait */
+  .top-number { font-size: clamp(48px, 12vw, 96px); }
+  .latest-title { font-size: clamp(28px, 6vw, 48px); font-weight: 600; margin-bottom: 4px; }
+  .latest-sub-1 { font-size: clamp(14px, 3vw, 20px); color: var(--c-text); margin-top: 4px; }
+  .latest-sub-time { font-size: clamp(16px, 3.5vw, 24px); font-weight: bold; }
+  .latest-sub-2 { font-size: clamp(12px, 2.5vw, 18px); color: var(--c-muted); margin-top: 4px; }
+  .latest-sub-3 { font-size: clamp(14px, 3vw, 20px); color: var(--c-accent2); margin-top: 4px; }
+
+  /* Font scale overrides for Desktop/Landscape */
+  @media (min-aspect-ratio: 1/1) and (min-width: 768px) {
+    .top-number { font-size: clamp(32px, 4vw, 56px); }
+    .latest-title { font-size: clamp(20px, 2.5vw, 32px); }
+    .latest-sub-1 { font-size: clamp(12px, 1.2vw, 14px); }
+    .latest-sub-time { font-size: clamp(14px, 1.5vw, 16px); }
+    .latest-sub-2 { font-size: clamp(10px, 1vw, 12px); }
+    .latest-sub-3 { font-size: clamp(11px, 1.2vw, 14px); }
+    .stat-label { font-size: clamp(10px, 1vw, 12px); }
+    .cat-count { font-size: clamp(32px, 4vw, 56px); }
+    .cat-name { font-size: clamp(10px, 1.2vw, 14px); }
+    .game-name-overlay { font-size: clamp(10px, 1vw, 12px); padding: 4px 12px; top: 12px; left: 12px; }
+  }
 `;
 
 const ROW_COUNT = 6;
@@ -274,7 +298,7 @@ const CategoryCard = ({ title, games, cssClass }) => {
         imgClassName="group-hover:scale-105" 
       />
       <div className="cat-overlay" />
-      {gameName && <div className="game-name-overlay">{gameName}</div>}
+      {gameName && <div className="game-name-overlay" style={{ transition: 'none', animation: 'none' }}>{gameName}</div>}
       <div className="cat-content">
         <div className="cat-count">{eligible.length}</div>
         <div className="cat-name">{title}</div>
@@ -351,13 +375,13 @@ export default function Stats({ streamData }) {
         <div className="stats-top-row fade-up delay-1 shadow-2xl">
           <div className="stats-left-col">
             <div className="stat-card">
-              <div className="stat-number" style={{ fontSize: 'clamp(32px, 5vw, 56px)' }}>
+              <div className="stat-number top-number">
                 {totalStreamsCount.toLocaleString()}
               </div>
               <div className="stat-label">Streams</div>
             </div>
             <div className="stat-card">
-              <div className="stat-number" style={{ fontSize: 'clamp(32px, 5vw, 56px)' }}>
+              <div className="stat-number top-number">
                 {totalGamesCount}
               </div>
               <div className="stat-label">Games in Library</div>
@@ -369,16 +393,16 @@ export default function Stats({ streamData }) {
               <CrossfadeImage src={latestBgImage} alt="latest game" className="w-full h-full" imgClassName="object-cover" />
             </div>
             <div className="latest-content">
-              <div className="stat-number drop-shadow-xl" style={{ fontSize: 'clamp(20px, 2.5vw, 32px)', fontWeight: 600, marginBottom: '4px' }}>
+              <div className="stat-number drop-shadow-xl latest-title">
                 {mostRecentGame?.game_name || '—'}
               </div>
-              <div className="stat-sub" style={{ color: 'var(--c-text)', fontSize: '13px', marginTop: '4px' }}>
-                Last streamed: <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{timeSinceLastStream}</span>
+              <div className="stat-sub latest-sub-1">
+                Last streamed: <span className="latest-sub-time">{timeSinceLastStream}</span>
               </div>
-              <div className="stat-sub" style={{ color: 'var(--c-muted)', fontSize: '10px', marginTop: '4px' }}>
+              <div className="stat-sub latest-sub-2">
                 {mostRecentGame?.lastStreamTimestampRaw || 'Unknown'}
               </div>
-              <div className="stat-sub" style={{ color: 'var(--c-accent2)', fontSize: '11px', marginTop: '4px' }}>
+              <div className="stat-sub latest-sub-3">
                 {mostRecentGame?.latestRunName || ''}
               </div>
             </div>

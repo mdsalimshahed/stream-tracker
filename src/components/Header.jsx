@@ -26,8 +26,8 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-transparent pointer-events-none border-b border-white/5 shrink-0">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+    <header className="sticky top-0 z-40 bg-transparent pointer-events-none border-b border-white/5 shrink-0 w-full max-w-full">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-3 w-full">
         
         {/* Left Side Glass Pod (Mobile Title + Actions) */}
         <div className="pointer-events-auto w-full md:w-auto bg-black/60 backdrop-blur-xl rounded-2xl shadow-lg border border-white/10 px-4 py-2 flex justify-between items-center shrink-0">
@@ -52,10 +52,10 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
         </div>
 
         {/* Right Side Glass Pod (Wrapping Nav) */}
-        <div className="pointer-events-auto w-full md:w-auto bg-black/60 backdrop-blur-xl rounded-2xl shadow-lg border border-white/10 px-2 sm:px-4 py-2 flex flex-wrap items-center justify-center gap-2 md:gap-3">
+        <div className="pointer-events-auto w-full md:w-auto max-w-full bg-black/60 backdrop-blur-xl rounded-2xl shadow-lg border border-white/10 p-2 flex flex-col sm:flex-row items-center justify-center gap-2 md:gap-3">
           
           {/* Desktop Import/Export */}
-          <div className="hidden md:flex items-center gap-2 pr-3 border-r border-white/10 shrink-0">
+          <div className="hidden md:flex items-center justify-center gap-2 px-2 sm:border-r border-white/10 shrink-0">
             <button
               onClick={handleImportClick}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition text-white/80 hover:text-white whitespace-nowrap"
@@ -71,7 +71,7 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
           </div>
 
           {/* Wrapping Nav for all screens */}
-          <nav className="flex flex-wrap justify-center gap-1 sm:gap-2 shrink-0">
+          <nav className="flex flex-wrap justify-center items-center w-full gap-1.5 sm:gap-2">
             {[
               { id: 'dashboard', label: 'History', icon: Clock },
               { id: 'library', label: 'Library', icon: BookOpen },

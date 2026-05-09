@@ -79,7 +79,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
 
   const gridStyle = {
     display: 'grid',
-    gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, 260px), 1fr))`,
+    gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${layoutPrefs.cardMaxWidth || 250}px), 1fr))`,
     gap: `${layoutPrefs.cardGap}px`
   };
 
@@ -89,7 +89,6 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
     backdropFilter: 'blur(8px)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     transition: 'all 0.2s',
-    maxWidth: `${layoutPrefs.cardMaxWidth || 320}px`,
     width: '100%',
     margin: '0 auto'
   };
@@ -156,18 +155,22 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                     className="absolute inset-0 w-full h-full" 
                     imgClassName="object-cover" 
                   />
+                  {/* Status tag overlaid on bottom-right of the image */}
+                  <span className={`${labelInfo.bg} absolute bottom-2 right-2 text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
+                    {labelInfo.icon && <span className="hidden min-[400px]:block">{labelInfo.icon}</span>}
+                    {labelInfo.text}
+                  </span>
                   {/* Yellow Gradient Line at the bottom of the image */}
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30" />
                 </div>
                 <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
                   <div className="flex flex-wrap justify-between items-start gap-2">
-                    <h3 className="font-bold tracking-tight flex-1 min-w-[50%] drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
-                    <span className={`${labelInfo.bg} shrink-0 text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
-                      {labelInfo.icon && <span className="hidden min-[400px]:block">{labelInfo.icon}</span>}
-                      {labelInfo.text}
-                    </span>
+                    <h3 className="font-bold tracking-tight flex-1 drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
                   </div>
-                  <p className="text-white/60 mt-1 drop-shadow-md mb-auto" style={{ fontSize: `${systemFonts.libYear}px` }}>{game.release_year}</p>
+                  <p className="text-white/80 mt-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libYear}px` }}>
+                    {game.details?.developer || 'Unknown Developer'}
+                  </p>
+                  <p className="text-white/60 mt-1 mb-auto" style={{ fontSize: `${Math.max(10, systemFonts.libYear - 2)}px` }}>{game.release_year}</p>
                   <div className="flex justify-between items-center mt-3">
                     <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full shadow z-20">{game.totalStreams} streams</span>
                   </div>

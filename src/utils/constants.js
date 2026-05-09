@@ -5,11 +5,16 @@ export const DEFAULT_SYSTEM_FONTS = {
   libTitle: 16,
   libYear: 14,
   libBadge: 18,
-  dashboardTime: 10, // Added for history timestamp
+  dashboardTime: 10,
   modalHeader: 31,
   logTitle: 16,
   logSub: 13,
-  searchBar: 19
+  searchBar: 19,
+  statsMainCount: 4.5,
+  statsMainLabel: 1.1,
+  statsLabel: 1.1,
+  statsTitle: 2.2,
+  statsSub: 1.1
 };
 
 export const DEFAULT_LAYOUT_PREFS = {
@@ -25,12 +30,8 @@ export const DEFAULT_LAYOUT_PREFS = {
   panelFillOpacity: 0.2,
   bgDimming: 0,
   cycleInterval: 3000,
-  statsLeftWidth: 5,
-  statsRightWidth: 5,
-  statsCardPadding: 25,
-  cardOpacity: 0.2,
-  bgCycleInterval: 2,
-  statsCardRadius: 10
+  statsSplitRatio: 0.35,
+  statsRowSplitRatio: 0.60
 };
 
 export const DEFAULT_THUMBNAIL_CONFIG = {

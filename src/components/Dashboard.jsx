@@ -1,12 +1,12 @@
 // src/components/Dashboard.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { parseCustomTimestamp } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
 
 export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs, globalImage, hoveredImage, hoverState, onHoverGame }) {
-  const [recentStreams, setRecentStreams] = useState([]);
-
-  useEffect(() => {
+  // Use useMemo instead of useEffect so the recent streams are calculated 
+  // synchronously before the first render. This prevents the "empty state" flash!
+  const recentStreams = useMemo(() => {
     const recent = [];
     Object.entries(streamData).forEach(([appId, game]) => {
       Object.entries(game.cycles || {}).forEach(([cycleName, cycleData]) => {
@@ -28,7 +28,7 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
       });
     });
     recent.sort((a, b) => b.lastTimeDate - a.lastTimeDate);
-    setRecentStreams(recent.slice(0, 15));
+    return recent.slice(0, 15);
   }, [streamData]);
 
   const containerStyle = {
@@ -40,7 +40,7 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
 
   const gridStyle = {
     display: 'grid',
-    gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, 260px), 1fr))`,
+    gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${layoutPrefs.cardMaxWidth || 250}px), 1fr))`,
     gap: `${layoutPrefs.cardGap}px`
   };
 
@@ -50,7 +50,6 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
     backdropFilter: 'blur(8px)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     transition: 'all 0.2s',
-    maxWidth: `${layoutPrefs.cardMaxWidth || 320}px`,
     width: '100%',
     margin: '0 auto'
   };
@@ -85,11 +84,11 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
                   className="absolute inset-0 w-full h-full" 
                   imgClassName="object-cover" 
                 />
-                <div className="absolute bottom-2 right-2 bg-blue-600/80 backdrop-blur-sm px-2 py-1 rounded-full text-[10px] sm:text-xs font-semibold text-white pointer-events-none shadow z-20">
+                <div className="absolute bottom-2 right-2 bg-blue-600/80 backdrop-blur-sm px-2 py-1 rounded-none text-[10px] sm:text-xs font-semibold text-white pointer-events-none shadow z-20 border border-white/10">
                   Resume
                 </div>
                 {/* Yellow Gradient Line at the bottom of the image */}
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30" />
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
               </div>
               <div className="p-3 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
                 <h3 className="font-bold leading-tight drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>

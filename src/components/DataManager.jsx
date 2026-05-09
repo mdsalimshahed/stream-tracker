@@ -1,3 +1,4 @@
+// src/components/DataManager.jsx
 import React from 'react';
 import { Type, Layout, Eye, Download } from 'lucide-react';
 import { RangeControl } from './common/UIComponents';
@@ -56,12 +57,23 @@ export default function DataManager({
           <RangeControl label="Search Input Text" description="Font size of search bar" value={systemFonts.searchBar} min={12} max={48} onChange={v => updateFont('searchBar', v)} />
         </div>
 
+        <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2"><Type size={24} /> Typography: Stats Page</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+          <RangeControl label="Main Counts" description="Streams & Games count size" value={systemFonts.statsMainCount ?? 4.5} min={1} max={15} step={0.1} onChange={v => updateFont('statsMainCount', v)} />
+          <RangeControl label="Main Labels" description="'Streams' & 'Games in Library' text" value={systemFonts.statsMainLabel ?? 1.1} min={0.5} max={5} step={0.1} onChange={v => updateFont('statsMainLabel', v)} />
+          <RangeControl label="Latest Game Title" description="Size of the latest game name" value={systemFonts.statsTitle ?? 2.2} min={0.5} max={10} step={0.1} onChange={v => updateFont('statsTitle', v)} />
+          <RangeControl label="Subtexts & Details" description="Size of times, dates, and run names" value={systemFonts.statsSub ?? 1.1} min={0.5} max={5} step={0.1} onChange={v => updateFont('statsSub', v)} />
+          <RangeControl label="Category Labels" description="Size of category game names" value={systemFonts.statsLabel ?? 1.1} min={0.5} max={5} step={0.1} onChange={v => updateFont('statsLabel', v)} />
+        </div>
+
         <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2"><Layout size={24} /> Layout & Spacing</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
           <RangeControl label="Modal Split (Left Column %)" description="Balance between game details and runs/logs" value={(layoutPrefs.modalSplitRatio || 0.6) * 100} min={20} max={80} onChange={v => updateLayout('modalSplitRatio', v / 100)} />
+          <RangeControl label="Stats Width Split (Left %)" description="Top row left/right ratio" value={(layoutPrefs.statsSplitRatio ?? 0.35) * 100} min={10} max={90} onChange={v => updateLayout('statsSplitRatio', v / 100)} />
+          <RangeControl label="Stats Height Split (Top %)" description="Top row vs Category rows ratio" value={(layoutPrefs.statsRowSplitRatio ?? 0.6) * 100} min={20} max={80} onChange={v => updateLayout('statsRowSplitRatio', v / 100)} />
           <RangeControl label="Card Padding" description="Space inside card (text area)" value={layoutPrefs.cardPadding} min={0} max={64} onChange={v => updateLayout('cardPadding', v)} />
           <RangeControl label="Card Gap" description="Space between cards" value={layoutPrefs.cardGap} min={0} max={64} onChange={v => updateLayout('cardGap', v)} />
-          <RangeControl label="Card Max Width" description="Maximum width of each card" value={layoutPrefs.cardMaxWidth} min={150} max={600} onChange={v => updateLayout('cardMaxWidth', v)} />
+          <RangeControl label="Card Base Width" description="Minimum width of cards before wrapping" value={layoutPrefs.cardMaxWidth || 250} min={150} max={600} onChange={v => updateLayout('cardMaxWidth', v)} />
           <RangeControl label="Page Horizontal Padding" description="Left/right margin of content" value={layoutPrefs.containerPaddingX} min={0} max={128} onChange={v => updateLayout('containerPaddingX', v)} />
           <RangeControl label="Page Vertical Padding" description="Top/bottom margin of content" value={layoutPrefs.containerPaddingY} min={0} max={128} onChange={v => updateLayout('containerPaddingY', v)} />
           

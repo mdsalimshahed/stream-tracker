@@ -522,7 +522,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen text-white antialiased relative bg-black overflow-hidden flex flex-col">
+    <div className="min-h-screen text-white font-sans antialiased relative bg-black overflow-hidden flex flex-col">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -596,8 +596,8 @@ export default function App() {
           {currentView === 'stats' && (
             <Stats 
               streamData={streamData} 
-              mosaicXGap={mosaicXGap} 
-              mosaicYGap={mosaicYGap} 
+              systemFonts={systemFonts}
+              layoutPrefs={layoutPrefs}
             />
           )}
           {currentView === 'search' && (() => {
@@ -610,7 +610,7 @@ export default function App() {
 
             const gridStyle = {
               display: 'grid',
-              gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, 260px), 1fr))`,
+              gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${layoutPrefs.cardMaxWidth || 250}px), 1fr))`,
               gap: `${layoutPrefs.cardGap}px`
             };
 
@@ -620,7 +620,6 @@ export default function App() {
               backdropFilter: 'blur(8px)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               transition: 'all 0.2s',
-              maxWidth: `${layoutPrefs.cardMaxWidth || 320}px`,
               width: '100%',
               margin: '0 auto'
             };
@@ -628,17 +627,18 @@ export default function App() {
             return (
               <div className="flex flex-col h-full overflow-hidden">
                 <div className="sticky top-0 z-10 border-b border-white/10 px-6 py-4">
-                  <div className="max-w-4xl mx-auto relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={22} />
+                  <div className="max-w-4xl mx-auto relative group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 z-10" size={22} />
                     <input
                       type="text"
                       style={{ fontSize: `${systemFonts.searchBar}px` }}
-                      className="w-full bg-black/60 border border-white/10 rounded-2xl py-4 pl-12 pr-24 text-lg focus:outline-none focus:border-yellow-500 transition-colors shadow-inner text-white"
+                      className="w-full bg-black/60 border border-white/10 rounded-none py-4 pl-12 pr-24 text-lg focus:outline-none transition-colors shadow-inner text-white peer relative z-0"
                       placeholder="Search RAWG database..."
                       value={sQ}
                       onChange={(e) => setSQ(e.target.value)}
                     />
-                    {isS && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 animate-spin text-blue-400" size={22} />}
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 peer-focus:opacity-100 transition-opacity duration-300 z-20 pointer-events-none" />
+                    {isS && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 animate-spin text-blue-400 z-10" size={22} />}
                   </div>
                 </div>
                 
@@ -654,7 +654,7 @@ export default function App() {
                         <div key={g.id} className="group relative overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300" style={cardStyle}>
                           <div className="aspect-video bg-black/40 overflow-hidden relative shrink-0">
                             <img src={g.background_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover'} alt={g.name} className="absolute inset-0 w-full h-full object-cover" />
-                            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30" />
+                            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
                           </div>
                           
                           <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
@@ -667,11 +667,11 @@ export default function App() {
                             </p>
                             
                             {isInLibrary ? (
-                              <div className="mt-4 w-full bg-white/5 py-2 rounded-xl font-medium flex items-center justify-center text-white/50 cursor-not-allowed border border-white/5">
+                              <div className="mt-4 w-full bg-white/5 py-2 rounded-none font-medium flex items-center justify-center text-white/50 cursor-not-allowed border border-white/5">
                                 Already in Library
                               </div>
                             ) : (
-                              <button onClick={() => handleAddGame(g)} className="mt-4 w-full bg-white/10 hover:bg-white/20 active:scale-95 py-2 rounded-xl font-medium flex items-center justify-center gap-2 transition-all border border-white/10">
+                              <button onClick={() => handleAddGame(g)} className="mt-4 w-full bg-white/10 hover:bg-white/20 active:scale-95 py-2 rounded-none font-medium flex items-center justify-center gap-2 transition-all border border-white/10">
                                 <Plus size={18} /> Add to Library
                               </button>
                             )}

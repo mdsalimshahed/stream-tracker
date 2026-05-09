@@ -79,23 +79,19 @@ const STYLES = `
     --c-green:   #3ddc84;
     --c-orange:  #f5a623;
     --c-red:     #ff5c5c;
-    font-family: 'Inter', system-ui, sans-serif;
     color: var(--c-text);
   }
   .stats-root * { box-sizing: border-box; margin: 0; padding: 0; }
   
   .stats-scroll {
-    position: relative;
-    z-index: 10;
-    height: 100%;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-    gap: 16px;
+    position: relative; z-index: 10; height: 100%; width: 100%; 
+    overflow-y: auto; display: flex; flex-direction: column; 
+    padding: 24px; gap: 24px;
   }
-  @media (min-width: 768px) {
-    .stats-scroll { padding: 24px; gap: 24px; }
+  
+  /* Lock layout strictly to viewport on desktop to prevent scrolling/overflow */
+  @media (min-width: 1024px) {
+    .stats-scroll { overflow: hidden; }
   }
 
   .mosaic-wrap { position: fixed; inset: 0; z-index: -10; overflow: hidden; pointer-events: none; }
@@ -107,25 +103,52 @@ const STYLES = `
     background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.70) 40%, rgba(0,0,0,0.95) 100%);
   }
   
+  /* EXACT FLEXBOX PROPORTIONS FOR DESKTOP */
   .stats-top-row {
-    display: flex; flex-direction: column; 
-    background: var(--c-border); border: 1px solid var(--c-border); border-radius: 2px; overflow: hidden;
-    flex-shrink: 0; 
+    display: flex; flex-direction: column; gap: 0; flex-shrink: 0; 
   }
-  @media (min-width: 768px) { 
-    .stats-top-row { flex-direction: row; flex: 1.2; min-height: 0; flex-shrink: 1; } 
+  @media (min-width: 1024px) {
+    .stats-top-row { 
+      flex-direction: row; 
+      flex: var(--flex-top) 1 0%; 
+      min-height: 0; flex-shrink: 1; 
+    }
   }
 
-  .stats-left-col { flex: 1; display: flex; flex-direction: column; background: var(--c-border); gap: 1px; }
-  @media (min-width: 768px) { .stats-left-col { flex-direction: row; min-height: 0; } }
+  .stats-left-col { 
+    display: flex; flex-direction: row; gap: 0; flex: 1; z-index: 2;
+  }
+  @media (min-width: 1024px) {
+    .stats-left-col { 
+      flex-direction: column; 
+      flex: 0 0 calc(var(--flex-left) * 1%); 
+      width: calc(var(--flex-left) * 1%); 
+      min-height: 0; gap: 0; 
+    }
+  }
   
-  .stats-right-col { flex: 1; background: rgba(13,17,23,0.35); position: relative; overflow: hidden; min-height: 250px; }
-  @media (min-width: 768px) { .stats-right-col { min-height: 0; } }
+  .stats-right-col { 
+    flex: 1; background: rgba(13,17,23,0.35); position: relative; overflow: hidden; 
+    border: 1px solid var(--c-border); border-radius: 0;
+    min-height: 300px; z-index: 1;
+  }
+  @media (min-width: 1024px) {
+    .stats-right-col { 
+      flex: 0 0 calc(var(--flex-right) * 1%); 
+      width: calc(var(--flex-right) * 1%); 
+      min-height: 0; margin-left: -1px; 
+    }
+  }
+  @media (max-width: 1023px) {
+    .stats-right-col { margin-top: -1px; }
+  }
 
   .stat-card {
-    flex: 1; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 32px 24px; position: relative; overflow: hidden; transition: background 0.25s; display: flex; flex-direction: column; justify-content: center; min-height: 140px;
+    flex: 1; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 24px; 
+    position: relative; overflow: hidden; transition: background 0.25s; 
+    display: flex; flex-direction: column; justify-content: center; 
+    border: 1px solid var(--c-border); border-radius: 0;
   }
-  @media (min-width: 768px) { .stat-card { min-height: 0; } }
   
   .stat-card:hover { background: rgba(20,26,36,0.8); }
   .stat-card::before {
@@ -134,60 +157,78 @@ const STYLES = `
   }
   .stat-card:hover::before { opacity: 1; }
   
-  .stat-number { font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--c-text); transition: color 0.2s; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
+  /* Remove duplicate borders where cards touch */
+  @media (min-width: 1024px) {
+    .stat-card + .stat-card { margin-top: -1px; }
+  }
+  @media (max-width: 1023px) {
+    .stat-card + .stat-card { margin-left: -1px; }
+  }
+
+  .stat-number { font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--c-text); transition: color 0.3s ease; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
   .stat-card:hover .stat-number { color: var(--c-accent); }
-  .stat-label { font-size: clamp(12px, 3vw, 18px); letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
-  .stat-sub { font-size: clamp(12px, 2vw, 16px); color: var(--c-accent2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+
+  .stats-right-col:hover .latest-title { color: var(--c-accent) !important; }
+
+  /* DYNAMIC TEXT SCALING BOUNDS */
+  .top-number { font-size: clamp(2rem, calc(var(--sz-main) * 1.5vmin), 6rem); }
+  .stat-label { font-size: clamp(0.7rem, calc(var(--sz-main-label) * 0.9vmin), 2rem); letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  
+  .latest-title { font-size: clamp(1.2rem, calc(var(--sz-title) * 1.5vmin), 4rem); font-weight: 600; margin-bottom: 8px; transition: color 0.3s; }
+  .latest-sub-3 { font-size: clamp(0.85rem, calc(var(--sz-sub) * 1vmin), 2rem); color: var(--c-accent2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .latest-sub-1, .latest-sub-2 { font-size: clamp(0.8rem, calc(var(--sz-sub) * 0.8vmin), 2rem); color: var(--c-muted); margin-top: 6px; }
+  .latest-sub-time { font-weight: bold; color: var(--c-text); font-size: 1.06em; }
 
   .latest-bg { position: absolute; inset: 0; z-index: 0; }
-  
   .latest-content { 
     position: absolute; inset: 0; z-index: 1; padding: 24px; 
     background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); 
     display: flex; flex-direction: column; justify-content: flex-end; 
   }
 
-  .cat-row { display: grid; grid-template-columns: 1fr; gap: 16px; flex-shrink: 0; }
-  @media (min-width: 768px) { .cat-row { grid-template-columns: repeat(3, 1fr); gap: 24px; flex: 1; min-height: 0; flex-shrink: 1; } }
+  .cat-row { display: flex; flex-direction: column; gap: 24px; flex-shrink: 0; }
+  @media (min-width: 1024px) {
+    .cat-row { flex-direction: row; flex: var(--flex-bottom) 1 0%; min-height: 0; flex-shrink: 1; }
+  }
   
-  .cat-card { position: relative; overflow: hidden; border: 1px solid var(--c-border); border-radius: 2px; aspect-ratio: 16/9; display: flex; flex-direction: column; cursor: default; transition: all 0.3s ease; transition-delay: 0s; z-index: 1; }
-  @media (min-width: 768px) { .cat-card { aspect-ratio: auto; height: 100%; } }
+  .cat-card { flex: 1; position: relative; overflow: hidden; border: 1px solid var(--c-border); border-radius: 0; min-height: 200px; display: flex; flex-direction: column; cursor: default; transition: all 0.3s ease; z-index: 1; }
+  @media (min-width: 1024px) {
+    .cat-card { min-height: 0; }
+  }
+  .cat-card:hover { transform: scale(1.02); box-shadow: 0 16px 48px rgba(0,0,0,0.8); z-index: 10; }
   
-  .cat-card:hover { transform: scale(1.05); box-shadow: 0 16px 48px rgba(0,0,0,0.8); transition-delay: 0.3s; z-index: 10; }
   .cat-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 60%); }
-  .cat-content { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px 14px; }
-  .cat-count { font-weight: 600; font-size: clamp(48px, 12vw, 96px); line-height: 1; letter-spacing: -0.02em; color: #fff; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
-  .cat-name { font-size: clamp(12px, 3vw, 20px); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  .cat-content { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; pointer-events: none;}
+  
+  .cat-count { font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: #fff; text-shadow: 0 4px 16px rgba(0,0,0,0.8); font-size: clamp(2rem, calc(var(--sz-main) * 1.2vmin), 5rem); }
+  .cat-name { letter-spacing: 0.2em; text-transform: uppercase; margin-top: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); font-size: clamp(0.7rem, calc(var(--sz-label) * 0.9vmin), 2rem); }
   
   .cat-ongoing .cat-name   { color: var(--c-green); }
   .cat-completed .cat-name { color: var(--c-orange); }
   .cat-abandoned .cat-name { color: var(--c-red); }
   
-  .game-name-overlay { position: absolute; top: clamp(12px, 2vw, 24px); left: clamp(12px, 2vw, 24px); z-index: 3; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); padding: clamp(4px, 1vw, 12px) clamp(12px, 3vw, 24px); border-radius: 30px; font-size: clamp(12px, 3vw, 28px); font-weight: 500; color: white; pointer-events: none; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); }
+  .game-name-overlay { 
+    position: absolute; top: 20px; left: 20px; z-index: 3; font-weight: 600; color: white; pointer-events: none; white-space: nowrap; 
+    text-shadow: 0 4px 12px rgba(0,0,0,1), 0 2px 6px rgba(0,0,0,0.8); transition: color 0.3s ease;
+    font-size: clamp(0.9rem, calc(var(--sz-label) * 1.1vmin), 2.5rem);
+  }
+  .cat-card:hover .game-name-overlay { color: var(--c-accent); }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up  { animation: fadeUp 0.6s ease both; }
   .delay-1  { animation-delay: 0.1s; }
   .delay-2  { animation-delay: 0.2s; }
 
-  .top-number { font-size: clamp(48px, 12vw, 96px); }
-  .latest-title { font-size: clamp(28px, 6vw, 48px); font-weight: 600; margin-bottom: 4px; }
-  .latest-sub-1 { font-size: clamp(14px, 3vw, 20px); color: var(--c-text); margin-top: 4px; }
-  .latest-sub-time { font-size: clamp(16px, 3.5vw, 24px); font-weight: bold; }
-  .latest-sub-2 { font-size: clamp(12px, 2.5vw, 18px); color: var(--c-muted); margin-top: 4px; }
-  .latest-sub-3 { font-size: clamp(14px, 3vw, 20px); color: var(--c-accent2); margin-top: 4px; }
-
-  @media (min-width: 768px) {
-    .top-number { font-size: clamp(32px, 4vw, 56px); }
-    .latest-title { font-size: clamp(20px, 2.5vw, 32px); }
-    .latest-sub-1 { font-size: clamp(12px, 1.2vw, 14px); }
-    .latest-sub-time { font-size: clamp(14px, 1.5vw, 16px); }
-    .latest-sub-2 { font-size: clamp(10px, 1vw, 12px); }
-    .latest-sub-3 { font-size: clamp(11px, 1.2vw, 14px); }
-    .stat-label { font-size: clamp(10px, 1vw, 12px); }
-    .cat-count { font-size: clamp(32px, 4vw, 56px); }
-    .cat-name { font-size: clamp(10px, 1.2vw, 14px); }
-    .game-name-overlay { font-size: clamp(10px, 1vw, 12px); padding: 4px 12px; top: 12px; left: 12px; }
+  @media (min-width: 1024px) {
+    .top-number { font-size: calc(var(--sz-main) * 1vw); }
+    .stat-label { font-size: calc(var(--sz-main-label) * 1vw); margin-top: 0.5vw; }
+    .latest-title { font-size: calc(var(--sz-title) * 1vw); margin-bottom: 0.5vw; }
+    .latest-sub-3 { font-size: calc(var(--sz-sub) * 1vw); margin-top: 0.5vw; }
+    .latest-sub-1, .latest-sub-2 { font-size: calc(var(--sz-sub) * 0.8vw); margin-top: 0.5vw; }
+    .latest-sub-time { font-size: 1.06em; }
+    .cat-count { font-size: calc(var(--sz-main) * 1vw); }
+    .cat-name { font-size: calc(var(--sz-label) * 1vw); margin-top: 0.3vw; }
+    .game-name-overlay { font-size: calc(var(--sz-label) * 1.1vw); top: 1vw; left: 1vw; }
   }
 `;
 
@@ -195,7 +236,7 @@ const ROW_COUNT = 6;
 const IMG_W = 110;
 const IMGS_PER_ROW = 16;
 
-const MosaicBackground = ({ allImages }) => {
+const MosaicBackground = ({ allImages, bgDimming }) => {
   const rowRefs = useRef([]);
 
   const rows = useMemo(() => {
@@ -270,7 +311,8 @@ const MosaicBackground = ({ allImages }) => {
           </div>
         ))}
       </div>
-      <div className="mosaic-overlay" />
+      {/* App Background Dimming Slider Overlay ONLY */}
+      <div className="absolute inset-0 bg-black transition-opacity duration-300 pointer-events-none" style={{ opacity: bgDimming ?? 0.5 }} />
     </div>
   );
 };
@@ -326,6 +368,7 @@ const CategoryCard = ({ title, games, cssClass }) => {
         duration={700}
       />
       <div className="cat-overlay" />
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
       {gameName && <div className="game-name-overlay">{gameName}</div>}
       <div className="cat-content">
         <div className="cat-count">{eligible.length}</div>
@@ -335,7 +378,7 @@ const CategoryCard = ({ title, games, cssClass }) => {
   );
 };
 
-export default function Stats({ streamData }) {
+export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   const [latestBgIndex, setLatestBgIndex] = useState(0);
 
   const games = useMemo(() =>
@@ -403,9 +446,26 @@ export default function Stats({ streamData }) {
   const latestBgImage = latestGameImages[latestBgIndex] || heroThumb;
 
   return (
-    <div className="stats-root" style={{ position: 'relative', height: '100%', width: '100%', overflow: 'hidden' }}>
+    <div 
+      className="stats-root" 
+      style={{ 
+        position: 'relative', 
+        height: '100%', 
+        width: '100%', 
+        overflow: 'hidden',
+        '--sz-main': systemFonts?.statsMainCount ?? 4.5,
+        '--sz-main-label': systemFonts?.statsMainLabel ?? 1.1,
+        '--sz-title': systemFonts?.statsTitle ?? 2.2,
+        '--sz-sub': systemFonts?.statsSub ?? 1.1,
+        '--sz-label': systemFonts?.statsLabel ?? 1.1,
+        '--flex-top': (layoutPrefs?.statsRowSplitRatio ?? 0.6) * 100,
+        '--flex-bottom': (1 - (layoutPrefs?.statsRowSplitRatio ?? 0.6)) * 100,
+        '--flex-left': (layoutPrefs?.statsSplitRatio ?? 0.35) * 100,
+        '--flex-right': (1 - (layoutPrefs?.statsSplitRatio ?? 0.35)) * 100,
+      }}
+    >
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <MosaicBackground allImages={allImages} />
+      <MosaicBackground allImages={allImages} bgDimming={layoutPrefs?.bgDimming} />
 
       <div className="stats-scroll">
         <div className="stats-top-row fade-up delay-1 shadow-2xl">
@@ -420,11 +480,14 @@ export default function Stats({ streamData }) {
               <div className="stat-number top-number">
                 {totalGamesCount}
               </div>
-              <div className="stat-label">Games in Library</div>
+              <div className="stat-label">
+                {totalGames === 1 ? 'Game in Library' : 'Games in Library'}
+              </div>
             </div>
           </div>
 
-          <div className="stats-right-col">
+          <div className="stats-right-col group">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
             <div className="latest-bg">
               <CrossfadeImage 
                 src={latestBgImage} 
@@ -435,17 +498,17 @@ export default function Stats({ streamData }) {
               />
             </div>
             <div className="latest-content">
-              <div className="stat-number drop-shadow-xl latest-title">
+              <div className="stat-number drop-shadow-xl latest-title transition-colors duration-300">
                 {mostRecentGame?.game_name || '—'}
+              </div>
+              <div className="stat-sub latest-sub-3">
+                {mostRecentGame?.latestRunName || ''}
               </div>
               <div className="stat-sub latest-sub-1">
                 Last streamed: <span className="latest-sub-time">{timeSinceLastStream}</span>
               </div>
               <div className="stat-sub latest-sub-2">
-                {mostRecentGame?.lastStreamTimestampRaw || 'Unknown'}
-              </div>
-              <div className="stat-sub latest-sub-3">
-                {mostRecentGame?.latestRunName || ''}
+                {mostRecentGame?.lastStreamTimestampRaw ? `On ${mostRecentGame.lastStreamTimestampRaw}` : 'Unknown'}
               </div>
             </div>
           </div>

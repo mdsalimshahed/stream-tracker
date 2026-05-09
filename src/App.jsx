@@ -208,7 +208,8 @@ export default function App() {
     const isPaused = selectedGameId || wCf || currentView === 'stats';
     if (isPaused) return;
 
-    const intervalTime = isHovering ? 2500 : (layoutPrefs.cycleInterval || 4000);
+    // Smoother crossfade needs a slightly longer interval to breathe
+    const intervalTime = isHovering ? 3000 : (layoutPrefs.cycleInterval || 4000);
 
     const intervalId = setInterval(() => {
       if (pool.length <= 1) {
@@ -536,11 +537,12 @@ export default function App() {
         <div className="absolute inset-0 z-0 pointer-events-none">
           <CrossfadeImage 
             src={globalImage || 'https://placehold.co/1920x1080/1a1a1a/333333?text=Loading'} 
-            className="absolute inset-0 w-full h-full"
+            className="absolute inset-0 w-full h-full bg-black"
             imgClassName="object-cover" 
+            duration={1500} /* Super smooth background crossfade */
           />
           <div 
-            className="absolute inset-0 bg-black transition-opacity duration-300" 
+            className="absolute inset-0 bg-black transition-opacity duration-1000" 
             style={{ opacity: layoutPrefs.bgDimming ?? 0.5 }} 
           />
         </div>

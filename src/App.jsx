@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Loader2, Plus } from 'lucide-react';
 import Header from './components/Header';
@@ -28,7 +29,13 @@ const migrateLabels = (data) => {
   return { data: newData, changed };
 };
 
+const checkPersist = () => {
+  try { return localStorage.getItem('persistSettings') !== 'false'; } catch(e) { return true; }
+};
+
 export default function App() {
+  const [persistSettings, setPersistSettings] = useState(checkPersist);
+
   const [streamData, setStreamData] = useState(() => {
     try {
       const s = localStorage.getItem('streamManagerData');
@@ -41,7 +48,9 @@ export default function App() {
     } catch (e) {}
     return {};
   });
+
   const [thumbnailConfig, setThumbnailConfig] = useState(() => {
+    if (!checkPersist()) return DEFAULT_THUMBNAIL_CONFIG;
     try {
       const s = localStorage.getItem('thumbnailConfig');
       if (s) {
@@ -56,34 +65,46 @@ export default function App() {
     } catch (e) {}
     return DEFAULT_THUMBNAIL_CONFIG;
   });
+
   const [systemFonts, setSystemFonts] = useState(() => {
+    if (!checkPersist()) return DEFAULT_SYSTEM_FONTS;
     try {
       const s = localStorage.getItem('systemFonts');
       return s ? JSON.parse(s) : DEFAULT_SYSTEM_FONTS;
     } catch(e) { return DEFAULT_SYSTEM_FONTS; }
   });
+
   const [layoutPrefs, setLayoutPrefs] = useState(() => {
+    if (!checkPersist()) return DEFAULT_LAYOUT_PREFS;
     try {
       const s = localStorage.getItem('layoutPrefs');
       return s ? { ...DEFAULT_LAYOUT_PREFS, ...JSON.parse(s) } : DEFAULT_LAYOUT_PREFS;
     } catch(e) { return DEFAULT_LAYOUT_PREFS; }
   });
+
   const [modalBgIntensity, setModalBgIntensity] = useState(() => {
+    if (!checkPersist()) return DEFAULT_MODAL_BG_INTENSITY;
     try {
       const s = localStorage.getItem('modalBgIntensity');
       return s !== null ? parseFloat(s) : DEFAULT_MODAL_BG_INTENSITY;
     } catch(e) { return DEFAULT_MODAL_BG_INTENSITY; }
   });
+
   const [modalPanelOpacity, setModalPanelOpacity] = useState(() => {
+    if (!checkPersist()) return DEFAULT_MODAL_PANEL_OPACITY;
     try {
       const s = localStorage.getItem('modalPanelOpacity');
       return s !== null ? parseFloat(s) : DEFAULT_MODAL_PANEL_OPACITY;
     } catch(e) { return DEFAULT_MODAL_PANEL_OPACITY; }
   });
+
   const [mosaicXGap, setMosaicXGap] = useState(() => {
+    if (!checkPersist()) return 0;
     try { const s = localStorage.getItem('mosaicXGap'); return s !== null ? parseInt(s) : 0; } catch(e) { return 0; }
   });
+
   const [mosaicYGap, setMosaicYGap] = useState(() => {
+    if (!checkPersist()) return 0;
     try { const s = localStorage.getItem('mosaicYGap'); return s !== null ? parseInt(s) : 0; } catch(e) { return 0; }
   });
 
@@ -108,14 +129,45 @@ export default function App() {
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const hoverTimeoutRef = useRef(null);
 
+  // Persistence Effects
   useEffect(() => { localStorage.setItem('streamManagerData', JSON.stringify(streamData)); }, [streamData]);
-  useEffect(() => { localStorage.setItem('thumbnailConfig', JSON.stringify(thumbnailConfig)); }, [thumbnailConfig]);
-  useEffect(() => { localStorage.setItem('systemFonts', JSON.stringify(systemFonts)); }, [systemFonts]);
-  useEffect(() => { localStorage.setItem('layoutPrefs', JSON.stringify(layoutPrefs)); }, [layoutPrefs]);
-  useEffect(() => { localStorage.setItem('modalBgIntensity', modalBgIntensity); }, [modalBgIntensity]);
-  useEffect(() => { localStorage.setItem('modalPanelOpacity', modalPanelOpacity); }, [modalPanelOpacity]);
-  useEffect(() => { localStorage.setItem('mosaicXGap', mosaicXGap); }, [mosaicXGap]);
-  useEffect(() => { localStorage.setItem('mosaicYGap', mosaicYGap); }, [mosaicYGap]);
+  useEffect(() => { localStorage.setItem('persistSettings', persistSettings); }, [persistSettings]);
+
+  useEffect(() => { 
+    if (persistSettings) localStorage.setItem('thumbnailConfig', JSON.stringify(thumbnailConfig)); 
+    else localStorage.removeItem('thumbnailConfig');
+  }, [thumbnailConfig, persistSettings]);
+
+  useEffect(() => { 
+    if (persistSettings) localStorage.setItem('systemFonts', JSON.stringify(systemFonts)); 
+    else localStorage.removeItem('systemFonts');
+  }, [systemFonts, persistSettings]);
+
+  useEffect(() => { 
+    if (persistSettings) localStorage.setItem('layoutPrefs', JSON.stringify(layoutPrefs)); 
+    else localStorage.removeItem('layoutPrefs');
+  }, [layoutPrefs, persistSettings]);
+
+  useEffect(() => { 
+    if (persistSettings) localStorage.setItem('modalBgIntensity', modalBgIntensity); 
+    else localStorage.removeItem('modalBgIntensity');
+  }, [modalBgIntensity, persistSettings]);
+
+  useEffect(() => { 
+    if (persistSettings) localStorage.setItem('modalPanelOpacity', modalPanelOpacity); 
+    else localStorage.removeItem('modalPanelOpacity');
+  }, [modalPanelOpacity, persistSettings]);
+
+  useEffect(() => { 
+    if (persistSettings) localStorage.setItem('mosaicXGap', mosaicXGap); 
+    else localStorage.removeItem('mosaicXGap');
+  }, [mosaicXGap, persistSettings]);
+
+  useEffect(() => { 
+    if (persistSettings) localStorage.setItem('mosaicYGap', mosaicYGap); 
+    else localStorage.removeItem('mosaicYGap');
+  }, [mosaicYGap, persistSettings]);
+
 
   const handleHoverGame = (cardId, gameId) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -417,27 +469,60 @@ export default function App() {
   };
 
   const handleExport = () => {
-    const dataStr = JSON.stringify(streamData, null, 2);
+    const exportData = {
+      version: "2.0.0",
+      streamData,
+      thumbnailConfig,
+      systemFonts,
+      layoutPrefs,
+      modalBgIntensity,
+      modalPanelOpacity,
+      mosaicXGap,
+      mosaicYGap,
+      exportDate: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `streamtracker_backup_${new Date().toISOString().slice(0,19)}.json`;
+    link.download = `streamtracker_full_backup_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    notify('Backup exported', 'success');
+    notify('Full backup (Library + Styles) exported', 'success');
   };
 
   const handleImport = (importedData) => {
-    const { data, changed } = migrateLabels(importedData);
-    setStreamData(data);
-    if (changed) notify('Old labels migrated to first run.', 'info');
-    else notify('Library restored', 'success');
+    try {
+      const isNewFormat = importedData.streamData !== undefined;
+      const streamContent = isNewFormat ? importedData.streamData : importedData;
+
+      const { data, changed } = migrateLabels(streamContent);
+      setStreamData(data);
+
+      if (isNewFormat) {
+        if (importedData.thumbnailConfig) setThumbnailConfig(importedData.thumbnailConfig);
+        if (importedData.systemFonts) setSystemFonts(importedData.systemFonts);
+        if (importedData.layoutPrefs) setLayoutPrefs(importedData.layoutPrefs);
+        if (importedData.modalBgIntensity !== undefined) setModalBgIntensity(importedData.modalBgIntensity);
+        if (importedData.modalPanelOpacity !== undefined) setModalPanelOpacity(importedData.modalPanelOpacity);
+        if (importedData.mosaicXGap !== undefined) setMosaicXGap(importedData.mosaicXGap);
+        if (importedData.mosaicYGap !== undefined) setMosaicYGap(importedData.mosaicYGap);
+        
+        notify('Library and Style settings restored completely', 'success');
+      } else {
+        if (changed) notify('Old labels migrated to first run.', 'info');
+        else notify('Library restored (Classic format)', 'success');
+      }
+    } catch (e) {
+      notify('Failed to parse import file', 'error');
+    }
   };
 
   return (
-    <div className="min-h-screen text-white font-sans antialiased relative bg-black overflow-hidden flex flex-col">
+    <div className="min-h-screen text-white antialiased relative bg-black overflow-hidden flex flex-col">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -476,6 +561,8 @@ export default function App() {
                 setModalBgIntensity={setModalBgIntensity}
                 modalPanelOpacity={modalPanelOpacity}
                 setModalPanelOpacity={setModalPanelOpacity}
+                persistSettings={persistSettings}
+                setPersistSettings={setPersistSettings}
               />
             </div>
           )}
@@ -513,43 +600,90 @@ export default function App() {
               mosaicYGap={mosaicYGap} 
             />
           )}
-          {currentView === 'search' && (
-            <div className="flex flex-col h-full overflow-hidden bg-black/40 backdrop-blur-xl">
-              <div className="sticky top-0 z-10 border-b border-white/10 px-6 py-4">
-                <div className="max-w-4xl mx-auto relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={22} />
-                  <input
-                    type="text"
-                    style={{ fontSize: `${systemFonts.searchBar}px` }}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-24 text-lg focus:outline-none focus:border-blue-500 transition shadow-inner"
-                    placeholder="Search RAWG database..."
-                    value={sQ}
-                    onChange={(e) => setSQ(e.target.value)}
-                  />
-                  {isS && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 animate-spin text-blue-400" size={22} />}
+          {currentView === 'search' && (() => {
+            const containerStyle = {
+              paddingLeft: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,
+              paddingRight: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,
+              paddingTop: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
+              paddingBottom: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
+            };
+
+            const gridStyle = {
+              display: 'grid',
+              gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, 260px), 1fr))`,
+              gap: `${layoutPrefs.cardGap}px`
+            };
+
+            const cardStyle = {
+              borderRadius: layoutPrefs.cardRounded ? `${layoutPrefs.cardRadius}px` : '0px',
+              backgroundColor: `rgba(0, 0, 0, ${layoutPrefs.panelFillOpacity ?? 0.1})`,
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              transition: 'all 0.2s',
+              maxWidth: `${layoutPrefs.cardMaxWidth || 320}px`,
+              width: '100%',
+              margin: '0 auto'
+            };
+
+            return (
+              <div className="flex flex-col h-full overflow-hidden">
+                <div className="sticky top-0 z-10 border-b border-white/10 px-6 py-4">
+                  <div className="max-w-4xl mx-auto relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={22} />
+                    <input
+                      type="text"
+                      style={{ fontSize: `${systemFonts.searchBar}px` }}
+                      className="w-full bg-black/60 border border-white/10 rounded-2xl py-4 pl-12 pr-24 text-lg focus:outline-none focus:border-yellow-500 transition-colors shadow-inner text-white"
+                      placeholder="Search RAWG database..."
+                      value={sQ}
+                      onChange={(e) => setSQ(e.target.value)}
+                    />
+                    {isS && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 animate-spin text-blue-400" size={22} />}
+                  </div>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto custom-scrollbar" style={containerStyle}>
+                  <div style={gridStyle}>
+                    {sR.map(g => {
+                      const isInLibrary = Object.values(streamData).some(existing => 
+                        existing.game_name?.toLowerCase() === g.name?.toLowerCase() && 
+                        (existing.details?.releaseDate === g.released || existing.release_year === (g.released ? g.released.substring(0, 4) : ''))
+                      ) || !!streamData[g.id.toString()];
+
+                      return (
+                        <div key={g.id} className="group relative overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300" style={cardStyle}>
+                          <div className="aspect-video bg-black/40 overflow-hidden relative shrink-0">
+                            <img src={g.background_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover'} alt={g.name} className="absolute inset-0 w-full h-full object-cover" />
+                            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30" />
+                          </div>
+                          
+                          <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
+                            <h3 className="font-bold tracking-tight flex-1 drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>{g.name}</h3>
+                            <p className="text-white/80 mt-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libYear}px` }}>
+                              {g.developers?.map(d => d.name).join(', ') || 'Unknown Developer'}
+                            </p>
+                            <p className="text-white/60 mt-1 mb-auto" style={{ fontSize: `${Math.max(10, systemFonts.libYear - 2)}px` }}>
+                              {g.released ? formatReleaseDate(g.released) : 'Unreleased'}
+                            </p>
+                            
+                            {isInLibrary ? (
+                              <div className="mt-4 w-full bg-white/5 py-2 rounded-xl font-medium flex items-center justify-center text-white/50 cursor-not-allowed border border-white/5">
+                                Already in Library
+                              </div>
+                            ) : (
+                              <button onClick={() => handleAddGame(g)} className="mt-4 w-full bg-white/10 hover:bg-white/20 active:scale-95 py-2 rounded-xl font-medium flex items-center justify-center gap-2 transition-all border border-white/10">
+                                <Plus size={18} /> Add to Library
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-              <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-6">
-                <div className="max-w-7xl mx-auto grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))' }}>
-                  {sR.map(g => (
-                    <div key={g.id} className="group bg-black/60 border border-white/10 rounded-2xl overflow-hidden shadow-lg backdrop-blur-md flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300 hover:border-blue-500/50">
-                      <div className="aspect-video bg-black/40 overflow-hidden relative shrink-0">
-                        <img src={g.background_image} alt={g.name} className="absolute inset-0 w-full h-full object-cover" />
-                      </div>
-                      <div className="p-5 flex flex-col flex-1">
-                        <h3 className="font-bold text-xl">{g.name}</h3>
-                        <p className="text-white/80 text-sm mt-1">{g.developers?.map(d => d.name).join(', ') || 'Unknown Developer'}</p>
-                        <p className="text-white/60 text-sm mt-1 mb-auto">{g.released ? formatReleaseDate(g.released) : 'Unreleased'}</p>
-                        <button onClick={() => handleAddGame(g)} className="mt-4 w-full bg-white/10 hover:bg-white/20 active:scale-95 py-2 rounded-xl font-medium flex items-center justify-center gap-2 transition-all">
-                          <Plus size={18} /> Add to Library
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </main>
       </div>
 

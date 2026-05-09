@@ -1,4 +1,3 @@
-// src/components/DataManager.jsx
 import React from 'react';
 import { Type, Layout, Eye, Download } from 'lucide-react';
 import { RangeControl } from './common/UIComponents';
@@ -14,7 +13,13 @@ const Toggle = ({ label, description, value, onChange }) => (
   </div>
 );
 
-export default function DataManager({ systemFonts, setSystemFonts, layoutPrefs, setLayoutPrefs, modalBgIntensity, setModalBgIntensity, modalPanelOpacity, setModalPanelOpacity, thumbnailConfig }) {
+export default function DataManager({ 
+  systemFonts, setSystemFonts, 
+  layoutPrefs, setLayoutPrefs, 
+  modalBgIntensity, setModalBgIntensity, 
+  modalPanelOpacity, setModalPanelOpacity,
+  persistSettings, setPersistSettings
+}) {
   const updateFont = (key, val) => setSystemFonts(prev => ({ ...prev, [key]: val }));
   const updateLayout = (key, val) => setLayoutPrefs(prev => ({ ...prev, [key]: val }));
 
@@ -22,6 +27,20 @@ export default function DataManager({ systemFonts, setSystemFonts, layoutPrefs, 
     <div className="h-full overflow-y-auto custom-scrollbar px-6 py-8">
       <div className="max-w-7xl mx-auto relative">
         
+        {/* Persistence Toggle */}
+        <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5 mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-lg">
+          <div>
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">Persistent Styling</h3>
+            <p className="text-sm text-white/60 mt-1">If enabled, your style and layout preferences will be saved in your browser memory. Turn off to easily reset everything to defaults on the next page refresh.</p>
+          </div>
+          <button 
+            onClick={() => setPersistSettings(!persistSettings)} 
+            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-md whitespace-nowrap shrink-0 ${persistSettings ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-white/10 hover:bg-white/20 text-white/60'}`}
+          >
+            {persistSettings ? 'ON (Saving Settings)' : 'OFF (Reset on Reload)'}
+          </button>
+        </div>
+
         <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2 pt-2"><Type size={24} /> Typography: Cards (History & Library)</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
           <RangeControl label="Game Title" description="Font size of game name" value={systemFonts.libTitle} min={8} max={64} onChange={v => updateFont('libTitle', v)} />
@@ -39,6 +58,7 @@ export default function DataManager({ systemFonts, setSystemFonts, layoutPrefs, 
 
         <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2"><Layout size={24} /> Layout & Spacing</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+          <RangeControl label="Modal Split (Left Column %)" description="Balance between game details and runs/logs" value={(layoutPrefs.modalSplitRatio || 0.6) * 100} min={20} max={80} onChange={v => updateLayout('modalSplitRatio', v / 100)} />
           <RangeControl label="Card Padding" description="Space inside card (text area)" value={layoutPrefs.cardPadding} min={0} max={64} onChange={v => updateLayout('cardPadding', v)} />
           <RangeControl label="Card Gap" description="Space between cards" value={layoutPrefs.cardGap} min={0} max={64} onChange={v => updateLayout('cardGap', v)} />
           <RangeControl label="Card Max Width" description="Maximum width of each card" value={layoutPrefs.cardMaxWidth} min={150} max={600} onChange={v => updateLayout('cardMaxWidth', v)} />

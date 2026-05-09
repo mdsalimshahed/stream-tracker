@@ -79,9 +79,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
 
   const gridStyle = {
     display: 'grid',
-    gridTemplateColumns: window.innerWidth > 768 
-      ? `repeat(${layoutPrefs.cardsPerRow || 5}, 1fr)` 
-      : 'repeat(auto-fill, minmax(160px, 1fr))',
+    gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, 260px), 1fr))`,
     gap: `${layoutPrefs.cardGap}px`
   };
 
@@ -106,12 +104,18 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-center bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-lg relative z-10">
+      <div className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-center relative z-10">
         <div className="relative w-full sm:w-80 flex-shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
-          <input type="text" placeholder="Filter games..." value={searchFilter} onChange={(e) => setSearchFilter(e.target.value)} className="w-full bg-white/10 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500 shadow-inner" />
+          <input 
+            type="text" 
+            placeholder="Filter games..." 
+            value={searchFilter} 
+            onChange={(e) => setSearchFilter(e.target.value)} 
+            className="w-full bg-black/60 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-yellow-500 shadow-inner text-white transition-colors" 
+          />
         </div>
-        <div className="flex w-full sm:w-auto bg-white/10 rounded-xl p-1 gap-1 shadow-inner overflow-x-auto no-scrollbar shrink-0">
+        <div className="flex w-full sm:w-auto bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl p-1 gap-1 shadow-inner overflow-x-auto no-scrollbar shrink-0">
           {[
             { id: 'recent', label: 'Recent', icon: Clock },
             { id: 'alpha', label: 'A-Z', icon: SortAsc },
@@ -152,10 +156,12 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                     className="absolute inset-0 w-full h-full" 
                     imgClassName="object-cover" 
                   />
+                  {/* Yellow Gradient Line at the bottom of the image */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30" />
                 </div>
                 <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
                   <div className="flex flex-wrap justify-between items-start gap-2">
-                    <h3 className="font-bold tracking-tight flex-1 min-w-[50%] drop-shadow-md" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
+                    <h3 className="font-bold tracking-tight flex-1 min-w-[50%] drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
                     <span className={`${labelInfo.bg} shrink-0 text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
                       {labelInfo.icon && <span className="hidden min-[400px]:block">{labelInfo.icon}</span>}
                       {labelInfo.text}

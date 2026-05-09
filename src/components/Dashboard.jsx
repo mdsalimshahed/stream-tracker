@@ -40,9 +40,7 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
 
   const gridStyle = {
     display: 'grid',
-    gridTemplateColumns: window.innerWidth > 768 
-      ? `repeat(${layoutPrefs.cardsPerRow || 5}, 1fr)` 
-      : 'repeat(auto-fill, minmax(160px, 1fr))',
+    gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, 260px), 1fr))`,
     gap: `${layoutPrefs.cardGap}px`
   };
 
@@ -90,9 +88,11 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
                 <div className="absolute bottom-2 right-2 bg-blue-600/80 backdrop-blur-sm px-2 py-1 rounded-full text-[10px] sm:text-xs font-semibold text-white pointer-events-none shadow z-20">
                   Resume
                 </div>
+                {/* Yellow Gradient Line at the bottom of the image */}
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30" />
               </div>
               <div className="p-3 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
-                <h3 className="font-bold text-white leading-tight drop-shadow-md" style={{ fontSize: `${systemFonts.libTitle}px` }}>
+                <h3 className="font-bold leading-tight drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>
                   {stream.gameName}
                 </h3>
                 <p className="text-white/80 mt-1 drop-shadow-md mb-auto" style={{ fontSize: `${systemFonts.libYear}px` }}>

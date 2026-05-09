@@ -77,7 +77,7 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
               onClick={() => openGameProfile(stream.appId, stream.cycleName)}
               onMouseEnter={() => onHoverGame(uniqueCardId, stream.appId)}
               onMouseLeave={() => onHoverGame(null, null)}
-              className="group cursor-pointer overflow-hidden shadow-xl flex flex-col"
+              className="group cursor-pointer overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300"
               style={cardStyle}
             >
               <div className="relative overflow-hidden aspect-video bg-black/40 shrink-0">
@@ -85,14 +85,14 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
                   src={activeImg} 
                   alt={stream.gameName} 
                   className="absolute inset-0 w-full h-full" 
-                  imgClassName="object-cover group-hover:scale-110" 
+                  imgClassName="object-cover" 
                 />
                 <div className="absolute bottom-2 right-2 bg-blue-600/80 backdrop-blur-sm px-2 py-1 rounded-full text-[10px] sm:text-xs font-semibold text-white pointer-events-none shadow z-20">
                   Resume
                 </div>
               </div>
               <div className="p-3 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
-                <h3 className="font-bold text-white leading-tight break-words drop-shadow-md" style={{ fontSize: `${systemFonts.libTitle}px` }}>
+                <h3 className="font-bold text-white leading-tight drop-shadow-md" style={{ fontSize: `${systemFonts.libTitle}px` }}>
                   {stream.gameName}
                 </h3>
                 <p className="text-white/80 mt-1 drop-shadow-md mb-auto" style={{ fontSize: `${systemFonts.libYear}px` }}>

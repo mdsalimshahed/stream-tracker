@@ -77,7 +77,6 @@ export const CrossfadeImage = ({ src, alt, className, imgClassName, style, durat
 
     let isMounted = true;
 
-    // Load the image in memory FIRST before trying to fade to it to prevent abrupt flashes
     const img = new Image();
     const handleLoadOrError = () => {
       if (!isMounted) return;
@@ -102,8 +101,9 @@ export const CrossfadeImage = ({ src, alt, className, imgClassName, style, durat
     };
   }, [src]);
 
+  // Removing inline transform to let Tailwind handle zooming smoothly
   const imgStyle = {
-    transition: `opacity ${duration}ms ease-in-out, transform ${duration}ms ease-in-out`
+    transition: `opacity ${duration}ms ease-in-out`
   };
 
   return (

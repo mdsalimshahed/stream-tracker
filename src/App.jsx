@@ -125,8 +125,6 @@ export default function App() {
         setHoverState({ cardId: null, gameId: null });
       }, 300);
     } else {
-      // INCREASED DELAY: Must rest on the card for 600ms to count as a deliberate hover.
-      // Quick swiping will clear the timeout before this ever fires.
       hoverTimeoutRef.current = setTimeout(() => {
         setHoverState({ cardId, gameId });
       }, 900);
@@ -172,7 +170,7 @@ export default function App() {
           const currIdx = pool.indexOf(prevHover);
           const nextIdx = currIdx === -1 ? 0 : (currIdx + 1) % pool.length;
           const nextImg = pool[nextIdx];
-          setGlobalImage(nextImg); // Keep global image perfectly in sync with the card
+          setGlobalImage(nextImg);
           return nextImg;
         });
       } else {
@@ -236,7 +234,23 @@ export default function App() {
       try {
         const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(sQ)}&page_size=12`);
         const data = await res.json();
-        setSR(data.results || []);
+        if (data.results) {
+          const detailed = await Promise.all(
+            data.results.map(async (g) => {
+              try {
+                if (g.developers) return g;
+                const dRes = await fetch(`https://api.rawg.io/api/games/${g.id}?key=${RAWG_API_KEY}`);
+                const dData = await dRes.json();
+                return { ...g, developers: dData.developers };
+              } catch (e) {
+                return g;
+              }
+            })
+          );
+          setSR(detailed);
+        } else {
+          setSR([]);
+        }
       } catch (err) {} finally { setIsS(false); }
     }, 400);
     return () => clearTimeout(delay);
@@ -259,21 +273,21 @@ export default function App() {
     const year = g.released ? g.released.substring(0, 4) : new Date().getFullYear().toString();
     const cover = g.background_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
     let details = {
-      developer: 'Unknown',
+      developer: g.developers?.[0]?.name || 'Unknown',
       publisher: 'Unknown',
-      releaseDate: year,
-      genres: 'Unknown',
-      tags: 'Unknown'
+      releaseDate: g.released || year,
+      genres: g.genres?.map(gn => gn.name).join(', ') || 'Unknown',
+      tags: g.tags?.map(t => t.name).join(', ') || 'Unknown'
     };
     try {
       const detailRes = await fetch(`https://api.rawg.io/api/games/${g.id}?key=${RAWG_API_KEY}`);
       const detailsData = await detailRes.json();
       details = {
-        developer: detailsData.developers?.[0]?.name || 'Unknown',
+        developer: detailsData.developers?.[0]?.name || details.developer,
         publisher: detailsData.publishers?.[0]?.name || 'Unknown',
-        releaseDate: detailsData.released || year,
-        genres: detailsData.genres?.map(g => g.name).join(', ') || 'Unknown',
-        tags: detailsData.tags?.map(t => t.name).join(', ') || 'Unknown',
+        releaseDate: detailsData.released || details.releaseDate,
+        genres: detailsData.genres?.map(gn => gn.name).join(', ') || details.genres,
+        tags: detailsData.tags?.map(t => t.name).join(', ') || details.tags,
       };
     } catch(e) {}
     setStreamData({
@@ -518,14 +532,15 @@ export default function App() {
               <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-6">
                 <div className="max-w-7xl mx-auto grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))' }}>
                   {sR.map(g => (
-                    <div key={g.id} className="bg-black/60 border border-white/10 rounded-2xl overflow-hidden hover:border-blue-500/50 transition group shadow-lg backdrop-blur-md flex flex-col">
+                    <div key={g.id} className="group bg-black/60 border border-white/10 rounded-2xl overflow-hidden shadow-lg backdrop-blur-md flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300 hover:border-blue-500/50">
                       <div className="aspect-video bg-black/40 overflow-hidden relative shrink-0">
-                        <img src={g.background_image} alt={g.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <img src={g.background_image} alt={g.name} className="absolute inset-0 w-full h-full object-cover" />
                       </div>
                       <div className="p-5 flex flex-col flex-1">
                         <h3 className="font-bold text-xl">{g.name}</h3>
-                        <p className="text-white/60 text-sm mt-1 mb-auto">{g.released || 'Unreleased'}</p>
-                        <button onClick={() => handleAddGame(g)} className="mt-4 w-full bg-white/10 hover:bg-white/20 py-2 rounded-xl font-medium flex items-center justify-center gap-2 transition">
+                        <p className="text-white/80 text-sm mt-1">{g.developers?.map(d => d.name).join(', ') || 'Unknown Developer'}</p>
+                        <p className="text-white/60 text-sm mt-1 mb-auto">{g.released ? formatReleaseDate(g.released) : 'Unreleased'}</p>
+                        <button onClick={() => handleAddGame(g)} className="mt-4 w-full bg-white/10 hover:bg-white/20 active:scale-95 py-2 rounded-xl font-medium flex items-center justify-center gap-2 transition-all">
                           <Plus size={18} /> Add to Library
                         </button>
                       </div>

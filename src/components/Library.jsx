@@ -139,7 +139,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                 onClick={() => openGameProfile(game.id)}
                 onMouseEnter={() => onHoverGame(game.id, game.id)}
                 onMouseLeave={() => onHoverGame(null, null)}
-                className="group relative cursor-pointer overflow-hidden shadow-xl flex flex-col"
+                className="group relative cursor-pointer overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300"
                 style={{
                   ...cardStyle,
                   viewTransitionName: `game-card-${game.id.toString().replace(/[^a-zA-Z0-9]/g, '-')}`
@@ -150,13 +150,13 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                     src={activeImg} 
                     alt={game.game_name} 
                     className="absolute inset-0 w-full h-full" 
-                    imgClassName="object-cover group-hover:scale-110" 
+                    imgClassName="object-cover" 
                   />
                 </div>
                 <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
-                  <div className="flex justify-between items-start gap-2">
-                    <h3 className="font-bold tracking-tight break-words flex-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
-                    <span className={`${labelInfo.bg} text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
+                  <div className="flex flex-wrap justify-between items-start gap-2">
+                    <h3 className="font-bold tracking-tight flex-1 min-w-[50%] drop-shadow-md" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
+                    <span className={`${labelInfo.bg} shrink-0 text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
                       {labelInfo.icon && <span className="hidden min-[400px]:block">{labelInfo.icon}</span>}
                       {labelInfo.text}
                     </span>

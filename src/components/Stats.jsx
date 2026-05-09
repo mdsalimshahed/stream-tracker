@@ -150,10 +150,10 @@ const STYLES = `
   .cat-row { display: grid; grid-template-columns: 1fr; gap: 16px; flex-shrink: 0; }
   @media (min-width: 768px) { .cat-row { grid-template-columns: repeat(3, 1fr); gap: 24px; flex: 1; min-height: 0; flex-shrink: 1; } }
   
-  .cat-card { position: relative; overflow: hidden; border: 1px solid var(--c-border); border-radius: 2px; aspect-ratio: 16/9; display: flex; flex-direction: column; cursor: default; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .cat-card { position: relative; overflow: hidden; border: 1px solid var(--c-border); border-radius: 2px; aspect-ratio: 16/9; display: flex; flex-direction: column; cursor: default; transition: all 0.3s ease; transition-delay: 0s; z-index: 1; }
   @media (min-width: 768px) { .cat-card { aspect-ratio: auto; height: 100%; } }
   
-  .cat-card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.8); }
+  .cat-card:hover { transform: scale(1.05); box-shadow: 0 16px 48px rgba(0,0,0,0.8); transition-delay: 0.3s; z-index: 10; }
   .cat-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 60%); }
   .cat-content { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px 14px; }
   .cat-count { font-weight: 600; font-size: clamp(48px, 12vw, 96px); line-height: 1; letter-spacing: -0.02em; color: #fff; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
@@ -318,11 +318,11 @@ const CategoryCard = ({ title, games, cssClass }) => {
   const gameName = imageEntries[currentIdx]?.gameName || '';
 
   return (
-    <div className={`cat-card ${cssClass} shadow-xl group`}>
+    <div className={`cat-card ${cssClass} group`}>
       <CrossfadeImage 
         src={currentSrc} 
         className="absolute inset-0 w-full h-full" 
-        imgClassName="group-hover:scale-105 object-cover" 
+        imgClassName="object-cover" 
         duration={700}
       />
       <div className="cat-overlay" />

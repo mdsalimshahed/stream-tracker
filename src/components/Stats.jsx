@@ -2,6 +2,12 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { parseCustomTimestamp } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
 
+const getResizedImage = (url, width = 640) => {
+  if (!url || typeof url !== 'string' || !url.includes('media.rawg.io')) return url;
+  return url.replace('/media/games/', `/media/resize/${width}/-/games/`)
+            .replace('/media/screenshots/', `/media/resize/${width}/-/screenshots/`);
+};
+
 const getLatestRunWithTimestamp = (cycles) => {
   let latestRun = null;
   let latestDate = null;
@@ -104,13 +110,11 @@ const STYLES = `
   }
   @media (min-aspect-ratio: 1/1) and (min-width: 768px) { .stats-top-row { flex-direction: row; margin: 0 24px; } }
 
-  /* Stack items vertically on portrait/mobile, horizontally only if landscape and wide enough */
   .stats-left-col { flex: 1; display: flex; flex-direction: column; background: var(--c-border); gap: 1px; }
   @media (min-aspect-ratio: 1/1) and (min-width: 768px) { .stats-left-col { flex-direction: row; } }
   
   .stats-right-col { flex: 1; background: rgba(13,17,23,0.35); position: relative; overflow: hidden; min-height: 350px; }
 
-  /* Stat cards expand fully and center their content vertically/horizontally */
   .stat-card {
     flex: 1; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 32px 24px; position: relative; overflow: hidden; transition: background 0.25s; display: flex; flex-direction: column; justify-content: center; min-height: 180px;
   }
@@ -128,7 +132,6 @@ const STYLES = `
 
   .latest-bg { position: absolute; inset: 0; z-index: 0; }
   
-  /* STRICTLY anchored to bottom left with NO BLUR */
   .latest-content { 
     position: absolute; inset: 0; z-index: 1; padding: 24px; 
     background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); 
@@ -156,7 +159,6 @@ const STYLES = `
   .delay-1  { animation-delay: 0.1s; }
   .delay-2  { animation-delay: 0.2s; }
 
-  /* Font scale classes for Mobile/Portrait */
   .top-number { font-size: clamp(48px, 12vw, 96px); }
   .latest-title { font-size: clamp(28px, 6vw, 48px); font-weight: 600; margin-bottom: 4px; }
   .latest-sub-1 { font-size: clamp(14px, 3vw, 20px); color: var(--c-text); margin-top: 4px; }
@@ -164,7 +166,6 @@ const STYLES = `
   .latest-sub-2 { font-size: clamp(12px, 2.5vw, 18px); color: var(--c-muted); margin-top: 4px; }
   .latest-sub-3 { font-size: clamp(14px, 3vw, 20px); color: var(--c-accent2); margin-top: 4px; }
 
-  /* Font scale overrides for Desktop/Landscape */
   @media (min-aspect-ratio: 1/1) and (min-width: 768px) {
     .top-number { font-size: clamp(32px, 4vw, 56px); }
     .latest-title { font-size: clamp(20px, 2.5vw, 32px); }
@@ -188,7 +189,7 @@ const MosaicBackground = ({ allImages }) => {
 
   const rows = useMemo(() => {
     const fallback = 'https://placehold.co/110x110/0d1117/1e2938?text=';
-    const pool = allImages.length ? allImages : [fallback];
+    const pool = allImages.length ? allImages.map(img => getResizedImage(img, 200)) : [fallback];
     return Array.from({ length: ROW_COUNT }, () => {
       const shuffled = [...pool].sort(() => Math.random() - 0.5);
       const base = Array.from({ length: IMGS_PER_ROW }, (_, i) => shuffled[i % shuffled.length]);
@@ -273,17 +274,35 @@ const CategoryCard = ({ title, games, cssClass }) => {
         if (!map.has(url)) map.set(url, game.game_name);
       });
     });
-    return Array.from(map.entries()).map(([url, gameName]) => ({ url, gameName }));
+    return Array.from(map.entries()).map(([url, gameName]) => ({ 
+      url: getResizedImage(url, 640),
+      gameName 
+    }));
   }, [eligible]);
 
   const [currentIdx, setCurrentIdx] = useState(0);
 
+  // Independent, staggered timer for each card
   useEffect(() => {
     if (imageEntries.length < 2) return;
-    const id = setInterval(() => {
+    
+    // Random delay between 0-2500ms before starting the cycle to desync them
+    const initialDelay = Math.random() * 2500;
+    // Base cycle interval between 3000ms and 4500ms
+    const cycleInterval = 3000 + Math.random() * 1500;
+    
+    let interval;
+    const timeout = setTimeout(() => {
       setCurrentIdx(prev => (prev + 1) % imageEntries.length);
-    }, 4000);
-    return () => clearInterval(id);
+      interval = setInterval(() => {
+        setCurrentIdx(prev => (prev + 1) % imageEntries.length);
+      }, cycleInterval);
+    }, initialDelay);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [imageEntries]);
 
   const fallback = 'https://placehold.co/480x270/0d1117/1e2938?text=';
@@ -296,9 +315,10 @@ const CategoryCard = ({ title, games, cssClass }) => {
         src={currentSrc} 
         className="absolute inset-0 w-full h-full" 
         imgClassName="group-hover:scale-105" 
+        duration={700}
       />
       <div className="cat-overlay" />
-      {gameName && <div className="game-name-overlay" style={{ transition: 'none', animation: 'none' }}>{gameName}</div>}
+      {gameName && <div className="game-name-overlay">{gameName}</div>}
       <div className="cat-content">
         <div className="cat-count">{eligible.length}</div>
         <div className="cat-name">{title}</div>
@@ -336,7 +356,6 @@ export default function Stats({ streamData }) {
   [streamData]);
 
   const allImages = useMemo(() => games.flatMap(g => g.thumbnail_urls || []).filter(Boolean), [games]);
-
   const totalStreams = useMemo(() => games.reduce((s, g) => s + g.totalStreams, 0), [games]);
   const totalGames  = games.length;
 
@@ -353,16 +372,28 @@ export default function Stats({ streamData }) {
 
   const latestGameImages = mostRecentGame?.thumbnail_urls || [];
 
+  // Independent staggered timer for the hero card as well
   useEffect(() => {
     if (latestGameImages.length < 2) return;
-    const interval = setInterval(() => {
+    const initialDelay = Math.random() * 2000;
+    const cycleInterval = 3500 + Math.random() * 1000;
+
+    let interval;
+    const timeout = setTimeout(() => {
       setLatestBgIndex(prev => (prev + 1) % latestGameImages.length);
-    }, 4000);
-    return () => clearInterval(interval);
+      interval = setInterval(() => {
+        setLatestBgIndex(prev => (prev + 1) % latestGameImages.length);
+      }, cycleInterval);
+    }, initialDelay);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [latestGameImages]);
 
   const heroThumb = allImages[0] || '';
-  const latestBgImage = latestGameImages[latestBgIndex] || heroThumb;
+  const latestBgImage = getResizedImage(latestGameImages[latestBgIndex] || heroThumb, 1280);
 
   return (
     <div className="stats-root" style={{ position: 'relative', height: '100%', width: '100%', overflow: 'hidden' }}>
@@ -390,7 +421,13 @@ export default function Stats({ streamData }) {
 
           <div className="stats-right-col">
             <div className="latest-bg">
-              <CrossfadeImage src={latestBgImage} alt="latest game" className="w-full h-full" imgClassName="object-cover" />
+              <CrossfadeImage 
+                src={latestBgImage} 
+                alt="latest game" 
+                className="w-full h-full" 
+                imgClassName="object-cover" 
+                duration={700}
+              />
             </div>
             <div className="latest-content">
               <div className="stat-number drop-shadow-xl latest-title">
@@ -410,7 +447,7 @@ export default function Stats({ streamData }) {
         </div>
 
         <div className="cat-row fade-up delay-2">
-          <CategoryCard title="Ongoing"   games={games} cssClass="cat-ongoing"   />
+          <CategoryCard title="Ongoing" games={games} cssClass="cat-ongoing" />
           <CategoryCard title="Completed" games={games} cssClass="cat-completed" />
           <CategoryCard title="Abandoned" games={games} cssClass="cat-abandoned" />
         </div>

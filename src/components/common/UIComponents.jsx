@@ -67,7 +67,7 @@ export const ColorOverride = ({ title, element, config, toggle, onChange }) => {
   );
 };
 
-export const CrossfadeImage = ({ src, alt, className, imgClassName, style }) => {
+export const CrossfadeImage = ({ src, alt, className, imgClassName, style, duration = 700 }) => {
   const [images, setImages] = useState([src, src]);
   const [activeIndex, setActiveIndex] = useState(1);
   const prevSrcRef = useRef(src);
@@ -77,7 +77,7 @@ export const CrossfadeImage = ({ src, alt, className, imgClassName, style }) => 
 
     let isMounted = true;
 
-    // Load the image in memory FIRST before trying to fade to it
+    // Load the image in memory FIRST before trying to fade to it to prevent abrupt flashes
     const img = new Image();
     const handleLoadOrError = () => {
       if (!isMounted) return;
@@ -103,7 +103,7 @@ export const CrossfadeImage = ({ src, alt, className, imgClassName, style }) => 
   }, [src]);
 
   const imgStyle = {
-    transition: 'opacity 1s ease-in-out, transform 1s ease-in-out'
+    transition: `opacity ${duration}ms ease-in-out, transform ${duration}ms ease-in-out`
   };
 
   return (

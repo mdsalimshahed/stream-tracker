@@ -1,9 +1,11 @@
+// src/utils/constants.js
 export const RAWG_API_KEY = "9fba73b06e6549dab7044ebd9b630b0f";
 
 export const DEFAULT_SYSTEM_FONTS = {
   libTitle: 16,
   libYear: 14,
   libBadge: 18,
+  dashboardTime: 10, // Added for history timestamp
   modalHeader: 31,
   logTitle: 16,
   logSub: 13,

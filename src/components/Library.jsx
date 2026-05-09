@@ -1,3 +1,4 @@
+// src/components/Library.jsx
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Search, Clock, SortAsc, SortDesc, Maximize, Trash2, Edit3 } from 'lucide-react';
@@ -53,17 +54,12 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
     return 0;
   });
 
-  // Modern browser native smooth reordering
   const handleSortClick = (newSort) => {
     if (sortBy === newSort) return;
-    
-    // Fallback for unsupported browsers
     if (!document.startViewTransition) {
       setSortBy(newSort);
       return;
     }
-
-    // Triggers the automatic layout morph/slide animation
     document.startViewTransition(() => {
       flushSync(() => {
         setSortBy(newSort);
@@ -146,7 +142,6 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                 className="group relative cursor-pointer overflow-hidden shadow-xl flex flex-col"
                 style={{
                   ...cardStyle,
-                  // The unique name tells the browser how to track this element's start/end positions during transition
                   viewTransitionName: `game-card-${game.id.toString().replace(/[^a-zA-Z0-9]/g, '-')}`
                 }}
               >

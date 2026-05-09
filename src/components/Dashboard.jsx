@@ -1,3 +1,4 @@
+// src/components/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { parseCustomTimestamp } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
@@ -97,7 +98,9 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
                 <p className="text-white/80 mt-1 drop-shadow-md mb-auto" style={{ fontSize: `${systemFonts.libYear}px` }}>
                   {stream.cycleDisplayName} • Session #{stream.count}
                 </p>
-                <p className="text-white/50 text-[10px] mt-3 font-mono drop-shadow-md hidden min-[400px]:block">{stream.lastTimeStr}</p>
+                <p className="text-white/50 mt-3 font-mono drop-shadow-md hidden min-[400px]:block" style={{ fontSize: `${systemFonts.dashboardTime || 10}px` }}>
+                  {stream.lastTimeStr}
+                </p>
               </div>
             </div>
           );

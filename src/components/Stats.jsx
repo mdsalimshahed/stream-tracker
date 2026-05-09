@@ -1,12 +1,7 @@
+// src/components/Stats.jsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { parseCustomTimestamp } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
-
-const getResizedImage = (url, width = 640) => {
-  if (!url || typeof url !== 'string' || !url.includes('media.rawg.io')) return url;
-  return url.replace('/media/games/', `/media/resize/${width}/-/games/`)
-            .replace('/media/screenshots/', `/media/resize/${width}/-/screenshots/`);
-};
 
 const getLatestRunWithTimestamp = (cycles) => {
   let latestRun = null;
@@ -88,9 +83,20 @@ const STYLES = `
     color: var(--c-text);
   }
   .stats-root * { box-sizing: border-box; margin: 0; padding: 0; }
-  .stats-scroll::-webkit-scrollbar { width: 4px; }
-  .stats-scroll::-webkit-scrollbar-track { background: transparent; }
-  .stats-scroll::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 2px; }
+  
+  .stats-scroll {
+    position: relative;
+    z-index: 10;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+  }
+  @media (min-width: 768px) {
+    .stats-scroll { padding: 24px; gap: 24px; }
+  }
 
   .mosaic-wrap { position: fixed; inset: 0; z-index: -10; overflow: hidden; pointer-events: none; }
   .mosaic-rows { display: flex; flex-direction: column; height: 100%; }
@@ -100,24 +106,27 @@ const STYLES = `
     position: absolute; inset: 0;
     background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.70) 40%, rgba(0,0,0,0.95) 100%);
   }
-
-  .divider { height: 1px; background: linear-gradient(to right, var(--c-accent), transparent); margin: 0 12px 18px 12px; opacity: 0.5; }
-  @media (min-aspect-ratio: 1/1) and (min-width: 768px) { .divider { margin: 0 24px 18px 24px; } }
   
   .stats-top-row {
-    display: flex; flex-direction: column; gap: 1px; margin: 0 12px;
+    display: flex; flex-direction: column; 
     background: var(--c-border); border: 1px solid var(--c-border); border-radius: 2px; overflow: hidden;
+    flex-shrink: 0; 
   }
-  @media (min-aspect-ratio: 1/1) and (min-width: 768px) { .stats-top-row { flex-direction: row; margin: 0 24px; } }
+  @media (min-width: 768px) { 
+    .stats-top-row { flex-direction: row; flex: 1.2; min-height: 0; flex-shrink: 1; } 
+  }
 
   .stats-left-col { flex: 1; display: flex; flex-direction: column; background: var(--c-border); gap: 1px; }
-  @media (min-aspect-ratio: 1/1) and (min-width: 768px) { .stats-left-col { flex-direction: row; } }
+  @media (min-width: 768px) { .stats-left-col { flex-direction: row; min-height: 0; } }
   
-  .stats-right-col { flex: 1; background: rgba(13,17,23,0.35); position: relative; overflow: hidden; min-height: 350px; }
+  .stats-right-col { flex: 1; background: rgba(13,17,23,0.35); position: relative; overflow: hidden; min-height: 250px; }
+  @media (min-width: 768px) { .stats-right-col { min-height: 0; } }
 
   .stat-card {
-    flex: 1; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 32px 24px; position: relative; overflow: hidden; transition: background 0.25s; display: flex; flex-direction: column; justify-content: center; min-height: 180px;
+    flex: 1; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 32px 24px; position: relative; overflow: hidden; transition: background 0.25s; display: flex; flex-direction: column; justify-content: center; min-height: 140px;
   }
+  @media (min-width: 768px) { .stat-card { min-height: 0; } }
+  
   .stat-card:hover { background: rgba(20,26,36,0.8); }
   .stat-card::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
@@ -138,10 +147,12 @@ const STYLES = `
     display: flex; flex-direction: column; justify-content: flex-end; 
   }
 
-  .cat-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 18px 12px; }
-  @media (min-aspect-ratio: 1/1) and (min-width: 768px) { .cat-row { grid-template-columns: repeat(3, 1fr); margin: 18px 24px; } }
+  .cat-row { display: grid; grid-template-columns: 1fr; gap: 16px; flex-shrink: 0; }
+  @media (min-width: 768px) { .cat-row { grid-template-columns: repeat(3, 1fr); gap: 24px; flex: 1; min-height: 0; flex-shrink: 1; } }
   
-  .cat-card { position: relative; overflow: hidden; border: 1px solid var(--c-border); border-radius: 2px; aspect-ratio: 16/9; cursor: default; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .cat-card { position: relative; overflow: hidden; border: 1px solid var(--c-border); border-radius: 2px; aspect-ratio: 16/9; display: flex; flex-direction: column; cursor: default; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  @media (min-width: 768px) { .cat-card { aspect-ratio: auto; height: 100%; } }
+  
   .cat-card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.8); }
   .cat-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 60%); }
   .cat-content { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px 14px; }
@@ -166,7 +177,7 @@ const STYLES = `
   .latest-sub-2 { font-size: clamp(12px, 2.5vw, 18px); color: var(--c-muted); margin-top: 4px; }
   .latest-sub-3 { font-size: clamp(14px, 3vw, 20px); color: var(--c-accent2); margin-top: 4px; }
 
-  @media (min-aspect-ratio: 1/1) and (min-width: 768px) {
+  @media (min-width: 768px) {
     .top-number { font-size: clamp(32px, 4vw, 56px); }
     .latest-title { font-size: clamp(20px, 2.5vw, 32px); }
     .latest-sub-1 { font-size: clamp(12px, 1.2vw, 14px); }
@@ -189,7 +200,7 @@ const MosaicBackground = ({ allImages }) => {
 
   const rows = useMemo(() => {
     const fallback = 'https://placehold.co/110x110/0d1117/1e2938?text=';
-    const pool = allImages.length ? allImages.map(img => getResizedImage(img, 200)) : [fallback];
+    const pool = allImages.length ? allImages : [fallback];
     return Array.from({ length: ROW_COUNT }, () => {
       const shuffled = [...pool].sort(() => Math.random() - 0.5);
       const base = Array.from({ length: IMGS_PER_ROW }, (_, i) => shuffled[i % shuffled.length]);
@@ -275,20 +286,17 @@ const CategoryCard = ({ title, games, cssClass }) => {
       });
     });
     return Array.from(map.entries()).map(([url, gameName]) => ({ 
-      url: getResizedImage(url, 640),
+      url: url,
       gameName 
     }));
   }, [eligible]);
 
   const [currentIdx, setCurrentIdx] = useState(0);
 
-  // Independent, staggered timer for each card
   useEffect(() => {
     if (imageEntries.length < 2) return;
     
-    // Random delay between 0-2500ms before starting the cycle to desync them
     const initialDelay = Math.random() * 2500;
-    // Base cycle interval between 3000ms and 4500ms
     const cycleInterval = 3000 + Math.random() * 1500;
     
     let interval;
@@ -314,7 +322,7 @@ const CategoryCard = ({ title, games, cssClass }) => {
       <CrossfadeImage 
         src={currentSrc} 
         className="absolute inset-0 w-full h-full" 
-        imgClassName="group-hover:scale-105" 
+        imgClassName="group-hover:scale-105 object-cover" 
         duration={700}
       />
       <div className="cat-overlay" />
@@ -372,7 +380,6 @@ export default function Stats({ streamData }) {
 
   const latestGameImages = mostRecentGame?.thumbnail_urls || [];
 
-  // Independent staggered timer for the hero card as well
   useEffect(() => {
     if (latestGameImages.length < 2) return;
     const initialDelay = Math.random() * 2000;
@@ -393,16 +400,14 @@ export default function Stats({ streamData }) {
   }, [latestGameImages]);
 
   const heroThumb = allImages[0] || '';
-  const latestBgImage = getResizedImage(latestGameImages[latestBgIndex] || heroThumb, 1280);
+  const latestBgImage = latestGameImages[latestBgIndex] || heroThumb;
 
   return (
     <div className="stats-root" style={{ position: 'relative', height: '100%', width: '100%', overflow: 'hidden' }}>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <MosaicBackground allImages={allImages} />
 
-      <div className="stats-scroll" style={{ position: 'relative', zIndex: 10, height: '100%', overflowY: 'auto', paddingTop: '16px' }}>
-        <div className="divider fade-up" />
-
+      <div className="stats-scroll">
         <div className="stats-top-row fade-up delay-1 shadow-2xl">
           <div className="stats-left-col">
             <div className="stat-card">

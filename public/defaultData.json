@@ -1809,11 +1809,11 @@
     "logTitle": 22,
     "logSub": 16,
     "searchBar": 19,
-    "statsMainCount": 2,
+    "statsMainCount": 3,
     "statsTitle": 2.3,
     "statsSub": 1,
     "statsLabel": 0.9,
-    "statsMainLabel": 0.9
+    "statsMainLabel": 1.3
   },
   "layoutPrefs": {
     "cardPadding": 0,
@@ -1842,5 +1842,5 @@
   "modalPanelOpacity": 0.5,
   "mosaicXGap": 0,
   "mosaicYGap": 0,
-  "exportDate": "2026-05-10T15:52:12.392Z"
+  "exportDate": "2026-05-10T16:10:43.289Z"
 }

@@ -1,8 +1,7 @@
 // src/components/Library.jsx
 import React, { useState } from 'react';
-import { flushSync } from 'react-dom';
 import { Search, Clock, SortAsc, SortDesc, Maximize, Trash2, Edit3 } from 'lucide-react';
-import { isLocalPath, parseCustomTimestamp } from '../utils/helpers';
+import { parseCustomTimestamp } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditGameModal } from './modals/EditGameModal';
 import { CrossfadeImage } from './common/UIComponents';
@@ -31,6 +30,9 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
   const [searchFilter, setSearchFilter] = useState('');
   const [editingGame, setEditingGame] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(null);
+  
+  // Custom sorting animation state (Replaces document.startViewTransition)
+  const [isSorting, setIsSorting] = useState(false);
 
   const games = Object.entries(streamData).map(([id, data]) => {
     const cycles = data.cycles || {};
@@ -54,22 +56,19 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
     return 0;
   });
 
+  // Replaces the heavy document.startViewTransition API with a lightweight CSS scale/fade
   const handleSortClick = (newSort) => {
     if (sortBy === newSort) return;
-    if (!document.startViewTransition) {
+    setIsSorting(true);
+    setTimeout(() => {
       setSortBy(newSort);
-      return;
-    }
-    document.startViewTransition(() => {
-      flushSync(() => {
-        setSortBy(newSort);
-      });
-    });
+      // Slight delay ensures DOM paints the new sort before fading back in
+      setTimeout(() => setIsSorting(false), 50); 
+    }, 150); 
   };
 
   const handleEditClick = (game) => setEditingGame(game);
   
-  // Now explicitly passing all manual parameters down
   const handleSaveEdit = (id, newName, newYear, developer, publisher, genres, tags, rawgId) => 
     onEditGame(id, newName, newYear, developer, publisher, genres, tags, rawgId);
 
@@ -152,7 +151,14 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar" style={containerStyle}>
-            <div style={gridStyle}>
+            <div 
+              style={{ 
+                ...gridStyle,
+                opacity: isSorting ? 0 : 1,
+                transform: isSorting ? 'scale(0.97)' : 'scale(1)',
+                transition: 'opacity 0.15s ease-out, transform 0.15s ease-out'
+              }}
+            >
               {sorted.map(game => {
                 const cover = game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
                 const isHovered = hoverState.cardId === game.id;

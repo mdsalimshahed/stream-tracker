@@ -79,24 +79,16 @@ const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
   return shuffled;
 };
 
-// --- Mosaic Component (Now Global with Resource-Saving Pause) ---
-const ROW_COUNT = 6;
-const IMG_W = 110;
-const IMGS_PER_ROW = 16;
+// --- Mosaic Component (Now Global, Hardware Accelerated & CSS-Driven) ---
+const MosaicBackground = React.memo(({ mosaicImages, isPaused }) => {
+  const ROWS = 6;
+  const IMGS_PER_ROW = 40; // High count to support ultra-wide monitors without blank spaces
 
-const MosaicBackground = ({ mosaicImages, isPaused }) => {
-  const rowRefs = useRef([]);
-  const pauseRef = useRef(isPaused);
-
-  useEffect(() => {
-    pauseRef.current = isPaused;
-  }, [isPaused]);
-
-  const rows = useMemo(() => {
+  const rowsConfig = useMemo(() => {
     const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
     const pool = mosaicImages && mosaicImages.length > 0 ? mosaicImages : [fallback];
 
-    return Array.from({ length: ROW_COUNT }, () => {
+    return Array.from({ length: ROWS }, (_, i) => {
       let sequence = [];
       let lastGameId = null;
       
@@ -110,9 +102,7 @@ const MosaicBackground = ({ mosaicImages, isPaused }) => {
             while (foundIdx < shuffled.length && shuffled[foundIdx].gameId === lastGameId) {
               foundIdx++;
             }
-            if (foundIdx === shuffled.length) {
-              foundIdx = 0;
-            }
+            if (foundIdx === shuffled.length) foundIdx = 0;
           }
           
           const selected = shuffled[foundIdx];
@@ -120,12 +110,12 @@ const MosaicBackground = ({ mosaicImages, isPaused }) => {
           lastGameId = selected.gameId;
           shuffled.splice(foundIdx, 1);
         }
-        
         sequence.push(...batch);
       }
       
       let base = sequence.slice(0, IMGS_PER_ROW);
 
+      // Boundary Fix: prevent seamless loop from placing identical games side by side
       if (base.length > 2 && base[base.length - 1].gameId === base[0].gameId) {
         for (let k = base.length - 2; k >= 1; k--) {
           if (
@@ -142,70 +132,42 @@ const MosaicBackground = ({ mosaicImages, isPaused }) => {
         }
       }
 
-      return [...base.map(b => b.url), ...base.map(b => b.url)];
+      const duration = 60 + Math.random() * 60; // Random speed between 60s to 120s per loop
+      const direction = i % 2 === 0 ? 'scrollLeft' : 'scrollRight';
+
+      return {
+        // Duplicate the images array to create the seamless scrolling loop
+        imgs: [...base.map(b => b.url), ...base.map(b => b.url)],
+        duration,
+        direction
+      };
     });
   }, [mosaicImages]);
 
-  useEffect(() => {
-    const STRIP_W = IMGS_PER_ROW * IMG_W;
-    const state = Array.from({ length: ROW_COUNT }, (_, i) => {
-      const base = 0.18 + Math.random() * 0.14;
-      return {
-        dir: i % 2 === 0 ? -1 : 1,
-        pos: i % 2 === 0 ? 0 : -STRIP_W,
-        speed: base,
-        targetSpeed: base,
-        baseSpeed: base,
-        pauseTimer: Math.floor(Math.random() * 300),
-        pauseCountdown: 0,
-      };
-    });
-
-    let rafId;
-    const tick = () => {
-      // Freezes physics engine entirely to save CPU/GPU cycles when hovering/modals open
-      if (!pauseRef.current) {
-        state.forEach((s, i) => {
-          const el = rowRefs.current[i];
-          if (!el) return;
-
-          s.pauseTimer--;
-          if (s.pauseTimer <= 0) {
-            if (Math.random() < 0.35) {
-              s.pauseCountdown = 80 + Math.floor(Math.random() * 120);
-              s.targetSpeed = 0.01 + Math.random() * 0.03;
-            } else {
-              s.targetSpeed = 0.14 + Math.random() * 0.18;
-            }
-            s.pauseTimer = 200 + Math.floor(Math.random() * 400);
-          }
-          if (s.pauseCountdown > 0) {
-            s.pauseCountdown--;
-            if (s.pauseCountdown === 0) s.targetSpeed = s.baseSpeed;
-          }
-
-          s.speed += (s.targetSpeed - s.speed) * 0.025;
-          s.pos += s.dir * s.speed;
-
-          if (s.dir === -1 && s.pos <= -STRIP_W) s.pos += STRIP_W;
-          if (s.dir ===  1 && s.pos >=  0)       s.pos -= STRIP_W;
-
-          el.style.transform = `translateX(${s.pos}px)`;
-        });
-      }
-      rafId = requestAnimationFrame(tick);
-    };
-
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
-
   return (
-    <div className="absolute inset-0 z-[-10] overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 z-[-10] overflow-hidden pointer-events-none bg-black">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes scrollLeft {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
+        }
+        @keyframes scrollRight {
+          0% { transform: translate3d(-50%, 0, 0); }
+          100% { transform: translate3d(0, 0, 0); }
+        }
+      `}} />
       <div className="flex flex-col h-full">
-        {rows.map((imgs, ri) => (
-          <div key={ri} className="flex-1 flex items-stretch will-change-transform" ref={el => { rowRefs.current[ri] = el; }}>
-            {imgs.map((src, ii) => (
+        {rowsConfig.map((row, ri) => (
+          <div 
+            key={ri} 
+            className="flex-1 flex items-stretch will-change-transform" 
+            style={{
+              width: 'max-content',
+              animation: `${row.direction} ${row.duration}s linear infinite`,
+              animationPlayState: isPaused ? 'paused' : 'running'
+            }}
+          >
+            {row.imgs.map((src, ii) => (
               <img key={ii} className="shrink-0 w-[110px] h-full object-cover block" src={src} alt="" loading="lazy" />
             ))}
           </div>
@@ -213,7 +175,7 @@ const MosaicBackground = ({ mosaicImages, isPaused }) => {
       </div>
     </div>
   );
-};
+});
 // ---------------------------------------
 
 const migrateLabels = (data) => {
@@ -350,7 +312,7 @@ export default function App() {
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const hoverTimeoutRef = useRef(null);
   
-  // Custom mosaic pause logic so it doesn't freeze abruptly when fading
+  // Custom mosaic pause logic
   const [mosaicPaused, setMosaicPaused] = useState(false);
 
   const hasCustomSettings = 
@@ -413,14 +375,11 @@ export default function App() {
 
   // Dedicated Mosaic Pause Handler
   useEffect(() => {
-    // If a modal/workspace is open, pause the mosaic instantly
     if (selectedGameId || wCf) {
       setMosaicPaused(true);
       return;
     }
     
-    // If we're hovering over a card, pause the mosaic after a 1-second delay
-    // This allows the mosaic to keep smoothly moving while it fades out behind the card
     if (hoverState.gameId) {
       const timer = setTimeout(() => {
         setMosaicPaused(true);
@@ -485,10 +444,36 @@ export default function App() {
       }
     } else {
       setHoveredImage(null);
+
+      if (globalPlaylistRef.current.length === 0 && Object.keys(streamData).length > 0) {
+        globalPlaylistRef.current = generateGlobalPlaylist(streamData);
+        globalIndexRef.current = 0;
+      }
+
+      const gList = globalPlaylistRef.current;
+      
+      if (gList.length > 0) {
+        setGlobalImage(gList[globalIndexRef.current]?.url || '');
+      }
+
+      if (gList.length > 1) {
+        intervalId = setInterval(() => {
+          let idx = globalIndexRef.current + 1;
+          
+          if (idx >= globalPlaylistRef.current.length) {
+            const lastGameId = globalPlaylistRef.current[globalPlaylistRef.current.length - 1]?.gameId;
+            globalPlaylistRef.current = generateGlobalPlaylist(streamData, lastGameId);
+            idx = 0;
+          }
+          
+          globalIndexRef.current = idx;
+          setGlobalImage(globalPlaylistRef.current[idx].url);
+        }, layoutPrefs.cycleInterval || 4000);
+      }
     }
 
     return () => clearInterval(intervalId);
-  }, [hoverState.gameId, streamData, selectedGameId, wCf]);
+  }, [hoverState.gameId, streamData, selectedGameId, wCf, layoutPrefs.cycleInterval]);
 
   useEffect(() => {
     const recovery = async () => {
@@ -855,7 +840,7 @@ export default function App() {
       `}</style>
 
       <div className="absolute inset-0 z-0 pointer-events-none">
-        {/* Default Global Mosaic Background (With optimized pause logic) */}
+        {/* Default Global Mosaic Background (With strictly CSS pause state) */}
         <div className={`absolute inset-0 transition-opacity duration-1000 ${hoverState.gameId ? 'opacity-0' : 'opacity-100'}`}>
           <MosaicBackground mosaicImages={mosaicImages} isPaused={mosaicPaused} />
         </div>

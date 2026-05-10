@@ -1840,10 +1840,10 @@
     "libTitle": 25,
     "libYear": 20,
     "libBadge": 18,
-    "dashboardTime": 16,
+    "dashboardTime": 19,
     "modalHeader": 41,
-    "logTitle": 17,
-    "logSub": 12,
+    "logTitle": 22,
+    "logSub": 18,
     "searchBar": 35,
     "statsMainCount": 3,
     "statsTitle": 2.3,
@@ -1878,5 +1878,5 @@
   "modalPanelOpacity": 0.5,
   "mosaicXGap": 0,
   "mosaicYGap": 0,
-  "exportDate": "2026-05-10T18:47:24.275Z"
+  "exportDate": "2026-05-10T18:52:32.298Z"
 }

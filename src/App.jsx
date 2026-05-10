@@ -23,7 +23,6 @@ const shuffleArray = (array) => {
   return arr;
 };
 
-// Generates a fully randomized playlist spanning all games, strictly avoiding consecutive same-game images
 const generateGlobalPlaylist = (gamesObj, lastGameId = null) => {
   let pool = [];
   Object.entries(gamesObj).forEach(([id, game]) => {
@@ -43,12 +42,10 @@ const generateGlobalPlaylist = (gamesObj, lastGameId = null) => {
   while (shuffled.length > 0) {
     let foundIdx = 0;
     
-    // Prevent consecutive images from the same game
     if (currentGameId !== null) {
       while (foundIdx < shuffled.length && shuffled[foundIdx].gameId === currentGameId) {
         foundIdx++;
       }
-      // If the only images left belong to the same game, we must use one
       if (foundIdx === shuffled.length) {
         foundIdx = 0;
       }
@@ -63,14 +60,12 @@ const generateGlobalPlaylist = (gamesObj, lastGameId = null) => {
   return playlist;
 };
 
-// Generates a randomized playlist for a single game (used during hover)
 const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
   const uniqueThumbs = [...new Set(images.filter(Boolean))];
   if (uniqueThumbs.length === 0) return [];
   if (uniqueThumbs.length === 1) return uniqueThumbs;
 
   let shuffled = shuffleArray(uniqueThumbs);
-  // Ensure the sequence doesn't seamlessly repeat the same image when starting over
   if (lastImageUrl && shuffled[0] === lastImageUrl) {
     const temp = shuffled[0];
     shuffled[0] = shuffled[1];
@@ -79,10 +74,13 @@ const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
   return shuffled;
 };
 
-// --- Mosaic Component (Now Global, Hardware Accelerated & CSS-Driven) ---
-const MosaicBackground = React.memo(({ mosaicImages, isPaused }) => {
+// --- Mosaic Component (Web Animations API) ---
+const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => {
   const ROWS = 6;
-  const IMGS_PER_ROW = 40; // High count to support ultra-wide monitors without blank spaces
+  const IMGS_PER_ROW = 40;
+
+  const rowRefs = useRef([]);
+  const animationsRef = useRef([]);
 
   const rowsConfig = useMemo(() => {
     const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
@@ -115,7 +113,6 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused }) => {
       
       let base = sequence.slice(0, IMGS_PER_ROW);
 
-      // Boundary Fix: prevent seamless loop from placing identical games side by side
       if (base.length > 2 && base[base.length - 1].gameId === base[0].gameId) {
         for (let k = base.length - 2; k >= 1; k--) {
           if (
@@ -132,11 +129,10 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused }) => {
         }
       }
 
-      const duration = 60 + Math.random() * 60; // Random speed between 60s to 120s per loop
-      const direction = i % 2 === 0 ? 'scrollLeft' : 'scrollRight';
+      const duration = 60000 + Math.random() * 60000; 
+      const direction = i % 2 === 0 ? 'left' : 'right';
 
       return {
-        // Duplicate the images array to create the seamless scrolling loop
         imgs: [...base.map(b => b.url), ...base.map(b => b.url)],
         duration,
         direction
@@ -144,28 +140,57 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused }) => {
     });
   }, [mosaicImages]);
 
+  useEffect(() => {
+    animationsRef.current.forEach(anim => anim.cancel());
+    animationsRef.current = [];
+
+    rowRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const config = rowsConfig[i];
+      
+      const keyframes = config.direction === 'left' 
+        ? [ { transform: 'translate3d(0, 0, 0)' }, { transform: 'translate3d(-50%, 0, 0)' } ]
+        : [ { transform: 'translate3d(-50%, 0, 0)' }, { transform: 'translate3d(0, 0, 0)' } ];
+
+      const animation = el.animate(keyframes, {
+        duration: config.duration,
+        iterations: Infinity,
+        easing: 'linear'
+      });
+
+      animation.playbackRate = isSlowMode ? 0.125 : 1;
+      if (isPaused) animation.pause();
+
+      animationsRef.current.push(animation);
+    });
+
+    return () => {
+      animationsRef.current.forEach(anim => anim.cancel());
+    };
+  }, [rowsConfig]); 
+
+  useEffect(() => {
+    animationsRef.current.forEach(anim => {
+      if (isPaused) {
+        anim.pause();
+      } else {
+        anim.playbackRate = isSlowMode ? 0.125 : 1; 
+        if (anim.playState === 'paused') {
+          anim.play();
+        }
+      }
+    });
+  }, [isPaused, isSlowMode]);
+
   return (
     <div className="absolute inset-0 z-[-10] overflow-hidden pointer-events-none bg-black">
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes scrollLeft {
-          0% { transform: translate3d(0, 0, 0); }
-          100% { transform: translate3d(-50%, 0, 0); }
-        }
-        @keyframes scrollRight {
-          0% { transform: translate3d(-50%, 0, 0); }
-          100% { transform: translate3d(0, 0, 0); }
-        }
-      `}} />
       <div className="flex flex-col h-full">
         {rowsConfig.map((row, ri) => (
           <div 
             key={ri} 
             className="flex-1 flex items-stretch will-change-transform" 
-            style={{
-              width: 'max-content',
-              animation: `${row.direction} ${row.duration}s linear infinite`,
-              animationPlayState: isPaused ? 'paused' : 'running'
-            }}
+            style={{ width: 'max-content' }}
+            ref={el => rowRefs.current[ri] = el}
           >
             {row.imgs.map((src, ii) => (
               <img key={ii} className="shrink-0 w-[110px] h-full object-cover block" src={src} alt="" loading="lazy" />
@@ -290,12 +315,10 @@ export default function App() {
   const [isS, setIsS] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  // Global images pool for the mosaic background
   const mosaicImages = useMemo(() => Object.entries(streamData).flatMap(([id, g]) => 
     (g.thumbnail_urls || []).filter(Boolean).map(url => ({ url, gameId: id }))
   ), [streamData]);
 
-  // Hover state trackers
   const globalPlaylistRef = useRef([]);
   const globalIndexRef = useRef(0);
   const hoverPlaylistRef = useRef({ gameId: null, list: [], index: -1 });
@@ -311,9 +334,46 @@ export default function App() {
   const [hoveredImage, setHoveredImage] = useState(null);
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const hoverTimeoutRef = useRef(null);
-  
-  // Custom mosaic pause logic
   const [mosaicPaused, setMosaicPaused] = useState(false);
+
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    let timeoutId;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => setWindowWidth(window.innerWidth), 100);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  const scaleFactor = Math.max(0.45, windowWidth / 1920);
+
+  const scaledSystemFonts = useMemo(() => {
+    const scaled = { ...systemFonts };
+    const scalableFontKeys = ['libTitle', 'libYear', 'dashboardTime', 'modalHeader', 'logTitle', 'logSub', 'searchBar'];
+    scalableFontKeys.forEach(key => {
+      if (typeof scaled[key] === 'number') {
+        scaled[key] = Math.max(1, scaled[key] * scaleFactor);
+      }
+    });
+    return scaled;
+  }, [systemFonts, scaleFactor]);
+
+  const scaledLayoutPrefs = useMemo(() => {
+    const scaled = { ...layoutPrefs };
+    const scalableLayoutKeys = ['cardPadding', 'cardGap', 'cardMaxWidth', 'containerPaddingX', 'containerPaddingY', 'cardRadius'];
+    scalableLayoutKeys.forEach(key => {
+      if (typeof scaled[key] === 'number') {
+        scaled[key] = Math.max(0, scaled[key] * scaleFactor);
+      }
+    });
+    return scaled;
+  }, [layoutPrefs, scaleFactor]);
 
   const hasCustomSettings = 
     JSON.stringify(systemFonts) !== JSON.stringify(DEFAULT_SYSTEM_FONTS) || 
@@ -373,28 +433,20 @@ export default function App() {
     }
   };
 
-  // Dedicated Mosaic Pause Handler
   useEffect(() => {
-    // 1. If a modal/workspace is open, pause the mosaic instantly
     if (selectedGameId || wCf) {
       setMosaicPaused(true);
       return;
     }
     
-    // 2. If we're hovering over a card, pause the mosaic after a 1-second delay
-    // This allows the mosaic to keep smoothly moving while it fades out behind the card
     if (hoverState.gameId) {
-      const timer = setTimeout(() => {
-        setMosaicPaused(true);
-      }, 1000); 
+      const timer = setTimeout(() => setMosaicPaused(true), 1000); 
       return () => clearTimeout(timer);
     } else {
-      // 3. Immediately resume the mosaic smoothly when we hover out
       setMosaicPaused(false);
     }
   }, [selectedGameId, wCf, hoverState.gameId]);
 
-  // Interval Manager for Hover Images
   useEffect(() => {
     const isPaused = selectedGameId || wCf; 
     if (isPaused) return;
@@ -483,23 +535,38 @@ export default function App() {
     const recovery = async () => {
       const dataCopy = JSON.parse(JSON.stringify(streamData));
       let changed = false;
+      
       for (const [id, game] of Object.entries(dataCopy)) {
         if (!game.thumbnail_urls || game.thumbnail_urls.length < 2 || !game.details) {
           try {
-            const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-            const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-            const d = await res.json();
-            if (d.results && d.results[0]) {
-              const bestMatch = d.results[0];
-              const detailRes = await fetch(`https://api.rawg.io/api/games/${bestMatch.id}?key=${RAWG_API_KEY}`);
-              const details = await detailRes.json();
-              const sRes = await fetch(`https://api.rawg.io/api/games/${bestMatch.id}/screenshots?key=${RAWG_API_KEY}`);
-              const sData = await sRes.json();
-              if (sData.results) {
-                const newUrls = [bestMatch.background_image, ...sData.results.map(x => x.image)].filter(Boolean).slice(0, 15);
-                game.thumbnail_urls = newUrls;
-                changed = true;
+            let targetId = id;
+            let cover = game.thumbnail_urls?.[0];
+            
+            if (!/^\d+$/.test(targetId)) {
+              const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+              const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+              const d = await res.json();
+              if (d.results && d.results[0]) {
+                targetId = d.results[0].id;
+                if (!cover) cover = d.results[0].background_image;
+              } else {
+                continue;
               }
+            }
+            
+            const detailRes = await fetch(`https://api.rawg.io/api/games/${targetId}?key=${RAWG_API_KEY}`);
+            const details = await detailRes.json();
+            
+            const sRes = await fetch(`https://api.rawg.io/api/games/${targetId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+            const sData = await sRes.json();
+            
+            if (sData.results) {
+              const newUrls = [cover || details.background_image, ...sData.results.map(x => x.image)].filter(Boolean);
+              game.thumbnail_urls = [...new Set(newUrls)];
+              changed = true;
+            }
+            
+            if (!game.details || Object.keys(game.details).length === 0) {
               game.details = {
                 developer: details.developers?.[0]?.name || 'Unknown',
                 publisher: details.publishers?.[0]?.name || 'Unknown',
@@ -514,6 +581,7 @@ export default function App() {
       }
       if (changed) setStreamData(dataCopy);
     };
+    
     if (Object.keys(streamData).length > 0) recovery();
   }, []);
 
@@ -579,8 +647,12 @@ export default function App() {
       setCurrentView('library');
       return;
     }
+    
+    notify('Fetching game metadata & screenshots...', 'info');
+    
     const year = g.released ? g.released.substring(0, 4) : new Date().getFullYear().toString();
     const cover = g.background_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
+    
     let details = {
       developer: g.developers?.[0]?.name || 'Unknown',
       publisher: 'Unknown',
@@ -588,9 +660,13 @@ export default function App() {
       genres: g.genres?.map(gn => gn.name).join(', ') || 'Unknown',
       tags: g.tags?.map(t => t.name).join(', ') || 'Unknown'
     };
+    
+    let thumbnails = [cover];
+
     try {
       const detailRes = await fetch(`https://api.rawg.io/api/games/${g.id}?key=${RAWG_API_KEY}`);
       const detailsData = await detailRes.json();
+      
       details = {
         developer: detailsData.developers?.[0]?.name || details.developer,
         publisher: detailsData.publishers?.[0]?.name || 'Unknown',
@@ -598,13 +674,25 @@ export default function App() {
         genres: detailsData.genres?.map(gn => gn.name).join(', ') || details.genres,
         tags: detailsData.tags?.map(t => t.name).join(', ') || details.tags,
       };
-    } catch(e) {}
-    setStreamData({
-      ...streamData,
+      
+      const sRes = await fetch(`https://api.rawg.io/api/games/${g.id}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+      const sData = await sRes.json();
+      
+      if (sData.results) {
+        thumbnails = [cover, ...sData.results.map(x => x.image)].filter(Boolean);
+        thumbnails = [...new Set(thumbnails)];
+      }
+      notify(`Successfully added ${g.name}!`, 'success');
+    } catch(e) {
+      notify(`Added ${g.name}, but some images failed to load`, 'error');
+    }
+
+    setStreamData(prev => ({
+      ...prev,
       [rid]: {
         game_name: g.name,
         release_year: year,
-        thumbnail_urls: [cover],
+        thumbnail_urls: thumbnails,
         cycles: {
           main: {
             stream_count: 0,
@@ -617,7 +705,8 @@ export default function App() {
         },
         details: details
       }
-    });
+    }));
+    
     openGameProfile(rid);
   };
 
@@ -629,7 +718,7 @@ export default function App() {
       const res = await fetch(`https://api.rawg.io/api/games/${rawgId}?key=${RAWG_API_KEY}`);
       const data = await res.json();
       if (data.id) {
-        const sRes = await fetch(`https://api.rawg.io/api/games/${data.id}/screenshots?key=${RAWG_API_KEY}`);
+        const sRes = await fetch(`https://api.rawg.io/api/games/${data.id}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
         const sData = await sRes.json();
         const nd = JSON.parse(JSON.stringify(streamData));
         nd[gameId].game_name = data.name;
@@ -844,12 +933,10 @@ export default function App() {
       `}</style>
 
       <div className="absolute inset-0 z-0 pointer-events-none">
-        {/* Default Global Mosaic Background (With strictly CSS pause state) */}
         <div className={`absolute inset-0 transition-opacity duration-1000 ${hoverState.gameId ? 'opacity-0' : 'opacity-100'}`}>
-          <MosaicBackground mosaicImages={mosaicImages} isPaused={mosaicPaused} />
+          <MosaicBackground mosaicImages={mosaicImages} isPaused={mosaicPaused} isSlowMode={currentView !== 'stats'} />
         </div>
 
-        {/* Hover State Single Game Background */}
         <div className={`absolute inset-0 transition-opacity duration-1000 ${hoverState.gameId ? 'opacity-100' : 'opacity-0'}`}>
           <CrossfadeImage 
             src={globalImage || 'https://placehold.co/1920x1080/1a1a1a/333333?text=Loading'} 
@@ -858,7 +945,6 @@ export default function App() {
           />
         </div>
 
-        {/* Universal Dimming Overlay (z-10 guarantees it always sits on top of all backgrounds) */}
         <div 
           className="absolute inset-0 bg-black transition-opacity duration-300 z-10 pointer-events-none" 
           style={{ opacity: layoutPrefs.bgDimming ?? 0.5 }} 
@@ -890,8 +976,8 @@ export default function App() {
             <Dashboard
               streamData={streamData}
               openGameProfile={openGameProfile}
-              systemFonts={systemFonts}
-              layoutPrefs={layoutPrefs}
+              systemFonts={scaledSystemFonts}
+              layoutPrefs={scaledLayoutPrefs}
               globalImage={globalImage}
               hoveredImage={hoveredImage}
               hoverState={hoverState}
@@ -907,8 +993,8 @@ export default function App() {
               onDeleteGame={deleteGame}
               onUpdateGameLink={updateGameLink}
               onEditGame={editGameDetails}
-              systemFonts={systemFonts}
-              layoutPrefs={layoutPrefs}
+              systemFonts={scaledSystemFonts}
+              layoutPrefs={scaledLayoutPrefs}
               globalImage={globalImage}
               hoveredImage={hoveredImage}
               hoverState={hoverState}
@@ -920,27 +1006,27 @@ export default function App() {
           {currentView === 'stats' && (
             <Stats 
               streamData={streamData} 
-              systemFonts={systemFonts}
-              layoutPrefs={layoutPrefs}
+              systemFonts={scaledSystemFonts}
+              layoutPrefs={scaledLayoutPrefs}
             />
           )}
           {currentView === 'search' && (() => {
             const containerStyle = {
-              paddingLeft: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,
-              paddingRight: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,
-              paddingTop: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
-              paddingBottom: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
+              paddingLeft: `clamp(16px, ${scaledLayoutPrefs.containerPaddingX}px, 5vw)`,
+              paddingRight: `clamp(16px, ${scaledLayoutPrefs.containerPaddingX}px, 5vw)`,
+              paddingTop: `clamp(16px, ${scaledLayoutPrefs.containerPaddingY}px, 5vh)`,
+              paddingBottom: `clamp(16px, ${scaledLayoutPrefs.containerPaddingY}px, 5vh)`,
             };
 
             const gridStyle = {
               display: 'grid',
-              gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${layoutPrefs.cardMaxWidth || 250}px), 1fr))`,
-              gap: `${layoutPrefs.cardGap}px`
+              gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${scaledLayoutPrefs.cardMaxWidth || 250}px), 1fr))`,
+              gap: `${scaledLayoutPrefs.cardGap}px`
             };
 
             const cardStyle = {
-              borderRadius: layoutPrefs.cardRounded ? `${layoutPrefs.cardRadius}px` : '0px',
-              backgroundColor: `rgba(0, 0, 0, ${layoutPrefs.panelFillOpacity ?? 0.1})`,
+              borderRadius: scaledLayoutPrefs.cardRounded ? `${scaledLayoutPrefs.cardRadius}px` : '0px',
+              backgroundColor: `rgba(0, 0, 0, ${scaledLayoutPrefs.panelFillOpacity ?? 0.1})`,
               backdropFilter: 'blur(8px)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               transition: 'all 0.2s',
@@ -955,7 +1041,7 @@ export default function App() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 z-10" size={22} />
                     <input
                       type="text"
-                      style={{ fontSize: `${systemFonts.searchBar}px` }}
+                      style={{ fontSize: `${scaledSystemFonts.searchBar}px` }}
                       className="w-full bg-black/60 border border-white/10 rounded-none py-4 pl-12 pr-24 text-lg focus:outline-none transition-colors shadow-inner text-white peer relative z-0"
                       placeholder="Search RAWG database..."
                       value={sQ}
@@ -981,12 +1067,12 @@ export default function App() {
                             <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
                           </div>
                           
-                          <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
-                            <h3 className="font-bold tracking-tight flex-1 drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>{g.name}</h3>
-                            <p className="text-white/80 mt-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libYear}px` }}>
+                          <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${scaledLayoutPrefs.cardPadding}px, 20px)` }}>
+                            <h3 className="font-bold tracking-tight flex-1 drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${scaledSystemFonts.libTitle}px` }}>{g.name}</h3>
+                            <p className="text-white/80 mt-1 drop-shadow-md" style={{ fontSize: `${scaledSystemFonts.libYear}px` }}>
                               {g.developers?.map(d => d.name).join(', ') || 'Unknown Developer'}
                             </p>
-                            <p className="text-white/60 mt-1 mb-auto" style={{ fontSize: `${Math.max(10, systemFonts.libYear - 2)}px` }}>
+                            <p className="text-white/60 mt-1 mb-auto" style={{ fontSize: `${Math.max(10, scaledSystemFonts.libYear - 2)}px` }}>
                               {g.released ? formatReleaseDate(g.released) : 'Unreleased'}
                             </p>
                             
@@ -1038,13 +1124,13 @@ export default function App() {
           onDeleteCycle={deleteCycle}
           onDeleteTimestamp={deleteTimestamp}
           onNotify={notify}
-          systemFonts={systemFonts}
+          systemFonts={scaledSystemFonts}
           modalBgIntensity={modalBgIntensity}
           modalPanelOpacity={modalPanelOpacity}
           initialRunId={initialRunForModal}
           onUpdateCycle={updateCycle}
           onAddCycle={addCycle}
-          layoutPrefs={layoutPrefs}
+          layoutPrefs={scaledLayoutPrefs}
         />
       )}
 
@@ -1063,7 +1149,7 @@ export default function App() {
           setConfig={setThumbnailConfig}
           onNotify={notify}
           selectedStreamNumber={wCf.selectedStreamNumber}
-          systemFonts={systemFonts}
+          systemFonts={scaledSystemFonts}
         />
       )}
     </div>

@@ -36,16 +36,20 @@ const useDynamicTime = (timestampMs) => {
       const diffMin = Math.floor(diffSec / 60);
       const diffHour = Math.floor(diffMin / 60);
       const diffDay = Math.floor(diffHour / 24);
-      if (diffSec < 60) setTimeText(`${diffSec}s ago`);
-      else if (diffMin < 60) setTimeText(`${diffMin}m ago`);
-      else if (diffHour < 24) setTimeText(`${diffHour}h ago`);
-      else setTimeText(`${diffDay}d ago`);
+      
+      if (diffSec < 60) setTimeText(`${diffSec} second${diffSec !== 1 ? 's' : ''} ago`);
+      else if (diffMin < 60) setTimeText(`${diffMin} minute${diffMin !== 1 ? 's' : ''} ago`);
+      else if (diffHour < 24) setTimeText(`${diffHour} hour${diffHour !== 1 ? 's' : ''} ago`);
+      else setTimeText(`${diffDay} day${diffDay !== 1 ? 's' : ''} ago`);
     };
+    
     update();
+    
     const d = Math.floor((Date.now() - timestampMs) / 1000);
     if (d < 60) interval = setInterval(update, 1000);
     else if (d < 3600) interval = setInterval(update, 60000);
     else interval = setInterval(update, 3600000);
+    
     return () => clearInterval(interval);
   }, [timestampMs]);
   return timeText;
@@ -174,7 +178,7 @@ const STYLES = `
   .top-number { font-size: clamp(2rem, calc(var(--sz-main) * 1.5vmin), 6rem); }
   .stat-label { font-size: clamp(0.7rem, calc(var(--sz-main-label) * 0.9vmin), 2rem); letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
   
-  .latest-title { font-size: clamp(1.5rem, calc(var(--sz-title) * 1.5vmin), 4rem); font-weight: 600; margin-bottom: 8px; transition: color 0.3s; }
+  .latest-title { font-size: clamp(1.2rem, calc(var(--sz-title) * 1.5vmin), 4rem); font-weight: 600; margin-bottom: 8px; transition: color 0.3s; }
   .latest-sub-3 { font-size: clamp(0.85rem, calc(var(--sz-sub) * 1vmin), 2rem); color: var(--c-accent2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .latest-sub-1, .latest-sub-2 { font-size: clamp(0.8rem, calc(var(--sz-sub) * 0.8vmin), 2rem); color: var(--c-muted); margin-top: 6px; }
   .latest-sub-time { font-weight: bold; color: var(--c-text); font-size: 1.25em; }
@@ -429,7 +433,7 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
               <div className="stat-number top-number">
                 {totalStreamsCount.toLocaleString()}
               </div>
-              <div className="stat-label">Streams</div>
+              <div className="stat-label">{totalStreams === 1 ? 'Stream' : 'Streams'}</div>
             </div>
             <div className="stat-card">
               <div className="stat-number top-number">

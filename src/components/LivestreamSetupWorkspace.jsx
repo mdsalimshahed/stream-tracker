@@ -1,6 +1,6 @@
 // src/components/LivestreamSetupWorkspace.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ChevronLeft, ImagePlus, Globe, Plus, Save, Loader2, Trash2, Upload } from 'lucide-react';
+import { X, ChevronLeft, ImagePlus, Globe, Plus, Save, Loader2, Trash2, Bold, Italic } from 'lucide-react';
 import ThumbnailCanvas from './ThumbnailCanvas';
 import { isLocalPath, generateStreamTitle, generateTimestamp } from '../utils/helpers';
 import { RAWG_API_KEY } from '../utils/constants';
@@ -30,12 +30,27 @@ export default function LivestreamSetupWorkspace({
   const [cF, setCF] = useState(null);
   const [selEl, setSelEl] = useState('title');
   const [urlInput, setUrlInput] = useState('');
+  const [embedCode, setEmbedCode] = useState('');
   const [hasCycleChanges, setHasCycleChanges] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState(null);
 
   const validI = images.filter(img => !isLocalPath(img));
   const workspaceCanvasRef = useRef(null);
   const sessionSaved = useRef(false);
+
+  // Inject saved Google Fonts into the document head immediately on component mount
+  useEffect(() => {
+    if (config.savedFonts) {
+      config.savedFonts.forEach(font => {
+        if (!document.querySelector(`link[href="${font.url}"]`)) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = font.url;
+          document.head.appendChild(link);
+        }
+      });
+    }
+  }, [config.savedFonts]);
 
   const saveImagesToStorage = (newImages) => {
     const updatedGame = JSON.parse(JSON.stringify(streamData[gameId]));
@@ -130,18 +145,81 @@ export default function LivestreamSetupWorkspace({
     });
   };
 
-  const handleFontUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const buffer = await file.arrayBuffer();
-      const font = new FontFace('UFont', buffer);
-      await font.load();
-      document.fonts.add(font);
-      setCF('UFont');
-    } catch (err) {
-      alert("Font error");
+  // Google Fonts extraction and gallery management logic
+  const handleAddGoogleFont = async () => {
+    if (!embedCode.trim()) return;
+    const text = embedCode.trim();
+    
+    // Support parsing both the full HTML <link> embed block, or a direct URL paste
+    const urlMatch = text.match(/(https:\/\/fonts\.googleapis\.com\/css2\?[^"'\s>]+)/);
+    // Replace HTML entities like &amp; just in case it was copied as raw HTML text
+    const urlString = urlMatch ? urlMatch[1].replace(/&amp;/g, '&') : text.replace(/&amp;/g, '&');
+    
+    if (!urlString.includes('fonts.googleapis.com/css2')) {
+       onNotify('Invalid Google Fonts code or URL', 'error');
+       return;
     }
+    
+    try {
+      const parsedUrl = new URL(urlString);
+      const families = parsedUrl.searchParams.getAll('family');
+      
+      if (families.length === 0) {
+         onNotify('No font families found in URL', 'error');
+         return;
+      }
+
+      let addedCount = 0;
+      const currentFonts = config.savedFonts || [];
+      let newFontsList = [...currentFonts];
+      const newFamilies = [];
+
+      families.forEach(famParam => {
+        // family parameter might look like "Oswald:wght@200..700"
+        // We only want the core name part before any colons
+        const rawName = famParam.split(':')[0];
+        const cleanName = rawName.replace(/\+/g, ' ');
+
+        if (!newFontsList.some(f => f.family === cleanName)) {
+          newFontsList.push({ family: cleanName, url: urlString });
+          newFamilies.push(cleanName);
+          addedCount++;
+        }
+      });
+
+      if (addedCount > 0) {
+         // Sort alphabetically before saving
+         newFontsList.sort((a, b) => a.family.localeCompare(b.family));
+         setConfig(p => ({ ...p, savedFonts: newFontsList }));
+         
+         if (!document.querySelector(`link[href="${urlString}"]`)) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = urlString;
+            link.onload = async () => {
+              try {
+                // Await the browser registering the font into memory before re-rendering canvas
+                await document.fonts.load(`16px "${newFamilies[0]}"`);
+              } catch(e) {}
+              setCF(newFamilies[0]);
+            };
+            document.head.appendChild(link);
+         } else {
+            setCF(newFamilies[0]);
+         }
+         onNotify(`Added ${addedCount} new font(s)`, 'success');
+      } else {
+         onNotify('Font(s) already in gallery', 'info');
+      }
+      setEmbedCode('');
+    } catch (e) {
+      onNotify('Failed to parse URL', 'error');
+    }
+  };
+
+  const handleDeleteFont = (family) => {
+    setConfig(p => ({ ...p, savedFonts: (p.savedFonts || []).filter(f => f.family !== family) }));
+    if (cF === family) setCF(null);
   };
 
   const handleSaveSession = () => {
@@ -166,153 +244,223 @@ export default function LivestreamSetupWorkspace({
     }
   };
 
+  // Ensure fonts are sorted alphabetically for rendering
+  const sortedFonts = [...(config.savedFonts || [])].sort((a, b) => a.family.localeCompare(b.family));
+
   return (
-    <div className="fixed inset-0 z-50 flex bg-black overflow-hidden">
-      <div className="w-full h-full bg-neutral-900 flex flex-col">
-        {/* Workspace Header */}
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-neutral-900/80 backdrop-blur-sm shrink-0 gap-3">
-          <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-            <button onClick={handleClose} className="p-2 hover:bg-white/10 rounded-full transition bg-white/5 shrink-0">
-              <ChevronLeft size={20} />
-            </button>
-            <div className="overflow-hidden w-full">
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight truncate w-full">{game.game_name}</h2>
-              <p className="text-xs text-white/50 truncate w-full">{cycleDisplayName} • Episode #{nC}</p>
+    <>
+      <div className="fixed inset-0 z-50 flex bg-black overflow-hidden">
+        <div className="w-full h-full bg-neutral-900 flex flex-col">
+          {/* Workspace Header */}
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-neutral-900/80 backdrop-blur-sm shrink-0 gap-3">
+            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+              <button onClick={handleClose} className="p-2 hover:bg-white/10 rounded-full transition bg-white/5 shrink-0">
+                <ChevronLeft size={20} />
+              </button>
+              <div className="overflow-hidden w-full">
+                <h2 className="text-lg sm:text-xl font-bold tracking-tight truncate w-full">{game.game_name}</h2>
+                <p className="text-xs text-white/50 truncate w-full">{cycleDisplayName} • Episode #{nC}</p>
+              </div>
+            </div>
+            <div className="flex gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
+              <button onClick={handleSaveSession} className="flex-1 sm:flex-none justify-center bg-emerald-600 hover:bg-emerald-500 px-4 sm:px-5 py-2 rounded-lg font-medium flex items-center gap-2 transition shadow-lg">
+                <Save size={16} /> <span className="hidden sm:inline">Save</span> Session
+              </button>
+              <button onClick={handleClose} className="p-2 hover:bg-white/10 rounded-lg sm:rounded-full transition bg-white/5 flex items-center justify-center">
+                <X size={20} />
+              </button>
             </div>
           </div>
-          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
-            <button onClick={handleSaveSession} className="flex-1 sm:flex-none justify-center bg-emerald-600 hover:bg-emerald-500 px-4 sm:px-5 py-2 rounded-lg font-medium flex items-center gap-2 transition shadow-lg">
-              <Save size={16} /> <span className="hidden sm:inline">Save</span> Session
-            </button>
-            <button onClick={handleClose} className="p-2 hover:bg-white/10 rounded-lg sm:rounded-full transition bg-white/5 flex items-center justify-center">
-              <X size={20} />
-            </button>
-          </div>
-        </div>
 
-        <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
-          
-          {/* Top/Left gallery */}
-          <div className="w-full lg:w-1/4 xl:w-1/5 lg:min-w-[220px] lg:max-w-[320px] h-auto border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col bg-neutral-900/50 shrink-0">
-            <div className="p-3 lg:p-4 space-y-3 lg:space-y-4 shrink-0">
-              <div className="flex gap-2">
-                <label className="flex-1 bg-white/5 hover:bg-white/10 rounded-lg p-2 text-center cursor-pointer transition">
-                  <ImagePlus size={16} className="mx-auto" />
-                  <input type="file" accept="image/*" className="hidden" onChange={handleUp} />
-                </label>
-                <button onClick={handleFindOnline} className="flex-1 bg-white/5 hover:bg-white/10 rounded-lg p-2 transition">
-                  <Globe size={16} className="mx-auto" />
-                </button>
-              </div>
-              <div className="flex gap-2 hidden lg:flex">
-                <input type="text" placeholder="Image URL..." value={urlInput} onChange={(e) => setUrlInput(e.target.value)} className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm" />
-                <button onClick={handleAddUrlImage} className="bg-blue-600 hover:bg-blue-500 px-3 rounded-lg transition"><Plus size={16} /></button>
-              </div>
-            </div>
+          <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
             
-            <div className="flex-1 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto custom-scrollbar px-3 lg:px-4 pb-3 lg:pb-4 flex flex-row lg:flex-col gap-3 lg:space-y-3 min-h-[140px] lg:min-h-0 items-center lg:items-stretch">
-              {loadingS ? (
-                <div className="flex w-full h-full items-center justify-center py-6"><Loader2 className="animate-spin text-white/40" size={28} /></div>
-              ) : (
-                images.map((img, idx) => (
-                  <div key={idx} className="w-32 lg:w-full shrink-0 relative aspect-video cursor-pointer rounded-lg overflow-hidden border-2 transition-all group/image" style={{ borderColor: selImg === img ? '#3b82f6' : 'transparent' }}>
-                    <img src={img} onClick={() => setSelImg(img)} className="w-full h-full object-cover" />
-                    <button onClick={() => handleDeleteImage(idx, img)} className="absolute bottom-1 right-1 lg:bottom-2 lg:right-2 p-1.5 bg-black/70 rounded-full opacity-0 group-hover/image:opacity-100 transition hover:bg-red-600"><Trash2 size={12} /></button>
-                  </div>
-                ))
-              )}
+            {/* Top/Left gallery */}
+            <div className="w-full lg:w-1/4 xl:w-1/5 lg:min-w-[220px] lg:max-w-[320px] h-auto border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col bg-neutral-900/50 shrink-0">
+              <div className="p-3 lg:p-4 space-y-3 lg:space-y-4 shrink-0">
+                <div className="flex gap-2">
+                  <label className="flex-1 bg-white/5 hover:bg-white/10 rounded-lg p-2 text-center cursor-pointer transition">
+                    <ImagePlus size={16} className="mx-auto" />
+                    <input type="file" accept="image/*" className="hidden" onChange={handleUp} />
+                  </label>
+                  <button onClick={handleFindOnline} className="flex-1 bg-white/5 hover:bg-white/10 rounded-lg p-2 transition">
+                    <Globe size={16} className="mx-auto" />
+                  </button>
+                </div>
+                <div className="flex gap-2 hidden lg:flex">
+                  <input type="text" placeholder="Image URL..." value={urlInput} onChange={(e) => setUrlInput(e.target.value)} className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm" />
+                  <button onClick={handleAddUrlImage} className="bg-blue-600 hover:bg-blue-500 px-3 rounded-lg transition"><Plus size={16} /></button>
+                </div>
+              </div>
+              
+              <div className="flex-1 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto custom-scrollbar px-3 lg:px-4 pb-3 lg:pb-4 flex flex-row lg:flex-col gap-3 lg:space-y-3 min-h-[140px] lg:min-h-0 items-center lg:items-stretch">
+                {loadingS ? (
+                  <div className="flex w-full h-full items-center justify-center py-6"><Loader2 className="animate-spin text-white/40" size={28} /></div>
+                ) : (
+                  images.map((img, idx) => (
+                    <div key={idx} className="w-32 lg:w-full shrink-0 relative aspect-video cursor-pointer rounded-lg overflow-hidden border-2 transition-all group/image" style={{ borderColor: selImg === img ? '#3b82f6' : 'transparent' }}>
+                      <img src={img} onClick={() => setSelImg(img)} className="w-full h-full object-cover" />
+                      <button onClick={() => handleDeleteImage(idx, img)} className="absolute bottom-1 right-1 lg:bottom-2 lg:right-2 p-1.5 bg-black/70 rounded-full opacity-0 group-hover/image:opacity-100 transition hover:bg-red-600"><Trash2 size={12} /></button>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Center: Canvas – now clipped to prevent bleeding */}
-          <div className="flex-1 flex flex-col bg-black min-h-[300px] shrink-0 lg:min-h-0 overflow-hidden">
-            <div className="mx-4 sm:mx-8 mt-4 p-2 sm:p-3 bg-white/10 rounded-lg text-center cursor-pointer hover:bg-white/20 transition" onClick={() => handleCopy(false)}>
-              <p className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wider">Stream Title (Click to Copy)</p>
-              <p className="text-white font-medium text-xs sm:text-sm break-all mt-1">{title}</p>
+            {/* Center: Canvas */}
+            <div className="flex-1 flex flex-col bg-black min-h-[300px] shrink-0 lg:min-h-0 overflow-hidden">
+              <div className="mx-4 sm:mx-8 mt-4 p-2 sm:p-3 bg-white/10 rounded-lg text-center cursor-pointer hover:bg-white/20 transition" onClick={() => handleCopy(false)}>
+                <p className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wider">Stream Title (Click to Copy)</p>
+                <p className="text-white font-medium text-xs sm:text-sm break-all mt-1">{title}</p>
+              </div>
+              <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
+                {selImg ? (
+                  <ThumbnailCanvas
+                    canvasRef={workspaceCanvasRef}
+                    bgImageUrl={selImg}
+                    gameName={game.game_name}
+                    cycleName={cycleDisplayName}
+                    streamCount={nC}
+                    config={config}
+                    customFont={cF}
+                  />
+                ) : (
+                  <div className="text-white/30 text-center text-sm">Select an image from the gallery</div>
+                )}
+              </div>
             </div>
-            <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
-              {selImg ? (
-                <ThumbnailCanvas
-                  canvasRef={workspaceCanvasRef}
-                  bgImageUrl={selImg}
-                  gameName={game.game_name}
-                  cycleName={cycleDisplayName}
-                  streamCount={nC}
-                  config={config}
-                  customFont={cF}
-                />
-              ) : (
-                <div className="text-white/30 text-center text-sm">Select an image from the gallery</div>
-              )}
-            </div>
-          </div>
 
-          {/* Bottom/Right panel: Controls */}
-          <div className="w-full lg:w-1/4 xl:w-1/4 lg:min-w-[280px] lg:max-w-[400px] border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col bg-neutral-900/50 shrink-0 lg:h-full">
-            <div className="p-3 lg:p-4 border-b border-white/10 shrink-0">
-              <select value={selEl} onChange={(e) => setSelEl(e.target.value)} className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-sm outline-none focus:border-blue-500 shadow-inner">
-                <option value="title">Game Title</option>
-                <option value="stream">Livestream #</option>
-                <option value="cycle">Run Label</option>
-                <option value="layout">Positioning</option>
-                <option value="font">Custom Font</option>
-              </select>
-            </div>
-            <div className="flex-1 overflow-visible lg:overflow-y-auto lg:custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
-              {selEl === 'title' && (
-                <>
-                  <div className="flex gap-2">
-                    <button onClick={() => setConfig(p => ({...p, splitTitle: !p.splitTitle}))} className={`flex-1 py-2 rounded-lg text-xs font-medium transition shadow ${config.splitTitle ? 'bg-blue-600' : 'bg-white/10'}`}>Split Title</button>
-                    <button onClick={() => setConfig(p => ({...p, forceInvertTitle: !p.forceInvertTitle}))} className={`flex-1 py-2 rounded-lg text-xs font-medium transition shadow ${config.forceInvertTitle ? 'bg-amber-600' : 'bg-white/10'}`}>Invert Colors</button>
+            {/* Bottom/Right panel: Controls */}
+            <div className="w-full lg:w-1/4 xl:w-1/4 lg:min-w-[280px] lg:max-w-[400px] border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col bg-neutral-900/50 shrink-0 lg:h-full">
+              <div className="p-3 lg:p-4 border-b border-white/10 shrink-0">
+                <select value={selEl} onChange={(e) => setSelEl(e.target.value)} className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-sm outline-none focus:border-blue-500 shadow-inner">
+                  <option value="title">Game Title</option>
+                  <option value="stream">Livestream #</option>
+                  <option value="cycle">Run Label</option>
+                  <option value="layout">Positioning</option>
+                  <option value="font">Custom Font</option>
+                </select>
+              </div>
+              
+              <div className="flex-1 flex flex-col overflow-hidden pb-12 lg:pb-0">
+                {selEl === 'title' && (
+                  <div className="flex-1 overflow-y-auto lg:custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
+                    <div className="flex gap-2">
+                      <button onClick={() => setConfig(p => ({...p, titleBold: !p.titleBold}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.titleBold ? 'bg-blue-600' : 'bg-white/10'}`}><Bold size={16} /> Bold</button>
+                      <button onClick={() => setConfig(p => ({...p, titleItalic: !p.titleItalic}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.titleItalic ? 'bg-blue-600' : 'bg-white/10'}`}><Italic size={16} /> Italic</button>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => setConfig(p => ({...p, splitTitle: !p.splitTitle}))} className={`flex-1 py-2 rounded-lg text-xs font-medium transition shadow ${config.splitTitle ? 'bg-blue-600' : 'bg-white/10'}`}>Split Title</button>
+                      <button onClick={() => setConfig(p => ({...p, forceInvertTitle: !p.forceInvertTitle}))} className={`flex-1 py-2 rounded-lg text-xs font-medium transition shadow ${config.forceInvertTitle ? 'bg-amber-600' : 'bg-white/10'}`}>Invert Colors</button>
+                    </div>
+                    <RangeControl label="Title Size" value={config.titleSize} min={40} max={200} onChange={v => setConfig(p => ({...p, titleSize: v}))} />
+                    <RangeControl label="Subtitle Size" value={config.subtitleSize} min={40} max={150} onChange={v => setConfig(p => ({...p, subtitleSize: v}))} />
+                    <RangeControl label="Outline Weight" value={config.strokeWidth} min={1} max={30} onChange={v => setConfig(p => ({...p, strokeWidth: v}))} />
+                    <ColorOverride title="Manual Colors" element="title" config={config} toggle={() => setConfig(p => ({...p, manualColors: {...p.manualColors, title: !p.manualColors.title}}))} onChange={(el, k, v) => setConfig(p => ({...p, colors: {...p.colors, [`${el}${k}`]: v}}))} />
                   </div>
-                  <RangeControl label="Title Size" value={config.titleSize} min={40} max={200} onChange={v => setConfig(p => ({...p, titleSize: v}))} />
-                  <RangeControl label="Subtitle Size" value={config.subtitleSize} min={40} max={150} onChange={v => setConfig(p => ({...p, subtitleSize: v}))} />
-                  <RangeControl label="Outline Weight" value={config.strokeWidth} min={1} max={30} onChange={v => setConfig(p => ({...p, strokeWidth: v}))} />
-                  <ColorOverride title="Manual Colors" element="title" config={config} toggle={() => setConfig(p => ({...p, manualColors: {...p.manualColors, title: !p.manualColors.title}}))} onChange={(el, k, v) => setConfig(p => ({...p, colors: {...p.colors, [`${el}${k}`]: v}}))} />
-                </>
-              )}
-              {selEl === 'stream' && (
-                <>
-                  <RangeControl label="Scale" value={config.streamCountSize} min={40} max={280} onChange={v => setConfig(p => ({...p, streamCountSize: v}))} />
-                  <ColorOverride title="Manual Colors" element="stream" config={config} toggle={() => setConfig(p => ({...p, manualColors: {...p.manualColors, streamCount: !p.manualColors.streamCount}}))} onChange={(el, k, v) => setConfig(p => ({...p, colors: {...p.colors, [`${el}${k}`]: v}}))} />
-                </>
-              )}
-              {selEl === 'cycle' && (
-                <>
-                  <RangeControl label="Scale" value={config.cycleSize} min={30} max={220} onChange={v => setConfig(p => ({...p, cycleSize: v}))} />
-                  <ColorOverride title="Manual Colors" element="cycle" config={config} toggle={() => setConfig(p => ({...p, manualColors: {...p.manualColors, cycle: !p.manualColors.cycle}}))} onChange={(el, k, v) => setConfig(p => ({...p, colors: {...p.colors, [`${el}${k}`]: v}}))} />
-                </>
-              )}
-              {selEl === 'layout' && (
-                <>
-                  <RangeControl label="Title Y Offset" value={config.titleYOffset} min={10} max={550} onChange={v => setConfig(p => ({...p, titleYOffset: v}))} />
-                  <RangeControl label="Title Spacing" value={config.titleSpacing} min={0} max={300} onChange={v => setConfig(p => ({...p, titleSpacing: v}))} />
-                  <button onClick={() => setConfig(p => ({...p, showBottomShadow: !p.showBottomShadow}))} className={`w-full py-2 rounded-lg text-xs font-medium transition shadow ${config.showBottomShadow ? 'bg-emerald-600' : 'bg-white/10'}`}>Toggle Shadow</button>
-                  <RangeControl label="Left/Right Margin" value={config.bottomPaddingX} min={0} max={900} onChange={v => setConfig(p => ({...p, bottomPaddingX: v}))} />
-                  <RangeControl label="Bottom Margin" value={config.bottomPaddingY} min={0} max={600} onChange={v => setConfig(p => ({...p, bottomPaddingY: v}))} />
-                  <RangeControl label="Label Gap" value={config.bottomSpacing} min={0} max={300} onChange={v => setConfig(p => ({...p, bottomSpacing: v}))} />
-                </>
-              )}
-              {selEl === 'font' && (
-                <label className="block w-full bg-white/5 hover:bg-white/10 rounded-lg p-4 text-center cursor-pointer transition shadow-inner">
-                  <Upload size={20} className="mx-auto mb-2 text-white/50" />
-                  <span className="text-xs text-white/80">Upload .ttf/.otf</span>
-                  <input type="file" accept=".ttf,.otf" className="hidden" onChange={handleFontUpload} />
-                </label>
-              )}
+                )}
+                {selEl === 'stream' && (
+                  <div className="flex-1 overflow-y-auto lg:custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
+                    <div className="flex gap-2 mb-4">
+                      <button onClick={() => setConfig(p => ({...p, streamBold: !p.streamBold}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.streamBold ? 'bg-blue-600' : 'bg-white/10'}`}><Bold size={16} /> Bold</button>
+                      <button onClick={() => setConfig(p => ({...p, streamItalic: !p.streamItalic}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.streamItalic ? 'bg-blue-600' : 'bg-white/10'}`}><Italic size={16} /> Italic</button>
+                    </div>
+                    <RangeControl label="Scale" value={config.streamCountSize} min={40} max={280} onChange={v => setConfig(p => ({...p, streamCountSize: v}))} />
+                    <ColorOverride title="Manual Colors" element="stream" config={config} toggle={() => setConfig(p => ({...p, manualColors: {...p.manualColors, streamCount: !p.manualColors.streamCount}}))} onChange={(el, k, v) => setConfig(p => ({...p, colors: {...p.colors, [`${el}${k}`]: v}}))} />
+                  </div>
+                )}
+                {selEl === 'cycle' && (
+                  <div className="flex-1 overflow-y-auto lg:custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
+                    <div className="flex gap-2 mb-4">
+                      <button onClick={() => setConfig(p => ({...p, cycleBold: !p.cycleBold}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.cycleBold ? 'bg-blue-600' : 'bg-white/10'}`}><Bold size={16} /> Bold</button>
+                      <button onClick={() => setConfig(p => ({...p, cycleItalic: !p.cycleItalic}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.cycleItalic ? 'bg-blue-600' : 'bg-white/10'}`}><Italic size={16} /> Italic</button>
+                    </div>
+                    <RangeControl label="Scale" value={config.cycleSize} min={30} max={220} onChange={v => setConfig(p => ({...p, cycleSize: v}))} />
+                    <ColorOverride title="Manual Colors" element="cycle" config={config} toggle={() => setConfig(p => ({...p, manualColors: {...p.manualColors, cycle: !p.manualColors.cycle}}))} onChange={(el, k, v) => setConfig(p => ({...p, colors: {...p.colors, [`${el}${k}`]: v}}))} />
+                  </div>
+                )}
+                {selEl === 'layout' && (
+                  <div className="flex-1 overflow-y-auto lg:custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
+                    <RangeControl label="Title Y Offset" value={config.titleYOffset} min={10} max={550} onChange={v => setConfig(p => ({...p, titleYOffset: v}))} />
+                    <RangeControl label="Title Spacing" value={config.titleSpacing} min={0} max={300} onChange={v => setConfig(p => ({...p, titleSpacing: v}))} />
+                    <button onClick={() => setConfig(p => ({...p, showBottomShadow: !p.showBottomShadow}))} className={`w-full py-2 rounded-lg text-xs font-medium transition shadow ${config.showBottomShadow ? 'bg-emerald-600' : 'bg-white/10'}`}>Toggle Shadow</button>
+                    <RangeControl label="Left/Right Margin" value={config.bottomPaddingX} min={0} max={900} onChange={v => setConfig(p => ({...p, bottomPaddingX: v}))} />
+                    <RangeControl label="Bottom Margin" value={config.bottomPaddingY} min={0} max={600} onChange={v => setConfig(p => ({...p, bottomPaddingY: v}))} />
+                    <RangeControl label="Label Gap" value={config.bottomSpacing} min={0} max={300} onChange={v => setConfig(p => ({...p, bottomSpacing: v}))} />
+                  </div>
+                )}
+                {selEl === 'font' && (
+                  <div className="flex-1 flex flex-col overflow-hidden p-4 space-y-4 pb-12 lg:pb-4">
+                    <button 
+                      onClick={() => window.open('https://fonts.google.com', '_blank')} 
+                      className="w-full bg-white/5 hover:bg-white/10 rounded-lg p-3 transition flex items-center justify-center gap-2 text-sm shadow border border-white/5 font-medium shrink-0"
+                    >
+                      <Globe size={18} className="text-blue-400" /> Browse Google Fonts
+                    </button>
+
+                    <div className="flex gap-2 shrink-0">
+                      <input 
+                        type="text" 
+                        placeholder="Paste <link> embed code or URL..." 
+                        value={embedCode} 
+                        onChange={e => setEmbedCode(e.target.value)}
+                        className="flex-1 bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors shadow-inner min-w-0"
+                      />
+                      <button onClick={handleAddGoogleFont} className="bg-blue-600 hover:bg-blue-500 px-3 rounded-lg transition shadow-lg flex items-center justify-center shrink-0">
+                        <Plus size={18} />
+                      </button>
+                    </div>
+
+                    <div className="mt-4 border-t border-white/10 pt-4 flex-1 flex flex-col min-h-0">
+                      <label className="text-xs text-white/50 uppercase font-bold tracking-wider block mb-3 shrink-0">
+                        Font Gallery (Current: <span className="text-white">{cF || 'System'}</span>)
+                      </label>
+                      <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+                        <div 
+                          onClick={() => setCF(null)}
+                          className={`relative border rounded-lg p-4 cursor-pointer transition ${cF === null ? 'border-blue-500 bg-blue-500/10' : 'border-white/10 bg-black/40 hover:bg-white/5'}`}
+                        >
+                          <span className="text-lg block font-sans font-medium text-white/80">System Default Font</span>
+                        </div>
+
+                        {sortedFonts.map((font, idx) => (
+                          <div 
+                            key={idx} 
+                            onClick={() => setCF(font.family)}
+                            className={`relative group border rounded-lg p-4 cursor-pointer transition ${cF === font.family ? 'border-blue-500 bg-blue-500/10' : 'border-white/10 bg-black/40 hover:bg-white/5'}`}
+                          >
+                            <span style={{ fontFamily: `"${font.family}", sans-serif` }} className="text-2xl block truncate pr-8">
+                              {font.family}
+                            </span>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleDeleteFont(font.family); }} 
+                              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+
+                        {sortedFonts.length === 0 && (
+                          <div className="text-center py-6 text-white/50 text-sm">No Google Fonts added yet.</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {confirmDialog && (
-        <ConfirmBanner
-          title={confirmDialog.title}
-          message={confirmDialog.message}
-          onConfirm={confirmDialog.onConfirm}
-          onCancel={() => setConfirmDialog(null)}
-        />
-      )}
-    </div>
+        {confirmDialog && (
+          <ConfirmBanner
+            title={confirmDialog.title}
+            message={confirmDialog.message}
+            onConfirm={confirmDialog.onConfirm}
+            onCancel={() => setConfirmDialog(null)}
+          />
+        )}
+      </div>
+    </>
   );
 }

@@ -1,3 +1,4 @@
+// src/components/ThumbnailCanvas.jsx
 import React, { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
@@ -12,18 +13,21 @@ export default function ThumbnailCanvas({ bgImageUrl, gameName, cycleName, strea
     const targetW = 1280, targetH = 720;
     const fontFace = customFont ? `"${customFont}", serif` : '"Book Antiqua", system-ui, sans-serif';
 
-    const getScaledFont = (text, initialSize, maxWidth) => {
+    const getScaledFont = (text, initialSize, maxWidth, weight, style) => {
       let size = initialSize;
-      ctx.font = `900 ${size}px ${fontFace}`;
-      while (size > 20 && ctx.measureText(text).width > maxWidth) { size -= 5; ctx.font = `900 ${size}px ${fontFace}`; }
+      ctx.font = `${style} ${weight} ${size}px ${fontFace}`;
+      while (size > 20 && ctx.measureText(text).width > maxWidth) { 
+        size -= 5; 
+        ctx.font = `${style} ${weight} ${size}px ${fontFace}`; 
+      }
       return size;
     };
 
-    const renderTextCleanly = (text, x, y, size, align, strokeColor, fillColor, strokeWidth, shadow = null) => {
+    const renderTextCleanly = (text, x, y, size, align, strokeColor, fillColor, strokeWidth, weight, style, shadow = null) => {
       const buffer = document.createElement('canvas');
       buffer.width = targetW; buffer.height = targetH;
       const bctx = buffer.getContext('2d');
-      bctx.font = `900 ${size}px ${fontFace}`;
+      bctx.font = `${style} ${weight} ${size}px ${fontFace}`;
       bctx.textAlign = align;
       bctx.textBaseline = 'alphabetic';
       bctx.lineJoin = "round";
@@ -43,15 +47,23 @@ export default function ThumbnailCanvas({ bgImageUrl, gameName, cycleName, strea
       ctx.clearRect(0, 0, targetW, targetH);
       ctx.drawImage(imgToDraw, 0, 0, targetW, targetH);
       
+      const titleWeight = config.titleBold ? 'bold' : 'normal';
+      const titleStyle = config.titleItalic ? 'italic' : 'normal';
+      const streamWeight = config.streamBold ? 'bold' : 'normal';
+      const streamStyle = config.streamItalic ? 'italic' : 'normal';
+      const cycleWeight = config.cycleBold ? 'bold' : 'normal';
+      const cycleStyle = config.cycleItalic ? 'italic' : 'normal';
+      
       let parts = [gameName];
       if (config.splitTitle && gameName.includes(":")) { 
         const idx = gameName.indexOf(":"); 
         parts = [gameName.substring(0, idx+1).trim(), gameName.substring(idx+1).trim()]; 
       }
-      const sizes = parts.map((part, i) => getScaledFont(part, i === 0 ? config.titleSize : config.subtitleSize, 1150));
+      
+      const sizes = parts.map((part, i) => getScaledFont(part, i === 0 ? config.titleSize : config.subtitleSize, 1150, titleWeight, titleStyle));
       ctx.textBaseline = 'alphabetic';
       const heights = parts.map((part, i) => { 
-        ctx.font = `900 ${sizes[i]}px ${fontFace}`; 
+        ctx.font = `${titleStyle} ${titleWeight} ${sizes[i]}px ${fontFace}`; 
         const m = ctx.measureText(part); 
         return m.actualBoundingBoxAscent + m.actualBoundingBoxDescent; 
       });
@@ -71,20 +83,22 @@ export default function ThumbnailCanvas({ bgImageUrl, gameName, cycleName, strea
       parts.forEach((p, i) => {
         const dY = cTY + heights[i], dX = config.titleAlign === 'left' ? 50 : config.titleAlign === 'right' ? targetW - 50 : cX;
         const sC = isL ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.9)", fC = isL ? "rgba(255,255,255,0.59)" : "rgba(0,0,0,0.59)";
-        renderTextCleanly(p, dX, dY, sizes[i], config.titleAlign, config.manualColors.title ? config.colors.titleStroke : sC, config.manualColors.title ? config.colors.titleFill : fC, config.strokeWidth);
+        renderTextCleanly(p, dX, dY, sizes[i], config.titleAlign, config.manualColors.title ? config.colors.titleStroke : sC, config.manualColors.title ? config.colors.titleFill : fC, config.strokeWidth, titleWeight, titleStyle);
         cTY += heights[i] + (i === 0 && parts.length === 2 ? config.titleSpacing : 0);
       });
 
       const sT_ = `Livestream #${streamCount}`, cT_ = cycleName === "main" ? "First Playthrough" : cycleName;
       let bX = config.bottomPaddingX; if (config.bottomAlign === 'center') bX = targetW/2; else if (config.bottomAlign === 'right') bX = targetW - config.bottomPaddingX;
-      ctx.font = `900 ${config.streamCountSize}px ${fontFace}`;
+      
+      ctx.font = `${streamStyle} ${streamWeight} ${config.streamCountSize}px ${fontFace}`;
       const sm = ctx.measureText(sT_), sA = sm.actualBoundingBoxAscent, sH_ = sA + sm.actualBoundingBoxDescent, sDY = targetH - sH_ - config.bottomPaddingY + sA;
       const sh = config.showBottomShadow ? { x: 5, y: 5, color: "rgba(0,0,0,0.7)" } : null;
-      renderTextCleanly(sT_, bX, sDY, config.streamCountSize, config.bottomAlign, config.manualColors.streamCount ? config.colors.streamStroke : "rgba(0,0,0,0.78)", config.manualColors.streamCount ? config.colors.streamFill : "#FFF", 6, sh);
+      renderTextCleanly(sT_, bX, sDY, config.streamCountSize, config.bottomAlign, config.manualColors.streamCount ? config.colors.streamStroke : "rgba(0,0,0,0.78)", config.manualColors.streamCount ? config.colors.streamFill : "#FFF", 6, streamWeight, streamStyle, sh);
+      
       if (cT_) {
-        ctx.font = `900 ${config.cycleSize}px ${fontFace}`;
+        ctx.font = `${cycleStyle} ${cycleWeight} ${config.cycleSize}px ${fontFace}`;
         const cm = ctx.measureText(cT_), cA = cm.actualBoundingBoxAscent, cDY = sDY - sA - config.bottomSpacing - cm.actualBoundingBoxDescent + cA;
-        renderTextCleanly(cT_, bX, cDY, config.cycleSize, config.bottomAlign, config.manualColors.cycle ? config.colors.cycleStroke : "rgba(0,0,0,0.78)", config.manualColors.cycle ? config.colors.cycleFill : "#FFD700", 4, sh);
+        renderTextCleanly(cT_, bX, cDY, config.cycleSize, config.bottomAlign, config.manualColors.cycle ? config.colors.cycleStroke : "rgba(0,0,0,0.78)", config.manualColors.cycle ? config.colors.cycleFill : "#FFD700", 4, cycleWeight, cycleStyle, sh);
       }
       setIsDrawing(false);
     };

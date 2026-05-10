@@ -1474,7 +1474,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 34,
+          "stream_count": 33,
           "timestamps": [
             "16th June 2025, 10:12:33 PM",
             "17th June 2025, 04:06:39 PM",
@@ -1508,8 +1508,7 @@
             "7th January 2026, 08:33:05 PM",
             "8th January 2026, 10:08:47 PM",
             "4th April 2026, 11:28:30 AM",
-            "30th April 2026, 01:14:16 PM",
-            "11st May 2026, 12:42:52 AM"
+            "30th April 2026, 01:14:16 PM"
           ],
           "isMain": false,
           "youtubePlaylist": "https://www.youtube.com/playlist?list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV"
@@ -1717,7 +1716,7 @@
     "titleYOffset": 16,
     "titleSpacing": 25,
     "strokeWidth": 13,
-    "splitTitle": false,
+    "splitTitle": true,
     "streamCountSize": 88,
     "cycleSize": 55,
     "bottomSpacing": 68,
@@ -1816,33 +1815,15 @@
       {
         "family": "Roboto",
         "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
-      },
-      {
-        "family": "Noto Serif Display",
-        "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
-      },
-      {
-        "family": "Playfair Display",
-        "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
-      },
-      {
-        "family": "EB Garamond",
-        "url": "https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
       }
-    ],
-    "titleBold": true,
-    "titleItalic": false,
-    "streamBold": true,
-    "cycleBold": true,
-    "streamItalic": false,
-    "cycleItalic": false
+    ]
   },
   "systemFonts": {
-    "libTitle": 25,
-    "libYear": 20,
+    "libTitle": 20,
+    "libYear": 18,
     "libBadge": 18,
-    "dashboardTime": 16,
-    "modalHeader": 41,
+    "dashboardTime": 14,
+    "modalHeader": 31,
     "logTitle": 17,
     "logSub": 12,
     "searchBar": 35,
@@ -1856,14 +1837,14 @@
     "cardPadding": 0,
     "cardGap": 20,
     "cardRadius": 32,
-    "cardMaxWidth": 413,
+    "cardMaxWidth": 279,
     "cardsPerRow": 4,
     "modalSplitRatio": 0.45,
     "containerPaddingX": 121,
     "containerPaddingY": 0,
     "cardRounded": false,
     "panelFillOpacity": 0.4,
-    "bgDimming": 0.8,
+    "bgDimming": 0.4,
     "cycleInterval": 2000,
     "statsSplitRatio": 0.5,
     "statsRowSplitRatio": 0.55,
@@ -1879,5 +1860,5 @@
   "modalPanelOpacity": 0.5,
   "mosaicXGap": 0,
   "mosaicYGap": 0,
-  "exportDate": "2026-05-10T18:44:31.390Z"
+  "exportDate": "2026-05-10T17:33:51.040Z"
 }

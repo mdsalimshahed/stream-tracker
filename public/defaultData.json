@@ -1827,7 +1827,7 @@
     "cardRounded": false,
     "panelFillOpacity": 0.4,
     "bgDimming": 0.4,
-    "cycleInterval": 2000,
+    "cycleInterval": 1500,
     "statsSplitRatio": 0.5,
     "statsRowSplitRatio": 0.55,
     "statsLeftWidth": 5,
@@ -1835,11 +1835,12 @@
     "statsCardPadding": 25,
     "cardOpacity": 0.2,
     "bgCycleInterval": 2,
-    "statsCardRadius": 10
+    "statsCardRadius": 10,
+    "hoverCycleInterval": 1500
   },
   "modalBgIntensity": 1,
   "modalPanelOpacity": 0.5,
   "mosaicXGap": 0,
   "mosaicYGap": 0,
-  "exportDate": "2026-05-09T17:59:57.392Z"
+  "exportDate": "2026-05-10T06:32:31.465Z"
 }

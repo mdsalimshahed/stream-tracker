@@ -1801,13 +1801,13 @@
     "streamCountAlign": "left"
   },
   "systemFonts": {
-    "libTitle": 17,
-    "libYear": 14,
+    "libTitle": 27,
+    "libYear": 22,
     "libBadge": 18,
-    "dashboardTime": 12,
+    "dashboardTime": 18,
     "modalHeader": 31,
-    "logTitle": 16,
-    "logSub": 13,
+    "logTitle": 22,
+    "logSub": 16,
     "searchBar": 19,
     "statsMainCount": 2,
     "statsTitle": 2.3,
@@ -1819,7 +1819,7 @@
     "cardPadding": 0,
     "cardGap": 16,
     "cardRadius": 32,
-    "cardMaxWidth": 301,
+    "cardMaxWidth": 392,
     "cardsPerRow": 4,
     "modalSplitRatio": 0.45,
     "containerPaddingX": 121,
@@ -1827,7 +1827,7 @@
     "cardRounded": false,
     "panelFillOpacity": 0.4,
     "bgDimming": 0.4,
-    "cycleInterval": 1500,
+    "cycleInterval": 2000,
     "statsSplitRatio": 0.5,
     "statsRowSplitRatio": 0.55,
     "statsLeftWidth": 5,
@@ -1842,5 +1842,5 @@
   "modalPanelOpacity": 0.5,
   "mosaicXGap": 0,
   "mosaicYGap": 0,
-  "exportDate": "2026-05-10T06:32:31.465Z"
+  "exportDate": "2026-05-10T15:52:12.392Z"
 }

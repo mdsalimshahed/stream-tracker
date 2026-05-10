@@ -1,9 +1,37 @@
-import React, { useState, useEffect } from 'react';
+// src/components/GameProfileModal.jsx
+import React, { useState, useEffect, useRef } from 'react';
 import { X, ArrowRight, ArrowLeft, Gamepad2, Clock, Plus, Trash2, Edit3, Save, Star } from 'lucide-react';
 import { formatRunName, formatReleaseDate } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditRunModal } from './modals/EditRunModal';
 import { CrossfadeImage } from './common/UIComponents';
+
+const shuffleArray = (array) => {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+// Generates a randomized playlist strictly for THIS specific game
+const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
+  const uniqueThumbs = [...new Set(images.filter(Boolean))];
+  if (uniqueThumbs.length === 0) return [];
+  if (uniqueThumbs.length === 1) return uniqueThumbs;
+
+  let shuffled = shuffleArray(uniqueThumbs);
+  
+  // Boundary Rule: Ensure the new list doesn't start with the exact same image it ended with
+  if (lastImageUrl && shuffled[0] === lastImageUrl) {
+    const temp = shuffled[0];
+    shuffled[0] = shuffled[1];
+    shuffled[1] = temp;
+  }
+  
+  return shuffled;
+};
 
 export default function GameProfileModal({ 
   gameId, gameData, onClose, onStartWorkspace, onDeleteCycle, onDeleteTimestamp, onNotify, 
@@ -15,21 +43,42 @@ export default function GameProfileModal({
   const [selectedLogIndex, setSelectedLogIndex] = useState(null);
   const [editingRun, setEditingRun] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(null);
+
+  const playlistRef = useRef([]);
+  const indexRef = useRef(0);
   
-  // Initialize synchronously to prevent the "No Image" crossfade flash
-  const initialImages = gameData?.thumbnail_urls?.filter(url => !url.startsWith('blob:') && url.startsWith('http')) || [];
-  const [bgImageIndex, setBgImageIndex] = useState(0);
-  const [bgImages, setBgImages] = useState(initialImages);
+  // Initialize the playlist strictly using THIS game's images ONLY
+  if (playlistRef.current.length === 0 && gameData && gameData.thumbnail_urls) {
+    playlistRef.current = generateSingleGamePlaylist(gameData.thumbnail_urls);
+  }
+
+  const [bgImage, setBgImage] = useState(() => {
+    return playlistRef.current.length > 0 
+      ? playlistRef.current[0]
+      : 'https://placehold.co/1280x720/1e293b/475569?text=No+Image';
+  });
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    const images = gameData.thumbnail_urls?.filter(url => !url.startsWith('blob:') && url.startsWith('http')) || [];
-    setBgImages(images);
     
     const intervalTime = layoutPrefs?.cycleInterval || 4000;
-    const interval = setInterval(() => {
-      if (images.length) setBgImageIndex(prev => (prev + 1) % images.length);
-    }, intervalTime);
+    let interval;
+
+    if (playlistRef.current.length > 1) {
+      interval = setInterval(() => {
+        let idx = indexRef.current + 1;
+        
+        // When we run out of images for this game, reshuffle them
+        if (idx >= playlistRef.current.length) {
+          const lastImg = playlistRef.current[playlistRef.current.length - 1];
+          playlistRef.current = generateSingleGamePlaylist(gameData.thumbnail_urls || [], lastImg);
+          idx = 0;
+        }
+        
+        indexRef.current = idx;
+        setBgImage(playlistRef.current[idx]);
+      }, intervalTime);
+    }
     
     return () => {
       document.body.style.overflow = 'unset';
@@ -156,7 +205,6 @@ export default function GameProfileModal({
     }
   };
 
-  const bgImage = bgImages[bgImageIndex] || 'https://placehold.co/1280x720/1e293b/475569?text=No+Image';
   const blurAmount = 8 + (1 - modalBgIntensity) * 24; 
   
   const panelStyle = { 
@@ -166,7 +214,6 @@ export default function GameProfileModal({
     boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.5)',
   };
 
-  // DYNAMIC COLUMN CALCULATION
   const isLargeScreen = window.innerWidth > 1024;
   const leftWidth = isLargeScreen ? `${(layoutPrefs.modalSplitRatio || 0.6) * 100}%` : '100%';
   const rightWidth = isLargeScreen ? `${(1 - (layoutPrefs.modalSplitRatio || 0.6)) * 100}%` : '100%';

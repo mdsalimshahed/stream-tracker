@@ -177,7 +177,7 @@ const STYLES = `
   .latest-title { font-size: clamp(1.2rem, calc(var(--sz-title) * 1.5vmin), 4rem); font-weight: 600; margin-bottom: 8px; transition: color 0.3s; }
   .latest-sub-3 { font-size: clamp(0.85rem, calc(var(--sz-sub) * 1vmin), 2rem); color: var(--c-accent2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .latest-sub-1, .latest-sub-2 { font-size: clamp(0.8rem, calc(var(--sz-sub) * 0.8vmin), 2rem); color: var(--c-muted); margin-top: 6px; }
-  .latest-sub-time { font-weight: bold; color: var(--c-text); font-size: 1.06em; }
+  .latest-sub-time { font-weight: bold; color: var(--c-text); font-size: 1.25em; }
 
   .latest-bg { position: absolute; inset: 0; z-index: 0; }
   .latest-content { 
@@ -236,18 +236,71 @@ const ROW_COUNT = 6;
 const IMG_W = 110;
 const IMGS_PER_ROW = 16;
 
-const MosaicBackground = ({ allImages, bgDimming }) => {
+const MosaicBackground = ({ mosaicImages, bgDimming }) => {
   const rowRefs = useRef([]);
 
   const rows = useMemo(() => {
-    const fallback = 'https://placehold.co/110x110/0d1117/1e2938?text=';
-    const pool = allImages.length ? allImages : [fallback];
+    const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
+    const pool = mosaicImages && mosaicImages.length > 0 ? mosaicImages : [fallback];
+
     return Array.from({ length: ROW_COUNT }, () => {
-      const shuffled = [...pool].sort(() => Math.random() - 0.5);
-      const base = Array.from({ length: IMGS_PER_ROW }, (_, i) => shuffled[i % shuffled.length]);
-      return [...base, ...base];
+      let sequence = [];
+      let lastGameId = null;
+      
+      // Build a well-spaced sequence of images for the row
+      while (sequence.length < IMGS_PER_ROW) {
+        // Completely shuffle the pool for random selection
+        let shuffled = [...pool].sort(() => Math.random() - 0.5);
+        let batch = [];
+        
+        while (shuffled.length > 0) {
+          let foundIdx = 0;
+          // Skip consecutive images from the same game
+          if (lastGameId !== null) {
+            while (foundIdx < shuffled.length && shuffled[foundIdx].gameId === lastGameId) {
+              foundIdx++;
+            }
+            // If only images from the same game are left, we have no choice but to use one
+            if (foundIdx === shuffled.length) {
+              foundIdx = 0;
+            }
+          }
+          
+          const selected = shuffled[foundIdx];
+          batch.push(selected);
+          lastGameId = selected.gameId;
+          
+          // Remove selected from the shuffled pool so others get a turn
+          shuffled.splice(foundIdx, 1);
+        }
+        
+        sequence.push(...batch);
+      }
+      
+      // Slice exactly the amount we need for the row layout
+      let base = sequence.slice(0, IMGS_PER_ROW);
+
+      // Boundary Fix: prevent the seamless scrolling loop from placing identical games side by side
+      if (base.length > 2 && base[base.length - 1].gameId === base[0].gameId) {
+        for (let k = base.length - 2; k >= 1; k--) {
+          if (
+            base[k].gameId !== base[0].gameId && 
+            base[k].gameId !== base[base.length - 2].gameId &&
+            base[base.length - 1].gameId !== base[k - 1].gameId &&
+            base[base.length - 1].gameId !== base[k + 1].gameId
+          ) {
+            const temp = base[k];
+            base[k] = base[base.length - 1];
+            base[base.length - 1] = temp;
+            break;
+          }
+        }
+      }
+
+      // Duplicating the sequence creates the seamless scrolling animation
+      return [...base.map(b => b.url), ...base.map(b => b.url)];
     });
-  }, [allImages]);
+  }, [mosaicImages]);
 
   useEffect(() => {
     const STRIP_W = IMGS_PER_ROW * IMG_W;
@@ -311,41 +364,84 @@ const MosaicBackground = ({ allImages, bgDimming }) => {
           </div>
         ))}
       </div>
-      {/* App Background Dimming Slider Overlay ONLY */}
       <div className="absolute inset-0 bg-black transition-opacity duration-300 pointer-events-none" style={{ opacity: bgDimming ?? 0.5 }} />
     </div>
   );
 };
 
+// --- Helper Functions for Two-Level Randomization ---
+const shuffleArray = (array) => {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+const generatePlaylist = (games, lastGameName = null) => {
+  // Only keep games that have at least one valid thumbnail
+  const validGames = games.filter(g => g.thumbnail_urls && g.thumbnail_urls.length > 0);
+  if (validGames.length === 0) return [];
+
+  let shuffledGames = shuffleArray(validGames);
+
+  // Boundary Rule: Ensure the new list doesn't start with the exact same game it ended with
+  if (shuffledGames.length > 1 && lastGameName && shuffledGames[0].game_name === lastGameName) {
+    const temp = shuffledGames[0];
+    shuffledGames[0] = shuffledGames[1];
+    shuffledGames[1] = temp;
+  }
+
+  let playlist = [];
+  // For each randomized game, grab its images, randomize them, and push them to the final playlist
+  shuffledGames.forEach(game => {
+    const uniqueThumbs = [...new Set((game.thumbnail_urls || []).filter(Boolean))];
+    const shuffledImages = shuffleArray(uniqueThumbs);
+    shuffledImages.forEach(url => {
+      playlist.push({ url, gameName: game.game_name });
+    });
+  });
+
+  return playlist;
+};
+// ----------------------------------------------------
+
 const CategoryCard = ({ title, games, cssClass }) => {
   const eligible = useMemo(() => games.filter(g => g.latestRunLabel === title), [games, title]);
 
-  const imageEntries = useMemo(() => {
-    const map = new Map();
-    eligible.forEach(game => {
-      (game.thumbnail_urls || []).forEach(url => {
-        if (!map.has(url)) map.set(url, game.game_name);
-      });
-    });
-    return Array.from(map.entries()).map(([url, gameName]) => ({ 
-      url: url,
-      gameName 
-    }));
+  const playlistRef = useRef([]);
+  const [currentData, setCurrentData] = useState({ url: null, gameName: '' });
+
+  // Initialize the playlist dynamically when eligible games change
+  useEffect(() => {
+    playlistRef.current = generatePlaylist(eligible, null);
+    setCurrentData(playlistRef.current[0] || { url: null, gameName: '' });
   }, [eligible]);
 
-  const [currentIdx, setCurrentIdx] = useState(0);
-
+  // Interval manager to loop through the 2-level randomized playlist smoothly
   useEffect(() => {
-    if (imageEntries.length < 2) return;
-    
+    const totalValidImages = eligible.reduce((acc, g) => acc + new Set((g.thumbnail_urls || []).filter(Boolean)).size, 0);
+    if (totalValidImages < 2) return;
+
     const initialDelay = Math.random() * 2500;
     const cycleInterval = 3000 + Math.random() * 1500;
     
+    let idx = 0;
     let interval;
+
     const timeout = setTimeout(() => {
-      setCurrentIdx(prev => (prev + 1) % imageEntries.length);
       interval = setInterval(() => {
-        setCurrentIdx(prev => (prev + 1) % imageEntries.length);
+        idx++;
+        
+        // Once the current playlist is exhausted, regenerate the playlist using the custom logic
+        if (idx >= playlistRef.current.length) {
+          const lastGame = playlistRef.current[playlistRef.current.length - 1]?.gameName;
+          playlistRef.current = generatePlaylist(eligible, lastGame);
+          idx = 0;
+        }
+        
+        setCurrentData(playlistRef.current[idx]);
       }, cycleInterval);
     }, initialDelay);
 
@@ -353,11 +449,11 @@ const CategoryCard = ({ title, games, cssClass }) => {
       clearTimeout(timeout);
       clearInterval(interval);
     };
-  }, [imageEntries]);
+  }, [eligible]);
 
   const fallback = 'https://placehold.co/480x270/0d1117/1e2938?text=';
-  const currentSrc = imageEntries[currentIdx]?.url || fallback;
-  const gameName = imageEntries[currentIdx]?.gameName || '';
+  const currentSrc = currentData.url || fallback;
+  const gameName = currentData.gameName || '';
 
   return (
     <div className={`cat-card ${cssClass} group`}>
@@ -407,6 +503,12 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   [streamData]);
 
   const allImages = useMemo(() => games.flatMap(g => g.thumbnail_urls || []).filter(Boolean), [games]);
+  
+  // Create object array for mosaic layout rule checking
+  const mosaicImages = useMemo(() => games.flatMap(g => 
+    (g.thumbnail_urls || []).filter(Boolean).map(url => ({ url, gameId: g.id }))
+  ), [games]);
+
   const totalStreams = useMemo(() => games.reduce((s, g) => s + g.totalStreams, 0), [games]);
   const totalGames  = games.length;
 
@@ -465,7 +567,7 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
       }}
     >
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <MosaicBackground allImages={allImages} bgDimming={layoutPrefs?.bgDimming} />
+      <MosaicBackground mosaicImages={mosaicImages} bgDimming={layoutPrefs?.bgDimming} />
 
       <div className="stats-scroll">
         <div className="stats-top-row fade-up delay-1 shadow-2xl">

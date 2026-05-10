@@ -13,6 +13,73 @@ import { CrossfadeImage } from './components/common/UIComponents';
 import { RAWG_API_KEY, DEFAULT_SYSTEM_FONTS, DEFAULT_LAYOUT_PREFS, DEFAULT_THUMBNAIL_CONFIG, DEFAULT_MODAL_BG_INTENSITY, DEFAULT_MODAL_PANEL_OPACITY } from './utils/constants';
 import { formatRunName, formatReleaseDate } from './utils/helpers';
 
+// --- Two-Level Randomization Helpers ---
+const shuffleArray = (array) => {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+// Generates a fully randomized playlist spanning all games, strictly avoiding consecutive same-game images
+const generateGlobalPlaylist = (gamesObj, lastGameId = null) => {
+  let pool = [];
+  Object.entries(gamesObj).forEach(([id, game]) => {
+    const uniqueThumbs = [...new Set((game.thumbnail_urls || []).filter(Boolean))];
+    uniqueThumbs.forEach(url => {
+      pool.push({ url, gameId: id });
+    });
+  });
+
+  if (pool.length === 0) return [];
+  if (pool.length === 1) return pool;
+
+  let shuffled = shuffleArray(pool);
+  let playlist = [];
+  let currentGameId = lastGameId;
+
+  while (shuffled.length > 0) {
+    let foundIdx = 0;
+    
+    // Prevent consecutive images from the same game
+    if (currentGameId !== null) {
+      while (foundIdx < shuffled.length && shuffled[foundIdx].gameId === currentGameId) {
+        foundIdx++;
+      }
+      // If the only images left belong to the same game, we must use one
+      if (foundIdx === shuffled.length) {
+        foundIdx = 0;
+      }
+    }
+    
+    const selected = shuffled[foundIdx];
+    playlist.push(selected);
+    currentGameId = selected.gameId;
+    shuffled.splice(foundIdx, 1);
+  }
+
+  return playlist;
+};
+
+// Generates a randomized playlist for a single game (used during hover)
+const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
+  const uniqueThumbs = [...new Set(images.filter(Boolean))];
+  if (uniqueThumbs.length === 0) return [];
+  if (uniqueThumbs.length === 1) return uniqueThumbs;
+
+  let shuffled = shuffleArray(uniqueThumbs);
+  // Ensure the sequence doesn't seamlessly repeat the same image when starting over
+  if (lastImageUrl && shuffled[0] === lastImageUrl) {
+    const temp = shuffled[0];
+    shuffled[0] = shuffled[1];
+    shuffled[1] = temp;
+  }
+  return shuffled;
+};
+// ---------------------------------------
+
 const migrateLabels = (data) => {
   let changed = false;
   const newData = JSON.parse(JSON.stringify(data));
@@ -125,18 +192,28 @@ export default function App() {
   const [isS, setIsS] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const [globalImage, setGlobalImage] = useState('');
+  // Background and Hover Playlist Trackers
+  const globalPlaylistRef = useRef([]);
+  const globalIndexRef = useRef(0);
+  const hoverPlaylistRef = useRef({ gameId: null, list: [], index: -1 });
+
+  if (globalPlaylistRef.current.length === 0 && Object.keys(streamData).length > 0) {
+    globalPlaylistRef.current = generateGlobalPlaylist(streamData);
+  }
+
+  const [globalImage, setGlobalImage] = useState(() => {
+    return globalPlaylistRef.current.length > 0 ? globalPlaylistRef.current[0].url : '';
+  });
+  
   const [hoveredImage, setHoveredImage] = useState(null);
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const hoverTimeoutRef = useRef(null);
 
-  // Determine if settings have been changed or imported
   const hasCustomSettings = 
     JSON.stringify(systemFonts) !== JSON.stringify(DEFAULT_SYSTEM_FONTS) || 
     JSON.stringify(layoutPrefs) !== JSON.stringify(DEFAULT_LAYOUT_PREFS) ||
     JSON.stringify(thumbnailConfig) !== JSON.stringify(DEFAULT_THUMBNAIL_CONFIG);
 
-  // Persistence Effects
   useEffect(() => { localStorage.setItem('streamManagerData', JSON.stringify(streamData)); }, [streamData]);
   useEffect(() => { localStorage.setItem('persistSettings', persistSettings); }, [persistSettings]);
 
@@ -190,60 +267,92 @@ export default function App() {
     }
   };
 
+  // Dual-State Playlist Interval Manager
   useEffect(() => {
-    let pool = [];
-    const gameId = hoverState.gameId;
-    const isHovering = Boolean(gameId && streamData[gameId]);
-    
-    if (isHovering) {
-      pool = streamData[gameId].thumbnail_urls || [];
-    } else {
-      pool = Object.values(streamData).flatMap(g => g.thumbnail_urls || []);
-    }
-    
-    pool = [...new Set(pool.filter(Boolean))];
-    if (pool.length === 0) return;
-
-    if (isHovering) {
-      setHoveredImage(pool[0]);
-      setGlobalImage(prev => prev !== pool[0] ? pool[0] : prev);
-    } else {
-      setHoveredImage(null);
-      setGlobalImage(prev => pool.includes(prev) ? prev : pool[Math.floor(Math.random() * pool.length)]);
-    }
-
     const isPaused = selectedGameId || wCf || currentView === 'stats';
     if (isPaused) return;
 
-    const intervalTime = isHovering ? 2500 : (layoutPrefs.cycleInterval || 4000);
+    const gameId = hoverState.gameId;
+    const isHovering = Boolean(gameId && streamData[gameId]);
 
-    const intervalId = setInterval(() => {
-      if (pool.length <= 1) {
-        if (isHovering) setHoveredImage(pool[0]);
-        setGlobalImage(pool[0]);
-        return;
-      }
-      
-      if (isHovering) {
-        setHoveredImage(prevHover => {
-          const currIdx = pool.indexOf(prevHover);
-          const nextIdx = currIdx === -1 ? 0 : (currIdx + 1) % pool.length;
-          const nextImg = pool[nextIdx];
-          setGlobalImage(nextImg);
-          return nextImg;
-        });
+    let intervalId;
+
+    if (isHovering) {
+      // 1. Hover-State Initialization (Per-Game Playlist)
+      if (hoverPlaylistRef.current.gameId !== gameId) {
+        const rawImages = streamData[gameId].thumbnail_urls || [];
+        hoverPlaylistRef.current = {
+          gameId,
+          list: generateSingleGamePlaylist(rawImages),
+          index: -1 // Start at -1 to delay the first image swap
+        };
+        
+        setHoveredImage(null); // Explicitly keep the card's original cover image immediately
+        
+        if (rawImages.length > 0) {
+          setGlobalImage(rawImages[0]); // Fade the global background to the game cover immediately
+        }
       } else {
-        setGlobalImage(prev => {
-          let nextImg = pool[Math.floor(Math.random() * pool.length)];
-          let attempts = 0;
-          while (nextImg === prev && attempts < 10) {
-            nextImg = pool[Math.floor(Math.random() * pool.length)];
-            attempts++;
-          }
-          return nextImg;
-        });
+        // Resuming an active hover seamlessly
+        const idx = hoverPlaylistRef.current.index;
+        const currentImg = idx >= 0 ? hoverPlaylistRef.current.list[idx] : null;
+        setHoveredImage(currentImg);
+        if (currentImg) {
+          setGlobalImage(currentImg);
+        } else if (streamData[gameId].thumbnail_urls?.length > 0) {
+          setGlobalImage(streamData[gameId].thumbnail_urls[0]);
+        }
       }
-    }, intervalTime);
+
+      // Cycle through per-game playlist (Wait 2.5s before the first swap)
+      const hList = hoverPlaylistRef.current.list;
+      if (hList.length > 1) {
+        intervalId = setInterval(() => {
+          let idx = hoverPlaylistRef.current.index + 1;
+          
+          if (idx >= hoverPlaylistRef.current.list.length) {
+            const lastImg = hoverPlaylistRef.current.list[hoverPlaylistRef.current.list.length - 1];
+            hoverPlaylistRef.current.list = generateSingleGamePlaylist(streamData[gameId].thumbnail_urls || [], lastImg);
+            idx = 0;
+          }
+          
+          hoverPlaylistRef.current.index = idx;
+          const nextImg = hoverPlaylistRef.current.list[idx];
+          setHoveredImage(nextImg);
+          setGlobalImage(nextImg);
+        }, 2500);
+      }
+
+    } else {
+      // 2. Default-State Initialization (Global Playlist)
+      setHoveredImage(null);
+
+      if (globalPlaylistRef.current.length === 0 && Object.keys(streamData).length > 0) {
+        globalPlaylistRef.current = generateGlobalPlaylist(streamData);
+        globalIndexRef.current = 0;
+      }
+
+      const gList = globalPlaylistRef.current;
+      
+      if (gList.length > 0) {
+        setGlobalImage(gList[globalIndexRef.current]?.url || '');
+      }
+
+      if (gList.length > 1) {
+        intervalId = setInterval(() => {
+          let idx = globalIndexRef.current + 1;
+          
+          if (idx >= globalPlaylistRef.current.length) {
+            const lastGameId = globalPlaylistRef.current[globalPlaylistRef.current.length - 1]?.gameId;
+            globalPlaylistRef.current = generateGlobalPlaylist(streamData, lastGameId);
+            idx = 0;
+          }
+          
+          globalIndexRef.current = idx;
+          setGlobalImage(globalPlaylistRef.current[idx].url);
+        }, layoutPrefs.cycleInterval || 4000);
+      }
+    }
 
     return () => clearInterval(intervalId);
   }, [hoverState.gameId, streamData, selectedGameId, wCf, currentView, layoutPrefs.cycleInterval]);
@@ -412,18 +521,26 @@ export default function App() {
           tags: data.tags?.map(t => t.name).join(', ') || 'Unknown',
         };
         setStreamData(nd);
-        notify('Game updated!', 'success');
+        notify('Game updated with RAWG metadata!', 'success');
       } else notify('Invalid RAWG link', 'error');
     } catch(e) { notify('Update failed', 'error'); }
   };
 
-  const editGameDetails = (gameId, newName, newYear, rawgId) => {
+  const editGameDetails = (gameId, newName, newYear, developer, publisher, genres, tags, rawgId) => {
     const nd = JSON.parse(JSON.stringify(streamData));
     if (nd[gameId]) {
       nd[gameId].game_name = newName;
       if (newYear) nd[gameId].release_year = newYear;
+      
+      if (!nd[gameId].details) nd[gameId].details = {};
+      if (developer !== undefined) nd[gameId].details.developer = developer;
+      if (publisher !== undefined) nd[gameId].details.publisher = publisher;
+      if (genres !== undefined) nd[gameId].details.genres = genres;
+      if (tags !== undefined) nd[gameId].details.tags = tags;
+      
       setStreamData(nd);
-      notify(`Game updated to "${newName}"`, 'success');
+      notify(`Game details updated!`, 'success');
+      
       if (rawgId) updateGameLink(gameId, rawgId);
     }
   };
@@ -569,7 +686,6 @@ export default function App() {
   const handleImport = (importedData) => {
     try {
       const isSettingsOnly = importedData.type === 'settings_only';
-      // Force isFullBackup to false if we explicitly requested settings_only
       const isFullBackup = !isSettingsOnly && (importedData.type === 'full_backup' || importedData.streamData !== undefined);
       const isClassic = !isSettingsOnly && !isFullBackup;
 

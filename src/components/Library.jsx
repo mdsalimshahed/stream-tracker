@@ -68,7 +68,10 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
   };
 
   const handleEditClick = (game) => setEditingGame(game);
-  const handleSaveEdit = (id, newName, newYear, rawgId) => onEditGame(id, newName, newYear, rawgId);
+  
+  // Now explicitly passing all manual parameters down
+  const handleSaveEdit = (id, newName, newYear, developer, publisher, genres, tags, rawgId) => 
+    onEditGame(id, newName, newYear, developer, publisher, genres, tags, rawgId);
 
   const containerStyle = {
     paddingLeft: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,

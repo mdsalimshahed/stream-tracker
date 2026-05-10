@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+// src/components/common/UIComponents.jsx
+import React, { useState, useEffect } from 'react';
 
 export const RangeControl = ({ label, description, value, min, max, step = 1, onChange, disabled = false }) => (
   <div className={`space-y-1 ${disabled ? 'opacity-50' : ''}`}>
@@ -67,59 +68,45 @@ export const ColorOverride = ({ title, element, config, toggle, onChange }) => {
   );
 };
 
+// Re-engineered to stack the incoming image on top and fade it in, 
+// keeping the old image 100% solid in the background to prevent transparency flashing
 export const CrossfadeImage = ({ src, alt, className, imgClassName, style, duration = 700 }) => {
-  const [images, setImages] = useState([src, src]);
-  const [activeIndex, setActiveIndex] = useState(1);
-  const prevSrcRef = useRef(src);
+  const [images, setImages] = useState([{ id: Date.now(), src }]);
 
   useEffect(() => {
-    if (!src || src === prevSrcRef.current) return;
-
-    let isMounted = true;
-
-    const img = new Image();
-    const handleLoadOrError = () => {
-      if (!isMounted) return;
-      prevSrcRef.current = src;
-      setActiveIndex(prev => {
-        const nextIndex = prev === 0 ? 1 : 0;
-        setImages(currImages => {
-          const newArr = [...currImages];
-          newArr[nextIndex] = src;
-          return newArr;
-        });
-        return nextIndex;
-      });
-    };
-
-    img.onload = handleLoadOrError;
-    img.onerror = handleLoadOrError;
-    img.src = src;
-
-    return () => {
-      isMounted = false;
-    };
+    if (!src) return;
+    setImages(prev => {
+      // Don't add if it's the exact same sequential image
+      if (prev.length > 0 && prev[prev.length - 1].src === src) return prev;
+      
+      // Keep ONLY the most recent image as a solid base, and append the new image to fade in on top
+      return [prev[prev.length - 1], { id: Date.now(), src }];
+    });
   }, [src]);
-
-  // Removing inline transform to let Tailwind handle zooming smoothly
-  const imgStyle = {
-    transition: `opacity ${duration}ms ease-in-out`
-  };
 
   return (
     <div className={`relative overflow-hidden ${className || ''}`} style={style}>
-      <img 
-        src={images[0] || ''} 
-        alt={alt || ''} 
-        style={imgStyle}
-        className={`absolute inset-0 w-full h-full ${activeIndex === 0 ? 'opacity-100' : 'opacity-0'} ${imgClassName || ''}`} 
-      />
-      <img 
-        src={images[1] || ''} 
-        alt={alt || ''} 
-        style={imgStyle}
-        className={`absolute inset-0 w-full h-full ${activeIndex === 1 ? 'opacity-100' : 'opacity-0'} ${imgClassName || ''}`} 
-      />
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes smoothFadeIn {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+      `}} />
+      {images.map((imgObj, i) => {
+        const isTopLayer = i === images.length - 1;
+        return (
+          <img
+            key={imgObj.id}
+            src={imgObj.src}
+            alt={alt || ''}
+            style={{
+              animation: isTopLayer && images.length > 1 ? `smoothFadeIn ${duration}ms ease-in-out forwards` : 'none',
+              zIndex: i, // Maintains an extremely low z-index (0 and 1) so it never covers up overlays
+            }}
+            className={`absolute inset-0 w-full h-full ${imgClassName || ''}`}
+          />
+        );
+      })}
     </div>
   );
 };

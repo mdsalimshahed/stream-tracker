@@ -315,6 +315,49 @@ export default function App() {
   // Custom mosaic pause logic
   const [mosaicPaused, setMosaicPaused] = useState(false);
 
+  // ----------- VIEWPORT RELATIVE SCALING LOGIC -----------
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    let timeoutId;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => setWindowWidth(window.innerWidth), 100);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  // Set standard reference monitor width to 1920px.
+  // Clamping at 0.45 safely guarantees iPads correctly display a multi-card grid.
+  const scaleFactor = Math.max(0.45, windowWidth / 1920);
+
+  const scaledSystemFonts = useMemo(() => {
+    const scaled = { ...systemFonts };
+    const scalableFontKeys = ['libTitle', 'libYear', 'dashboardTime', 'modalHeader', 'logTitle', 'logSub', 'searchBar'];
+    scalableFontKeys.forEach(key => {
+      if (typeof scaled[key] === 'number') {
+        scaled[key] = Math.max(1, scaled[key] * scaleFactor);
+      }
+    });
+    return scaled;
+  }, [systemFonts, scaleFactor]);
+
+  const scaledLayoutPrefs = useMemo(() => {
+    const scaled = { ...layoutPrefs };
+    const scalableLayoutKeys = ['cardPadding', 'cardGap', 'cardMaxWidth', 'containerPaddingX', 'containerPaddingY', 'cardRadius'];
+    scalableLayoutKeys.forEach(key => {
+      if (typeof scaled[key] === 'number') {
+        scaled[key] = Math.max(0, scaled[key] * scaleFactor);
+      }
+    });
+    return scaled;
+  }, [layoutPrefs, scaleFactor]);
+  // -------------------------------------------------------
+
   const hasCustomSettings = 
     JSON.stringify(systemFonts) !== JSON.stringify(DEFAULT_SYSTEM_FONTS) || 
     JSON.stringify(layoutPrefs) !== JSON.stringify(DEFAULT_LAYOUT_PREFS) ||
@@ -375,17 +418,21 @@ export default function App() {
 
   // Dedicated Mosaic Pause Handler
   useEffect(() => {
+    // 1. If a modal/workspace is open, pause the mosaic instantly
     if (selectedGameId || wCf) {
       setMosaicPaused(true);
       return;
     }
     
+    // 2. If we're hovering over a card, pause the mosaic after a 1-second delay
+    // This allows the mosaic to keep smoothly moving while it fades out behind the card
     if (hoverState.gameId) {
       const timer = setTimeout(() => {
         setMosaicPaused(true);
       }, 1000); 
       return () => clearTimeout(timer);
     } else {
+      // 3. Immediately resume the mosaic smoothly when we hover out
       setMosaicPaused(false);
     }
   }, [selectedGameId, wCf, hoverState.gameId]);
@@ -840,7 +887,7 @@ export default function App() {
       `}</style>
 
       <div className="absolute inset-0 z-0 pointer-events-none">
-        {/* Default Global Mosaic Background (With strictly CSS pause state) */}
+        {/* Default Global Mosaic Background */}
         <div className={`absolute inset-0 transition-opacity duration-1000 ${hoverState.gameId ? 'opacity-0' : 'opacity-100'}`}>
           <MosaicBackground mosaicImages={mosaicImages} isPaused={mosaicPaused} />
         </div>
@@ -854,23 +901,23 @@ export default function App() {
           />
         </div>
 
-        {/* Universal Dimming Overlay */}
+        {/* Universal Dimming Overlay (z-10 guarantees it always sits on top of all backgrounds) */}
         <div 
-          className="absolute inset-0 bg-black transition-opacity duration-300" 
+          className="absolute inset-0 bg-black transition-opacity duration-300 z-10 pointer-events-none" 
           style={{ opacity: layoutPrefs.bgDimming ?? 0.5 }} 
         />
       </div>
 
-      <div className="relative z-10 flex flex-col h-screen">
+      <div className="relative z-20 flex flex-col h-screen">
         <Header currentView={currentView} onViewChange={setCurrentView} onImport={handleImport} onExport={() => setShowExportModal(true)} />
 
         <main className="flex-1 overflow-hidden flex flex-col relative">
           {currentView === 'data' && (
             <div className="flex flex-col h-full overflow-hidden bg-black/40 backdrop-blur-xl">
               <DataManager
-                systemFonts={systemFonts}
+                systemFonts={systemFonts} 
                 setSystemFonts={setSystemFonts}
-                layoutPrefs={layoutPrefs}
+                layoutPrefs={layoutPrefs} 
                 setLayoutPrefs={setLayoutPrefs}
                 modalBgIntensity={modalBgIntensity}
                 setModalBgIntensity={setModalBgIntensity}
@@ -886,8 +933,8 @@ export default function App() {
             <Dashboard
               streamData={streamData}
               openGameProfile={openGameProfile}
-              systemFonts={systemFonts}
-              layoutPrefs={layoutPrefs}
+              systemFonts={scaledSystemFonts}
+              layoutPrefs={scaledLayoutPrefs}
               globalImage={globalImage}
               hoveredImage={hoveredImage}
               hoverState={hoverState}
@@ -903,8 +950,8 @@ export default function App() {
               onDeleteGame={deleteGame}
               onUpdateGameLink={updateGameLink}
               onEditGame={editGameDetails}
-              systemFonts={systemFonts}
-              layoutPrefs={layoutPrefs}
+              systemFonts={scaledSystemFonts}
+              layoutPrefs={scaledLayoutPrefs}
               globalImage={globalImage}
               hoveredImage={hoveredImage}
               hoverState={hoverState}
@@ -916,27 +963,27 @@ export default function App() {
           {currentView === 'stats' && (
             <Stats 
               streamData={streamData} 
-              systemFonts={systemFonts}
-              layoutPrefs={layoutPrefs}
+              systemFonts={scaledSystemFonts}
+              layoutPrefs={scaledLayoutPrefs}
             />
           )}
           {currentView === 'search' && (() => {
             const containerStyle = {
-              paddingLeft: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,
-              paddingRight: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,
-              paddingTop: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
-              paddingBottom: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
+              paddingLeft: `clamp(16px, ${scaledLayoutPrefs.containerPaddingX}px, 5vw)`,
+              paddingRight: `clamp(16px, ${scaledLayoutPrefs.containerPaddingX}px, 5vw)`,
+              paddingTop: `clamp(16px, ${scaledLayoutPrefs.containerPaddingY}px, 5vh)`,
+              paddingBottom: `clamp(16px, ${scaledLayoutPrefs.containerPaddingY}px, 5vh)`,
             };
 
             const gridStyle = {
               display: 'grid',
-              gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${layoutPrefs.cardMaxWidth || 250}px), 1fr))`,
-              gap: `${layoutPrefs.cardGap}px`
+              gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${scaledLayoutPrefs.cardMaxWidth || 250}px), 1fr))`,
+              gap: `${scaledLayoutPrefs.cardGap}px`
             };
 
             const cardStyle = {
-              borderRadius: layoutPrefs.cardRounded ? `${layoutPrefs.cardRadius}px` : '0px',
-              backgroundColor: `rgba(0, 0, 0, ${layoutPrefs.panelFillOpacity ?? 0.1})`,
+              borderRadius: scaledLayoutPrefs.cardRounded ? `${scaledLayoutPrefs.cardRadius}px` : '0px',
+              backgroundColor: `rgba(0, 0, 0, ${scaledLayoutPrefs.panelFillOpacity ?? 0.1})`,
               backdropFilter: 'blur(8px)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               transition: 'all 0.2s',
@@ -951,7 +998,7 @@ export default function App() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 z-10" size={22} />
                     <input
                       type="text"
-                      style={{ fontSize: `${systemFonts.searchBar}px` }}
+                      style={{ fontSize: `${scaledSystemFonts.searchBar}px` }}
                       className="w-full bg-black/60 border border-white/10 rounded-none py-4 pl-12 pr-24 text-lg focus:outline-none transition-colors shadow-inner text-white peer relative z-0"
                       placeholder="Search RAWG database..."
                       value={sQ}
@@ -977,12 +1024,12 @@ export default function App() {
                             <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
                           </div>
                           
-                          <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
-                            <h3 className="font-bold tracking-tight flex-1 drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>{g.name}</h3>
-                            <p className="text-white/80 mt-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libYear}px` }}>
+                          <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${scaledLayoutPrefs.cardPadding}px, 20px)` }}>
+                            <h3 className="font-bold tracking-tight flex-1 drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${scaledSystemFonts.libTitle}px` }}>{g.name}</h3>
+                            <p className="text-white/80 mt-1 drop-shadow-md" style={{ fontSize: `${scaledSystemFonts.libYear}px` }}>
                               {g.developers?.map(d => d.name).join(', ') || 'Unknown Developer'}
                             </p>
-                            <p className="text-white/60 mt-1 mb-auto" style={{ fontSize: `${Math.max(10, systemFonts.libYear - 2)}px` }}>
+                            <p className="text-white/60 mt-1 mb-auto" style={{ fontSize: `${Math.max(10, scaledSystemFonts.libYear - 2)}px` }}>
                               {g.released ? formatReleaseDate(g.released) : 'Unreleased'}
                             </p>
                             
@@ -1034,13 +1081,13 @@ export default function App() {
           onDeleteCycle={deleteCycle}
           onDeleteTimestamp={deleteTimestamp}
           onNotify={notify}
-          systemFonts={systemFonts}
+          systemFonts={scaledSystemFonts}
           modalBgIntensity={modalBgIntensity}
           modalPanelOpacity={modalPanelOpacity}
           initialRunId={initialRunForModal}
           onUpdateCycle={updateCycle}
           onAddCycle={addCycle}
-          layoutPrefs={layoutPrefs}
+          layoutPrefs={scaledLayoutPrefs}
         />
       )}
 
@@ -1059,7 +1106,7 @@ export default function App() {
           setConfig={setThumbnailConfig}
           onNotify={notify}
           selectedStreamNumber={wCf.selectedStreamNumber}
-          systemFonts={systemFonts}
+          systemFonts={scaledSystemFonts}
         />
       )}
     </div>

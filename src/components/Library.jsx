@@ -1,5 +1,5 @@
 // src/components/Library.jsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Search, Clock, SortAsc, SortDesc, Maximize, Trash2, Edit3 } from 'lucide-react';
 import { parseCustomTimestamp } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
@@ -31,8 +31,9 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
   const [editingGame, setEditingGame] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(null);
   
-  // Custom sorting animation state (Replaces document.startViewTransition)
+  // Custom sorting animation state & scroll reference
   const [isSorting, setIsSorting] = useState(false);
+  const scrollRef = useRef(null);
 
   const games = Object.entries(streamData).map(([id, data]) => {
     const cycles = data.cycles || {};
@@ -56,10 +57,15 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
     return 0;
   });
 
-  // Replaces the heavy document.startViewTransition API with a lightweight CSS scale/fade
   const handleSortClick = (newSort) => {
     if (sortBy === newSort) return;
     setIsSorting(true);
+    
+    // Autoscroll to the top when the sort button is clicked
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
     setTimeout(() => {
       setSortBy(newSort);
       // Slight delay ensures DOM paints the new sort before fading back in
@@ -150,7 +156,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar" style={containerStyle}>
+          <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar" style={containerStyle}>
             <div 
               style={{ 
                 ...gridStyle,

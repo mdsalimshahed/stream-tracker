@@ -1,5 +1,6 @@
+// src/components/LivestreamSetupWorkspace.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ChevronLeft, ImagePlus, Globe, Plus, Save, Loader2, Trash2 } from 'lucide-react';
+import { X, ChevronLeft, ImagePlus, Globe, Plus, Save, Loader2, Trash2, Upload } from 'lucide-react';
 import ThumbnailCanvas from './ThumbnailCanvas';
 import { isLocalPath, generateStreamTitle, generateTimestamp } from '../utils/helpers';
 import { RAWG_API_KEY } from '../utils/constants';

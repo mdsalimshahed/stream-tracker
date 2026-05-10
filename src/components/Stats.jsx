@@ -174,7 +174,7 @@ const STYLES = `
   .top-number { font-size: clamp(2rem, calc(var(--sz-main) * 1.5vmin), 6rem); }
   .stat-label { font-size: clamp(0.7rem, calc(var(--sz-main-label) * 0.9vmin), 2rem); letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
   
-  .latest-title { font-size: clamp(1.2rem, calc(var(--sz-title) * 1.5vmin), 4rem); font-weight: 600; margin-bottom: 8px; transition: color 0.3s; }
+  .latest-title { font-size: clamp(1.5rem, calc(var(--sz-title) * 1.5vmin), 4rem); font-weight: 600; margin-bottom: 8px; transition: color 0.3s; }
   .latest-sub-3 { font-size: clamp(0.85rem, calc(var(--sz-sub) * 1vmin), 2rem); color: var(--c-accent2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .latest-sub-1, .latest-sub-2 { font-size: clamp(0.8rem, calc(var(--sz-sub) * 0.8vmin), 2rem); color: var(--c-muted); margin-top: 6px; }
   .latest-sub-time { font-weight: bold; color: var(--c-text); font-size: 1.25em; }

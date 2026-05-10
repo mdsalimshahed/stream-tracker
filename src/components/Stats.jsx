@@ -225,149 +225,12 @@ const STYLES = `
     .latest-title { font-size: calc(var(--sz-title) * 1vw); margin-bottom: 0.5vw; }
     .latest-sub-3 { font-size: calc(var(--sz-sub) * 1vw); margin-top: 0.5vw; }
     .latest-sub-1, .latest-sub-2 { font-size: calc(var(--sz-sub) * 0.8vw); margin-top: 0.5vw; }
-    .latest-sub-time { font-size: 1.06em; }
+    .latest-sub-time { font-size: 1.25em; }
     .cat-count { font-size: calc(var(--sz-main) * 1vw); }
     .cat-name { font-size: calc(var(--sz-label) * 1vw); margin-top: 0.3vw; }
     .game-name-overlay { font-size: calc(var(--sz-label) * 1.1vw); top: 1vw; left: 1vw; }
   }
 `;
-
-const ROW_COUNT = 6;
-const IMG_W = 110;
-const IMGS_PER_ROW = 16;
-
-const MosaicBackground = ({ mosaicImages, bgDimming }) => {
-  const rowRefs = useRef([]);
-
-  const rows = useMemo(() => {
-    const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
-    const pool = mosaicImages && mosaicImages.length > 0 ? mosaicImages : [fallback];
-
-    return Array.from({ length: ROW_COUNT }, () => {
-      let sequence = [];
-      let lastGameId = null;
-      
-      // Build a well-spaced sequence of images for the row
-      while (sequence.length < IMGS_PER_ROW) {
-        // Completely shuffle the pool for random selection
-        let shuffled = [...pool].sort(() => Math.random() - 0.5);
-        let batch = [];
-        
-        while (shuffled.length > 0) {
-          let foundIdx = 0;
-          // Skip consecutive images from the same game
-          if (lastGameId !== null) {
-            while (foundIdx < shuffled.length && shuffled[foundIdx].gameId === lastGameId) {
-              foundIdx++;
-            }
-            // If only images from the same game are left, we have no choice but to use one
-            if (foundIdx === shuffled.length) {
-              foundIdx = 0;
-            }
-          }
-          
-          const selected = shuffled[foundIdx];
-          batch.push(selected);
-          lastGameId = selected.gameId;
-          
-          // Remove selected from the shuffled pool so others get a turn
-          shuffled.splice(foundIdx, 1);
-        }
-        
-        sequence.push(...batch);
-      }
-      
-      // Slice exactly the amount we need for the row layout
-      let base = sequence.slice(0, IMGS_PER_ROW);
-
-      // Boundary Fix: prevent the seamless scrolling loop from placing identical games side by side
-      if (base.length > 2 && base[base.length - 1].gameId === base[0].gameId) {
-        for (let k = base.length - 2; k >= 1; k--) {
-          if (
-            base[k].gameId !== base[0].gameId && 
-            base[k].gameId !== base[base.length - 2].gameId &&
-            base[base.length - 1].gameId !== base[k - 1].gameId &&
-            base[base.length - 1].gameId !== base[k + 1].gameId
-          ) {
-            const temp = base[k];
-            base[k] = base[base.length - 1];
-            base[base.length - 1] = temp;
-            break;
-          }
-        }
-      }
-
-      // Duplicating the sequence creates the seamless scrolling animation
-      return [...base.map(b => b.url), ...base.map(b => b.url)];
-    });
-  }, [mosaicImages]);
-
-  useEffect(() => {
-    const STRIP_W = IMGS_PER_ROW * IMG_W;
-    const state = Array.from({ length: ROW_COUNT }, (_, i) => {
-      const base = 0.18 + Math.random() * 0.14;
-      return {
-        dir: i % 2 === 0 ? -1 : 1,
-        pos: i % 2 === 0 ? 0 : -STRIP_W,
-        speed: base,
-        targetSpeed: base,
-        baseSpeed: base,
-        pauseTimer: Math.floor(Math.random() * 300),
-        pauseCountdown: 0,
-      };
-    });
-
-    let rafId;
-    const tick = () => {
-      state.forEach((s, i) => {
-        const el = rowRefs.current[i];
-        if (!el) return;
-
-        s.pauseTimer--;
-        if (s.pauseTimer <= 0) {
-          if (Math.random() < 0.35) {
-            s.pauseCountdown = 80 + Math.floor(Math.random() * 120);
-            s.targetSpeed = 0.01 + Math.random() * 0.03;
-          } else {
-            s.targetSpeed = 0.14 + Math.random() * 0.18;
-          }
-          s.pauseTimer = 200 + Math.floor(Math.random() * 400);
-        }
-        if (s.pauseCountdown > 0) {
-          s.pauseCountdown--;
-          if (s.pauseCountdown === 0) s.targetSpeed = s.baseSpeed;
-        }
-
-        s.speed += (s.targetSpeed - s.speed) * 0.025;
-        s.pos += s.dir * s.speed;
-
-        if (s.dir === -1 && s.pos <= -STRIP_W) s.pos += STRIP_W;
-        if (s.dir ===  1 && s.pos >=  0)       s.pos -= STRIP_W;
-
-        el.style.transform = `translateX(${s.pos}px)`;
-      });
-      rafId = requestAnimationFrame(tick);
-    };
-
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
-
-  return (
-    <div className="mosaic-wrap">
-      <div className="mosaic-rows">
-        {rows.map((imgs, ri) => (
-          <div key={ri} className="mosaic-row" ref={el => { rowRefs.current[ri] = el; }}>
-            {imgs.map((src, ii) => (
-              <img key={ii} className="mosaic-img" src={src} alt="" loading="lazy" />
-            ))}
-          </div>
-        ))}
-      </div>
-      <div className="absolute inset-0 bg-black transition-opacity duration-300 pointer-events-none" style={{ opacity: bgDimming ?? 0.5 }} />
-    </div>
-  );
-};
 
 // --- Helper Functions for Two-Level Randomization ---
 const shuffleArray = (array) => {
@@ -380,13 +243,11 @@ const shuffleArray = (array) => {
 };
 
 const generatePlaylist = (games, lastGameName = null) => {
-  // Only keep games that have at least one valid thumbnail
   const validGames = games.filter(g => g.thumbnail_urls && g.thumbnail_urls.length > 0);
   if (validGames.length === 0) return [];
 
   let shuffledGames = shuffleArray(validGames);
 
-  // Boundary Rule: Ensure the new list doesn't start with the exact same game it ended with
   if (shuffledGames.length > 1 && lastGameName && shuffledGames[0].game_name === lastGameName) {
     const temp = shuffledGames[0];
     shuffledGames[0] = shuffledGames[1];
@@ -394,7 +255,6 @@ const generatePlaylist = (games, lastGameName = null) => {
   }
 
   let playlist = [];
-  // For each randomized game, grab its images, randomize them, and push them to the final playlist
   shuffledGames.forEach(game => {
     const uniqueThumbs = [...new Set((game.thumbnail_urls || []).filter(Boolean))];
     const shuffledImages = shuffleArray(uniqueThumbs);
@@ -411,15 +271,16 @@ const CategoryCard = ({ title, games, cssClass }) => {
   const eligible = useMemo(() => games.filter(g => g.latestRunLabel === title), [games, title]);
 
   const playlistRef = useRef([]);
+  const indexRef = useRef(0);
   const [currentData, setCurrentData] = useState({ url: null, gameName: '' });
 
-  // Initialize the playlist dynamically when eligible games change
   useEffect(() => {
-    playlistRef.current = generatePlaylist(eligible, null);
-    setCurrentData(playlistRef.current[0] || { url: null, gameName: '' });
+    const newPlaylist = generatePlaylist(eligible, null);
+    playlistRef.current = newPlaylist;
+    indexRef.current = 0;
+    setCurrentData(newPlaylist[0] || { url: null, gameName: '' });
   }, [eligible]);
 
-  // Interval manager to loop through the 2-level randomized playlist smoothly
   useEffect(() => {
     const totalValidImages = eligible.reduce((acc, g) => acc + new Set((g.thumbnail_urls || []).filter(Boolean)).size, 0);
     if (totalValidImages < 2) return;
@@ -427,20 +288,19 @@ const CategoryCard = ({ title, games, cssClass }) => {
     const initialDelay = Math.random() * 2500;
     const cycleInterval = 3000 + Math.random() * 1500;
     
-    let idx = 0;
     let interval;
 
     const timeout = setTimeout(() => {
       interval = setInterval(() => {
-        idx++;
+        let idx = indexRef.current + 1;
         
-        // Once the current playlist is exhausted, regenerate the playlist using the custom logic
         if (idx >= playlistRef.current.length) {
           const lastGame = playlistRef.current[playlistRef.current.length - 1]?.gameName;
           playlistRef.current = generatePlaylist(eligible, lastGame);
           idx = 0;
         }
         
+        indexRef.current = idx;
         setCurrentData(playlistRef.current[idx]);
       }, cycleInterval);
     }, initialDelay);
@@ -502,13 +362,6 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
     }),
   [streamData]);
 
-  const allImages = useMemo(() => games.flatMap(g => g.thumbnail_urls || []).filter(Boolean), [games]);
-  
-  // Create object array for mosaic layout rule checking
-  const mosaicImages = useMemo(() => games.flatMap(g => 
-    (g.thumbnail_urls || []).filter(Boolean).map(url => ({ url, gameId: g.id }))
-  ), [games]);
-
   const totalStreams = useMemo(() => games.reduce((s, g) => s + g.totalStreams, 0), [games]);
   const totalGames  = games.length;
 
@@ -544,7 +397,7 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
     };
   }, [latestGameImages]);
 
-  const heroThumb = allImages[0] || '';
+  const heroThumb = latestGameImages[0] || '';
   const latestBgImage = latestGameImages[latestBgIndex] || heroThumb;
 
   return (
@@ -567,7 +420,7 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
       }}
     >
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <MosaicBackground mosaicImages={mosaicImages} bgDimming={layoutPrefs?.bgDimming} />
+      {/* Mosaic Background is handled globally by App.jsx */}
 
       <div className="stats-scroll">
         <div className="stats-top-row fade-up delay-1 shadow-2xl">

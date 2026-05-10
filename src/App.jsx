@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, Loader2, Plus, X } from 'lucide-react';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
@@ -77,6 +77,142 @@ const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
     shuffled[1] = temp;
   }
   return shuffled;
+};
+
+// --- Mosaic Component (Now Global with Resource-Saving Pause) ---
+const ROW_COUNT = 6;
+const IMG_W = 110;
+const IMGS_PER_ROW = 16;
+
+const MosaicBackground = ({ mosaicImages, isPaused }) => {
+  const rowRefs = useRef([]);
+  const pauseRef = useRef(isPaused);
+
+  useEffect(() => {
+    pauseRef.current = isPaused;
+  }, [isPaused]);
+
+  const rows = useMemo(() => {
+    const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
+    const pool = mosaicImages && mosaicImages.length > 0 ? mosaicImages : [fallback];
+
+    return Array.from({ length: ROW_COUNT }, () => {
+      let sequence = [];
+      let lastGameId = null;
+      
+      while (sequence.length < IMGS_PER_ROW) {
+        let shuffled = [...pool].sort(() => Math.random() - 0.5);
+        let batch = [];
+        
+        while (shuffled.length > 0) {
+          let foundIdx = 0;
+          if (lastGameId !== null) {
+            while (foundIdx < shuffled.length && shuffled[foundIdx].gameId === lastGameId) {
+              foundIdx++;
+            }
+            if (foundIdx === shuffled.length) {
+              foundIdx = 0;
+            }
+          }
+          
+          const selected = shuffled[foundIdx];
+          batch.push(selected);
+          lastGameId = selected.gameId;
+          shuffled.splice(foundIdx, 1);
+        }
+        
+        sequence.push(...batch);
+      }
+      
+      let base = sequence.slice(0, IMGS_PER_ROW);
+
+      if (base.length > 2 && base[base.length - 1].gameId === base[0].gameId) {
+        for (let k = base.length - 2; k >= 1; k--) {
+          if (
+            base[k].gameId !== base[0].gameId && 
+            base[k].gameId !== base[base.length - 2].gameId &&
+            base[base.length - 1].gameId !== base[k - 1].gameId &&
+            base[base.length - 1].gameId !== base[k + 1].gameId
+          ) {
+            const temp = base[k];
+            base[k] = base[base.length - 1];
+            base[base.length - 1] = temp;
+            break;
+          }
+        }
+      }
+
+      return [...base.map(b => b.url), ...base.map(b => b.url)];
+    });
+  }, [mosaicImages]);
+
+  useEffect(() => {
+    const STRIP_W = IMGS_PER_ROW * IMG_W;
+    const state = Array.from({ length: ROW_COUNT }, (_, i) => {
+      const base = 0.18 + Math.random() * 0.14;
+      return {
+        dir: i % 2 === 0 ? -1 : 1,
+        pos: i % 2 === 0 ? 0 : -STRIP_W,
+        speed: base,
+        targetSpeed: base,
+        baseSpeed: base,
+        pauseTimer: Math.floor(Math.random() * 300),
+        pauseCountdown: 0,
+      };
+    });
+
+    let rafId;
+    const tick = () => {
+      // Freezes physics engine entirely to save CPU/GPU cycles when hovering/modals open
+      if (!pauseRef.current) {
+        state.forEach((s, i) => {
+          const el = rowRefs.current[i];
+          if (!el) return;
+
+          s.pauseTimer--;
+          if (s.pauseTimer <= 0) {
+            if (Math.random() < 0.35) {
+              s.pauseCountdown = 80 + Math.floor(Math.random() * 120);
+              s.targetSpeed = 0.01 + Math.random() * 0.03;
+            } else {
+              s.targetSpeed = 0.14 + Math.random() * 0.18;
+            }
+            s.pauseTimer = 200 + Math.floor(Math.random() * 400);
+          }
+          if (s.pauseCountdown > 0) {
+            s.pauseCountdown--;
+            if (s.pauseCountdown === 0) s.targetSpeed = s.baseSpeed;
+          }
+
+          s.speed += (s.targetSpeed - s.speed) * 0.025;
+          s.pos += s.dir * s.speed;
+
+          if (s.dir === -1 && s.pos <= -STRIP_W) s.pos += STRIP_W;
+          if (s.dir ===  1 && s.pos >=  0)       s.pos -= STRIP_W;
+
+          el.style.transform = `translateX(${s.pos}px)`;
+        });
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 z-[-10] overflow-hidden pointer-events-none">
+      <div className="flex flex-col h-full">
+        {rows.map((imgs, ri) => (
+          <div key={ri} className="flex-1 flex items-stretch will-change-transform" ref={el => { rowRefs.current[ri] = el; }}>
+            {imgs.map((src, ii) => (
+              <img key={ii} className="shrink-0 w-[110px] h-full object-cover block" src={src} alt="" loading="lazy" />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 // ---------------------------------------
 
@@ -192,7 +328,12 @@ export default function App() {
   const [isS, setIsS] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  // Background and Hover Playlist Trackers
+  // Global images pool for the mosaic background
+  const mosaicImages = useMemo(() => Object.entries(streamData).flatMap(([id, g]) => 
+    (g.thumbnail_urls || []).filter(Boolean).map(url => ({ url, gameId: id }))
+  ), [streamData]);
+
+  // Hover state trackers
   const globalPlaylistRef = useRef([]);
   const globalIndexRef = useRef(0);
   const hoverPlaylistRef = useRef({ gameId: null, list: [], index: -1 });
@@ -208,6 +349,9 @@ export default function App() {
   const [hoveredImage, setHoveredImage] = useState(null);
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const hoverTimeoutRef = useRef(null);
+  
+  // Custom mosaic pause logic so it doesn't freeze abruptly when fading
+  const [mosaicPaused, setMosaicPaused] = useState(false);
 
   const hasCustomSettings = 
     JSON.stringify(systemFonts) !== JSON.stringify(DEFAULT_SYSTEM_FONTS) || 
@@ -267,9 +411,29 @@ export default function App() {
     }
   };
 
-  // Dual-State Playlist Interval Manager
+  // Dedicated Mosaic Pause Handler
   useEffect(() => {
-    const isPaused = selectedGameId || wCf || currentView === 'stats';
+    // If a modal/workspace is open, pause the mosaic instantly
+    if (selectedGameId || wCf) {
+      setMosaicPaused(true);
+      return;
+    }
+    
+    // If we're hovering over a card, pause the mosaic after a 1-second delay
+    // This allows the mosaic to keep smoothly moving while it fades out behind the card
+    if (hoverState.gameId) {
+      const timer = setTimeout(() => {
+        setMosaicPaused(true);
+      }, 1000); 
+      return () => clearTimeout(timer);
+    } else {
+      setMosaicPaused(false);
+    }
+  }, [selectedGameId, wCf, hoverState.gameId]);
+
+  // Interval Manager for Hover Images
+  useEffect(() => {
+    const isPaused = selectedGameId || wCf; 
     if (isPaused) return;
 
     const gameId = hoverState.gameId;
@@ -278,22 +442,20 @@ export default function App() {
     let intervalId;
 
     if (isHovering) {
-      // 1. Hover-State Initialization (Per-Game Playlist)
       if (hoverPlaylistRef.current.gameId !== gameId) {
         const rawImages = streamData[gameId].thumbnail_urls || [];
         hoverPlaylistRef.current = {
           gameId,
           list: generateSingleGamePlaylist(rawImages),
-          index: -1 // Start at -1 to delay the first image swap
+          index: -1
         };
         
-        setHoveredImage(null); // Explicitly keep the card's original cover image immediately
+        setHoveredImage(null); 
         
         if (rawImages.length > 0) {
-          setGlobalImage(rawImages[0]); // Fade the global background to the game cover immediately
+          setGlobalImage(rawImages[0]); 
         }
       } else {
-        // Resuming an active hover seamlessly
         const idx = hoverPlaylistRef.current.index;
         const currentImg = idx >= 0 ? hoverPlaylistRef.current.list[idx] : null;
         setHoveredImage(currentImg);
@@ -304,7 +466,6 @@ export default function App() {
         }
       }
 
-      // Cycle through per-game playlist (Wait 2.5s before the first swap)
       const hList = hoverPlaylistRef.current.list;
       if (hList.length > 1) {
         intervalId = setInterval(() => {
@@ -322,40 +483,12 @@ export default function App() {
           setGlobalImage(nextImg);
         }, 2500);
       }
-
     } else {
-      // 2. Default-State Initialization (Global Playlist)
       setHoveredImage(null);
-
-      if (globalPlaylistRef.current.length === 0 && Object.keys(streamData).length > 0) {
-        globalPlaylistRef.current = generateGlobalPlaylist(streamData);
-        globalIndexRef.current = 0;
-      }
-
-      const gList = globalPlaylistRef.current;
-      
-      if (gList.length > 0) {
-        setGlobalImage(gList[globalIndexRef.current]?.url || '');
-      }
-
-      if (gList.length > 1) {
-        intervalId = setInterval(() => {
-          let idx = globalIndexRef.current + 1;
-          
-          if (idx >= globalPlaylistRef.current.length) {
-            const lastGameId = globalPlaylistRef.current[globalPlaylistRef.current.length - 1]?.gameId;
-            globalPlaylistRef.current = generateGlobalPlaylist(streamData, lastGameId);
-            idx = 0;
-          }
-          
-          globalIndexRef.current = idx;
-          setGlobalImage(globalPlaylistRef.current[idx].url);
-        }, layoutPrefs.cycleInterval || 4000);
-      }
     }
 
     return () => clearInterval(intervalId);
-  }, [hoverState.gameId, streamData, selectedGameId, wCf, currentView, layoutPrefs.cycleInterval]);
+  }, [hoverState.gameId, streamData, selectedGameId, wCf]);
 
   useEffect(() => {
     const recovery = async () => {
@@ -711,7 +844,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen text-white antialiased relative bg-black overflow-hidden flex flex-col font-sans">
+    <div className="min-h-screen text-white font-sans antialiased relative bg-black overflow-hidden flex flex-col">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -721,20 +854,27 @@ export default function App() {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      {currentView !== 'stats' && (
-        <div className="absolute inset-0 z-0 pointer-events-none">
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* Default Global Mosaic Background (With optimized pause logic) */}
+        <div className={`absolute inset-0 transition-opacity duration-1000 ${hoverState.gameId ? 'opacity-0' : 'opacity-100'}`}>
+          <MosaicBackground mosaicImages={mosaicImages} isPaused={mosaicPaused} />
+        </div>
+
+        {/* Hover State Single Game Background */}
+        <div className={`absolute inset-0 transition-opacity duration-1000 ${hoverState.gameId ? 'opacity-100' : 'opacity-0'}`}>
           <CrossfadeImage 
             src={globalImage || 'https://placehold.co/1920x1080/1a1a1a/333333?text=Loading'} 
-            className="absolute inset-0 w-full h-full bg-black"
+            className="absolute inset-0 w-full h-full"
             imgClassName="object-cover" 
-            duration={1500}
-          />
-          <div 
-            className="absolute inset-0 bg-black transition-opacity duration-1000" 
-            style={{ opacity: layoutPrefs.bgDimming ?? 0.5 }} 
           />
         </div>
-      )}
+
+        {/* Universal Dimming Overlay */}
+        <div 
+          className="absolute inset-0 bg-black transition-opacity duration-300" 
+          style={{ opacity: layoutPrefs.bgDimming ?? 0.5 }} 
+        />
+      </div>
 
       <div className="relative z-10 flex flex-col h-screen">
         <Header currentView={currentView} onViewChange={setCurrentView} onImport={handleImport} onExport={() => setShowExportModal(true)} />
@@ -903,6 +1043,7 @@ export default function App() {
         <GameProfileModal
           gameId={selectedGameId}
           gameData={streamData[selectedGameId]}
+          streamData={streamData}
           onClose={() => { setSelectedGameId(null); setInitialRunForModal(null); }}
           onStartWorkspace={handleStartWorkspace}
           onDeleteCycle={deleteCycle}

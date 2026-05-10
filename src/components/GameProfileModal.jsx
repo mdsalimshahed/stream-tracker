@@ -1,4 +1,3 @@
-// src/components/GameProfileModal.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { X, ArrowRight, ArrowLeft, Gamepad2, Clock, Plus, Trash2, Edit3, Save, Star } from 'lucide-react';
 import { formatRunName, formatReleaseDate } from '../utils/helpers';
@@ -15,7 +14,7 @@ const shuffleArray = (array) => {
   return arr;
 };
 
-// Generates a randomized playlist strictly for THIS specific game
+// Only randomizes images for THIS specific game, ensuring no boundary repeats
 const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
   const uniqueThumbs = [...new Set(images.filter(Boolean))];
   if (uniqueThumbs.length === 0) return [];
@@ -23,7 +22,6 @@ const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
 
   let shuffled = shuffleArray(uniqueThumbs);
   
-  // Boundary Rule: Ensure the new list doesn't start with the exact same image it ended with
   if (lastImageUrl && shuffled[0] === lastImageUrl) {
     const temp = shuffled[0];
     shuffled[0] = shuffled[1];
@@ -47,7 +45,6 @@ export default function GameProfileModal({
   const playlistRef = useRef([]);
   const indexRef = useRef(0);
   
-  // Initialize the playlist strictly using THIS game's images ONLY
   if (playlistRef.current.length === 0 && gameData && gameData.thumbnail_urls) {
     playlistRef.current = generateSingleGamePlaylist(gameData.thumbnail_urls);
   }
@@ -68,7 +65,6 @@ export default function GameProfileModal({
       interval = setInterval(() => {
         let idx = indexRef.current + 1;
         
-        // When we run out of images for this game, reshuffle them
         if (idx >= playlistRef.current.length) {
           const lastImg = playlistRef.current[playlistRef.current.length - 1];
           playlistRef.current = generateSingleGamePlaylist(gameData.thumbnail_urls || [], lastImg);
@@ -232,18 +228,12 @@ export default function GameProfileModal({
         </div>
       </div>
 
-      {/* Main modal container with hidden overflow on large screens */}
       <div className="fixed inset-0 z-[50] overflow-y-auto lg:overflow-hidden custom-scrollbar" onClick={onClose}>
-        
-        {/* Ensures inner container fills the screen up to padding */}
         <div className="min-h-full lg:h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
-          
           <div 
             className="relative w-full max-w-7xl flex flex-col lg:flex-row lg:items-stretch gap-4 lg:gap-6 mx-auto cursor-auto lg:max-h-full" 
             onClick={e => e.stopPropagation()}
           >
-            
-            {/* LEFT COLUMN: Image & Details */}
             <div className="flex flex-col rounded-2xl shadow-2xl overflow-hidden shrink-0 lg:min-h-0" style={{ ...panelStyle, width: leftWidth }}>
               <div className="relative shrink-0 aspect-video bg-black/40 border-b border-white/10">
                 <CrossfadeImage src={bgImage} className="w-full h-full" imgClassName="object-cover" />
@@ -258,7 +248,6 @@ export default function GameProfileModal({
                 </button>
               </div>
               
-              {/* Internal overflow for details panel */}
               <div className="p-6 space-y-4 overflow-y-auto custom-scrollbar lg:min-h-0">
                 <div className="space-y-3">
                   <div><span className="text-white/50 text-sm block">Developer</span><span className="text-white text-sm">{details.developer}</span></div>
@@ -291,10 +280,7 @@ export default function GameProfileModal({
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Runs & Logs */}
             <div className="flex flex-col gap-4 lg:gap-6 shrink-0 lg:min-h-0" style={{ width: rightWidth }}>
-              
-              {/* RUNS PANEL */}
               <div className="flex flex-col rounded-2xl shadow-xl overflow-hidden lg:flex-1 lg:min-h-0" style={panelStyle}>
                 <div className="shrink-0 flex justify-between items-center p-4 border-b border-white/5">
                   <h3 className="text-sm font-semibold text-white/50 flex items-center gap-2"><Gamepad2 size={16} /> Runs</h3>
@@ -308,7 +294,6 @@ export default function GameProfileModal({
                   </div>
                 </div>
                 
-                {/* Dynamic height allocation with internal scrolling */}
                 <div className="overflow-y-auto custom-scrollbar p-4 pt-2 space-y-2 max-h-[350px] lg:max-h-none lg:flex-1 lg:min-h-0">
                   {cycleEntries.map(cycle => {
                     const streamCount = cycle.stream_count || 0;
@@ -377,10 +362,8 @@ export default function GameProfileModal({
                 </div>
               </div>
 
-              {/* LOGS PANEL */}
               <div className="flex flex-col rounded-2xl shadow-xl overflow-hidden lg:flex-1 lg:min-h-0" style={panelStyle}>
                 <h3 className="shrink-0 text-sm font-semibold text-white/50 flex items-center gap-2 p-4 border-b border-white/5"><Clock size={16} /> Session Logs</h3>
-                {/* Dynamic height allocation with internal scrolling */}
                 <div className="overflow-y-auto custom-scrollbar p-4 pt-2 space-y-2 max-h-[350px] lg:max-h-none lg:flex-1 lg:min-h-0">
                   {renderTimestamps()}
                 </div>

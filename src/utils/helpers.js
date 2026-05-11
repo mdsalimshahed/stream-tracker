@@ -56,25 +56,3 @@ export const formatReleaseDate = (dateString) => {
   const dayStr = `${day}${suffix[day % 10]}`;
   return `${dayStr} ${month} ${year}`;
 };
-
-// Dynamic image optimizer to prevent massive RAM consumption
-export const getOptimizedImage = (url, targetWidth = 600) => {
-  if (!url || typeof url !== 'string') return '';
-  if (url.startsWith('blob:') || url.startsWith('data:')) return url;
-  
-  // Natively resize RAWG images using their internal crop/resize API
-  if (url.includes('media.rawg.io/media/') && !url.includes('/resize/')) {
-    return url.replace('media.rawg.io/media/', `media.rawg.io/media/resize/${targetWidth}/-/`);
-  }
-  
-  // Steam native downscaling (Steam provides tiny 600x338 thumbnails for all high-res screenshots)
-  if (url.includes('akamai.steamstatic.com') || url.includes('steamcdn-a.akamaihd.net')) {
-    // If the image is a high-res screenshot (1920x1080 or 1280x720), swap the suffix to fetch the native thumbnail
-    if (targetWidth <= 600) {
-      return url.replace(/\.1920x1080\.jpg/i, '.600x338.jpg')
-                .replace(/\.1280x720\.jpg/i, '.600x338.jpg');
-    }
-  }
-  
-  return url;
-};

@@ -1,6 +1,6 @@
 // src/components/Dashboard.jsx
 import React, { useMemo } from 'react';
-import { parseCustomTimestamp, getOptimizedImage } from '../utils/helpers';
+import { parseCustomTimestamp } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
 
 export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs, globalImage, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
@@ -82,7 +82,7 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
             const isHovered = hoverState.cardId === uniqueCardId;
             const activeImg = (isHovered && hoveredImage?.gameId === stream.appId && hoveredImage?.url) 
                 ? hoveredImage.url 
-                : getOptimizedImage(stream.cover, 600);
+                : stream.cover;
 
             return (
               <div

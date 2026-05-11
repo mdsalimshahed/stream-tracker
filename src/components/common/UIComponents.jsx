@@ -104,6 +104,8 @@ export const CrossfadeImage = ({ src, alt, className, imgClassName, style, durat
               zIndex: i, // Maintains an extremely low z-index (0 and 1) so it never covers up overlays
             }}
             className={`absolute inset-0 w-full h-full ${imgClassName || ''}`}
+            decoding="async" // Offloads image decoding from the main thread so animations don't stagger
+            loading={isTopLayer ? "eager" : "lazy"} 
           />
         );
       })}

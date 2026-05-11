@@ -11,7 +11,7 @@ import Stats from './components/Stats';
 import { Notification } from './components/Notification';
 import { CrossfadeImage } from './components/common/UIComponents';
 import { RAWG_API_KEY, DEFAULT_SYSTEM_FONTS, DEFAULT_LAYOUT_PREFS, DEFAULT_THUMBNAIL_CONFIG, DEFAULT_MODAL_BG_INTENSITY, DEFAULT_MODAL_PANEL_OPACITY } from './utils/constants';
-import { formatRunName, formatReleaseDate, getOptimizedImage } from './utils/helpers';
+import { formatRunName, formatReleaseDate } from './utils/helpers';
 
 // --- Two-Level Randomization Helpers ---
 const shuffleArray = (array) => {
@@ -166,7 +166,6 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
       const safeDelta = Math.min(delta, 50);
 
       // Frame-rate independent exponential smoothing
-      // Lower multiplier = longer, smoother transition
       const globalLerpFactor = 1 - Math.exp(-safeDelta * 0.0015);
       const chaosLerpFactor = 1 - Math.exp(-safeDelta * 0.0008);
 
@@ -189,7 +188,7 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
           const rand = Math.random();
           if (rand < 0.15) { 
             state.targetChaos = 0.1 + Math.random() * 0.2;
-            state.timer = 2000 + Math.random() * 3000; // Increased timer for smoother pacing
+            state.timer = 2000 + Math.random() * 3000;
           } else if (rand < 0.35) { 
             state.targetChaos = 1.5 + Math.random() * 1.5;
             state.timer = 2500 + Math.random() * 3500;
@@ -243,7 +242,7 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
                 key={ii} 
                 className="shrink-0 object-cover block h-full" 
                 style={{ aspectRatio: item.aspect }}
-                src={getOptimizedImage(item.url, 200)} 
+                src={item.url} 
                 alt="" 
                 loading="lazy" 
                 decoding="async" 
@@ -478,15 +477,12 @@ export default function App() {
 
 
   const handleHoverGame = (cardId, gameId) => {
-    // Always clear the "set" timeout if the mouse moves to prevent premature triggering
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = null;
     }
     
     if (cardId === null) {
-      // Mouse left a card. Start a clear timer IF one isn't already running.
-      // This ensures that continuous scrolling across gaps doesn't delay the clear.
       if (!clearHoverTimeoutRef.current) {
         clearHoverTimeoutRef.current = setTimeout(() => {
           setHoverState({ cardId: null, gameId: null });
@@ -494,9 +490,7 @@ export default function App() {
         }, 1500);
       }
     } else {
-      // Mouse entered a new card. Wait 1.5s to trigger the backdrop.
       hoverTimeoutRef.current = setTimeout(() => {
-        // We rested on this card! Cancel any pending clears so it doesn't flicker back to mosaic.
         if (clearHoverTimeoutRef.current) {
           clearTimeout(clearHoverTimeoutRef.current);
           clearHoverTimeoutRef.current = null;
@@ -537,8 +531,6 @@ export default function App() {
           index: -1
         };
         
-        // INSTANT SYNC: Use the game's exact cover_image as the absolute starting point 
-        // to guarantee the card image and global background align without a frame of lag.
         const startingImage = streamData[gameId].cover_image || rawImages[0] || '';
         setHoveredImage({ url: startingImage, gameId }); 
         setGlobalImage(startingImage); 
@@ -566,7 +558,7 @@ export default function App() {
           const nextImg = hoverPlaylistRef.current.list[idx];
           setHoveredImage({ url: nextImg, gameId });
           setGlobalImage(nextImg);
-        }, 1500); // Fast 1.5s interval for snappy hovering
+        }, 1500); 
       }
     } else {
       setHoveredImage({ url: null, gameId: null });
@@ -610,7 +602,6 @@ export default function App() {
       for (const [id, game] of Object.entries(dataCopy)) {
         if (!game.details) game.details = { developer: 'Unknown', publisher: 'Unknown', releaseDate: game.release_year, genres: 'Unknown', tags: 'Unknown' };
         
-        // Migrate legacy games: extract cover_image and filter out header.jpg from thumbnail_urls
         if (!game.cover_image) {
           if (game.thumbnail_urls && game.thumbnail_urls.length > 0) {
             game.cover_image = game.thumbnail_urls[0];
@@ -623,7 +614,6 @@ export default function App() {
         
         let isUpdated = false;
 
-        // Auto-search steam for existing games if missing Steam link and not opted-out
         if (!game.details.steamUrl && !game.details.notOnSteam) {
           try {
              let steamId = null;
@@ -644,7 +634,6 @@ export default function App() {
                 const steamDataObj = detailsRaw[steamId]?.data;
 
                 if (steamDataObj) {
-                   // Always apply Steam Header as primary cover image
                    game.cover_image = steamDataObj.header_image;
                    
                    let newUrls = [];
@@ -669,7 +658,6 @@ export default function App() {
           } catch(e) {}
         }
         
-        // Ensure RAWG fallbacks are intact if images are less than 2
         if (!game.thumbnail_urls || game.thumbnail_urls.length < 2) {
           try {
             const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
@@ -698,7 +686,6 @@ export default function App() {
     if (Object.keys(streamData).length > 0) recovery();
   }, []);
 
-  // MANUAL SYNC HANDLER
   const handleManualSync = async () => {
     if (isSyncing) return;
     setIsSyncing(true);
@@ -740,7 +727,6 @@ export default function App() {
               const steamDataObj = detailsRaw[steamId]?.data;
 
               if (steamDataObj) {
-                 // Force overwrite cover_image with Steam header
                  game.cover_image = steamDataObj.header_image;
                  
                  let newUrls = [];
@@ -784,7 +770,6 @@ export default function App() {
       }
     }
     
-    // Normalization Hook logic
     const steamDevs = new Set();
     const steamPubs = new Set();
 
@@ -836,7 +821,6 @@ export default function App() {
     setIsSyncing(false);
   };
 
-  // MANUAL Search Handler
   const handleSearch = async () => {
     if (!sQ.trim()) { setSR([]); return; }
     setIsS(true);
@@ -871,7 +855,6 @@ export default function App() {
           })));
         }
       } else {
-        // Zero Steam results -> Fallback to RAWG
         const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(sQ)}&page_size=12`);
         const rawgData = await rawgRes.json();
         if (rawgData.results && rawgData.results.length > 0) {
@@ -918,7 +901,6 @@ export default function App() {
       });
   };
 
-  // Handle Add Game with separate cover_image and thumbnail_urls logic
   const handleAddGame = async (g) => {
     const rid = g.id.toString();
     if (streamData[rid]) {
@@ -948,7 +930,6 @@ export default function App() {
 
     try {
       if (g.isRawgOnly) {
-         // Full RAWG Fetch
          const detailRes = await fetch(`https://api.rawg.io/api/games/${rid}?key=${RAWG_API_KEY}`);
          const detailData = await detailRes.json();
          details.developer = detailData.developers?.map(d => d.name).join(', ') || details.developer;
@@ -965,7 +946,6 @@ export default function App() {
              thumbnails = sData.results.map(x => x.image).filter(Boolean);
          }
       } else {
-         // 1. Fetch from Steam API
          const targetUrl = `/steam-api/api/appdetails?appids=${rid}&l=english`;
          const res = await fetch(targetUrl);
          const steamDataObj = await res.json();
@@ -983,11 +963,10 @@ export default function App() {
            
            if (gameDetails.header_image) cover_image = gameDetails.header_image;
            if (gameDetails.screenshots) {
-             thumbnails = gameDetails.screenshots.map(s => s.path_full); // path_full is high resolution
+             thumbnails = gameDetails.screenshots.map(s => s.path_full);
            }
          }
 
-         // 2. Fetch User Tags and extra Screenshots from RAWG
          try {
            const cleanName = finalName.replace(/[:™®©]/g, '').trim();
            const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
@@ -1070,7 +1049,6 @@ export default function App() {
       }
       let tagsString = 'Unknown';
 
-      // Fetch RAWG data
       try {
         const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(gameDetails.name)}&page_size=1`);
         const rawgSearchData = await rawgSearchRes.json();
@@ -1316,7 +1294,7 @@ export default function App() {
 
         <div className={`absolute inset-0 transition-opacity duration-1000 ${hoverState.gameId ? 'opacity-100' : 'opacity-0'}`}>
           <CrossfadeImage 
-            src={getOptimizedImage(globalImage, 1280)} 
+            src={globalImage} 
             className="absolute inset-0 w-full h-full"
             imgClassName="object-cover" 
           />
@@ -1442,7 +1420,7 @@ export default function App() {
                       return (
                         <div key={g.id} className="group relative overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300" style={cardStyle}>
                           <div className="aspect-video bg-black/40 overflow-hidden relative shrink-0">
-                            <img src={getOptimizedImage(g.cover_image || g.background_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover', 600)} alt={g.name} className="absolute inset-0 w-full h-full object-cover" />
+                            <img src={g.cover_image || g.background_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover'} alt={g.name} className="absolute inset-0 w-full h-full object-cover" />
                             {g.isRawgOnly && (
                               <span className="absolute top-2 right-2 bg-purple-600/80 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full z-20 shadow">RAWG</span>
                             )}

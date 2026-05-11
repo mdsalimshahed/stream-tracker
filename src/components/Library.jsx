@@ -1,7 +1,7 @@
 // src/components/Library.jsx
 import React, { useState, useRef } from 'react';
 import { Search, Clock, SortAsc, SortDesc, Maximize, Trash2, Edit3 } from 'lucide-react';
-import { parseCustomTimestamp, getOptimizedImage } from '../utils/helpers';
+import { parseCustomTimestamp } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditGameModal } from './modals/EditGameModal';
 import { CrossfadeImage } from './common/UIComponents';
@@ -169,10 +169,10 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                 const cover = game.cover_image || game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
                 const isHovered = hoverState.cardId === game.id;
                 
-                // Only use raw hovered image if this specific card is active. Otherwise, fallback to optimized cover.
+                // Use original raw URL
                 const displayImg = (isHovered && hoveredImage?.gameId === game.id && hoveredImage?.url) 
                     ? hoveredImage.url 
-                    : getOptimizedImage(cover, 600);
+                    : cover;
 
                 const labelInfo = getLabelStyle(game.label);
                 

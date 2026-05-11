@@ -25,13 +25,12 @@ const getLatestRun = (cycles) => {
   return latestRun;
 }
 
-export default function Library({ streamData, openGameProfile, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, activeBgUrl, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
+export default function Library({ streamData, handleCardClick, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, activeBgUrl, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
   const [sortBy, setSortBy] = useState('recent');
   const [searchFilter, setSearchFilter] = useState('');
   const [editingGame, setEditingGame] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(null);
   
-  // Custom sorting animation state & scroll reference
   const [isSorting, setIsSorting] = useState(false);
   const scrollRef = useRef(null);
 
@@ -176,10 +175,14 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                 return (
                   <div
                     key={game.id}
-                    onClick={() => openGameProfile(game.id)}
+                    onClick={(e) => handleCardClick(e, game.id, game.id)}
                     onMouseEnter={() => onHoverGame(game.id, game.id)}
                     onMouseLeave={() => onHoverGame(null, null)}
-                    className="group relative cursor-pointer overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300"
+                    className={`group relative cursor-pointer overflow-hidden flex flex-col transition-all duration-300 ${
+                      isHovered 
+                        ? 'scale-105 shadow-2xl z-20 border-white/20' 
+                        : 'shadow-xl hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300 delay-0'
+                    }`}
                     style={{
                       ...cardStyle,
                       viewTransitionName: `game-card-${game.id.toString().replace(/[^a-zA-Z0-9]/g, '-')}`
@@ -192,11 +195,11 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                         className="absolute inset-0 w-full h-full" 
                         imgClassName="object-cover" 
                       />
-                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30" />
+                      <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent transition-opacity duration-300 z-30 pointer-events-none ${isHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
                     </div>
                     <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
                       <div className="flex flex-wrap justify-between items-start gap-2">
-                        <h3 className="font-bold tracking-tight flex-1 drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
+                        <h3 className={`font-bold tracking-tight flex-1 drop-shadow-md transition-colors duration-300 ${isHovered ? 'text-[#e8c87a]' : 'group-hover:text-[#e8c87a]'}`} style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
                       </div>
                       <p className="text-white/80 mt-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libYear}px` }}>
                         {game.details?.developer || 'Unknown Developer'}
@@ -213,7 +216,7 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                         </div>
                       </div>
                     </div>
-                    <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition z-30">
+                    <div className={`absolute top-2 right-2 flex flex-col gap-1 transition z-30 ${isHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleEditClick(game); }}
                         className="p-1.5 rounded-full bg-blue-500/80 backdrop-blur text-white hover:bg-blue-600 shadow"

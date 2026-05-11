@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { parseCustomTimestamp } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
 
-export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs, activeBgUrl, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
+export default function Dashboard({ streamData, handleCardClick, systemFonts, layoutPrefs, activeBgUrl, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
   
   const recentStreams = useMemo(() => {
     const recent = [];
@@ -87,10 +87,14 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
             return (
               <div
                 key={uniqueCardId}
-                onClick={() => openGameProfile(stream.appId, stream.cycleName)}
+                onClick={(e) => handleCardClick(e, uniqueCardId, stream.appId, stream.cycleName)}
                 onMouseEnter={() => onHoverGame(uniqueCardId, stream.appId)}
                 onMouseLeave={() => onHoverGame(null, null)}
-                className="group cursor-pointer overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300"
+                className={`group cursor-pointer overflow-hidden flex flex-col transition-all duration-300 ${
+                  isHovered 
+                    ? 'scale-105 shadow-2xl z-20 border-white/20' 
+                    : 'shadow-xl hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300 delay-0'
+                }`}
                 style={cardStyle}
               >
                 <div className="relative overflow-hidden aspect-video bg-black/40 shrink-0">
@@ -100,10 +104,10 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
                     className="absolute inset-0 w-full h-full" 
                     imgClassName="object-cover" 
                   />
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
+                  <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent transition-opacity duration-300 z-30 pointer-events-none ${isHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
                 </div>
                 <div className="p-3 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
-                  <h3 className="font-bold leading-tight drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>
+                  <h3 className={`font-bold leading-tight drop-shadow-md transition-colors duration-300 ${isHovered ? 'text-[#e8c87a]' : 'group-hover:text-[#e8c87a]'}`} style={{ fontSize: `${systemFonts.libTitle}px` }}>
                     {stream.gameName}
                   </h3>
                   

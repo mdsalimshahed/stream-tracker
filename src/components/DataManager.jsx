@@ -6,8 +6,11 @@ import { RangeControl } from './common/UIComponents';
 const Toggle = ({ label, description, value, onChange }) => (
   <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
     <div className="flex justify-between items-center">
-      <div><div className="text-sm font-medium text-white">{label}</div><div className="text-xs text-white/40 mt-0.5">{description}</div></div>
-      <button onClick={() => onChange(!value)} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${value ? 'bg-blue-600 text-white' : 'bg-white/10 text-white/60'}`}>
+      <div>
+        <div className="text-sm font-medium text-white">{label}</div>
+        <div className="text-xs text-white/40 mt-0.5 pr-4 leading-tight">{description}</div>
+      </div>
+      <button onClick={() => onChange(!value)} className={`px-4 py-2 rounded-lg text-sm font-medium transition shrink-0 ${value ? 'bg-blue-600 text-white' : 'bg-white/10 text-white/60'}`}>
         {value ? 'Enabled' : 'Disabled'}
       </button>
     </div>
@@ -88,6 +91,14 @@ export default function DataManager({
 
         <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2"><Eye size={24} /> UI Visibility & Opacity</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+          {/* New Performance Toggle Here */}
+          <Toggle 
+            label="3D Hover Effects" 
+            description="Toggles the flipping mosaic background on hover. If disabled, clicking a card once previews it, and clicking twice opens it (saves performance on lower-end computers)." 
+            value={layoutPrefs.enableHoverEffects !== false} 
+            onChange={v => updateLayout('enableHoverEffects', v)} 
+          />
+
           <RangeControl label="Card Panel Opacity" description="Transparency of game cards (History, Library, Add)" value={layoutPrefs.panelFillOpacity ?? 0.1} min={0} max={1} step={0.01} onChange={v => updateLayout('panelFillOpacity', v)} />
           <RangeControl label="App Background Dimming" description="Opacity of the dark overlay on the background" value={layoutPrefs.bgDimming ?? 0.5} min={0} max={1} step={0.01} onChange={v => updateLayout('bgDimming', v)} />
           <RangeControl label="Modal Panel Opacity" description="Transparency of Runs & Logs panels" value={modalPanelOpacity} min={0} max={1} step={0.01} onChange={setModalPanelOpacity} />

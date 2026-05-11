@@ -41,7 +41,6 @@ const generateGlobalPlaylist = (gamesObj, lastGameId = null) => {
 
   while (shuffled.length > 0) {
     let foundIdx = 0;
-    
     if (currentGameId !== null) {
       while (foundIdx < shuffled.length && shuffled[foundIdx].gameId === currentGameId) {
         foundIdx++;
@@ -50,7 +49,6 @@ const generateGlobalPlaylist = (gamesObj, lastGameId = null) => {
         foundIdx = 0;
       }
     }
-    
     const selected = shuffled[foundIdx];
     playlist.push(selected);
     currentGameId = selected.gameId;
@@ -75,7 +73,7 @@ const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
 };
 
 // --- Mosaic Component (Hardware Accelerated Transparent 3D Window Flip) ---
-const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip }) => {
+const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip, activeHoverUrl }) => {
   const ROWS = 7;
   const IMGS_PER_ROW = 24;
 
@@ -84,10 +82,18 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
 
   const globalStateRef = useRef({ currentSpeed: isSlowMode ? 0.15 : 1 });
   const modeRef = useRef({ isPaused, isSlowMode });
+  
+  const [flipUrl, setFlipUrl] = useState(null);
 
   useEffect(() => {
     modeRef.current = { isPaused, isSlowMode };
   }, [isPaused, isSlowMode]);
+
+  useEffect(() => {
+    if (activeHoverUrl) {
+      setFlipUrl(activeHoverUrl);
+    }
+  }, [activeHoverUrl]);
 
   const rowsConfig = useMemo(() => {
     const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
@@ -110,7 +116,6 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
             }
             if (foundIdx === shuffled.length) foundIdx = 0;
           }
-          
           const selected = shuffled[foundIdx];
           batch.push(selected);
           lastGameId = selected.gameId;
@@ -225,7 +230,6 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
   }, [rowsConfig]); 
 
   return (
-    // Note: No background color here! Allows the CrossfadeImage behind it to show through.
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <div className="flex flex-col h-[100vh] w-full">
         {rowsConfig.map((row, ri) => (
@@ -249,29 +253,12 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
                     transformStyle: 'preserve-3d'
                   }}
                 >
-                  {/* Front Face: Original Mosaic Tile */}
-                  <div 
-                    className="absolute inset-0 bg-black" 
-                    style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
-                  >
-                    <img 
-                      src={item.url} 
-                      alt="" 
-                      className="w-full h-full object-cover block" 
-                      loading="lazy" 
-                      decoding="async" 
-                    />
+                  {/* Front Face */}
+                  <div className="absolute inset-0 bg-black" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
+                    <img src={item.url} alt="" className="w-full h-full object-cover block" loading="lazy" decoding="async" />
                   </div>
-                  {/* Back Face: Transparent - creates a "window" to reveal the underlying background */}
-                  <div 
-                    className="absolute inset-0" 
-                    style={{ 
-                      backfaceVisibility: 'hidden', 
-                      WebkitBackfaceVisibility: 'hidden', 
-                      transform: 'rotateY(180deg)',
-                      background: 'transparent'
-                    }}
-                  ></div>
+                  {/* Back Face (Transparent Window) */}
+                  <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: 'transparent' }}></div>
                 </div>
               </div>
             ))}
@@ -349,11 +336,11 @@ export default function App() {
   });
 
   const [layoutPrefs, setLayoutPrefs] = useState(() => {
-    if (!checkPersist()) return DEFAULT_LAYOUT_PREFS;
+    if (!checkPersist()) return { ...DEFAULT_LAYOUT_PREFS, enableHoverEffects: true };
     try {
       const s = localStorage.getItem('layoutPrefs');
-      return s ? { ...DEFAULT_LAYOUT_PREFS, ...JSON.parse(s) } : DEFAULT_LAYOUT_PREFS;
-    } catch(e) { return DEFAULT_LAYOUT_PREFS; }
+      return s ? { enableHoverEffects: true, ...DEFAULT_LAYOUT_PREFS, ...JSON.parse(s) } : { ...DEFAULT_LAYOUT_PREFS, enableHoverEffects: true };
+    } catch(e) { return { ...DEFAULT_LAYOUT_PREFS, enableHoverEffects: true }; }
   });
 
   const [modalBgIntensity, setModalBgIntensity] = useState(() => {
@@ -370,16 +357,6 @@ export default function App() {
       const s = localStorage.getItem('modalPanelOpacity');
       return s !== null ? parseFloat(s) : DEFAULT_MODAL_PANEL_OPACITY;
     } catch(e) { return DEFAULT_MODAL_PANEL_OPACITY; }
-  });
-
-  const [mosaicXGap, setMosaicXGap] = useState(() => {
-    if (!checkPersist()) return 0;
-    try { const s = localStorage.getItem('mosaicXGap'); return s !== null ? parseInt(s) : 0; } catch(e) { return 0; }
-  });
-
-  const [mosaicYGap, setMosaicYGap] = useState(() => {
-    if (!checkPersist()) return 0;
-    try { const s = localStorage.getItem('mosaicYGap'); return s !== null ? parseInt(s) : 0; } catch(e) { return 0; }
   });
 
   const [currentView, setCurrentView] = useState(() => {
@@ -456,44 +433,48 @@ export default function App() {
 
   useEffect(() => { localStorage.setItem('streamManagerData', JSON.stringify(streamData)); }, [streamData]);
   useEffect(() => { localStorage.setItem('persistSettings', persistSettings); }, [persistSettings]);
+  useEffect(() => { if (persistSettings) localStorage.setItem('thumbnailConfig', JSON.stringify(thumbnailConfig)); else localStorage.removeItem('thumbnailConfig'); }, [thumbnailConfig, persistSettings]);
+  useEffect(() => { if (persistSettings) localStorage.setItem('systemFonts', JSON.stringify(systemFonts)); else localStorage.removeItem('systemFonts'); }, [systemFonts, persistSettings]);
+  useEffect(() => { if (persistSettings) localStorage.setItem('layoutPrefs', JSON.stringify(layoutPrefs)); else localStorage.removeItem('layoutPrefs'); }, [layoutPrefs, persistSettings]);
+  useEffect(() => { if (persistSettings) localStorage.setItem('modalBgIntensity', modalBgIntensity); else localStorage.removeItem('modalBgIntensity'); }, [modalBgIntensity, persistSettings]);
+  useEffect(() => { if (persistSettings) localStorage.setItem('modalPanelOpacity', modalPanelOpacity); else localStorage.removeItem('modalPanelOpacity'); }, [modalPanelOpacity, persistSettings]);
 
-  useEffect(() => { 
-    if (persistSettings) localStorage.setItem('thumbnailConfig', JSON.stringify(thumbnailConfig)); 
-    else localStorage.removeItem('thumbnailConfig');
-  }, [thumbnailConfig, persistSettings]);
 
-  useEffect(() => { 
-    if (persistSettings) localStorage.setItem('systemFonts', JSON.stringify(systemFonts)); 
-    else localStorage.removeItem('systemFonts');
-  }, [systemFonts, persistSettings]);
+  // Global click listener: if hovers are disabled and you click OUTSIDE a card, it resets the background
+  useEffect(() => {
+    const handleGlobalClick = () => {
+      if (layoutPrefs.enableHoverEffects === false && hoverState.gameId) {
+        setHoverState({ cardId: null, gameId: null });
+      }
+    };
+    window.addEventListener('click', handleGlobalClick);
+    return () => window.removeEventListener('click', handleGlobalClick);
+  }, [layoutPrefs.enableHoverEffects, hoverState.gameId]);
 
-  useEffect(() => { 
-    if (persistSettings) localStorage.setItem('layoutPrefs', JSON.stringify(layoutPrefs)); 
-    else localStorage.removeItem('layoutPrefs');
-  }, [layoutPrefs, persistSettings]);
-
-  useEffect(() => { 
-    if (persistSettings) localStorage.setItem('modalBgIntensity', modalBgIntensity); 
-    else localStorage.removeItem('modalBgIntensity');
-  }, [modalBgIntensity, persistSettings]);
-
-  useEffect(() => { 
-    if (persistSettings) localStorage.setItem('modalPanelOpacity', modalPanelOpacity); 
-    else localStorage.removeItem('modalPanelOpacity');
-  }, [modalPanelOpacity, persistSettings]);
-
-  useEffect(() => { 
-    if (persistSettings) localStorage.setItem('mosaicXGap', mosaicXGap); 
-    else localStorage.removeItem('mosaicXGap');
-  }, [mosaicXGap, persistSettings]);
-
-  useEffect(() => { 
-    if (persistSettings) localStorage.setItem('mosaicYGap', mosaicYGap); 
-    else localStorage.removeItem('mosaicYGap');
-  }, [mosaicYGap, persistSettings]);
-
+  // Handle direct clicks on the card
+  const handleCardClick = (e, uniqueCardId, gameId, cycleId = null) => {
+    e.stopPropagation(); // Prevents the global click listener above from firing
+    
+    if (layoutPrefs.enableHoverEffects !== false) {
+      // Normal Behavior: Click opens the profile immediately
+      setHoverState({ cardId: null, gameId: null });
+      openGameProfile(gameId, cycleId);
+    } else {
+      // Disabled Hover Behavior: First click previews, Second click opens
+      if (hoverState.cardId === uniqueCardId) {
+        setHoverState({ cardId: null, gameId: null });
+        openGameProfile(gameId, cycleId);
+      } else {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        if (clearHoverTimeoutRef.current) clearTimeout(clearHoverTimeoutRef.current);
+        setHoverState({ cardId: uniqueCardId, gameId });
+      }
+    }
+  };
 
   const handleHoverGame = (cardId, gameId) => {
+    if (layoutPrefs.enableHoverEffects === false) return; // Do nothing on physical hover if disabled
+
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = null;
@@ -522,7 +503,6 @@ export default function App() {
       setMosaicPaused(true);
       return;
     }
-    
     if (hoverState.gameId) {
       setMosaicPaused(true);
     } else {
@@ -1325,7 +1305,7 @@ export default function App() {
           {currentView === 'dashboard' && (
             <Dashboard
               streamData={streamData}
-              openGameProfile={openGameProfile}
+              handleCardClick={handleCardClick}
               systemFonts={scaledSystemFonts}
               layoutPrefs={scaledLayoutPrefs}
               activeBgUrl={activeBgUrl}
@@ -1338,7 +1318,7 @@ export default function App() {
           {currentView === 'library' && (
             <Library
               streamData={streamData}
-              openGameProfile={openGameProfile}
+              handleCardClick={handleCardClick}
               onDeleteGame={deleteGame}
               onUpdateGameLink={updateGameLink}
               onEditGame={editGameDetails}

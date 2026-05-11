@@ -165,11 +165,21 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
       lastTime = time;
       const safeDelta = Math.min(delta, 50);
 
+      // Frame-rate independent exponential smoothing
+      // Lower multiplier = longer, smoother transition
+      const globalLerpFactor = 1 - Math.exp(-safeDelta * 0.0015);
+      const chaosLerpFactor = 1 - Math.exp(-safeDelta * 0.0008);
+
       let targetGlobalSpeed = 1.0;
       if (modeRef.current.isPaused) targetGlobalSpeed = 0.0;
       else if (modeRef.current.isSlowMode) targetGlobalSpeed = 0.15;
 
-      globalStateRef.current.currentSpeed += (targetGlobalSpeed - globalStateRef.current.currentSpeed) * 0.05;
+      globalStateRef.current.currentSpeed += (targetGlobalSpeed - globalStateRef.current.currentSpeed) * globalLerpFactor;
+
+      // Snap to exact 0 to prevent micro-creeping when paused
+      if (Math.abs(globalStateRef.current.currentSpeed) < 0.001 && targetGlobalSpeed === 0) {
+        globalStateRef.current.currentSpeed = 0;
+      }
 
       rowsConfig.forEach((config, i) => {
         const state = config.state;
@@ -179,17 +189,17 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
           const rand = Math.random();
           if (rand < 0.15) { 
             state.targetChaos = 0.1 + Math.random() * 0.2;
-            state.timer = 1500 + Math.random() * 2000;
+            state.timer = 2000 + Math.random() * 3000; // Increased timer for smoother pacing
           } else if (rand < 0.35) { 
             state.targetChaos = 1.5 + Math.random() * 1.5;
-            state.timer = 2000 + Math.random() * 3000;
+            state.timer = 2500 + Math.random() * 3500;
           } else { 
             state.targetChaos = 0.8 + Math.random() * 0.4;
-            state.timer = 3000 + Math.random() * 4000;
+            state.timer = 3000 + Math.random() * 5000;
           }
         }
 
-        state.currentChaos += (state.targetChaos - state.currentChaos) * 0.05;
+        state.currentChaos += (state.targetChaos - state.currentChaos) * chaosLerpFactor;
 
         const actualSpeed = globalStateRef.current.currentSpeed * state.currentChaos * config.baseSpeed;
         const moveAmount = actualSpeed * safeDelta;

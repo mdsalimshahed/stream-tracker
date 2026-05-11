@@ -50,13 +50,6 @@ body {
   transition: opacity 1000ms ease-in-out;
 }
 
-/* Ensure images cover the area without stretching */
-.bg-cover {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
 /* Standard UI Transitions */
 .transition-all {
   transition-property: all;
@@ -102,6 +95,7 @@ body {
   background: linear-gradient(to left, #facc15, transparent) bottom right / 100% 4px no-repeat,
               linear-gradient(to top, #facc15, transparent) bottom right / 4px 100% no-repeat;
 }
+
 @keyframes pageTransition {
   from {
     opacity: 0;

@@ -9,6 +9,7 @@ import GameProfileModal from './components/GameProfileModal';
 import LivestreamSetupWorkspace from './components/LivestreamSetupWorkspace';
 import Stats from './components/Stats';
 import { Notification } from './components/Notification';
+import { CrossfadeImage } from './components/common/UIComponents';
 import { RAWG_API_KEY, DEFAULT_SYSTEM_FONTS, DEFAULT_LAYOUT_PREFS, DEFAULT_THUMBNAIL_CONFIG, DEFAULT_MODAL_BG_INTENSITY, DEFAULT_MODAL_PANEL_OPACITY } from './utils/constants';
 import { formatRunName, formatReleaseDate } from './utils/helpers';
 
@@ -20,6 +21,43 @@ const shuffleArray = (array) => {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+};
+
+const generateGlobalPlaylist = (gamesObj, lastGameId = null) => {
+  let pool = [];
+  Object.entries(gamesObj).forEach(([id, game]) => {
+    const uniqueThumbs = [...new Set((game.thumbnail_urls || []).filter(Boolean))];
+    uniqueThumbs.forEach(url => {
+      pool.push({ url, gameId: id });
+    });
+  });
+
+  if (pool.length === 0) return [];
+  if (pool.length === 1) return pool;
+
+  let shuffled = shuffleArray(pool);
+  let playlist = [];
+  let currentGameId = lastGameId;
+
+  while (shuffled.length > 0) {
+    let foundIdx = 0;
+    
+    if (currentGameId !== null) {
+      while (foundIdx < shuffled.length && shuffled[foundIdx].gameId === currentGameId) {
+        foundIdx++;
+      }
+      if (foundIdx === shuffled.length) {
+        foundIdx = 0;
+      }
+    }
+    
+    const selected = shuffled[foundIdx];
+    playlist.push(selected);
+    currentGameId = selected.gameId;
+    shuffled.splice(foundIdx, 1);
+  }
+
+  return playlist;
 };
 
 const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
@@ -36,8 +74,8 @@ const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
   return shuffled;
 };
 
-// --- Mosaic Component (Hardware Accelerated 3D Flip) ---
-const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, activeHoverUrl }) => {
+// --- Mosaic Component (Hardware Accelerated Transparent 3D Window Flip) ---
+const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip }) => {
   const ROWS = 7;
   const IMGS_PER_ROW = 24;
 
@@ -46,19 +84,10 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, activ
 
   const globalStateRef = useRef({ currentSpeed: isSlowMode ? 0.15 : 1 });
   const modeRef = useRef({ isPaused, isSlowMode });
-  
-  // Track the image to render on the backface. We hold onto it even when hovering stops so it doesn't vanish while flipping back
-  const [flipUrl, setFlipUrl] = useState(null);
 
   useEffect(() => {
     modeRef.current = { isPaused, isSlowMode };
   }, [isPaused, isSlowMode]);
-
-  useEffect(() => {
-    if (activeHoverUrl) {
-      setFlipUrl(activeHoverUrl);
-    }
-  }, [activeHoverUrl]);
 
   const rowsConfig = useMemo(() => {
     const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
@@ -196,7 +225,8 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, activ
   }, [rowsConfig]); 
 
   return (
-    <div className="absolute inset-0 z-[-10] overflow-hidden pointer-events-none bg-black">
+    // Note: No background color here! Allows the CrossfadeImage behind it to show through.
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <div className="flex flex-col h-[100vh] w-full">
         {rowsConfig.map((row, ri) => (
           <div 
@@ -212,29 +242,36 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, activ
                 style={{ aspectRatio: item.aspect }}
               >
                 <div 
-                  className={`relative w-full h-full transition-transform duration-700 preserve-3d ${activeHoverUrl ? 'rotate-y-180' : ''}`}
-                  style={{ transitionDelay: `${(ri * 35) + ((ii % IMGS_PER_ROW) * 20)}ms` }}
+                  className={`relative w-full h-full transition-transform duration-[1200ms] ${shouldFlip ? 'rotate-y-180' : ''}`}
+                  style={{ 
+                    transitionTimingFunction: 'cubic-bezier(0.25, 0.8, 0.25, 1)',
+                    transitionDelay: `${(ri * 40) + ((ii % IMGS_PER_ROW) * 20)}ms`,
+                    transformStyle: 'preserve-3d'
+                  }}
                 >
                   {/* Front Face: Original Mosaic Tile */}
-                  <img 
-                    src={item.url} 
-                    alt="" 
-                    className="absolute inset-0 w-full h-full object-cover backface-hidden block" 
-                    loading="lazy" 
-                    decoding="async" 
-                  />
-                  {/* Back Face: Hovered Game Image */}
-                  <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-black">
-                    {flipUrl && (
-                      <img 
-                        src={flipUrl} 
-                        alt="" 
-                        className="w-full h-full object-cover" 
-                        loading="lazy" 
-                        decoding="async" 
-                      />
-                    )}
+                  <div 
+                    className="absolute inset-0 bg-black" 
+                    style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+                  >
+                    <img 
+                      src={item.url} 
+                      alt="" 
+                      className="w-full h-full object-cover block" 
+                      loading="lazy" 
+                      decoding="async" 
+                    />
                   </div>
+                  {/* Back Face: Transparent - creates a "window" to reveal the underlying background */}
+                  <div 
+                    className="absolute inset-0" 
+                    style={{ 
+                      backfaceVisibility: 'hidden', 
+                      WebkitBackfaceVisibility: 'hidden', 
+                      transform: 'rotateY(180deg)',
+                      background: 'transparent'
+                    }}
+                  ></div>
                 </div>
               </div>
             ))}
@@ -367,7 +404,7 @@ export default function App() {
 
   const hoverPlaylistRef = useRef({ gameId: null, list: [], index: -1 });
   
-  const [hoveredImage, setHoveredImage] = useState({ url: null, gameId: null });
+  const [activeBgUrl, setActiveBgUrl] = useState('');
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const hoverTimeoutRef = useRef(null);
   const clearHoverTimeoutRef = useRef(null);
@@ -512,13 +549,13 @@ export default function App() {
         };
         
         const startingImage = streamData[gameId].cover_image || rawImages[0] || '';
-        setHoveredImage({ url: startingImage, gameId }); 
+        setActiveBgUrl(startingImage); 
       } else {
         const idx = hoverPlaylistRef.current.index;
         const currentImg = idx >= 0 ? hoverPlaylistRef.current.list[idx] : null;
         const fallback = streamData[gameId].cover_image || '';
         
-        setHoveredImage({ url: currentImg || fallback, gameId });
+        setActiveBgUrl(currentImg || fallback);
       }
 
       const hList = hoverPlaylistRef.current.list;
@@ -533,17 +570,15 @@ export default function App() {
           }
           
           hoverPlaylistRef.current.index = idx;
-          const nextImg = hoverPlaylistRef.current.list[idx];
-          setHoveredImage({ url: nextImg, gameId });
+          setActiveBgUrl(hoverPlaylistRef.current.list[idx]);
         }, layoutPrefs.hoverCycleInterval || 1500); 
       }
-    } else {
-      setHoveredImage({ url: null, gameId: null });
     }
 
     return () => clearInterval(intervalId);
   }, [hoverState.gameId, streamData, selectedGameId, wCf, layoutPrefs.hoverCycleInterval]);
 
+  // Handle data recovery and Steam Auto-Link on component load
   useEffect(() => {
     const recovery = async () => {
       const dataCopy = JSON.parse(JSON.stringify(streamData));
@@ -913,7 +948,7 @@ export default function App() {
            
            if (gameDetails.header_image) cover_image = gameDetails.header_image;
            if (gameDetails.screenshots) {
-             thumbnails = gameDetails.screenshots.map(s => s.path_full); 
+             thumbnails = gameDetails.screenshots.map(s => s.path_full);
            }
          }
 
@@ -1237,13 +1272,29 @@ export default function App() {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className={`absolute inset-0 transition-opacity duration-1000 opacity-100`}>
-          <MosaicBackground mosaicImages={mosaicImages} isPaused={mosaicPaused} isSlowMode={currentView !== 'stats'} activeHoverUrl={hoveredImage?.url} />
+      <div className="absolute inset-0 z-0 pointer-events-none bg-black">
+        {/* 1. The background fading image that fills the screen */}
+        <div className={`absolute inset-0 transition-opacity duration-[1200ms] ease-out ${hoverState.gameId ? 'opacity-100' : 'opacity-0'}`}>
+          <CrossfadeImage 
+            src={activeBgUrl} 
+            className="absolute inset-0 w-full h-full"
+            imgClassName="object-cover" 
+          />
         </div>
 
+        {/* 2. The flipping mosaic */}
+        <div className="absolute inset-0 z-10">
+          <MosaicBackground 
+            mosaicImages={mosaicImages} 
+            isPaused={mosaicPaused} 
+            isSlowMode={currentView !== 'stats'} 
+            shouldFlip={!!hoverState.gameId} 
+          />
+        </div>
+
+        {/* 3. Dimming overlay */}
         <div 
-          className="absolute inset-0 bg-black transition-opacity duration-300 z-10 pointer-events-none" 
+          className="absolute inset-0 bg-black transition-opacity duration-300 z-20 pointer-events-none" 
           style={{ opacity: layoutPrefs.bgDimming ?? 0.5 }} 
         />
       </div>
@@ -1277,7 +1328,7 @@ export default function App() {
               openGameProfile={openGameProfile}
               systemFonts={scaledSystemFonts}
               layoutPrefs={scaledLayoutPrefs}
-              hoveredImage={hoveredImage}
+              activeBgUrl={activeBgUrl}
               hoverState={hoverState}
               onHoverGame={handleHoverGame}
               onImportDefault={handleImportDefault}
@@ -1293,7 +1344,7 @@ export default function App() {
               onEditGame={editGameDetails}
               systemFonts={scaledSystemFonts}
               layoutPrefs={scaledLayoutPrefs}
-              hoveredImage={hoveredImage}
+              activeBgUrl={activeBgUrl}
               hoverState={hoverState}
               onHoverGame={handleHoverGame}
               onImportDefault={handleImportDefault}

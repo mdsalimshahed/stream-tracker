@@ -25,7 +25,7 @@ const getLatestRun = (cycles) => {
   return latestRun;
 }
 
-export default function Library({ streamData, openGameProfile, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
+export default function Library({ streamData, openGameProfile, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, activeBgUrl, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
   const [sortBy, setSortBy] = useState('recent');
   const [searchFilter, setSearchFilter] = useState('');
   const [editingGame, setEditingGame] = useState(null);
@@ -167,8 +167,8 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                 const cover = game.cover_image || game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
                 const isHovered = hoverState.cardId === game.id;
                 
-                const displayImg = (isHovered && hoveredImage?.gameId === game.id && hoveredImage?.url) 
-                    ? hoveredImage.url 
+                const displayImg = (isHovered && activeBgUrl) 
+                    ? activeBgUrl 
                     : cover;
 
                 const labelInfo = getLabelStyle(game.label);

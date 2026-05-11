@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { parseCustomTimestamp } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
 
-export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
+export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs, activeBgUrl, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
   
   const recentStreams = useMemo(() => {
     const recent = [];
@@ -80,8 +80,8 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
           {recentStreams.map((stream) => {
             const uniqueCardId = `${stream.appId}-${stream.cycleName}`;
             const isHovered = hoverState.cardId === uniqueCardId;
-            const activeImg = (isHovered && hoveredImage?.gameId === stream.appId && hoveredImage?.url) 
-                ? hoveredImage.url 
+            const activeImg = (isHovered && activeBgUrl) 
+                ? activeBgUrl 
                 : stream.cover;
 
             return (

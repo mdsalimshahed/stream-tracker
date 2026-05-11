@@ -9,7 +9,6 @@ import GameProfileModal from './components/GameProfileModal';
 import LivestreamSetupWorkspace from './components/LivestreamSetupWorkspace';
 import Stats from './components/Stats';
 import { Notification } from './components/Notification';
-import { CrossfadeImage } from './components/common/UIComponents';
 import { RAWG_API_KEY, DEFAULT_SYSTEM_FONTS, DEFAULT_LAYOUT_PREFS, DEFAULT_THUMBNAIL_CONFIG, DEFAULT_MODAL_BG_INTENSITY, DEFAULT_MODAL_PANEL_OPACITY } from './utils/constants';
 import { formatRunName, formatReleaseDate } from './utils/helpers';
 
@@ -21,44 +20,6 @@ const shuffleArray = (array) => {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
-};
-
-const generateGlobalPlaylist = (gamesObj, lastGameId = null) => {
-  let pool = [];
-  Object.entries(gamesObj).forEach(([id, game]) => {
-    // Rely exclusively on thumbnail_urls (high-res gameplay images), ignoring cover_image
-    const uniqueThumbs = [...new Set((game.thumbnail_urls || []).filter(Boolean))];
-    uniqueThumbs.forEach(url => {
-      pool.push({ url, gameId: id });
-    });
-  });
-
-  if (pool.length === 0) return [];
-  if (pool.length === 1) return pool;
-
-  let shuffled = shuffleArray(pool);
-  let playlist = [];
-  let currentGameId = lastGameId;
-
-  while (shuffled.length > 0) {
-    let foundIdx = 0;
-    
-    if (currentGameId !== null) {
-      while (foundIdx < shuffled.length && shuffled[foundIdx].gameId === currentGameId) {
-        foundIdx++;
-      }
-      if (foundIdx === shuffled.length) {
-        foundIdx = 0;
-      }
-    }
-    
-    const selected = shuffled[foundIdx];
-    playlist.push(selected);
-    currentGameId = selected.gameId;
-    shuffled.splice(foundIdx, 1);
-  }
-
-  return playlist;
 };
 
 const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
@@ -75,8 +36,8 @@ const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
   return shuffled;
 };
 
-// --- Mosaic Component (Web Animations API) ---
-const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => {
+// --- Mosaic Component (Hardware Accelerated 3D Flip) ---
+const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, activeHoverUrl }) => {
   const ROWS = 7;
   const IMGS_PER_ROW = 24;
 
@@ -85,10 +46,19 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
 
   const globalStateRef = useRef({ currentSpeed: isSlowMode ? 0.15 : 1 });
   const modeRef = useRef({ isPaused, isSlowMode });
+  
+  // Track the image to render on the backface. We hold onto it even when hovering stops so it doesn't vanish while flipping back
+  const [flipUrl, setFlipUrl] = useState(null);
 
   useEffect(() => {
     modeRef.current = { isPaused, isSlowMode };
   }, [isPaused, isSlowMode]);
+
+  useEffect(() => {
+    if (activeHoverUrl) {
+      setFlipUrl(activeHoverUrl);
+    }
+  }, [activeHoverUrl]);
 
   const rowsConfig = useMemo(() => {
     const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
@@ -145,7 +115,7 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
 
       const duration = 40000 + Math.random() * 20000; 
       const direction = i % 2 === 0 ? 'left' : 'right';
-      const baseSpeed = 50 / duration; // % per ms
+      const baseSpeed = 50 / duration;
 
       return {
         imgs: [...baseWithAspect, ...baseWithAspect],
@@ -165,7 +135,6 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
       lastTime = time;
       const safeDelta = Math.min(delta, 50);
 
-      // Frame-rate independent exponential smoothing
       const globalLerpFactor = 1 - Math.exp(-safeDelta * 0.0015);
       const chaosLerpFactor = 1 - Math.exp(-safeDelta * 0.0008);
 
@@ -175,7 +144,6 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
 
       globalStateRef.current.currentSpeed += (targetGlobalSpeed - globalStateRef.current.currentSpeed) * globalLerpFactor;
 
-      // Snap to exact 0 to prevent micro-creeping when paused
       if (Math.abs(globalStateRef.current.currentSpeed) < 0.001 && targetGlobalSpeed === 0) {
         globalStateRef.current.currentSpeed = 0;
       }
@@ -238,15 +206,37 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
             ref={el => rowRefs.current[ri] = el}
           >
             {row.imgs.map((item, ii) => (
-              <img 
+              <div 
                 key={ii} 
-                className="shrink-0 object-cover block h-full" 
+                className="shrink-0 h-full perspective-1000" 
                 style={{ aspectRatio: item.aspect }}
-                src={item.url} 
-                alt="" 
-                loading="lazy" 
-                decoding="async" 
-              />
+              >
+                <div 
+                  className={`relative w-full h-full transition-transform duration-700 preserve-3d ${activeHoverUrl ? 'rotate-y-180' : ''}`}
+                  style={{ transitionDelay: `${(ri * 35) + ((ii % IMGS_PER_ROW) * 20)}ms` }}
+                >
+                  {/* Front Face: Original Mosaic Tile */}
+                  <img 
+                    src={item.url} 
+                    alt="" 
+                    className="absolute inset-0 w-full h-full object-cover backface-hidden block" 
+                    loading="lazy" 
+                    decoding="async" 
+                  />
+                  {/* Back Face: Hovered Game Image */}
+                  <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-black">
+                    {flipUrl && (
+                      <img 
+                        src={flipUrl} 
+                        alt="" 
+                        className="w-full h-full object-cover" 
+                        loading="lazy" 
+                        decoding="async" 
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ))}
@@ -375,17 +365,7 @@ export default function App() {
     (g.thumbnail_urls || []).filter(Boolean).map(url => ({ url, gameId: id }))
   ), [streamData]);
 
-  const globalPlaylistRef = useRef([]);
-  const globalIndexRef = useRef(0);
   const hoverPlaylistRef = useRef({ gameId: null, list: [], index: -1 });
-
-  if (globalPlaylistRef.current.length === 0 && Object.keys(streamData).length > 0) {
-    globalPlaylistRef.current = generateGlobalPlaylist(streamData);
-  }
-
-  const [globalImage, setGlobalImage] = useState(() => {
-    return globalPlaylistRef.current.length > 0 ? globalPlaylistRef.current[0].url : '';
-  });
   
   const [hoveredImage, setHoveredImage] = useState({ url: null, gameId: null });
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
@@ -533,14 +513,12 @@ export default function App() {
         
         const startingImage = streamData[gameId].cover_image || rawImages[0] || '';
         setHoveredImage({ url: startingImage, gameId }); 
-        setGlobalImage(startingImage); 
       } else {
         const idx = hoverPlaylistRef.current.index;
         const currentImg = idx >= 0 ? hoverPlaylistRef.current.list[idx] : null;
         const fallback = streamData[gameId].cover_image || '';
         
         setHoveredImage({ url: currentImg || fallback, gameId });
-        setGlobalImage(currentImg || fallback);
       }
 
       const hList = hoverPlaylistRef.current.list;
@@ -557,43 +535,15 @@ export default function App() {
           hoverPlaylistRef.current.index = idx;
           const nextImg = hoverPlaylistRef.current.list[idx];
           setHoveredImage({ url: nextImg, gameId });
-          setGlobalImage(nextImg);
-        }, 1500); 
+        }, layoutPrefs.hoverCycleInterval || 1500); 
       }
     } else {
       setHoveredImage({ url: null, gameId: null });
-
-      if (globalPlaylistRef.current.length === 0 && Object.keys(streamData).length > 0) {
-        globalPlaylistRef.current = generateGlobalPlaylist(streamData);
-        globalIndexRef.current = 0;
-      }
-
-      const gList = globalPlaylistRef.current;
-      
-      if (gList.length > 0) {
-        setGlobalImage(gList[globalIndexRef.current]?.url || '');
-      }
-
-      if (gList.length > 1) {
-        intervalId = setInterval(() => {
-          let idx = globalIndexRef.current + 1;
-          
-          if (idx >= globalPlaylistRef.current.length) {
-            const lastGameId = globalPlaylistRef.current[globalPlaylistRef.current.length - 1]?.gameId;
-            globalPlaylistRef.current = generateGlobalPlaylist(streamData, lastGameId);
-            idx = 0;
-          }
-          
-          globalIndexRef.current = idx;
-          setGlobalImage(globalPlaylistRef.current[idx].url);
-        }, layoutPrefs.cycleInterval || 4000);
-      }
     }
 
     return () => clearInterval(intervalId);
-  }, [hoverState.gameId, streamData, selectedGameId, wCf, layoutPrefs.cycleInterval]);
+  }, [hoverState.gameId, streamData, selectedGameId, wCf, layoutPrefs.hoverCycleInterval]);
 
-  // Handle data recovery and Steam Auto-Link on component load
   useEffect(() => {
     const recovery = async () => {
       const dataCopy = JSON.parse(JSON.stringify(streamData));
@@ -963,7 +913,7 @@ export default function App() {
            
            if (gameDetails.header_image) cover_image = gameDetails.header_image;
            if (gameDetails.screenshots) {
-             thumbnails = gameDetails.screenshots.map(s => s.path_full);
+             thumbnails = gameDetails.screenshots.map(s => s.path_full); 
            }
          }
 
@@ -1288,16 +1238,8 @@ export default function App() {
       `}</style>
 
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className={`absolute inset-0 transition-opacity duration-1000 ${hoverState.gameId ? 'opacity-0' : 'opacity-100'}`}>
-          <MosaicBackground mosaicImages={mosaicImages} isPaused={mosaicPaused} isSlowMode={currentView !== 'stats'} />
-        </div>
-
-        <div className={`absolute inset-0 transition-opacity duration-1000 ${hoverState.gameId ? 'opacity-100' : 'opacity-0'}`}>
-          <CrossfadeImage 
-            src={globalImage} 
-            className="absolute inset-0 w-full h-full"
-            imgClassName="object-cover" 
-          />
+        <div className={`absolute inset-0 transition-opacity duration-1000 opacity-100`}>
+          <MosaicBackground mosaicImages={mosaicImages} isPaused={mosaicPaused} isSlowMode={currentView !== 'stats'} activeHoverUrl={hoveredImage?.url} />
         </div>
 
         <div 
@@ -1335,7 +1277,6 @@ export default function App() {
               openGameProfile={openGameProfile}
               systemFonts={scaledSystemFonts}
               layoutPrefs={scaledLayoutPrefs}
-              globalImage={globalImage}
               hoveredImage={hoveredImage}
               hoverState={hoverState}
               onHoverGame={handleHoverGame}
@@ -1352,7 +1293,6 @@ export default function App() {
               onEditGame={editGameDetails}
               systemFonts={scaledSystemFonts}
               layoutPrefs={scaledLayoutPrefs}
-              globalImage={globalImage}
               hoveredImage={hoveredImage}
               hoverState={hoverState}
               onHoverGame={handleHoverGame}

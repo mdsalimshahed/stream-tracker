@@ -25,7 +25,7 @@ const getLatestRun = (cycles) => {
   return latestRun;
 }
 
-export default function Library({ streamData, openGameProfile, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, globalImage, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
+export default function Library({ streamData, openGameProfile, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
   const [sortBy, setSortBy] = useState('recent');
   const [searchFilter, setSearchFilter] = useState('');
   const [editingGame, setEditingGame] = useState(null);
@@ -61,14 +61,12 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
     if (sortBy === newSort) return;
     setIsSorting(true);
     
-    // Autoscroll to the top when the sort button is clicked
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
     setTimeout(() => {
       setSortBy(newSort);
-      // Slight delay ensures DOM paints the new sort before fading back in
       setTimeout(() => setIsSorting(false), 50); 
     }, 150); 
   };
@@ -169,7 +167,6 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                 const cover = game.cover_image || game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
                 const isHovered = hoverState.cardId === game.id;
                 
-                // Use original raw URL
                 const displayImg = (isHovered && hoveredImage?.gameId === game.id && hoveredImage?.url) 
                     ? hoveredImage.url 
                     : cover;

@@ -68,18 +68,13 @@ export const ColorOverride = ({ title, element, config, toggle, onChange }) => {
   );
 };
 
-// Re-engineered to stack the incoming image on top and fade it in, 
-// keeping the old image 100% solid in the background to prevent transparency flashing
 export const CrossfadeImage = ({ src, alt, className, imgClassName, style, duration = 700 }) => {
   const [images, setImages] = useState([{ id: Date.now(), src }]);
 
   useEffect(() => {
     if (!src) return;
     setImages(prev => {
-      // Don't add if it's the exact same sequential image
       if (prev.length > 0 && prev[prev.length - 1].src === src) return prev;
-      
-      // Keep ONLY the most recent image as a solid base, and append the new image to fade in on top
       return [prev[prev.length - 1], { id: Date.now(), src }];
     });
   }, [src]);
@@ -101,10 +96,10 @@ export const CrossfadeImage = ({ src, alt, className, imgClassName, style, durat
             alt={alt || ''}
             style={{
               animation: isTopLayer && images.length > 1 ? `smoothFadeIn ${duration}ms ease-in-out forwards` : 'none',
-              zIndex: i, // Maintains an extremely low z-index (0 and 1) so it never covers up overlays
+              zIndex: i,
             }}
             className={`absolute inset-0 w-full h-full ${imgClassName || ''}`}
-            decoding="async" // Offloads image decoding from the main thread so animations don't stagger
+            decoding="async" 
             loading={isTopLayer ? "eager" : "lazy"} 
           />
         );

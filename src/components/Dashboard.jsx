@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { parseCustomTimestamp } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
 
-export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs, globalImage, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
+export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
   
   const recentStreams = useMemo(() => {
     const recent = [];

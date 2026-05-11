@@ -469,7 +469,7 @@ export default function LivestreamSetupWorkspace({
                             onClick={() => setCF(font.family)}
                             className={`relative group border rounded-lg p-4 cursor-pointer transition ${cF === font.family ? 'border-blue-500 bg-blue-500/10' : 'border-white/10 bg-black/40 hover:bg-white/5'}`}
                           >
-                            <span style={{ fontFamily: font.isLocal ? `"${font.family}"` : `"${font.family}", sans-serif` }} className="text-2xl block truncate pr-16">
+                            <span style={{ fontFamily: font.isLocal ? `"${font.family}"` : `"${font.family}", sans-serif` }} className="text-lg block truncate pr-16">
                               {font.family}
                             </span>
                             {!font.isLocal && (

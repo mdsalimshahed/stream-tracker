@@ -77,15 +77,23 @@ const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
 
 // --- Mosaic Component (Web Animations API) ---
 const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => {
-  const ROWS = 6;
-  const IMGS_PER_ROW = 12;
+  const ROWS = 7;
+  const IMGS_PER_ROW = 24;
 
   const rowRefs = useRef([]);
-  const animationsRef = useRef([]);
+  const requestRef = useRef(null);
+
+  const globalStateRef = useRef({ currentSpeed: isSlowMode ? 0.15 : 1 });
+  const modeRef = useRef({ isPaused, isSlowMode });
+
+  useEffect(() => {
+    modeRef.current = { isPaused, isSlowMode };
+  }, [isPaused, isSlowMode]);
 
   const rowsConfig = useMemo(() => {
     const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
     const pool = mosaicImages && mosaicImages.length > 0 ? mosaicImages : [fallback];
+    const aspectRatios = ['16/9', '4/3', '1/1'];
 
     return Array.from({ length: ROWS }, (_, i) => {
       let sequence = [];
@@ -130,74 +138,102 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
         }
       }
 
-      const duration = 60000 + Math.random() * 60000; 
+      const baseWithAspect = base.map(b => ({
+        url: b.url,
+        aspect: aspectRatios[Math.floor(Math.random() * aspectRatios.length)]
+      }));
+
+      const duration = 40000 + Math.random() * 20000; 
       const direction = i % 2 === 0 ? 'left' : 'right';
+      const baseSpeed = 50 / duration; // % per ms
 
       return {
-        imgs: [...base.map(b => b.url), ...base.map(b => b.url)],
-        duration,
-        direction
+        imgs: [...baseWithAspect, ...baseWithAspect],
+        baseSpeed,
+        direction,
+        state: { targetChaos: 1, currentChaos: 1, timer: 0 }
       };
     });
   }, [mosaicImages]);
 
   useEffect(() => {
-    animationsRef.current.forEach(anim => anim.cancel());
-    animationsRef.current = [];
+    let lastTime = performance.now();
+    let positions = rowsConfig.map(c => c.direction === 'right' ? -50 : 0);
 
-    rowRefs.current.forEach((el, i) => {
-      if (!el) return;
-      const config = rowsConfig[i];
-      
-      const keyframes = config.direction === 'left' 
-        ? [ { transform: 'translate3d(0, 0, 0)' }, { transform: 'translate3d(-50%, 0, 0)' } ]
-        : [ { transform: 'translate3d(-50%, 0, 0)' }, { transform: 'translate3d(0, 0, 0)' } ];
+    const animateLoop = (time) => {
+      const delta = time - lastTime;
+      lastTime = time;
+      const safeDelta = Math.min(delta, 50);
 
-      const animation = el.animate(keyframes, {
-        duration: config.duration,
-        iterations: Infinity,
-        easing: 'linear'
+      let targetGlobalSpeed = 1.0;
+      if (modeRef.current.isPaused) targetGlobalSpeed = 0.0;
+      else if (modeRef.current.isSlowMode) targetGlobalSpeed = 0.15;
+
+      globalStateRef.current.currentSpeed += (targetGlobalSpeed - globalStateRef.current.currentSpeed) * 0.05;
+
+      rowsConfig.forEach((config, i) => {
+        const state = config.state;
+        state.timer -= safeDelta;
+
+        if (state.timer <= 0) {
+          const rand = Math.random();
+          if (rand < 0.15) { 
+            state.targetChaos = 0.1 + Math.random() * 0.2;
+            state.timer = 1500 + Math.random() * 2000;
+          } else if (rand < 0.35) { 
+            state.targetChaos = 1.5 + Math.random() * 1.5;
+            state.timer = 2000 + Math.random() * 3000;
+          } else { 
+            state.targetChaos = 0.8 + Math.random() * 0.4;
+            state.timer = 3000 + Math.random() * 4000;
+          }
+        }
+
+        state.currentChaos += (state.targetChaos - state.currentChaos) * 0.05;
+
+        const actualSpeed = globalStateRef.current.currentSpeed * state.currentChaos * config.baseSpeed;
+        const moveAmount = actualSpeed * safeDelta;
+
+        if (config.direction === 'left') {
+          positions[i] -= moveAmount;
+          if (positions[i] <= -50) positions[i] += 50;
+        } else {
+          positions[i] += moveAmount;
+          if (positions[i] >= 0) positions[i] -= 50;
+        }
+
+        const el = rowRefs.current[i];
+        if (el) {
+          el.style.transform = `translate3d(${positions[i]}%, 0, 0)`;
+        }
       });
 
-      animation.playbackRate = isSlowMode ? 0.125 : 3;
-      if (isPaused) animation.pause();
+      requestRef.current = requestAnimationFrame(animateLoop);
+    };
 
-      animationsRef.current.push(animation);
-    });
+    requestRef.current = requestAnimationFrame(animateLoop);
 
     return () => {
-      animationsRef.current.forEach(anim => anim.cancel());
+      cancelAnimationFrame(requestRef.current);
     };
   }, [rowsConfig]); 
 
-  useEffect(() => {
-    animationsRef.current.forEach(anim => {
-      if (isPaused) {
-        anim.pause();
-      } else {
-        anim.playbackRate = isSlowMode ? 0.125 : 3; 
-        if (anim.playState === 'paused') {
-          anim.play();
-        }
-      }
-    });
-  }, [isPaused, isSlowMode]);
-
   return (
     <div className="absolute inset-0 z-[-10] overflow-hidden pointer-events-none bg-black">
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-[100vh] w-full">
         {rowsConfig.map((row, ri) => (
           <div 
             key={ri} 
-            className="flex-1 flex items-stretch will-change-transform" 
-            style={{ width: 'max-content' }}
+            className="flex-none flex flex-row items-stretch will-change-transform" 
+            style={{ width: 'max-content', height: `${100 / ROWS}vh` }}
             ref={el => rowRefs.current[ri] = el}
           >
-            {row.imgs.map((src, ii) => (
+            {row.imgs.map((item, ii) => (
               <img 
                 key={ii} 
-                className="shrink-0 w-[160px] h-full object-cover block" 
-                src={getOptimizedImage(src, 200)} 
+                className="shrink-0 object-cover block h-full" 
+                style={{ aspectRatio: item.aspect }}
+                src={getOptimizedImage(item.url, 200)} 
                 alt="" 
                 loading="lazy" 
                 decoding="async" 
@@ -450,8 +486,7 @@ export default function App() {
     }
     
     if (hoverState.gameId) {
-      const timer = setTimeout(() => setMosaicPaused(true), 1000); 
-      return () => clearTimeout(timer);
+      setMosaicPaused(true);
     } else {
       setMosaicPaused(false);
     }

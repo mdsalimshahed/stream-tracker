@@ -391,6 +391,7 @@ export default function App() {
   const [hoveredImage, setHoveredImage] = useState({ url: null, gameId: null });
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const hoverTimeoutRef = useRef(null);
+  const clearHoverTimeoutRef = useRef(null);
   const [mosaicPaused, setMosaicPaused] = useState(false);
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -477,15 +478,31 @@ export default function App() {
 
 
   const handleHoverGame = (cardId, gameId) => {
-    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    // Always clear the "set" timeout if the mouse moves to prevent premature triggering
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
     
     if (cardId === null) {
-      hoverTimeoutRef.current = setTimeout(() => {
-        setHoverState({ cardId: null, gameId: null });
-      }, 200);
+      // Mouse left a card. Start a clear timer IF one isn't already running.
+      // This ensures that continuous scrolling across gaps doesn't delay the clear.
+      if (!clearHoverTimeoutRef.current) {
+        clearHoverTimeoutRef.current = setTimeout(() => {
+          setHoverState({ cardId: null, gameId: null });
+          clearHoverTimeoutRef.current = null;
+        }, 1500);
+      }
     } else {
-      // Immediate sync trigger to eliminate visual lag
-      setHoverState({ cardId, gameId });
+      // Mouse entered a new card. Wait 1.5s to trigger the backdrop.
+      hoverTimeoutRef.current = setTimeout(() => {
+        // We rested on this card! Cancel any pending clears so it doesn't flicker back to mosaic.
+        if (clearHoverTimeoutRef.current) {
+          clearTimeout(clearHoverTimeoutRef.current);
+          clearHoverTimeoutRef.current = null;
+        }
+        setHoverState({ cardId, gameId });
+      }, 1500);
     }
   };
 

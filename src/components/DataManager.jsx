@@ -92,7 +92,7 @@ export default function DataManager({
           <RangeControl label="App Background Dimming" description="Opacity of the dark overlay on the background" value={layoutPrefs.bgDimming ?? 0.5} min={0} max={1} step={0.01} onChange={v => updateLayout('bgDimming', v)} />
           <RangeControl label="Modal Panel Opacity" description="Transparency of Runs & Logs panels" value={modalPanelOpacity} min={0} max={1} step={0.01} onChange={setModalPanelOpacity} />
           <RangeControl label="Modal Background Dimming" description="0 = fully dimmed, 1 = full visibility" value={modalBgIntensity} min={0} max={1} step={0.01} onChange={setModalBgIntensity} />
-          <RangeControl label="Background Cycle Speed" description="Image slideshow interval (ms)" value={layoutPrefs.cycleInterval ?? 4000} min={1000} max={20000} step={500} onChange={v => updateLayout('cycleInterval', v)} />
+          <RangeControl label="Hover Image Cycle Speed" description="Card thumbnail slideshow interval (ms)" value={layoutPrefs.hoverCycleInterval ?? 1500} min={500} max={10000} step={100} onChange={v => updateLayout('hoverCycleInterval', v)} />
         </div>
 
         <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2"><RefreshCw size={24} /> Data Synchronization</h2>

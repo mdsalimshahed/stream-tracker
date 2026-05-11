@@ -30,6 +30,7 @@ export const DEFAULT_LAYOUT_PREFS = {
   panelFillOpacity: 0.2,
   bgDimming: 0,
   cycleInterval: 3000,
+  hoverCycleInterval: 1500,
   statsSplitRatio: 0.35,
   statsRowSplitRatio: 0.60
 };

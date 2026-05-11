@@ -307,7 +307,7 @@ export default function LivestreamSetupWorkspace({
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+          <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar">
             
             {/* Top/Left gallery */}
             <div className="w-full lg:w-1/4 xl:w-1/5 lg:min-w-[220px] lg:max-w-[320px] h-auto border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col bg-neutral-900/50 shrink-0">
@@ -342,7 +342,7 @@ export default function LivestreamSetupWorkspace({
             </div>
 
             {/* Center: Canvas */}
-            <div className="flex-1 flex flex-col bg-black min-h-[300px] shrink-0 lg:min-h-0 overflow-hidden">
+            <div className="flex-none lg:flex-1 flex flex-col bg-black min-h-[300px] shrink-0 lg:min-h-0 overflow-hidden">
               <div className="mx-4 sm:mx-8 mt-4 p-2 sm:p-3 bg-white/10 rounded-lg text-center cursor-pointer hover:bg-white/20 transition" onClick={() => handleCopy(false)}>
                 <p className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wider">Stream Title (Click to Copy)</p>
                 <p className="text-white font-medium text-xs sm:text-sm break-all mt-1">{title}</p>
@@ -366,7 +366,7 @@ export default function LivestreamSetupWorkspace({
             </div>
 
             {/* Bottom/Right panel: Controls */}
-            <div className="w-full lg:w-1/4 xl:w-1/4 lg:min-w-[280px] lg:max-w-[400px] border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col bg-neutral-900/50 shrink-0 lg:h-full h-[50vh] lg:h-auto">
+            <div className="w-full lg:w-1/4 xl:w-1/4 lg:min-w-[280px] lg:max-w-[400px] border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col bg-neutral-900/50 shrink-0 lg:h-full">
               <div className="p-3 lg:p-4 border-b border-white/10 shrink-0">
                 <select value={selEl} onChange={(e) => setSelEl(e.target.value)} className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-sm outline-none focus:border-blue-500 shadow-inner">
                   <option value="title">Game Title</option>
@@ -377,7 +377,7 @@ export default function LivestreamSetupWorkspace({
                 </select>
               </div>
               
-              <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+              <div className="flex-none lg:flex-1 flex flex-col lg:overflow-hidden min-h-0">
                 {selEl === 'title' && (
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
                     <div className="flex gap-2">
@@ -430,7 +430,7 @@ export default function LivestreamSetupWorkspace({
                   </div>
                 )}
                 {selEl === 'font' && (
-                  <div className="flex-1 flex flex-col overflow-hidden p-4 space-y-4 pb-12 lg:pb-4">
+                  <div className="flex-none lg:flex-1 flex flex-col lg:overflow-hidden p-4 space-y-4 pb-12 lg:pb-4">
                     <button 
                       onClick={() => window.open('https://fonts.google.com', '_blank')} 
                       className="w-full bg-white/5 hover:bg-white/10 rounded-lg p-3 transition flex items-center justify-center gap-2 text-sm shadow border border-white/5 font-medium shrink-0"

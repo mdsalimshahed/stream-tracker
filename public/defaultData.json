@@ -6,6 +6,12 @@
       "game_name": "DARK SOULS™: REMASTERED",
       "release_year": "2018",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_3a71463e4ccaf28c5c27f6cf8d32a3a125f45404.1920x1080.jpg?t=1764975651",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_92b2ba470cbfdb8839b649b3f478e5531dd81a17.1920x1080.jpg?t=1764975651",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_626cc310dc9ac7fb146011582c864a35e5f3e381.1920x1080.jpg?t=1764975651",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_f1617a419eb3b0cd877ec71230c59aa2672b62dc.1920x1080.jpg?t=1764975651",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_f60f54e58b13d0744853672ccd35810397e3fa26.1920x1080.jpg?t=1764975651",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_b4a80bd6e828a81db09ecbef5694e5d0cddb2caf.1920x1080.jpg?t=1764975651",
         "https://media.rawg.io/media/games/29c/29c6c21cc0c78cff6f45d23631cc82f4.jpg",
         "https://media.rawg.io/media/screenshots/2f6/2f651074458bc3603a5da1348e5a368b.jpg",
         "https://media.rawg.io/media/screenshots/44f/44ff25a559b7ba6c4a4f969acfcee8fc.jpg",
@@ -25,17 +31,29 @@
         }
       },
       "details": {
-        "developer": "FromSoftware",
-        "publisher": "Bandai Namco Entertainment",
-        "releaseDate": "2018-05-23",
-        "genres": "Action, RPG",
-        "youtubePlaylist": ""
-      }
+        "developer": "QLOC, FromSoftware, Inc.",
+        "publisher": "FromSoftware, Inc., Bandai Namco Entertainment",
+        "releaseDate": "23 May, 2018",
+        "genres": "Action",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/570940/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/29c/29c6c21cc0c78cff6f45d23631cc82f4.jpg"
     },
     "1030300": {
       "game_name": "Hollow Knight: Silksong",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/26950369fe4b03c2268620eb9815c8a246aa0b06/ss_26950369fe4b03c2268620eb9815c8a246aa0b06.1920x1080.jpg?t=1776125736",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/09ccaa6c16f158f9df8298feb5d196098506a028/ss_09ccaa6c16f158f9df8298feb5d196098506a028.1920x1080.jpg?t=1776125736",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/d1a893ec6357b347a55ed929833ba793b57a79d2/ss_d1a893ec6357b347a55ed929833ba793b57a79d2.1920x1080.jpg?t=1776125736",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/856e33e755a0b9a785c645d116036516ea08812b/ss_856e33e755a0b9a785c645d116036516ea08812b.1920x1080.jpg?t=1776125736",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/8e09f2b2eedd3fa9b4479dd5c26d8bdf60562478/ss_8e09f2b2eedd3fa9b4479dd5c26d8bdf60562478.1920x1080.jpg?t=1776125736",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/d907d0cc2b10b5ea4788b8d502cc27787d520c1d/ss_d907d0cc2b10b5ea4788b8d502cc27787d520c1d.1920x1080.jpg?t=1776125736",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/1b93e8131cb6f4bd9e3791a606d0da8f9ee78276/ss_1b93e8131cb6f4bd9e3791a606d0da8f9ee78276.1920x1080.jpg?t=1776125736",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/d20b045b8bdaea6ace2ca4170875772b439c2c2e/ss_d20b045b8bdaea6ace2ca4170875772b439c2c2e.1920x1080.jpg?t=1776125736",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/2ebe4dc35ad33ad86b672f7cf9faed44c9b1668e/ss_2ebe4dc35ad33ad86b672f7cf9faed44c9b1668e.1920x1080.jpg?t=1776125736",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/dae3a0798c6c59a433b46de8f5ec18b21ad97fcd/ss_dae3a0798c6c59a433b46de8f5ec18b21ad97fcd.1920x1080.jpg?t=1776125736",
         "https://media.rawg.io/media/games/27c/27cd8b7dead05a870f8a514a9a1915ad.jpg",
         "https://media.rawg.io/media/screenshots/9f9/9f9a0edd1478facde5209abe4000c015.jpg",
         "https://media.rawg.io/media/screenshots/3f3/3f35cf2130d1d8763ee45dc77ce843b2.jpg",
@@ -62,15 +80,25 @@
       "details": {
         "developer": "Team Cherry",
         "publisher": "Team Cherry",
-        "releaseDate": "2025-09-04",
-        "genres": "Action, Adventure, Indie, Platformer",
-        "youtubePlaylist": ""
-      }
+        "releaseDate": "Sep 4, 2025",
+        "genres": "Action, Adventure, Indie",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/1030300/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/27c/27cd8b7dead05a870f8a514a9a1915ad.jpg"
     },
     "1145350": {
       "game_name": "Hades II",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_ef0f63061d0a0a9a7e46f3b84f125d25330e8f19.1920x1080.jpg?t=1765831644",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_f28befd916e59b8bf0a8a801b8a498b8adaa01eb.1920x1080.jpg?t=1765831644",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_b88cb7b48a86f07a7288bf37141f6558279f9bfc.1920x1080.jpg?t=1765831644",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_c8d2b18451a2cc4d5b4fdd78ed84a5e64e051eac.1920x1080.jpg?t=1765831644",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_f366f20f4fb699f6735581e04c7c45a1ef7bd1b8.1920x1080.jpg?t=1765831644",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_47e14ed55ac7f1bf9266b2cd5b3e4d9eae0ca54c.1920x1080.jpg?t=1765831644",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_295de30c8ec9fc82b73f226e68dd8b7fa8b07a62.1920x1080.jpg?t=1765831644",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_93a2b3a39788031aac115b2edeebcefe585d6c8d.1920x1080.jpg?t=1765831644",
         "https://media.rawg.io/media/games/8fd/8fd2e8317849fd265ad8781c324d4ec2.jpg",
         "https://media.rawg.io/media/screenshots/59e/59e9ba1215b11e43ad64f363bfb7f65b.jpg",
         "https://media.rawg.io/media/screenshots/e93/e93aa58a1bf6f628507121a206ef856d.jpg",
@@ -102,15 +130,29 @@
       "details": {
         "developer": "Supergiant Games",
         "publisher": "Supergiant Games",
-        "releaseDate": "2025-09-25",
-        "genres": "Action, Adventure, RPG, Indie",
-        "youtubePlaylist": ""
-      }
+        "releaseDate": "25 Sep, 2025",
+        "genres": "Action, Indie, RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/1145350/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/8fd/8fd2e8317849fd265ad8781c324d4ec2.jpg"
     },
     "1275550": {
       "game_name": "Arctic Awakening",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/26bb0ee6587d3a05634e17d5e9ce0c42228b8651/ss_26bb0ee6587d3a05634e17d5e9ce0c42228b8651.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/93895f56ef37a10844938d80de8e050b649cb89f/ss_93895f56ef37a10844938d80de8e050b649cb89f.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/f3e1b20f112ab0edf5e93515265d00a02c4afceb/ss_f3e1b20f112ab0edf5e93515265d00a02c4afceb.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/ab68a413bc8c758ab7160b59b6f0345ee46cf237/ss_ab68a413bc8c758ab7160b59b6f0345ee46cf237.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/e1844b97f83c58a0ba997d422c8ea9be533125eb/ss_e1844b97f83c58a0ba997d422c8ea9be533125eb.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/c73f15fc7fbdec2b6c4ae79a5e837cf564669623/ss_c73f15fc7fbdec2b6c4ae79a5e837cf564669623.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/48b884bba7d0ef3e8dd57a5cd59d92adb9f3ba43/ss_48b884bba7d0ef3e8dd57a5cd59d92adb9f3ba43.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/b7a075afa4a837f1c3379bbfb16187b294458f29/ss_b7a075afa4a837f1c3379bbfb16187b294458f29.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/7c1483cd501a96f4623923899ea9330429ed9cf2/ss_7c1483cd501a96f4623923899ea9330429ed9cf2.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/043f4d833f2fc04a47faa0234f0f1446f861eb62/ss_043f4d833f2fc04a47faa0234f0f1446f861eb62.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/2f3f26913c0e8505c13522206a45f3218fadb525/ss_2f3f26913c0e8505c13522206a45f3218fadb525.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/63378ce8498d4c5837d9b6826e792bb1f9461c44/ss_63378ce8498d4c5837d9b6826e792bb1f9461c44.1920x1080.jpg?t=1769524913",
         "https://media.rawg.io/media/screenshots/eae/eaece5425428d494fd24ca529b0bdc57.jpg",
         "https://media.rawg.io/media/screenshots/469/46964813d9c5be4bfcab8f0501eaf100.jpg",
         "https://media.rawg.io/media/screenshots/f08/f0802bd8665246e5b47340bd00c45028.jpg",
@@ -132,15 +174,26 @@
       "details": {
         "developer": "GoldFire Studios",
         "publisher": "GoldFire Studios",
-        "releaseDate": "2025-09-18",
+        "releaseDate": "18 Sep, 2025",
         "genres": "Adventure, Indie",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/1275550/"
+      },
+      "cover_image": "https://media.rawg.io/media/screenshots/eae/eaece5425428d494fd24ca529b0bdc57.jpg"
     },
     "1448440": {
       "game_name": "Wo Long: Fallen Dynasty",
       "release_year": "2023",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1448440/ss_46d32690392bad490af693cbf3394f8f346890ce.1920x1080.jpg?t=1775538052",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1448440/ss_db17363dfa15e14909f975ff768c666e2fe98f63.1920x1080.jpg?t=1775538052",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1448440/ss_616f77c0cf7aa9ad801608d72bbaf188696b7438.1920x1080.jpg?t=1775538052",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1448440/ss_059a719c1e150ec703459541db853fd2fbf1df55.1920x1080.jpg?t=1775538052",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1448440/ss_36a81a85d8f775a29d410d398c59686e81d0c303.1920x1080.jpg?t=1775538052",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1448440/ss_cd96ce49fcf8ce741662d8535e44bdaa17a98378.1920x1080.jpg?t=1775538052",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1448440/ss_8a5b4063c83ad2216a23134511fe2ab8bb8c06cf.1920x1080.jpg?t=1775538052",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1448440/ss_94092c0b508bf16f90ece74338dae524d6f00a35.1920x1080.jpg?t=1775538052",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1448440/ss_01435a19c580b3740c82a0ed9bac0638900aca92.1920x1080.jpg?t=1775538052",
         "https://media.rawg.io/media/games/1e1/1e1b965459d5cf69cf51e5d6fe7da959.jpg",
         "https://media.rawg.io/media/screenshots/685/685a1bf55020b04e28458f6d9e6baafd.jpg",
         "https://media.rawg.io/media/screenshots/40f/40f690943819b91582fefc6263dc0259.jpg",
@@ -161,17 +214,29 @@
         }
       },
       "details": {
-        "developer": "Team NINJA",
-        "publisher": "Koei Tecmo Games",
-        "releaseDate": "2023-03-03",
-        "genres": "Action",
-        "youtubePlaylist": ""
-      }
+        "developer": "KOEI TECMO GAMES CO., LTD.",
+        "publisher": "KOEI TECMO GAMES CO., LTD., CE-Asia(Asia)",
+        "releaseDate": "3 Mar, 2023",
+        "genres": "Action, Adventure, RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/1448440/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/1e1/1e1b965459d5cf69cf51e5d6fe7da959.jpg"
     },
     "1501750": {
       "game_name": "Lords of the Fallen",
       "release_year": "2023",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1501750/741bdea1df8f5b7e694cd9cf1a055f61da23aa7a/ss_741bdea1df8f5b7e694cd9cf1a055f61da23aa7a.1920x1080.jpg?t=1773254369",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1501750/ss_dccd501a0b49d5ab317cf3c3d9073e5968db2af9.1920x1080.jpg?t=1773254369",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1501750/ecb5a5df054344bf681282edb3ed76499e675605/ss_ecb5a5df054344bf681282edb3ed76499e675605.1920x1080.jpg?t=1773254369",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1501750/ss_37e77b49edf7cb0ea8582197eb0ea98628c6803a.1920x1080.jpg?t=1773254369",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1501750/ss_1114c931ca9a4f671a2a7d22112abe3340df43d1.1920x1080.jpg?t=1773254369",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1501750/c952b64b96c7ec4da866053f323d3d9b1baf48ee/ss_c952b64b96c7ec4da866053f323d3d9b1baf48ee.1920x1080.jpg?t=1773254369",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1501750/ss_124bdcd74aff7f3408b9b5769be260ff12f44fae.1920x1080.jpg?t=1773254369",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1501750/47dd2aec80b4b992192863ffd12ec1b79cfc32c6/ss_47dd2aec80b4b992192863ffd12ec1b79cfc32c6.1920x1080.jpg?t=1773254369",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1501750/751e33f2c2c99a77fd7c8e4073e950077f59f7b6/ss_751e33f2c2c99a77fd7c8e4073e950077f59f7b6.1920x1080.jpg?t=1773254369",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1501750/ss_d8dc50bcdaa648b484de41995a944f1c1a0cb3f2.1920x1080.jpg?t=1773254369",
         "https://media.rawg.io/media/games/12c/12c2fd04262732cb5e2e6ff378e1cc2d.jpg",
         "https://media.rawg.io/media/screenshots/76b/76bc60d56254710dbf9ba34b41493633.jpg",
         "https://media.rawg.io/media/screenshots/9b8/9b86053233018aa55a92c7ba1d598621.jpg",
@@ -213,17 +278,36 @@
         }
       },
       "details": {
-        "developer": "City Interactive",
+        "developer": "CI Games",
         "publisher": "CI Games",
-        "releaseDate": "2023-10-13",
-        "genres": "Action, RPG",
-        "youtubePlaylist": ""
-      }
+        "releaseDate": "13 Oct, 2023",
+        "genres": "Action, Adventure, RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/1501750/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/12c/12c2fd04262732cb5e2e6ff378e1cc2d.jpg"
     },
     "1721060": {
       "game_name": "Mandragora: Whispers of the Witch Tree",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/ec1c5b12fd1904e237665701d3d97b105d5fd34e/ss_ec1c5b12fd1904e237665701d3d97b105d5fd34e.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/ef025167b934a2c87c4e535e8086ec4c8738e1f9/ss_ef025167b934a2c87c4e535e8086ec4c8738e1f9.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/b50532c8f2f3fb749eae0cb63b3a00cf1f46f182/ss_b50532c8f2f3fb749eae0cb63b3a00cf1f46f182.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/223edea7b329c6f892192172e83a77aaec0f9106/ss_223edea7b329c6f892192172e83a77aaec0f9106.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/9f08e55f1a2b357086630e9a6189fcfbc65a8ad0/ss_9f08e55f1a2b357086630e9a6189fcfbc65a8ad0.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/e5d718b258ce4a85dc430579e5d025bcf70d42d5/ss_e5d718b258ce4a85dc430579e5d025bcf70d42d5.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/279b3aa3f1e1dbca5fdacf65c459d0bee94553a6/ss_279b3aa3f1e1dbca5fdacf65c459d0bee94553a6.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/6d5677b2c3f7f8775c799490633b437c1ae107b4/ss_6d5677b2c3f7f8775c799490633b437c1ae107b4.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/e790829a3994b0e4df53281701ca205ba3b00f80/ss_e790829a3994b0e4df53281701ca205ba3b00f80.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/febdc16ab6109d06d600ed3c8828db54ab7be369/ss_febdc16ab6109d06d600ed3c8828db54ab7be369.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/57179de595f27cc41e99948a8ee28756d333c882/ss_57179de595f27cc41e99948a8ee28756d333c882.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/44b01c8e114c1b9f6cb660dcfa45081823a38c75/ss_44b01c8e114c1b9f6cb660dcfa45081823a38c75.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/b6e2f2017bf214be43fc7ce3da9e6ccff6c7a390/ss_b6e2f2017bf214be43fc7ce3da9e6ccff6c7a390.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/aaeb16f1da405d1c2a7a3195aadf198412a8a4c3/ss_aaeb16f1da405d1c2a7a3195aadf198412a8a4c3.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/8580095629dd9a19a586ad3b5c1e97d26efd97ea/ss_8580095629dd9a19a586ad3b5c1e97d26efd97ea.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/906f9be92baa0278a9a647e39783d23a700eb132/ss_906f9be92baa0278a9a647e39783d23a700eb132.1920x1080.jpg?t=1758912549",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/7c30808d7295573304adda7735cbd67b6c5f5985/ss_7c30808d7295573304adda7735cbd67b6c5f5985.1920x1080.jpg?t=1758912549",
         "https://media.rawg.io/media/games/d0a/d0a69e26b006172a7ecbce4a3a8f33bd.jpg",
         "https://media.rawg.io/media/screenshots/29c/29c5074ca46178f385d3a9c0accbe0d1.jpg",
         "https://media.rawg.io/media/screenshots/743/743011f5eb1cf5a2d3376c406fe1d4d7.jpg",
@@ -269,15 +353,27 @@
       "details": {
         "developer": "Primal Game Studio",
         "publisher": "Knights Peak",
-        "releaseDate": "2025-04-16",
-        "genres": "Action, RPG, Indie",
-        "youtubePlaylist": ""
-      }
+        "releaseDate": "17 Apr, 2025",
+        "genres": "Action, Indie, RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/1721060/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/d0a/d0a69e26b006172a7ecbce4a3a8f33bd.jpg"
     },
     "1771300": {
       "game_name": "Kingdom Come: Deliverance II",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_935ddb59f90bc2c21c706132cb9b446fe7851c19.1920x1080.jpg?t=1777975568",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_709f3329562cd2cfe6db70bac908b3e72eaef83b.1920x1080.jpg?t=1777975568",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_bd668f4d12300c019fa3fa73108aa62929fbf862.1920x1080.jpg?t=1777975568",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_5580d672302cdc5f8b7161dc94f266341e61a182.1920x1080.jpg?t=1777975568",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_27e006df1aef43380ae7db0d0b08538b26b49daa.1920x1080.jpg?t=1777975568",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_e9a693d1027ec19c4fdbe5156abc80adac7039f8.1920x1080.jpg?t=1777975568",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_293abf266a1847da65bb633b9e76e851715a4b58.1920x1080.jpg?t=1777975568",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_77abcbc203685b38a50a8cee383bd7f47488f090.1920x1080.jpg?t=1777975568",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_9013f64f459b341d91a4e65bcad2e9c78a9f61af.1920x1080.jpg?t=1777975568",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_b863918a1655050ee6200846cf8abb71137fa13e.1920x1080.jpg?t=1777975568",
         "https://media.rawg.io/media/games/d84/d842fec4ae7bbd782d330f678c980f7f.jpg",
         "https://media.rawg.io/media/screenshots/9a8/9a8ecc33989862e3be29132189c3f7f6.jpg",
         "https://media.rawg.io/media/screenshots/741/741f7625ce8adfe138b43608f1e8e01c.jpg",
@@ -346,15 +442,27 @@
       "details": {
         "developer": "Warhorse Studios",
         "publisher": "Deep Silver",
-        "releaseDate": "2025-02-03",
+        "releaseDate": "4 Feb, 2025",
         "genres": "Action, Adventure, RPG",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/1771300/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/d84/d842fec4ae7bbd782d330f678c980f7f.jpg"
     },
     "1903340": {
       "game_name": "Clair Obscur: Expedition 33",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1903340/ss_483a27df5072beb3a4650634a764bda750fbcb82.1920x1080.jpg?t=1773676780",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1903340/ss_e49800e906e8a0f00707458c836567c933603bac.1920x1080.jpg?t=1773676780",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1903340/ss_b8089016095e6a16e324a59c45b2f24a439bd0b3.1920x1080.jpg?t=1773676780",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1903340/ss_8439c07d7b1f2fcfc6449db5f051f8d0867f4785.1920x1080.jpg?t=1773676780",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1903340/ss_9e050e6a61a4d9f4fe54bc62c8c73da38e9a63b0.1920x1080.jpg?t=1773676780",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1903340/ss_d3a10809f5cc2a8df7773f41acd1493f4fb900ec.1920x1080.jpg?t=1773676780",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1903340/ss_ec16f873c7d14fc4a4f17966b25f9712dc486b4a.1920x1080.jpg?t=1773676780",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1903340/ss_c130295c9e1169dc0c63eaae0618e64d06a88c92.1920x1080.jpg?t=1773676780",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1903340/ss_0902af724ac45a9093dee022a7893dc50cbf555e.1920x1080.jpg?t=1773676780",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1903340/ss_49ba857fef972f2584e41fa0b46cddbcda8aa30f.1920x1080.jpg?t=1773676780",
         "https://media.rawg.io/media/games/466/4667f17fdee9ebbcea2049e54f8e2b96.jpg",
         "https://media.rawg.io/media/screenshots/1e4/1e4dcb884c03242be7dab30fad77d7b2.jpg",
         "https://media.rawg.io/media/screenshots/22c/22c350e84e9f320b389cdabf0c213f7f.jpg",
@@ -497,17 +605,31 @@
         }
       },
       "details": {
-        "developer": "Sundial Interactive",
+        "developer": "Sandfall Interactive",
         "publisher": "Kepler Interactive",
-        "releaseDate": "2025-04-24",
-        "genres": "RPG",
-        "youtubePlaylist": ""
-      }
+        "releaseDate": "24 Apr, 2025",
+        "genres": "Action, RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/1903340/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/466/4667f17fdee9ebbcea2049e54f8e2b96.jpg"
     },
     "1904480": {
       "game_name": "Absolum",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/d71352f60e6b4cc27c5b9a224d6827ec647d2fac/ss_d71352f60e6b4cc27c5b9a224d6827ec647d2fac.1920x1080.jpg?t=1772809437",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/7eb27341f5ce29c6deccfde32792fd9a156ff57a/ss_7eb27341f5ce29c6deccfde32792fd9a156ff57a.1920x1080.jpg?t=1772809437",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/c678e413a5268e5a60e9ec08dfa6dc3e079e432e/ss_c678e413a5268e5a60e9ec08dfa6dc3e079e432e.1920x1080.jpg?t=1772809437",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/d9b75c8a2e9dc9ddb09f8390f23e9e8ed44111c2/ss_d9b75c8a2e9dc9ddb09f8390f23e9e8ed44111c2.1920x1080.jpg?t=1772809437",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/ea0656207cbaf00003294eee4ce963b6df166916/ss_ea0656207cbaf00003294eee4ce963b6df166916.1920x1080.jpg?t=1772809437",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/c8246fcdb78cab61fba6d1ac8265982e9d601ac5/ss_c8246fcdb78cab61fba6d1ac8265982e9d601ac5.1920x1080.jpg?t=1772809437",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/b3a8d0020cec236134d98cae4f3c3cea31258a0f/ss_b3a8d0020cec236134d98cae4f3c3cea31258a0f.1920x1080.jpg?t=1772809437",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/e409fa794bdb1f938e2f9eb4c099a69cc567e1f6/ss_e409fa794bdb1f938e2f9eb4c099a69cc567e1f6.1920x1080.jpg?t=1772809437",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/d63a25ed4dfdd40c56ca9183f5269c013bdcaa9b/ss_d63a25ed4dfdd40c56ca9183f5269c013bdcaa9b.1920x1080.jpg?t=1772809437",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/0f55b2190d847601a4576c6008c04a00620ee96b/ss_0f55b2190d847601a4576c6008c04a00620ee96b.1920x1080.jpg?t=1772809437",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/bc8ceff4c2af27b2f7b475e4dce00cbfb6505778/ss_bc8ceff4c2af27b2f7b475e4dce00cbfb6505778.1920x1080.jpg?t=1772809437",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1904480/0f34686ccbba73337c7da08dd355b728a91adb6b/ss_0f34686ccbba73337c7da08dd355b728a91adb6b.1920x1080.jpg?t=1772809437",
         "https://media.rawg.io/media/games/adb/adbb4ab0ecc7fc37e8dec23ec5db7154.jpg",
         "https://media.rawg.io/media/screenshots/d05/d053891ccfc4e142529560ef8e111cc2.jpg",
         "https://media.rawg.io/media/screenshots/fd1/fd14adebd23575cf823cf0bec5a2ce54.jpg",
@@ -536,17 +658,36 @@
         }
       },
       "details": {
-        "developer": "DotEmu",
-        "publisher": "DotEmu",
-        "releaseDate": "2025-10-09",
-        "genres": "Action, Adventure, RPG, Indie",
-        "youtubePlaylist": ""
-      }
+        "developer": "Dotemu, Guard Crush Games, Supamonks",
+        "publisher": "Dotemu, Gamirror Games",
+        "releaseDate": "9 Oct, 2025",
+        "genres": "Action, Adventure, Indie, RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/1904480/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/adb/adbb4ab0ecc7fc37e8dec23ec5db7154.jpg"
     },
     "1934570": {
       "game_name": "South of Midnight",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_40596f6708fcabef80fb7ef72c1b03e4134a3869.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_d00b68da2754c5003dc01f73a62365bc8de03c1a.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_103bb6df9ddfd8e93cbe28ad2066e4a2bfbce54e.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_49c8bb3ebf011820f9069e91eaf2d346d65bda19.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_592785179712f4f4a22dee03e68bd7204a6ecfa7.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_d55880395d165fae7086311c306dbc598160da84.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_176b21b4e07b7d2cadec6317c3cbcb13bea0a1d9.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_eb127afa9163c723bc51b2ac61175b468e3eed87.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_1c5e1b46354abdfcfd7bd660eff71a21c8692392.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_2124db7c5ee5495f8902b250af1f76c210cd51a2.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_cce0d8da20bf90e2ce2d50f3a31ee224a1833779.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_94b26f4edcf561ad7392be25fe4833e50cfa27f1.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_2dc9726e8f44c5f178858881bb045649997f4db9.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_303e701f221493903aa3574d5c53421096673b9f.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_6e00b62a0f0c6f3c6da3d3323625ad03c70d859a.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_6aa0f7e85860d10154513f09364aa46acdefb58f.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_e4708af1f2f56baf18f19f7f7c37152a0b29e947.1920x1080.jpg?t=1776971609",
         "https://media.rawg.io/media/games/734/73451dc0abd013bee5b7d88faaacec11.jpg",
         "https://media.rawg.io/media/screenshots/283/28326b57b7fbeb0da66d86a31772f022.jpg",
         "https://media.rawg.io/media/screenshots/1d4/1d457fd29b2c6853f37d751bc89b250e.jpg",
@@ -570,15 +711,27 @@
       "details": {
         "developer": "Compulsion Games",
         "publisher": "Xbox Game Studios",
-        "releaseDate": "2025-04-08",
+        "releaseDate": "8 Apr, 2025",
         "genres": "Action, Adventure",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/1934570/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/734/73451dc0abd013bee5b7d88faaacec11.jpg"
     },
     "2054970": {
       "game_name": "Dragon's Dogma 2",
       "release_year": "2024",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2054970/ss_f419f8b6577558b40ce8c384f4bfaabbf44c8a8e.1920x1080.jpg?t=1768870094",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2054970/ss_084be4d2bf3c7365c2b684c4b5578a1ad8deefac.1920x1080.jpg?t=1768870094",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2054970/ss_037861574d85abdfb8908204e446544abd92effe.1920x1080.jpg?t=1768870094",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2054970/ss_ef263c112e274dc73a4bb00596aee1ebfc2b0ed8.1920x1080.jpg?t=1768870094",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2054970/ss_8979e7af203f7405845f76ffa73749d924540e97.1920x1080.jpg?t=1768870094",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2054970/ss_a2878bf879ea6c36cc2c5a554007a5116e8ede14.1920x1080.jpg?t=1768870094",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2054970/ss_06cdf45af9fa89bc9a6e9d46f830fe0e9d84f1e3.1920x1080.jpg?t=1768870094",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2054970/ss_7818dbd3504400f13f5924adc9d81999b791e87b.1920x1080.jpg?t=1768870094",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2054970/ss_db618332718d8a6c4f450dd3c6658ad154d328b4.1920x1080.jpg?t=1768870094",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2054970/ss_6d2e03c518137d89e8b82a4ada6f3d0a2e804cc5.1920x1080.jpg?t=1768870094",
         "https://media.rawg.io/media/games/679/679d7a18e220025bdd83dff484d6ea64.jpg",
         "https://media.rawg.io/media/screenshots/6f0/6f002d189757da338df32b622b9bc3b3.jpg",
         "https://media.rawg.io/media/screenshots/064/0645c9f2c668e958a3fd4b34bbca7958.jpg",
@@ -647,17 +800,27 @@
         }
       },
       "details": {
-        "developer": "Capcom",
-        "publisher": "Capcom",
-        "releaseDate": "2024-03-21",
-        "genres": "Action, Adventure, RPG",
-        "youtubePlaylist": ""
-      }
+        "developer": "CAPCOM Co., Ltd.",
+        "publisher": "CAPCOM Co., Ltd.",
+        "releaseDate": "21 Mar, 2024",
+        "genres": "Action, RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2054970/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/679/679d7a18e220025bdd83dff484d6ea64.jpg"
     },
     "2277560": {
       "game_name": "WUCHANG: Fallen Feathers",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2277560/ss_478326f2315a9568c3f01a945cc047b163ad237c.1920x1080.jpg?t=1770741955",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2277560/ss_181ddb23db2768c9b59b0a445a691215df43ccd2.1920x1080.jpg?t=1770741955",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2277560/ss_290c13f61436b3d81a9d81fd941a54ab1e42a023.1920x1080.jpg?t=1770741955",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2277560/ss_8f4c2fbc16e9314b96d5da1061fdc7a71032acef.1920x1080.jpg?t=1770741955",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2277560/ss_7bdcdca58a06c4bfdcf53c4eca64480be99e558c.1920x1080.jpg?t=1770741955",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2277560/ss_ccea970ca48e8e43bc3f7fb9b76c9a744daaaded.1920x1080.jpg?t=1770741955",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2277560/ss_fba15d254ba576149c9835e5e968286d57af31c3.1920x1080.jpg?t=1770741955",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2277560/ss_208899b545671513cb0bb7dad9ca2e803d44d0ef.1920x1080.jpg?t=1770741955",
         "https://media.rawg.io/media/games/bce/bcee4b00b58e05d52b8bb032ff7117f4.jpg",
         "https://media.rawg.io/media/screenshots/e48/e486257ceb5b6659c8fd7325fa395014.jpg",
         "https://media.rawg.io/media/screenshots/1ac/1ac388907adbdb166212e9e6278a0e73.jpg",
@@ -723,17 +886,31 @@
         }
       },
       "details": {
-        "developer": "Leenzee Games",
+        "developer": "Leenzee",
         "publisher": "505 Games",
-        "releaseDate": "2025-07-23",
+        "releaseDate": "23 Jul, 2025",
         "genres": "Action, Adventure, RPG",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2277560/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/bce/bcee4b00b58e05d52b8bb032ff7117f4.jpg"
     },
     "2379780": {
       "game_name": "Balatro",
       "release_year": "2024",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/96208723dbedef49d71bf1b0a74aee1689018c50/ss_96208723dbedef49d71bf1b0a74aee1689018c50.1920x1080.jpg?t=1774958057",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/ss_4862112e5030f74a5818cd4c31347d699ac5adf3.1920x1080.jpg?t=1774958057",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/ss_3be65a7dd3be072d567e11883d208861a7e959fa.1920x1080.jpg?t=1774958057",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/ss_e32ac94d7d1d6be7dd015d78f2b52aeb4cc282ed.1920x1080.jpg?t=1774958057",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/ss_b8455573ec1fd2c9412f22bd8df05f2d8027a95b.1920x1080.jpg?t=1774958057",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/ss_075cb45cbfa97d8139fb11f21667d6e35f908640.1920x1080.jpg?t=1774958057",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/ss_ae055e0e583ac65000920ce33511df73f40814f4.1920x1080.jpg?t=1774958057",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/ss_204350350761316ad3aa8b0184689f3f93e01f7b.1920x1080.jpg?t=1774958057",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/ss_ddee13031ad8ba66ac7806a46f6e5519d32e767d.1920x1080.jpg?t=1774958057",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/d8bca9a646921db5ecd24c25571b79e4ff15aa60/ss_d8bca9a646921db5ecd24c25571b79e4ff15aa60.1920x1080.jpg?t=1774958057",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/ss_e52b658ebc79c633063e58d77e73ca9750e01039.1920x1080.jpg?t=1774958057",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2379780/ss_5ab29592c9b5cafe5ce787740afc411eecb9664a.1920x1080.jpg?t=1774958057",
         "https://media.rawg.io/media/games/821/821a40bd0cc0ac7dfb3fe97a7878dc1f.jpg",
         "https://media.rawg.io/media/screenshots/8b1/8b1baae036eda9b4a6689e3afe6a1ef8.jpg",
         "https://media.rawg.io/media/screenshots/b26/b269f19a9659ed176437af3a5be4deb2.jpg",
@@ -760,16 +937,23 @@
       },
       "details": {
         "developer": "LocalThunk",
-        "publisher": "PlayStack",
-        "releaseDate": "2024-02-20",
-        "genres": "Strategy, Casual, Indie",
-        "youtubePlaylist": ""
-      }
+        "publisher": "Playstack",
+        "releaseDate": "20 Feb, 2024",
+        "genres": "Casual, Indie, Strategy",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2379780/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/821/821a40bd0cc0ac7dfb3fe97a7878dc1f.jpg"
     },
     "2407270": {
       "game_name": "AI LIMIT",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2407270/da65005f698d917178c337079c16e215cd9dc97b/ss_da65005f698d917178c337079c16e215cd9dc97b.1920x1080.jpg?t=1775125430",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2407270/390a04e9807fcc76147695bdc0de33391a952b03/ss_390a04e9807fcc76147695bdc0de33391a952b03.1920x1080.jpg?t=1775125430",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2407270/a946f09333f2498081ea438d2fa2e554aa744822/ss_a946f09333f2498081ea438d2fa2e554aa744822.1920x1080.jpg?t=1775125430",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2407270/f43cad827df1f40566e6aeae4e4d78e34d4d6288/ss_f43cad827df1f40566e6aeae4e4d78e34d4d6288.1920x1080.jpg?t=1775125430",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2407270/6c54c0fb13369aae7fc5d4be4639d94100c37633/ss_6c54c0fb13369aae7fc5d4be4639d94100c37633.1920x1080.jpg?t=1775125430",
         "https://media.rawg.io/media/games/f58/f5867ea18f8444660cd2892d4b282d30.jpg",
         "https://media.rawg.io/media/screenshots/968/968e7ca38e5452baf6e570668ecac015.jpg",
         "https://media.rawg.io/media/screenshots/cc5/cc5441b6b0e655c48e833be0240b388e.jpg",
@@ -799,17 +983,30 @@
         }
       },
       "details": {
-        "developer": "Unknown",
-        "publisher": "Sony Interactive Entertainment",
-        "releaseDate": "2025-03-27",
-        "genres": "Action, Indie",
-        "youtubePlaylist": ""
-      }
+        "developer": "Sense Games",
+        "publisher": "CE-Asia",
+        "releaseDate": "27 Mar, 2025",
+        "genres": "Action, Adventure, Indie, RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2407270/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/f58/f5867ea18f8444660cd2892d4b282d30.jpg"
     },
     "2515020": {
       "game_name": "FINAL FANTASY XVI",
       "release_year": "2024",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/ss_99530c1f839832ceeab2cf3450d5c0905312de47.1920x1080.jpg?t=1773294537",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/ss_7620e893321e1661bdf821617f349196c2b0019f.1920x1080.jpg?t=1773294537",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/ss_04ef537e3123d4a8dcbbadccc190cf87dee67783.1920x1080.jpg?t=1773294537",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/ss_d3aea73c0bea755c7152ee339ebb7f7dfefe8f91.1920x1080.jpg?t=1773294537",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/ss_90a7849fb556c73db88ac37afb1cce44ac39bfab.1920x1080.jpg?t=1773294537",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/ss_656229eb5e6846753160378c748d7d32143cf55a.1920x1080.jpg?t=1773294537",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/ss_1f19a79460eba5d3d7f88bf6488f17c29f374a84.1920x1080.jpg?t=1773294537",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/ss_cd52855dc62ce1488379d7f831acd4423b05c02a.1920x1080.jpg?t=1773294537",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/ss_8f22781f1fbea926f39157b5f6600cbbdbe7f930.1920x1080.jpg?t=1773294537",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/ss_7c550cc10ccf287489a3e63a0c3b08558814e327.1920x1080.jpg?t=1773294537",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/ss_a3b7190f4bbba01dc589f8a8f23efdf663192091.1920x1080.jpg?t=1773294537",
         "https://media.rawg.io/media/games/22e/22e68bb62b3013283972cecf98ed51dc.jpg",
         "https://media.rawg.io/media/screenshots/bc2/bc255e09533797521b2ff1e364113a0b.jpg",
         "https://media.rawg.io/media/screenshots/af2/af2426fc46c870b4fe3dfb0242f2f6cc_SDr2Q4j.jpg",
@@ -838,15 +1035,26 @@
       "details": {
         "developer": "Square Enix",
         "publisher": "Square Enix",
-        "releaseDate": "2023-06-22",
+        "releaseDate": "17 Sep, 2024",
         "genres": "Action, RPG",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2515020/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/22e/22e68bb62b3013283972cecf98ed51dc.jpg"
     },
     "2622380": {
       "game_name": "ELDEN RING NIGHTREIGN",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622380/ss_0b9594934db8a1457c915e200f9d0d9b447a3df4.1920x1080.jpg?t=1773099036",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622380/ss_1deefb0b7ea597f4227777239910b4990aa0cc77.1920x1080.jpg?t=1773099036",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622380/ss_802cd66236d951fba204fb9980e2c0c9213a264c.1920x1080.jpg?t=1773099036",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622380/ss_b3ed8ab522f5965e46bc7c090cad9d018f937ae2.1920x1080.jpg?t=1773099036",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622380/ss_edfd360b92d6f9b983b759fd837e664b86cd9563.1920x1080.jpg?t=1773099036",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622380/ss_7a6e385e299b4848943daf2c6bc8218c16cd9497.1920x1080.jpg?t=1773099036",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622380/ss_592648ca7867f7efc92c14166b254bb01ddab65a.1920x1080.jpg?t=1773099036",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622380/ss_123c13ef085accee034632b6ce5d67e017dabc73.1920x1080.jpg?t=1773099036",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622380/ss_4a88be86fecee192e41ed84607ce255e933cee3b.1920x1080.jpg?t=1773099036",
         "https://media.rawg.io/media/games/a14/a143ef815d323a3000840fc774d834c7.jpg",
         "https://media.rawg.io/media/screenshots/203/203c0f6c56dda05c25cd8dfa2e8520f9.jpg",
         "https://media.rawg.io/media/screenshots/860/86080fd4c83beb4fb0d462e057b1a5c9.jpg",
@@ -956,17 +1164,25 @@
         }
       },
       "details": {
-        "developer": "FromSoftware",
-        "publisher": "Bandai Namco Entertainment",
-        "releaseDate": "2025-05-30",
+        "developer": "FromSoftware, Inc.",
+        "publisher": "FromSoftware, Inc., Bandai Namco Entertainment",
+        "releaseDate": "29 May, 2025",
         "genres": "Action, RPG",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2622380/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/a14/a143ef815d323a3000840fc774d834c7.jpg"
     },
     "2623190": {
       "game_name": "The Elder Scrolls IV: Oblivion Remastered",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2623190/3cfe517f1464aa4d77df744c1e3d96e506da378d/ss_3cfe517f1464aa4d77df744c1e3d96e506da378d.1920x1080.jpg?t=1761681073",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2623190/27619a5ffb8d3b41d807a0387dc0a3d3616d4b48/ss_27619a5ffb8d3b41d807a0387dc0a3d3616d4b48.1920x1080.jpg?t=1761681073",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2623190/5d342842ed33010aac7dfa9e04b350a3a8911ef3/ss_5d342842ed33010aac7dfa9e04b350a3a8911ef3.1920x1080.jpg?t=1761681073",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2623190/c715d8ef2d024bd4ec0d75a7721f71ddeab9a00e/ss_c715d8ef2d024bd4ec0d75a7721f71ddeab9a00e.1920x1080.jpg?t=1761681073",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2623190/5b7d3079d983cd40a8f0b676b164e6c0fbf3edd2/ss_5b7d3079d983cd40a8f0b676b164e6c0fbf3edd2.1920x1080.jpg?t=1761681073",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2623190/84171997a07f3429636b518ae4246a7ab5e07d6e/ss_84171997a07f3429636b518ae4246a7ab5e07d6e.1920x1080.jpg?t=1761681073",
         "https://media.rawg.io/media/games/e56/e56b78444369c6b3ae92ae7f669bf8cd.jpg",
         "https://media.rawg.io/media/screenshots/e66/e66a501b293c4b9dffece616962639fd.jpg",
         "https://media.rawg.io/media/screenshots/139/13917c4007f814b5200a4d75ddb7a6c7.jpg",
@@ -988,17 +1204,39 @@
         }
       },
       "details": {
-        "developer": "Bethesda Game Studios",
+        "developer": "Bethesda Game Studios, Virtuos",
         "publisher": "Bethesda Softworks",
-        "releaseDate": "2025-04-22",
-        "genres": "Action, Adventure, RPG",
-        "youtubePlaylist": ""
-      }
+        "releaseDate": "22 Apr, 2025",
+        "genres": "RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2623190/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/e56/e56b78444369c6b3ae92ae7f669bf8cd.jpg"
     },
     "2627260": {
       "game_name": "NINJA GAIDEN 4",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/ss_149a8c8c3efef7c6ae41374b9aa102ac98f3dc8e.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/ss_e28b694c60ba173af5bb9a7a8b57be24fd9a7679.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/ss_e8fc97d4766a0e62a5cb218753c45136f615d5ba.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/ss_bd4c78adadf0236f8482faf86abc2020267f4fa7.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/ss_4360c0bd16ac595b91a51897c6f2d2673a83376e.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/ss_83ebe7af6a6c5e8297da767c279cb197c491c692.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/ss_b8dc06879068be20475b6ad1edc5a205e475c687.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/ss_31184a29d2a666586720ca74a169e429478ec9d8.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/ss_a9d7fb03fe6dbe5b77aff8523ad27cd068981ed7.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/ss_7ac7675da6a80f66c9fe88709f277eddc5cf9caa.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/3bbd630121be1d0bf87fa9fe2641fbedca718105/ss_3bbd630121be1d0bf87fa9fe2641fbedca718105.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/6bc424f0737354990e4724393b963ccb5e140414/ss_6bc424f0737354990e4724393b963ccb5e140414.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/a26402e07bcb456568649e3296b465cdc924e354/ss_a26402e07bcb456568649e3296b465cdc924e354.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/0ddf4fea4b1db87809e573deb9afaa18f2664b3a/ss_0ddf4fea4b1db87809e573deb9afaa18f2664b3a.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/9ad96dc5f0aff90caf54bb1a3c53b07a097d85b8/ss_9ad96dc5f0aff90caf54bb1a3c53b07a097d85b8.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/88cbe8560722981ae40da712cb78313fae0e3cd9/ss_88cbe8560722981ae40da712cb78313fae0e3cd9.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/1bc06765b3a87a7a491d783f371435bc510ee0dc/ss_1bc06765b3a87a7a491d783f371435bc510ee0dc.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/d97a4929923006260d8505cf9b6a744eb2ebc431/ss_d97a4929923006260d8505cf9b6a744eb2ebc431.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/8a51df85e4b5a81abf7e1f6132d7ea70d180d358/ss_8a51df85e4b5a81abf7e1f6132d7ea70d180d358.1920x1080.jpg?t=1772643576",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2627260/cb13a9409b8680183048e9db23fbf407ce349a5b/ss_cb13a9409b8680183048e9db23fbf407ce349a5b.1920x1080.jpg?t=1772643576",
         "https://media.rawg.io/media/games/9e8/9e8752c9e8ee0b5030b2851558506ecb.jpg",
         "https://media.rawg.io/media/screenshots/37d/37d894bf527d60bebc2cff247a089edd.jpg",
         "https://media.rawg.io/media/screenshots/187/187770306b3a9c8c213f6466b6a98150.jpg",
@@ -1022,17 +1260,40 @@
         }
       },
       "details": {
-        "developer": "Platinum Games",
+        "developer": "PlatinumGames Inc. / Team NINJA / KOEI TECMO GAMES CO., LTD.",
         "publisher": "Xbox Game Studios",
-        "releaseDate": "2025-10-21",
+        "releaseDate": "20 Oct, 2025",
         "genres": "Action, Adventure",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2627260/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/9e8/9e8752c9e8ee0b5030b2851558506ecb.jpg"
     },
     "2680010": {
       "game_name": "The First Berserker: Khazan",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_11d4d44dcec7a17477c79cce407ad21bb698bb44.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_402c7ba6898d27f9d7dcd6ccd79fc6233a09e832.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_811c368004336a7d7ac222e5c29317f3c308b333.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_89cbf59cbe5ece78b9c8a5fbd0e8f911e15208f2.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_3d7179f612d6d608c40c185e8c3c2acf6d6a2c0b.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_5b5a50502a6832e6b3c51e4c2a2a3031c17dc823.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_ff45b762725e29b206fcf09ba4b04d113cbe3d48.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_682391ad60984846d57831130c84c7856df72a93.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_0bb0aaaf8622c66402787ae86e2a264e02e93382.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_5a388518fc4404db1ba01b79c466c9067139787f.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_7e812a4d9c4647080bfb000a3def1afef6572faa.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_25977c74df097624b118232a62c3fade0c1dd029.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_64f645e1b0276a7f8166fbc0e171da1cda1d4484.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_12eb0f8e4b74d3c3b17aaa363ad0c205ac386f16.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_b7c5b0378fd5ffb30322d97d3059f1d108444538.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_b2d53a05c8a1c75e865fcef7562eed28ab2f4315.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_f14679ce1f74288e2047501a52be63b873a4fc66.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_7be4024033bcc8fb34f57374501fc97ecd7db264.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_3caa7060a98f3315819d52874ddee69eb9dbc520.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_49dcf4cae457bdf4011f1d92e191dd96dd7617eb.1920x1080.jpg?t=1776936760",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/ss_2227c9135a357032d012cf3011d3386ff6556f9b.1920x1080.jpg?t=1776936760",
         "https://media.rawg.io/media/games/ace/ace798425ecf3a1881309cf12f059aa0.jpg",
         "https://media.rawg.io/media/screenshots/a15/a151d9c50c0f2188aac907238a236e58.jpg",
         "https://media.rawg.io/media/screenshots/d26/d268308a4b5824721cc3f85499070360.jpg",
@@ -1085,16 +1346,28 @@
       },
       "details": {
         "developer": "Neople",
-        "publisher": "Nexon",
-        "releaseDate": "2025-03-27",
-        "genres": "Action",
-        "youtubePlaylist": ""
-      }
+        "publisher": "NEXON",
+        "releaseDate": "27 Mar, 2025",
+        "genres": "Action, Adventure, RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2680010/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/ace/ace798425ecf3a1881309cf12f059aa0.jpg"
     },
     "2840770": {
       "game_name": "Avatar: Frontiers of Pandora™",
       "release_year": "2024",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/5d96569712304414f21cddbedbe82d5d2b598bcb/ss_5d96569712304414f21cddbedbe82d5d2b598bcb.1920x1080.jpg?t=1769463197",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/75b20da8e11285fb3f33f550dafb7d842b70e31f/ss_75b20da8e11285fb3f33f550dafb7d842b70e31f.1920x1080.jpg?t=1769463197",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/b441eb8a77c901dae889a8605d2266b6defd7851/ss_b441eb8a77c901dae889a8605d2266b6defd7851.1920x1080.jpg?t=1769463197",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/f75613a079f078740df1d898d55e0aebf8031fb9/ss_f75613a079f078740df1d898d55e0aebf8031fb9.1920x1080.jpg?t=1769463197",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/3ea537adac955cda608c07dd428e2cd1388cbd70/ss_3ea537adac955cda608c07dd428e2cd1388cbd70.1920x1080.jpg?t=1769463197",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/894849eb55a6870c0ad3cf6dfe1d8b772abe578c/ss_894849eb55a6870c0ad3cf6dfe1d8b772abe578c.1920x1080.jpg?t=1769463197",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/36d908bb5f643c5b7e9c450b168bcc021fce9db0/ss_36d908bb5f643c5b7e9c450b168bcc021fce9db0.1920x1080.jpg?t=1769463197",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/aae462048e7aefe5e05108b3202527dc2a417a1b/ss_aae462048e7aefe5e05108b3202527dc2a417a1b.1920x1080.jpg?t=1769463197",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/570c150bd2e003e3b623820f1842525fb5abba4c/ss_570c150bd2e003e3b623820f1842525fb5abba4c.1920x1080.jpg?t=1769463197",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/5337d86a544274c8798ba18dd54b901b02ce5d3a/ss_5337d86a544274c8798ba18dd54b901b02ce5d3a.1920x1080.jpg?t=1769463197",
         "https://media.rawg.io/media/games/983/9837c2e9a13a92c55c47327dfc22a81f.jpeg",
         "https://media.rawg.io/media/screenshots/e79/e79b32462dcd1efa695f55c044701433.jpg",
         "https://media.rawg.io/media/screenshots/178/178a97b5bb8949c07bc1f9af83b38bf7.jpg",
@@ -1113,22 +1386,31 @@
         }
       },
       "details": {
-        "developer": "Massive Entertainment",
-        "publisher": "Ubisoft Entertainment",
-        "releaseDate": "2023-12-07",
+        "developer": "Massive Entertainment – A Ubisoft Studio",
+        "publisher": "Ubisoft",
+        "releaseDate": "17 Jun, 2024",
         "genres": "Action, Adventure",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2840770/",
+        "tags": "",
+        "notOnSteam": false
+      },
+      "cover_image": "https://media.rawg.io/media/games/983/9837c2e9a13a92c55c47327dfc22a81f.jpeg"
     },
     "2848330": {
       "game_name": "Lies of P: Overture",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2848330/ss_4be5866692efa42e936aed0c29e240b991fcd455.1920x1080.jpg?t=1764564898",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2848330/ss_cc579e3e599c9f666b7e116abe411f0f0aee0acc.1920x1080.jpg?t=1764564898",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2848330/9a6b205baec9bbaedaf61a7a244de8c39515738a/ss_9a6b205baec9bbaedaf61a7a244de8c39515738a.1920x1080.jpg?t=1764564898",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2848330/bebd3b3f4053274f140001d3f88ca91edce53af1/ss_bebd3b3f4053274f140001d3f88ca91edce53af1.1920x1080.jpg?t=1764564898",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2848330/95190b06e50897e977a6c0808bbe6a6ed00c556c/ss_95190b06e50897e977a6c0808bbe6a6ed00c556c.1920x1080.jpg?t=1764564898",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2848330/e529d06a153d18bfc852982a37e5ff0cff45e143/ss_e529d06a153d18bfc852982a37e5ff0cff45e143.1920x1080.jpg?t=1764564898",
         "https://media.rawg.io/media/screenshots/8b3/8b3000e4e5320957018b52cd7a6e960e.jpg",
         "https://media.rawg.io/media/screenshots/c37/c37c96e51160f8ec7dcff52503389013.jpg",
         "https://media.rawg.io/media/screenshots/5dc/5dcb8e6b1cbaf4f107df19486d8af478.jpg",
-        "https://media.rawg.io/media/screenshots/ec0/ec0634b5c3e54a49ef7f603d7b6a0ec7.jpg",
-        "https://media.rawg.io/media/screenshots/8b3/8b3000e4e5320957018b52cd7a6e960e.jpg"
+        "https://media.rawg.io/media/screenshots/ec0/ec0634b5c3e54a49ef7f603d7b6a0ec7.jpg"
       ],
       "cycles": {
         "main": {
@@ -1176,17 +1458,28 @@
         }
       },
       "details": {
-        "developer": "Round8 Studio",
+        "developer": "NEOWIZ",
         "publisher": "NEOWIZ",
-        "releaseDate": "2025-06-07",
-        "genres": "Action, RPG",
-        "youtubePlaylist": ""
-      }
+        "releaseDate": "6 Jun, 2025",
+        "genres": "Action, Adventure, RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2848330/"
+      },
+      "cover_image": "https://media.rawg.io/media/screenshots/8b3/8b3000e4e5320957018b52cd7a6e960e.jpg"
     },
     "2947440": {
       "game_name": "SILENT HILL f",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2947440/93e420a6665b42229735a3495b86bd35b7cb8c53/ss_93e420a6665b42229735a3495b86bd35b7cb8c53.1920x1080.jpg?t=1770169624",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2947440/fdfc1171e15f271eb16750cd0e5575e5e312a6af/ss_fdfc1171e15f271eb16750cd0e5575e5e312a6af.1920x1080.jpg?t=1770169624",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2947440/212938a6419ccb6f2d2b6bdfe9c09a2600b7d846/ss_212938a6419ccb6f2d2b6bdfe9c09a2600b7d846.1920x1080.jpg?t=1770169624",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2947440/596675f3269d51ef397a7db04a08199fe1987ff1/ss_596675f3269d51ef397a7db04a08199fe1987ff1.1920x1080.jpg?t=1770169624",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2947440/c2a0f8efcb4cc01d3046a5c68675f9c811ee90e4/ss_c2a0f8efcb4cc01d3046a5c68675f9c811ee90e4.1920x1080.jpg?t=1770169624",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2947440/0052fc9d54c4b4f1588b798a6638556c6b5d4db2/ss_0052fc9d54c4b4f1588b798a6638556c6b5d4db2.1920x1080.jpg?t=1770169624",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2947440/c044355340e36cfbfa67b7e386b71318a1ff75f1/ss_c044355340e36cfbfa67b7e386b71318a1ff75f1.1920x1080.jpg?t=1770169624",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2947440/60a9221ab0c30b57921644c0e0419d65e7909755/ss_60a9221ab0c30b57921644c0e0419d65e7909755.1920x1080.jpg?t=1770169624",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2947440/b9add2b5ab7080498ef30b2ebe3da94ce09c9637/ss_b9add2b5ab7080498ef30b2ebe3da94ce09c9637.1920x1080.jpg?t=1770169624",
         "https://media.rawg.io/media/games/e7f/e7f2f571761abd7b3c0598c719ae8893.jpg",
         "https://media.rawg.io/media/screenshots/8b2/8b243945a439d181d8736e785064e01d.jpg",
         "https://media.rawg.io/media/screenshots/97f/97f19e3d62170c95f73540802337706a.jpg",
@@ -1226,17 +1519,39 @@
         }
       },
       "details": {
-        "developer": "NeoBards Entertainment",
-        "publisher": "Konami",
-        "releaseDate": "2025-09-24",
+        "developer": "NeoBards Entertainment Ltd.",
+        "publisher": "KONAMI",
+        "releaseDate": "24 Sep, 2025",
         "genres": "Action, Adventure",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/2947440/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/e7f/e7f2f571761abd7b3c0598c719ae8893.jpg"
     },
     "3280350": {
       "game_name": "DEATH STRANDING 2: ON THE BEACH",
       "release_year": "2026",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/702c9ed8dc25f26be07539cd5cfb9f08046d210a/ss_702c9ed8dc25f26be07539cd5cfb9f08046d210a.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/9732214efafbe68e6618806556cd448578217a04/ss_9732214efafbe68e6618806556cd448578217a04.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/1a78ae746ca46713e3c2cb2e5c4f197fea72fe50/ss_1a78ae746ca46713e3c2cb2e5c4f197fea72fe50.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/f8c42434fe7d51fdb3f039ca06a99f5f18518a31/ss_f8c42434fe7d51fdb3f039ca06a99f5f18518a31.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/dc15199b7f71ce4279be8002e9e5c508ecde83bc/ss_dc15199b7f71ce4279be8002e9e5c508ecde83bc.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/346a0dac8c589d8df5b208e5574cc75ab3d35fdf/ss_346a0dac8c589d8df5b208e5574cc75ab3d35fdf.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/8589dfcf440dcaf847351491a67fd148b3db02ed/ss_8589dfcf440dcaf847351491a67fd148b3db02ed.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/5cf7df6b041b24b0665f367ccbbcd17de87173f1/ss_5cf7df6b041b24b0665f367ccbbcd17de87173f1.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/bd110a9cea11491856671de276441b37449734b6/ss_bd110a9cea11491856671de276441b37449734b6.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/7c20172ae416b32faf59f2e730e2bdd7c486c886/ss_7c20172ae416b32faf59f2e730e2bdd7c486c886.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/8ea28dc4cc4259eb31103a0e0e221ab55ee3dd23/ss_8ea28dc4cc4259eb31103a0e0e221ab55ee3dd23.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/6e99bb3decef31c57879f2208ca14fffe35ba09e/ss_6e99bb3decef31c57879f2208ca14fffe35ba09e.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/51886efd8e277f91de5c218f9a4a1bacce56e4a3/ss_51886efd8e277f91de5c218f9a4a1bacce56e4a3.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/50edcc6c2b6f4ad6635b10ad5c305e0bcd2dbc5b/ss_50edcc6c2b6f4ad6635b10ad5c305e0bcd2dbc5b.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/0c31d7931696210d2eaa30d36fcb41d77aeeceda/ss_0c31d7931696210d2eaa30d36fcb41d77aeeceda.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/38ac60e57fb6e10cb11187c9a8c3b36626e389cb/ss_38ac60e57fb6e10cb11187c9a8c3b36626e389cb.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/0af407bb50feefb4f9e7b77e210f7f6fb8cb9d22/ss_0af407bb50feefb4f9e7b77e210f7f6fb8cb9d22.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/99082fa59d440ef484fe832278e66058510dd54c/ss_99082fa59d440ef484fe832278e66058510dd54c.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/309402f4d80bee724cf6fa3b2a85e2f45aa5960e/ss_309402f4d80bee724cf6fa3b2a85e2f45aa5960e.1920x1080.jpg?t=1774022345",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/568eb6e38c33c752e7bf1b32be7c7563db8b74d9/ss_568eb6e38c33c752e7bf1b32be7c7563db8b74d9.1920x1080.jpg?t=1774022345",
         "https://media.rawg.io/media/games/b85/b85bc300d42588af66fb516b7563f74f.jpg",
         "https://media.rawg.io/media/screenshots/7a9/7a97a649fde5f258651ae5e69abf0ed0.jpg",
         "https://media.rawg.io/media/screenshots/372/372b0916c1ce240a4406373c120abd8f.jpg",
@@ -1259,17 +1574,32 @@
         }
       },
       "details": {
-        "developer": "Kojima Productions",
-        "publisher": "Sony Interactive Entertainment",
-        "releaseDate": "2025-06-26",
+        "developer": "KOJIMA PRODUCTIONS, Nixxes Software ",
+        "publisher": "PlayStation Publishing LLC, KOJIMA PRODUCTIONS",
+        "releaseDate": "19 Mar, 2026",
         "genres": "Action, Adventure",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/3280350/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/b85/b85bc300d42588af66fb516b7563f74f.jpg"
     },
     "3321460": {
       "game_name": "Crimson Desert",
       "release_year": "2026",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/669119c3747653f41a46c59f213168448d094e04/ss_669119c3747653f41a46c59f213168448d094e04.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/4b178bdd24ed576458116d8d3383b5352dad0fae/ss_4b178bdd24ed576458116d8d3383b5352dad0fae.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/55e514af688f459364b3d0ffb288faf73580c8e5/ss_55e514af688f459364b3d0ffb288faf73580c8e5.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/d889c95c5f37b3a081cc7be68daf4ad2ffb9e291/ss_d889c95c5f37b3a081cc7be68daf4ad2ffb9e291.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/ab4e6544853a3ecb4e1e714b0fa706c50144fbbb/ss_ab4e6544853a3ecb4e1e714b0fa706c50144fbbb.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/17861390a1d7e6bbf3c44854605c63d68127afac/ss_17861390a1d7e6bbf3c44854605c63d68127afac.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/acbecac845c724dd50dfece5e420f5c6e4a2d171/ss_acbecac845c724dd50dfece5e420f5c6e4a2d171.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/10fa299935f8baed56b2311a6d905e2a5d751fa3/ss_10fa299935f8baed56b2311a6d905e2a5d751fa3.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/2fd06c82a96ba625e5e348e964e48ca372022549/ss_2fd06c82a96ba625e5e348e964e48ca372022549.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/da5b8d5347b66aa994119fc7052ca43896971da9/ss_da5b8d5347b66aa994119fc7052ca43896971da9.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/b64711208534731f57e0a4595241cdbb43a0cbc2/ss_b64711208534731f57e0a4595241cdbb43a0cbc2.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/65dce9f0199332d1dc43aa5dd3684e1967d7a551/ss_65dce9f0199332d1dc43aa5dd3684e1967d7a551.1920x1080.jpg?t=1777016399",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/54b5c0b89a83fd2383b67861c148144461d5a87c/ss_54b5c0b89a83fd2383b67861c148144461d5a87c.1920x1080.jpg?t=1777016399",
         "https://media.rawg.io/media/games/dac/dacfcdeaef957a36416f4e6d5ec76229.jpg",
         "https://media.rawg.io/media/screenshots/db1/db13b535ce6539774459f4a5890d1da5.jpg",
         "https://media.rawg.io/media/screenshots/a6f/a6f876b7fe5f558f942920a33d75d432.jpg",
@@ -1362,15 +1692,26 @@
       "details": {
         "developer": "Pearl Abyss",
         "publisher": "Pearl Abyss",
-        "releaseDate": "2026-03-19",
-        "genres": "Action, RPG",
-        "youtubePlaylist": "https://www.youtube.com/playlist?list=PLLzuld5NPO9DIfpiKjxOYNxTfsq1l0Ewt"
-      }
+        "releaseDate": "19 Mar, 2026",
+        "genres": "Action, Adventure",
+        "youtubePlaylist": "https://www.youtube.com/playlist?list=PLLzuld5NPO9DIfpiKjxOYNxTfsq1l0Ewt",
+        "steamUrl": "https://store.steampowered.com/app/3321460/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/dac/dacfcdeaef957a36416f4e6d5ec76229.jpg"
     },
     "3357650": {
       "game_name": "PRAGMATA",
       "release_year": "2026",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/9699288b90d0aad320e998f107b59edd27e9ea61/ss_9699288b90d0aad320e998f107b59edd27e9ea61.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/62486c0475c7bf1a14889d61a51ad24f09e5f044/ss_62486c0475c7bf1a14889d61a51ad24f09e5f044.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/26773713a2435c8edc2eac5e7eb234324b3b002f/ss_26773713a2435c8edc2eac5e7eb234324b3b002f.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/8913ab7128c72ddd1b407c274e9615b2f6e658a2/ss_8913ab7128c72ddd1b407c274e9615b2f6e658a2.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/24bebf802a598b3d5d6838828cf074e4445ec939/ss_24bebf802a598b3d5d6838828cf074e4445ec939.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/47776629e71f7769f2482259258a1aeb9babe31c/ss_47776629e71f7769f2482259258a1aeb9babe31c.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/5b6a007e52e0b2d4a36b74736ea2fa416830bf6f/ss_5b6a007e52e0b2d4a36b74736ea2fa416830bf6f.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/c83fa1a03cf350ae0f049579daaa117414c9c745/ss_c83fa1a03cf350ae0f049579daaa117414c9c745.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/e8f77d8e2ee8098847306490803433950e7c90fc/ss_e8f77d8e2ee8098847306490803433950e7c90fc.1920x1080.jpg?t=1777351016",
         "https://media.rawg.io/media/games/9b2/9b20adbf00491d56ad6793654067f2fd.jpg",
         "https://media.rawg.io/media/screenshots/ca1/ca18d0aae36eb9111d699e5fc301792c.jpg",
         "https://media.rawg.io/media/screenshots/bed/bed539410f44bb30d7ec90d5c3d3d79d.jpg",
@@ -1406,17 +1747,28 @@
         }
       },
       "details": {
-        "developer": "Capcom",
-        "publisher": "Capcom",
-        "releaseDate": "2026-04-17",
-        "genres": "Action",
-        "youtubePlaylist": ""
-      }
+        "developer": "CAPCOM Co., Ltd.",
+        "publisher": "CAPCOM Co., Ltd.",
+        "releaseDate": "16 Apr, 2026",
+        "genres": "Action, Adventure",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/3357650/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/9b2/9b20adbf00491d56ad6793654067f2fd.jpg"
     },
     "3378960": {
       "game_name": "Lost Soul Aside™",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3378960/ss_81f66d9aea777dd2ff35aab97ce6718c7d88a662.1920x1080.jpg?t=1756465896",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3378960/ss_1d52b0eb04bc0fd516d220986d50c2b5a0b4cab8.1920x1080.jpg?t=1756465896",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3378960/ss_8b129b2fdaa9186a7a5230de29f9b69167072997.1920x1080.jpg?t=1756465896",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3378960/ss_d938efdcf3f977f0ca6a422340915992e2892fe0.1920x1080.jpg?t=1756465896",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3378960/ss_3cdfeec83174278f31ef4c7b5b6956627982982b.1920x1080.jpg?t=1756465896",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3378960/ss_898609366cbbd28e1426ad55cabac2bf362141fe.1920x1080.jpg?t=1756465896",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3378960/ss_3e8b1894008ebf6a077d519bffb7ff36f932a044.1920x1080.jpg?t=1756465896",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3378960/ss_2e77385617fe1d3701189179136d4458ba45bc46.1920x1080.jpg?t=1756465896",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3378960/ss_accf596f0e8400a27aa78b48f3d5886cec1df910.1920x1080.jpg?t=1756465896",
         "https://media.rawg.io/media/games/247/24729748f277156a9f6a80c6c829a668.jpg",
         "https://media.rawg.io/media/screenshots/0ff/0ffbbee76397e4ee05a83eaf5b666fcd.jpg",
         "https://media.rawg.io/media/screenshots/60c/60c95fbc264a4794180b8067c014483d.jpg"
@@ -1454,16 +1806,28 @@
       },
       "details": {
         "developer": "Ultizero Games",
-        "publisher": "PlayStation Publishing",
-        "releaseDate": "2025-08-28",
-        "genres": "Action, Adventure, RPG, Indie",
-        "youtubePlaylist": ""
-      }
+        "publisher": "PlayStation Publishing LLC",
+        "releaseDate": "28 Aug, 2025",
+        "genres": "Action, Adventure, RPG",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/3378960/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/247/24729748f277156a9f6a80c6c829a668.jpg"
     },
     "3489700": {
       "game_name": "Stellar Blade™",
       "release_year": "2024",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/ss_4291827e357008499d4d5a17bc50d3e93869dd43.1920x1080.jpg?t=1776466244",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/ss_9d4d62e118a167333d53db94354671e10416b25d.1920x1080.jpg?t=1776466244",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/ss_bcb3946482dc5a1221c024098d2ac09e80255f3e.1920x1080.jpg?t=1776466244",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/ss_1ae903bf4153fa2c2b3ee4381eb355532ba79eab.1920x1080.jpg?t=1776466244",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/ss_0a156afe90170ba75773a6fe901153c4dd318980.1920x1080.jpg?t=1776466244",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/ss_590074c0cfa8c7098358a128f656b0198af8f0be.1920x1080.jpg?t=1776466244",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/ss_02282b4eb4c8b13129a13908b85840dbf2168644.1920x1080.jpg?t=1776466244",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/ss_2d4ad1a81618920416e7b68d02dc266ac898f144.1920x1080.jpg?t=1776466244",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/ss_2896b91d5498aa028b84b411875171e2a7ec11c8.1920x1080.jpg?t=1776466244",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3489700/ss_0d99694a69de6474cd7e0d6f59bfc7658c08450b.1920x1080.jpg?t=1776466244",
         "https://media.rawg.io/media/games/fbd/fbdef5455da4c4033bed896e1540f6a1.jpg",
         "https://media.rawg.io/media/screenshots/0c9/0c98c2913de0c48b57a49aacff794096.jpg",
         "https://media.rawg.io/media/screenshots/c5e/c5e5c6f19c0642b20e113b49a994e442.jpg",
@@ -1515,22 +1879,31 @@
         }
       },
       "details": {
-        "developer": "SHIFT UP",
-        "publisher": "PlayStation Publishing",
-        "releaseDate": "2024-04-26",
+        "developer": "SHIFT UP Corporation",
+        "publisher": "PlayStation Publishing LLC (excluding China)",
+        "releaseDate": "Jun 11, 2025",
         "genres": "Action, Adventure, RPG",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/3489700/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/fbd/fbdef5455da4c4033bed896e1540f6a1.jpg"
     },
     "3564740": {
       "game_name": "Where Winds Meet",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564740/7b794512617090cbca7f290a11cf09161e440aff/ss_7b794512617090cbca7f290a11cf09161e440aff.1920x1080.jpg?t=1777516538",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564740/4198704b3e41eda2f9612c39517269f74e69eb13/ss_4198704b3e41eda2f9612c39517269f74e69eb13.1920x1080.jpg?t=1777516538",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564740/f26044f203ffec81d3ef99356e279a02d175a8ed/ss_f26044f203ffec81d3ef99356e279a02d175a8ed.1920x1080.jpg?t=1777516538",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564740/b2588ce4ae2f2e359fff585ee5d4c4b56a59f00d/ss_b2588ce4ae2f2e359fff585ee5d4c4b56a59f00d.1920x1080.jpg?t=1777516538",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564740/55190d30450fc3a24e3a885f375c9bff678e35cf/ss_55190d30450fc3a24e3a885f375c9bff678e35cf.1920x1080.jpg?t=1777516538",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564740/03da26ae9ec58be50d495a431a6626ba8d528c8f/ss_03da26ae9ec58be50d495a431a6626ba8d528c8f.1920x1080.jpg?t=1777516538",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564740/f21bedd53966f707655b835f6ae34e82012965e3/ss_f21bedd53966f707655b835f6ae34e82012965e3.1920x1080.jpg?t=1777516538",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564740/080fbc7f0ee74b985fa8610bc3adc52023476a3b/ss_080fbc7f0ee74b985fa8610bc3adc52023476a3b.1920x1080.jpg?t=1777516538",
         "https://media.rawg.io/media/screenshots/8a7/8a797083d6dd0f810a42bb2fa379a23a.jpg",
         "https://media.rawg.io/media/screenshots/44a/44a0397a487f56f2741c0c3c2ffbc9b1.jpg",
         "https://media.rawg.io/media/screenshots/ad7/ad742d2cefa6380d2632d7cc47228a54.jpg",
-        "https://media.rawg.io/media/screenshots/d83/d83d04a36a5b644bf2567a103fd0857a.jpg",
-        "https://media.rawg.io/media/screenshots/8a7/8a797083d6dd0f810a42bb2fa379a23a.jpg"
+        "https://media.rawg.io/media/screenshots/d83/d83d04a36a5b644bf2567a103fd0857a.jpg"
       ],
       "cycles": {
         "main": {
@@ -1556,17 +1929,29 @@
         }
       },
       "details": {
-        "developer": "Everstone Games",
-        "publisher": "Netease",
-        "releaseDate": "2025-11-14",
-        "genres": "Action, Adventure, RPG",
-        "youtubePlaylist": ""
-      }
+        "developer": "Everstone Studio",
+        "publisher": "NetEase Games",
+        "releaseDate": "14 Nov, 2025",
+        "genres": "Action, Adventure, RPG, Free To Play",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/3564740/"
+      },
+      "cover_image": "https://media.rawg.io/media/screenshots/8a7/8a797083d6dd0f810a42bb2fa379a23a.jpg"
     },
     "3564860": {
       "game_name": "Stellar Blade™ Demo",
       "release_year": "2025",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564860/2896b91d5498aa028b84b411875171e2a7ec11c8/ss_2896b91d5498aa028b84b411875171e2a7ec11c8.1920x1080.jpg?t=1763134590",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564860/0a156afe90170ba75773a6fe901153c4dd318980/ss_0a156afe90170ba75773a6fe901153c4dd318980.1920x1080.jpg?t=1763134590",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564860/bcb3946482dc5a1221c024098d2ac09e80255f3e/ss_bcb3946482dc5a1221c024098d2ac09e80255f3e.1920x1080.jpg?t=1763134590",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564860/1ae903bf4153fa2c2b3ee4381eb355532ba79eab/ss_1ae903bf4153fa2c2b3ee4381eb355532ba79eab.1920x1080.jpg?t=1763134590",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564860/590074c0cfa8c7098358a128f656b0198af8f0be/ss_590074c0cfa8c7098358a128f656b0198af8f0be.1920x1080.jpg?t=1763134590",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564860/2d4ad1a81618920416e7b68d02dc266ac898f144/ss_2d4ad1a81618920416e7b68d02dc266ac898f144.1920x1080.jpg?t=1763134590",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564860/02282b4eb4c8b13129a13908b85840dbf2168644/ss_02282b4eb4c8b13129a13908b85840dbf2168644.1920x1080.jpg?t=1763134590",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564860/9d4d62e118a167333d53db94354671e10416b25d/ss_9d4d62e118a167333d53db94354671e10416b25d.1920x1080.jpg?t=1763134590",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564860/4291827e357008499d4d5a17bc50d3e93869dd43/ss_4291827e357008499d4d5a17bc50d3e93869dd43.1920x1080.jpg?t=1763134590",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564860/0d99694a69de6474cd7e0d6f59bfc7658c08450b/ss_0d99694a69de6474cd7e0d6f59bfc7658c08450b.1920x1080.jpg?t=1763134590",
         "https://media.rawg.io/media/games/fbd/fbdef5455da4c4033bed896e1540f6a1.jpg",
         "https://media.rawg.io/media/screenshots/0c9/0c98c2913de0c48b57a49aacff794096.jpg",
         "https://media.rawg.io/media/screenshots/c5e/c5e5c6f19c0642b20e113b49a994e442.jpg",
@@ -1586,17 +1971,32 @@
         }
       },
       "details": {
-        "developer": "SHIFT UP",
-        "publisher": "PlayStation Publishing",
-        "releaseDate": "2024-04-26",
+        "developer": "SHIFT UP Corporation",
+        "publisher": "PlayStation Publishing LLC (excluding China)",
+        "releaseDate": "30 May, 2025",
         "genres": "Action, Adventure, RPG",
-        "youtubePlaylist": ""
-      }
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/3564860/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/fbd/fbdef5455da4c4033bed896e1540f6a1.jpg"
     },
     "3681010": {
       "game_name": "Nioh 3",
       "release_year": "2026",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/c65877619b70c51d6be030c20b5c37bcfaf2e248/ss_c65877619b70c51d6be030c20b5c37bcfaf2e248.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/8c9333bf3f28194cb8113af455ecaf1aa45a0050/ss_8c9333bf3f28194cb8113af455ecaf1aa45a0050.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/5d02a1bcff9cc74ef4551c9afce91c78881539a1/ss_5d02a1bcff9cc74ef4551c9afce91c78881539a1.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/fe1a9485c46e95c8a899e8cfc645136f303b4fda/ss_fe1a9485c46e95c8a899e8cfc645136f303b4fda.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/9068ef1b3d231d0808ac8ec50ae864483e4374d9/ss_9068ef1b3d231d0808ac8ec50ae864483e4374d9.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/271b11ccc100773992d9e0a1d06a1d3848eaf1c8/ss_271b11ccc100773992d9e0a1d06a1d3848eaf1c8.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/291a1cebda45a0c6cfcf85d2e46e8cd46e1d45a3/ss_291a1cebda45a0c6cfcf85d2e46e8cd46e1d45a3.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/5d034bc651b8b1d5b7b12f9fd8e9f7d2b5fc0d6b/ss_5d034bc651b8b1d5b7b12f9fd8e9f7d2b5fc0d6b.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/76d0ee6c0c0d0605b3e9bdc690b477234e270554/ss_76d0ee6c0c0d0605b3e9bdc690b477234e270554.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/01473e77245640318e652da022a5c379d7fe09aa/ss_01473e77245640318e652da022a5c379d7fe09aa.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/b2cf85ed0b734ad851c42da74c731db3ca2e9502/ss_b2cf85ed0b734ad851c42da74c731db3ca2e9502.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/8f3e5ec42c6f3e1ed92a76541b4fc1245be4e687/ss_8f3e5ec42c6f3e1ed92a76541b4fc1245be4e687.1920x1080.jpg?t=1772090941",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/cdab644c4645c795e44d4b3766bdbd9dcb1613b5/ss_cdab644c4645c795e44d4b3766bdbd9dcb1613b5.1920x1080.jpg?t=1772090941",
         "https://media.rawg.io/media/games/18f/18f1e09f98c9a0e822b616d68d73c956.jpg"
       ],
       "cycles": {
@@ -1660,17 +2060,29 @@
         }
       },
       "details": {
-        "developer": "Unknown",
-        "publisher": "Unknown",
-        "releaseDate": "2026-02-06",
-        "genres": "Action",
-        "tags": "Unknown"
-      }
+        "developer": "KOEI TECMO GAMES CO., LTD.",
+        "publisher": "KOEI TECMO GAMES CO., LTD.",
+        "releaseDate": "5 Feb, 2026",
+        "genres": "Action, RPG",
+        "tags": "Unknown",
+        "steamUrl": "https://store.steampowered.com/app/3681010/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/18f/18f1e09f98c9a0e822b616d68d73c956.jpg"
     },
     "3764200": {
       "game_name": "Resident Evil Requiem",
       "release_year": "2026",
       "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/08af4e9398b8e45152bfbedce3bc24d22e2c0990/ss_08af4e9398b8e45152bfbedce3bc24d22e2c0990.1920x1080.jpg?t=1772587704",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/4921eb5fb45f6b7a3b62195e47c6d7b4175935a8/ss_4921eb5fb45f6b7a3b62195e47c6d7b4175935a8.1920x1080.jpg?t=1772587704",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/e7b791b703759aebe774b813eb29a364008552b8/ss_e7b791b703759aebe774b813eb29a364008552b8.1920x1080.jpg?t=1772587704",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/bbe5c4e0ba4fc551d9389cf2411c2cefe413af1d/ss_bbe5c4e0ba4fc551d9389cf2411c2cefe413af1d.1920x1080.jpg?t=1772587704",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/9422ad111dfd5fe1df34352946c6aa715c23f0f6/ss_9422ad111dfd5fe1df34352946c6aa715c23f0f6.1920x1080.jpg?t=1772587704",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/a5ad021e191c2f3cfcb4fcdd7abe193c887b3500/ss_a5ad021e191c2f3cfcb4fcdd7abe193c887b3500.1920x1080.jpg?t=1772587704",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/e4508c17151714d5d4f80cd31bdcacf0caf5559c/ss_e4508c17151714d5d4f80cd31bdcacf0caf5559c.1920x1080.jpg?t=1772587704",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/b61e78a244aef7a12cf08f9dc7e7fc7ead6eeddb/ss_b61e78a244aef7a12cf08f9dc7e7fc7ead6eeddb.1920x1080.jpg?t=1772587704",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/3f63fb0ce70f3e97799226b70ebea4d4794c53a1/ss_3f63fb0ce70f3e97799226b70ebea4d4794c53a1.1920x1080.jpg?t=1772587704",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3764200/9e35202b6c8262496e1c57275c51bcead7232249/ss_9e35202b6c8262496e1c57275c51bcead7232249.1920x1080.jpg?t=1772587704",
         "https://media.rawg.io/media/games/ed6/ed613937e113a4d43fa0db771e527a2f.jpg",
         "https://media.rawg.io/media/screenshots/7ea/7ea1b2a87e47df90eaf5ae6847b7c6f5.jpg",
         "https://media.rawg.io/media/screenshots/22c/22c0b1bab65fc16a2da31963fdf81ca5.jpg",
@@ -1701,30 +2113,34 @@
         }
       },
       "details": {
-        "developer": "Capcom",
-        "publisher": "Capcom",
-        "releaseDate": "2026-02-27",
-        "genres": "Action",
-        "youtubePlaylist": ""
-      }
+        "developer": "CAPCOM Co., Ltd.",
+        "publisher": "CAPCOM Co., Ltd.",
+        "releaseDate": "26 Feb, 2026",
+        "genres": "Action, Adventure",
+        "youtubePlaylist": "",
+        "steamUrl": "https://store.steampowered.com/app/3764200/"
+      },
+      "cover_image": "https://media.rawg.io/media/games/ed6/ed613937e113a4d43fa0db771e527a2f.jpg"
     }
   },
   "thumbnailConfig": {
-    "titleSize": 93,
+    "customFont": "Book Antiqua",
+    "bgZoom": 104,
+    "titleSize": 100,
     "subtitleSize": 66,
     "titleAlign": "center",
-    "titleYOffset": 16,
-    "titleSpacing": 25,
-    "strokeWidth": 13,
-    "splitTitle": false,
-    "streamCountSize": 88,
-    "cycleSize": 55,
-    "bottomSpacing": 68,
+    "titleYOffset": 20,
+    "titleSpacing": 27,
+    "strokeWidth": 16,
+    "splitTitle": true,
+    "streamCountSize": 110,
+    "cycleSize": 63,
+    "bottomSpacing": 88,
     "bottomAlign": "left",
-    "bottomPaddingX": 46,
-    "bottomPaddingY": 60,
+    "bottomPaddingX": 44,
+    "bottomPaddingY": 41,
     "showBottomShadow": true,
-    "forceInvertTitle": false,
+    "forceInvertTitle": true,
     "manualColors": {
       "title": false,
       "cycle": false,
@@ -1785,35 +2201,27 @@
       "strokeOpacity": 0.78
     },
     "titleLetterSpacing": 0,
-    "subtitleLetterSpacing": 2,
+    "subtitleLetterSpacing": 0,
     "titleDropShadow": false,
     "subtitleDropShadow": true,
     "titleYPadding": 88,
     "subtitleYPadding": 24,
     "subtitleAlign": "right",
-    "cycleLetterSpacing": 2,
+    "cycleLetterSpacing": 0,
     "cycleDropShadow": true,
     "cycleYPadding": 150,
     "cycleAlign": "left",
-    "streamCountLetterSpacing": 2,
+    "streamCountLetterSpacing": 0,
     "streamCountDropShadow": true,
     "streamCountYPadding": 10,
     "streamCountAlign": "left",
     "savedFonts": [
-      {
-        "family": "Google Sans",
-        "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
-      },
       {
         "family": "Intel One Mono",
         "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
       },
       {
         "family": "Montserrat",
-        "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
-      },
-      {
-        "family": "Roboto",
         "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
       },
       {
@@ -1829,7 +2237,7 @@
         "url": "https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
       }
     ],
-    "titleBold": true,
+    "titleBold": false,
     "titleItalic": false,
     "streamBold": true,
     "cycleBold": true,
@@ -1862,7 +2270,7 @@
     "containerPaddingY": 0,
     "cardRounded": false,
     "panelFillOpacity": 0.4,
-    "bgDimming": 0.8,
+    "bgDimming": 0.09,
     "cycleInterval": 2000,
     "statsSplitRatio": 0.5,
     "statsRowSplitRatio": 0.55,
@@ -1878,5 +2286,5 @@
   "modalPanelOpacity": 0.5,
   "mosaicXGap": 0,
   "mosaicYGap": 0,
-  "exportDate": "2026-05-10T18:52:32.298Z"
+  "exportDate": "2026-05-11T13:54:49.116Z"
 }

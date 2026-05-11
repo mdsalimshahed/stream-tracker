@@ -1,3 +1,4 @@
+// src/components/GameProfileModal.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { X, ArrowRight, ArrowLeft, Gamepad2, Clock, Plus, Trash2, Edit3, Save, Star } from 'lucide-react';
 import { formatRunName, formatReleaseDate } from '../utils/helpers';
@@ -14,7 +15,6 @@ const shuffleArray = (array) => {
   return arr;
 };
 
-// Only randomizes images for THIS specific game, ensuring no boundary repeats
 const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
   const uniqueThumbs = [...new Set(images.filter(Boolean))];
   if (uniqueThumbs.length === 0) return [];
@@ -91,7 +91,7 @@ export default function GameProfileModal({
   }));
   const currentCycle = cycleEntries.find(c => c.id === selectedCycleId) || null;
   const currentCycleData = currentCycle ? cycles[currentCycle.id] : { stream_count: 0, timestamps: [] };
-  const details = gameData.details || { developer: 'Unknown', publisher: 'Unknown', releaseDate: gameData.release_year, genres: 'Unknown', tags: 'Unknown' };
+  const details = gameData.details || { developer: 'Unknown', publisher: 'Unknown', releaseDate: gameData.release_year, genres: 'Unknown', tags: 'Unknown', steamUrl: '' };
 
   const handleNext = () => {
     let finalCycleId = isCreatingNew && newCycleName ? newCycleName.toLowerCase().replace(/\s+/g, '_') : selectedCycleId;
@@ -256,6 +256,14 @@ export default function GameProfileModal({
                   <div><span className="text-white/50 text-sm block">Genres</span><span className="text-white text-sm">{details.genres}</span></div>
                   {details.tags && details.tags !== 'Unknown' && (
                     <div><span className="text-white/50 text-sm block">Tags</span><span className="text-white text-sm">{details.tags}</span></div>
+                  )}
+                  {details.steamUrl && (
+                    <div>
+                      <span className="text-white/50 text-sm block">Steam Page</span>
+                      <a href={details.steamUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline text-sm break-all">
+                        {details.steamUrl}
+                      </a>
+                    </div>
                   )}
                 </div>
                 <div className="pt-3 border-t border-white/10 pb-2">

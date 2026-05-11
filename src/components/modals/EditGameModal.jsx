@@ -9,7 +9,9 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
   const [publisher, setPublisher] = useState(game.details?.publisher || '');
   const [genres, setGenres] = useState(game.details?.genres || '');
   const [tags, setTags] = useState(game.details?.tags || '');
-  const [rawgId, setRawgId] = useState('');
+  const [steamUrl, setSteamUrl] = useState(game.details?.steamUrl || '');
+  const [steamIdInput, setSteamIdInput] = useState('');
+  const [notOnSteam, setNotOnSteam] = useState(game.details?.notOnSteam || false);
 
   const handleSubmit = () => {
     if (!name.trim()) return;
@@ -21,13 +23,15 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
       publisher.trim(), 
       genres.trim(), 
       tags.trim(), 
-      rawgId.trim()
+      steamIdInput.trim(),
+      steamUrl.trim(),
+      notOnSteam
     );
     onClose();
   };
 
-  const openRawgSearch = () => {
-    const searchUrl = `https://rawg.io/search?query=${encodeURIComponent(name)}`;
+  const openSteamSearch = () => {
+    const searchUrl = `https://store.steampowered.com/search/?term=${encodeURIComponent(name)}`;
     window.open(searchUrl, '_blank');
   };
 
@@ -113,25 +117,50 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
                 placeholder="e.g., Singleplayer, Dark Fantasy, Souls-like"
               />
             </div>
+
+            <div className="sm:col-span-2">
+              <label className="text-sm font-semibold text-white/50 uppercase tracking-wider block mb-1.5 ml-1">Steam URL</label>
+              <input
+                type="text"
+                value={steamUrl}
+                onChange={e => setSteamUrl(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 text-white transition-colors"
+                placeholder="https://store.steampowered.com/app/..."
+              />
+            </div>
             
             <div className="sm:col-span-2 pt-4 mt-2 border-t border-white/10">
-              <label className="text-sm font-semibold text-white/50 uppercase tracking-wider block mb-1.5 ml-1">RAWG Auto-Sync (Optional)</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={rawgId}
-                  onChange={e => setRawgId(e.target.value)}
-                  className="flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 text-white transition-colors"
-                  placeholder="Paste RAWG Link or ID here..."
+              <label className="flex items-center gap-2 mb-3 cursor-pointer w-fit">
+                <input 
+                  type="checkbox" 
+                  checked={notOnSteam} 
+                  onChange={e => setNotOnSteam(e.target.checked)} 
+                  className="w-4 h-4 rounded bg-black/40 border border-white/10 accent-blue-500 cursor-pointer"
                 />
-                <button
-                  onClick={openRawgSearch}
-                  className="bg-blue-600 hover:bg-blue-500 px-4 py-2.5 rounded-lg text-sm font-bold whitespace-nowrap text-white shadow-lg transition-colors"
-                >
-                  Find on RAWG
-                </button>
-              </div>
-              <p className="text-xs text-blue-400 mt-2 ml-1">Note: Using this field will fetch fresh images and overwrite all manual fields above with RAWG data.</p>
+                <span className="text-sm font-semibold text-white/80">Not on Steam (Use RAWG Only)</span>
+              </label>
+              
+              {!notOnSteam && (
+                <>
+                  <label className="text-sm font-semibold text-white/50 uppercase tracking-wider block mb-1.5 ml-1">Steam Auto-Sync (Optional)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={steamIdInput}
+                      onChange={e => setSteamIdInput(e.target.value)}
+                      className="flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 text-white transition-colors"
+                      placeholder="Paste Steam Link or App ID to Auto Sync..."
+                    />
+                    <button
+                      onClick={openSteamSearch}
+                      className="bg-blue-600 hover:bg-blue-500 px-4 py-2.5 rounded-lg text-sm font-bold whitespace-nowrap text-white shadow-lg transition-colors"
+                    >
+                      Find on Steam
+                    </button>
+                  </div>
+                  <p className="text-xs text-blue-400 mt-2 ml-1">Note: Using this field will fetch fresh images and overwrite all manual fields above with Steam data.</p>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -11,7 +11,7 @@ import Stats from './components/Stats';
 import { Notification } from './components/Notification';
 import { CrossfadeImage } from './components/common/UIComponents';
 import { RAWG_API_KEY, DEFAULT_SYSTEM_FONTS, DEFAULT_LAYOUT_PREFS, DEFAULT_THUMBNAIL_CONFIG, DEFAULT_MODAL_BG_INTENSITY, DEFAULT_MODAL_PANEL_OPACITY } from './utils/constants';
-import { formatRunName, formatReleaseDate } from './utils/helpers';
+import { formatRunName, formatReleaseDate, getOptimizedImage } from './utils/helpers';
 
 // --- Two-Level Randomization Helpers ---
 const shuffleArray = (array) => {
@@ -26,6 +26,7 @@ const shuffleArray = (array) => {
 const generateGlobalPlaylist = (gamesObj, lastGameId = null) => {
   let pool = [];
   Object.entries(gamesObj).forEach(([id, game]) => {
+    // Rely exclusively on thumbnail_urls (high-res gameplay images), ignoring cover_image
     const uniqueThumbs = [...new Set((game.thumbnail_urls || []).filter(Boolean))];
     uniqueThumbs.forEach(url => {
       pool.push({ url, gameId: id });
@@ -77,7 +78,7 @@ const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
 // --- Mosaic Component (Web Animations API) ---
 const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => {
   const ROWS = 6;
-  const IMGS_PER_ROW = 40;
+  const IMGS_PER_ROW = 12;
 
   const rowRefs = useRef([]);
   const animationsRef = useRef([]);
@@ -158,7 +159,7 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
         easing: 'linear'
       });
 
-      animation.playbackRate = isSlowMode ? 0.125 : 1;
+      animation.playbackRate = isSlowMode ? 0.125 : 3;
       if (isPaused) animation.pause();
 
       animationsRef.current.push(animation);
@@ -174,7 +175,7 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
       if (isPaused) {
         anim.pause();
       } else {
-        anim.playbackRate = isSlowMode ? 0.125 : 1; 
+        anim.playbackRate = isSlowMode ? 0.125 : 3; 
         if (anim.playState === 'paused') {
           anim.play();
         }
@@ -193,7 +194,14 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode }) => 
             ref={el => rowRefs.current[ri] = el}
           >
             {row.imgs.map((src, ii) => (
-              <img key={ii} className="shrink-0 w-[110px] h-full object-cover block" src={src} alt="" loading="lazy" />
+              <img 
+                key={ii} 
+                className="shrink-0 w-[160px] h-full object-cover block" 
+                src={getOptimizedImage(src, 200)} 
+                alt="" 
+                loading="lazy" 
+                decoding="async" 
+              />
             ))}
           </div>
         ))}
@@ -225,6 +233,10 @@ const checkPersist = () => {
 
 export default function App() {
   const [persistSettings, setPersistSettings] = useState(checkPersist);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const notify = (msg, type) => setToast({ message: msg, type });
 
   const [streamData, setStreamData] = useState(() => {
     try {
@@ -306,7 +318,6 @@ export default function App() {
     return 'data';
   });
   
-  const [toast, setToast] = useState(null);
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [initialRunForModal, setInitialRunForModal] = useState(null);
   const [wCf, setWCF] = useState(null);
@@ -331,7 +342,7 @@ export default function App() {
     return globalPlaylistRef.current.length > 0 ? globalPlaylistRef.current[0].url : '';
   });
   
-  const [hoveredImage, setHoveredImage] = useState(null);
+  const [hoveredImage, setHoveredImage] = useState({ url: null, gameId: null });
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const hoverTimeoutRef = useRef(null);
   const [mosaicPaused, setMosaicPaused] = useState(false);
@@ -425,11 +436,10 @@ export default function App() {
     if (cardId === null) {
       hoverTimeoutRef.current = setTimeout(() => {
         setHoverState({ cardId: null, gameId: null });
-      }, 300);
+      }, 200);
     } else {
-      hoverTimeoutRef.current = setTimeout(() => {
-        setHoverState({ cardId, gameId });
-      }, 900);
+      // Immediate sync trigger to eliminate visual lag
+      setHoverState({ cardId, gameId });
     }
   };
 
@@ -465,24 +475,22 @@ export default function App() {
           index: -1
         };
         
-        setHoveredImage(null); 
-        
-        if (rawImages.length > 0) {
-          setGlobalImage(rawImages[0]); 
-        }
+        // INSTANT SYNC: Use the game's exact cover_image as the absolute starting point 
+        // to guarantee the card image and global background align without a frame of lag.
+        const startingImage = streamData[gameId].cover_image || rawImages[0] || '';
+        setHoveredImage({ url: startingImage, gameId }); 
+        setGlobalImage(startingImage); 
       } else {
         const idx = hoverPlaylistRef.current.index;
         const currentImg = idx >= 0 ? hoverPlaylistRef.current.list[idx] : null;
-        setHoveredImage(currentImg);
-        if (currentImg) {
-          setGlobalImage(currentImg);
-        } else if (streamData[gameId].thumbnail_urls?.length > 0) {
-          setGlobalImage(streamData[gameId].thumbnail_urls[0]);
-        }
+        const fallback = streamData[gameId].cover_image || '';
+        
+        setHoveredImage({ url: currentImg || fallback, gameId });
+        setGlobalImage(currentImg || fallback);
       }
 
       const hList = hoverPlaylistRef.current.list;
-      if (hList.length > 1) {
+      if (hList.length > 0) {
         intervalId = setInterval(() => {
           let idx = hoverPlaylistRef.current.index + 1;
           
@@ -494,12 +502,12 @@ export default function App() {
           
           hoverPlaylistRef.current.index = idx;
           const nextImg = hoverPlaylistRef.current.list[idx];
-          setHoveredImage(nextImg);
+          setHoveredImage({ url: nextImg, gameId });
           setGlobalImage(nextImg);
-        }, 2500);
+        }, 1500); // Fast 1.5s interval for snappy hovering
       }
     } else {
-      setHoveredImage(null);
+      setHoveredImage({ url: null, gameId: null });
 
       if (globalPlaylistRef.current.length === 0 && Object.keys(streamData).length > 0) {
         globalPlaylistRef.current = generateGlobalPlaylist(streamData);
@@ -531,90 +539,298 @@ export default function App() {
     return () => clearInterval(intervalId);
   }, [hoverState.gameId, streamData, selectedGameId, wCf, layoutPrefs.cycleInterval]);
 
+  // Handle data recovery and Steam Auto-Link on component load
   useEffect(() => {
     const recovery = async () => {
       const dataCopy = JSON.parse(JSON.stringify(streamData));
       let changed = false;
       
       for (const [id, game] of Object.entries(dataCopy)) {
-        if (!game.thumbnail_urls || game.thumbnail_urls.length < 2 || !game.details) {
+        if (!game.details) game.details = { developer: 'Unknown', publisher: 'Unknown', releaseDate: game.release_year, genres: 'Unknown', tags: 'Unknown' };
+        
+        // Migrate legacy games: extract cover_image and filter out header.jpg from thumbnail_urls
+        if (!game.cover_image) {
+          if (game.thumbnail_urls && game.thumbnail_urls.length > 0) {
+            game.cover_image = game.thumbnail_urls[0];
+            game.thumbnail_urls = game.thumbnail_urls.filter(url => !url.includes('header.jpg') && !url.includes('capsule'));
+          } else {
+            game.cover_image = 'https://placehold.co/600x400/1e293b/475569?text=Cover';
+          }
+          changed = true;
+        }
+        
+        let isUpdated = false;
+
+        // Auto-search steam for existing games if missing Steam link and not opted-out
+        if (!game.details.steamUrl && !game.details.notOnSteam) {
           try {
-            let targetId = id;
-            let cover = game.thumbnail_urls?.[0];
+             let steamId = null;
+             if (/^\d+$/.test(id)) {
+                steamId = id;
+             } else {
+                const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+                const searchRes = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=english&cc=US`);
+                const searchData = await searchRes.json();
+                if (searchData.items && searchData.items.length > 0) {
+                   steamId = searchData.items[0].id;
+                }
+             }
+
+             if (steamId) {
+                const detailRes = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
+                const detailsRaw = await detailRes.json();
+                const steamDataObj = detailsRaw[steamId]?.data;
+
+                if (steamDataObj) {
+                   // Always apply Steam Header as primary cover image
+                   game.cover_image = steamDataObj.header_image;
+                   
+                   let newUrls = [];
+                   if (steamDataObj.screenshots) {
+                     newUrls = steamDataObj.screenshots.map(s => s.path_full);
+                   }
+                   
+                   newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
+                   game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
+                   
+                   game.details.developer = steamDataObj.developers?.join(', ') || game.details.developer;
+                   game.details.publisher = steamDataObj.publishers?.join(', ') || game.details.publisher;
+                   game.details.releaseDate = steamDataObj.release_date?.date || game.details.releaseDate;
+                   game.details.genres = steamDataObj.genres?.map(g => g.description).join(', ') || game.details.genres;
+                   game.details.steamUrl = `https://store.steampowered.com/app/${steamId}/`;
+                   
+                   isUpdated = true;
+                }
+             }
+             
+             await new Promise(r => setTimeout(r, 400));
+          } catch(e) {}
+        }
+        
+        // Ensure RAWG fallbacks are intact if images are less than 2
+        if (!game.thumbnail_urls || game.thumbnail_urls.length < 2) {
+          try {
+            const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+            const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+            const rawgSearchData = await rawgSearchRes.json();
             
-            if (!/^\d+$/.test(targetId)) {
-              const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-              const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-              const d = await res.json();
-              if (d.results && d.results[0]) {
-                targetId = d.results[0].id;
-                if (!cover) cover = d.results[0].background_image;
-              } else {
-                continue;
+            if (rawgSearchData.results && rawgSearchData.results[0]) {
+              const rawgId = rawgSearchData.results[0].id;
+              const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+              const sData = await sRes.json();
+              if (sData.results) {
+                let newUrls = [...(game.thumbnail_urls || []), ...sData.results.map(x => x.image)].filter(Boolean);
+                game.thumbnail_urls = [...new Set(newUrls)];
+                isUpdated = true;
               }
-            }
-            
-            const detailRes = await fetch(`https://api.rawg.io/api/games/${targetId}?key=${RAWG_API_KEY}`);
-            const details = await detailRes.json();
-            
-            const sRes = await fetch(`https://api.rawg.io/api/games/${targetId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-            const sData = await sRes.json();
-            
-            if (sData.results) {
-              const newUrls = [cover || details.background_image, ...sData.results.map(x => x.image)].filter(Boolean);
-              game.thumbnail_urls = [...new Set(newUrls)];
-              changed = true;
-            }
-            
-            if (!game.details || Object.keys(game.details).length === 0) {
-              game.details = {
-                developer: details.developers?.[0]?.name || 'Unknown',
-                publisher: details.publishers?.[0]?.name || 'Unknown',
-                releaseDate: details.released || game.release_year,
-                genres: details.genres?.map(g => g.name).join(', ') || 'Unknown',
-                tags: details.tags?.map(t => t.name).join(', ') || 'Unknown',
-              };
-              changed = true;
             }
           } catch(e) {}
         }
+
+        if (isUpdated) changed = true;
       }
+      
       if (changed) setStreamData(dataCopy);
     };
     
     if (Object.keys(streamData).length > 0) recovery();
   }, []);
 
-  useEffect(() => {
-    if (!sQ.trim()) { setSR([]); return; }
-    const delay = setTimeout(async () => {
-      setIsS(true);
-      try {
-        const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(sQ)}&page_size=12`);
-        const data = await res.json();
-        if (data.results) {
-          const detailed = await Promise.all(
-            data.results.map(async (g) => {
-              try {
-                if (g.developers) return g;
-                const dRes = await fetch(`https://api.rawg.io/api/games/${g.id}?key=${RAWG_API_KEY}`);
-                const dData = await dRes.json();
-                return { ...g, developers: dData.developers };
-              } catch (e) {
-                return g;
-              }
-            })
-          );
-          setSR(detailed);
+  // MANUAL SYNC HANDLER
+  const handleManualSync = async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    notify('Starting manual library sync...', 'info');
+    
+    const dataCopy = JSON.parse(JSON.stringify(streamData));
+    let changed = false;
+    
+    for (const [id, game] of Object.entries(dataCopy)) {
+      if (!game.details) game.details = { developer: 'Unknown', publisher: 'Unknown', releaseDate: game.release_year, genres: 'Unknown', tags: 'Unknown' };
+      
+      if (!game.cover_image) {
+        if (game.thumbnail_urls && game.thumbnail_urls.length > 0) {
+          game.cover_image = game.thumbnail_urls[0];
+          game.thumbnail_urls = game.thumbnail_urls.filter(url => !url.includes('header.jpg') && !url.includes('capsule'));
         } else {
-          setSR([]);
+          game.cover_image = 'https://placehold.co/600x400/1e293b/475569?text=Cover';
         }
-      } catch (err) {} finally { setIsS(false); }
-    }, 400);
-    return () => clearTimeout(delay);
-  }, [sQ]);
+        changed = true;
+      }
+      
+      if (!game.details.steamUrl && !game.details.notOnSteam) {
+        try {
+           let steamId = null;
+           if (/^\d+$/.test(id)) {
+              steamId = id;
+           } else {
+              const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+              const searchRes = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=english&cc=US`);
+              const searchData = await searchRes.json();
+              if (searchData.items && searchData.items.length > 0) {
+                 steamId = searchData.items[0].id;
+              }
+           }
 
-  const notify = (msg, type) => setToast({ message: msg, type });
+           if (steamId) {
+              const detailRes = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
+              const detailsRaw = await detailRes.json();
+              const steamDataObj = detailsRaw[steamId]?.data;
+
+              if (steamDataObj) {
+                 // Force overwrite cover_image with Steam header
+                 game.cover_image = steamDataObj.header_image;
+                 
+                 let newUrls = [];
+                 if (steamDataObj.screenshots) {
+                   newUrls = steamDataObj.screenshots.map(s => s.path_full);
+                 }
+                 
+                 newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
+                 game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
+                 
+                 game.details.developer = steamDataObj.developers?.join(', ') || game.details.developer;
+                 game.details.publisher = steamDataObj.publishers?.join(', ') || game.details.publisher;
+                 game.details.releaseDate = steamDataObj.release_date?.date || game.details.releaseDate;
+                 game.details.genres = steamDataObj.genres?.map(g => g.description).join(', ') || game.details.genres;
+                 game.details.steamUrl = `https://store.steampowered.com/app/${steamId}/`;
+                 
+                 changed = true;
+              }
+           }
+           await new Promise(r => setTimeout(r, 400));
+        } catch(e) {}
+      }
+      
+      if (!game.thumbnail_urls || game.thumbnail_urls.length < 2) {
+        try {
+          const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+          const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+          const rawgSearchData = await rawgSearchRes.json();
+          
+          if (rawgSearchData.results && rawgSearchData.results[0]) {
+            const rawgId = rawgSearchData.results[0].id;
+            const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+            const sData = await sRes.json();
+            if (sData.results) {
+              let newUrls = [...(game.thumbnail_urls || []), ...sData.results.map(x => x.image)].filter(Boolean);
+              game.thumbnail_urls = [...new Set(newUrls)];
+              changed = true;
+            }
+          }
+        } catch(e) {}
+      }
+    }
+    
+    // Normalization Hook logic
+    const steamDevs = new Set();
+    const steamPubs = new Set();
+
+    Object.values(dataCopy).forEach(g => {
+      if (g.details && !g.details.notOnSteam && g.details.steamUrl) {
+        if (g.details.developer && g.details.developer !== 'Unknown') steamDevs.add(g.details.developer);
+        if (g.details.publisher && g.details.publisher !== 'Unknown') steamPubs.add(g.details.publisher);
+      }
+    });
+
+    const isSimilar = (str1, str2) => {
+      if (!str1 || !str2) return false;
+      const c1 = str1.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const c2 = str2.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (c1.length < 4 || c2.length < 4) return false;
+      return c1.includes(c2) || c2.includes(c1);
+    };
+
+    Object.values(dataCopy).forEach(g => {
+      if (g.details && g.details.notOnSteam) {
+        if (g.details.developer && g.details.developer !== 'Unknown') {
+          for (const sDev of steamDevs) {
+            if (isSimilar(g.details.developer, sDev) && g.details.developer !== sDev) {
+              g.details.developer = sDev;
+              changed = true;
+              break;
+            }
+          }
+        }
+        if (g.details.publisher && g.details.publisher !== 'Unknown') {
+          for (const sPub of steamPubs) {
+            if (isSimilar(g.details.publisher, sPub) && g.details.publisher !== sPub) {
+              g.details.publisher = sPub;
+              changed = true;
+              break;
+            }
+          }
+        }
+      }
+    });
+
+    if (changed) {
+      setStreamData(dataCopy);
+      notify('Library sync completed successfully!', 'success');
+    } else {
+      notify('Library is already up to date.', 'info');
+    }
+    
+    setIsSyncing(false);
+  };
+
+  // MANUAL Search Handler
+  const handleSearch = async () => {
+    if (!sQ.trim()) { setSR([]); return; }
+    setIsS(true);
+    try {
+      const targetUrl = `/steam-api/api/storesearch/?term=${sQ}&l=english&cc=US`;
+      const res = await fetch(targetUrl);
+      const data = await res.json();
+
+      if (data.items && data.items.length > 0) {
+        const appIds = data.items.map(i => i.id).join(',');
+        try {
+          const detailRes = await fetch(`/steam-api/api/appdetails?appids=${appIds}&l=english`);
+          const detailData = await detailRes.json();
+          
+          setSR(data.items.map(item => {
+            const d = detailData[item.id]?.data;
+            return {
+              id: item.id.toString(),
+              name: item.name,
+              cover_image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`,
+              developers: d?.developers ? d.developers.map(dev => ({name: dev})) : [],
+              released: d?.release_date?.date || '',
+              isRawgOnly: false
+            };
+          }));
+        } catch(err) {
+          setSR(data.items.map(item => ({
+            id: item.id.toString(),
+            name: item.name,
+            cover_image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`,
+            isRawgOnly: false
+          })));
+        }
+      } else {
+        // Zero Steam results -> Fallback to RAWG
+        const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(sQ)}&page_size=12`);
+        const rawgData = await rawgRes.json();
+        if (rawgData.results && rawgData.results.length > 0) {
+           setSR(rawgData.results.map(item => ({
+              id: item.id.toString(),
+              name: item.name,
+              cover_image: item.background_image,
+              developers: item.developers || [],
+              released: item.released || '',
+              isRawgOnly: true
+           })));
+        } else {
+           setSR([]);
+        }
+      }
+    } catch (err) {
+      console.error("Search failed:", err);
+    } finally { 
+      setIsS(false); 
+    }
+  };
 
   const openGameProfile = (gameId, runId = null) => {
     setSelectedGameId(gameId);
@@ -640,6 +856,7 @@ export default function App() {
       });
   };
 
+  // Handle Add Game with separate cover_image and thumbnail_urls logic
   const handleAddGame = async (g) => {
     const rid = g.id.toString();
     if (streamData[rid]) {
@@ -648,50 +865,107 @@ export default function App() {
       return;
     }
     
-    notify('Fetching game metadata & screenshots...', 'info');
+    notify(g.isRawgOnly ? 'Fetching data from RAWG...' : 'Fetching Steam metadata & RAWG images...', 'info');
     
-    const year = g.released ? g.released.substring(0, 4) : new Date().getFullYear().toString();
-    const cover = g.background_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
+    const steamUrl = `https://store.steampowered.com/app/${rid}/`;
     
     let details = {
-      developer: g.developers?.[0]?.name || 'Unknown',
+      developer: g.developers?.map(d => d.name).join(', ') || 'Unknown',
       publisher: 'Unknown',
-      releaseDate: g.released || year,
-      genres: g.genres?.map(gn => gn.name).join(', ') || 'Unknown',
-      tags: g.tags?.map(t => t.name).join(', ') || 'Unknown'
+      releaseDate: g.released || new Date().getFullYear().toString(),
+      genres: 'Unknown',
+      tags: 'Unknown',
+      steamUrl: g.isRawgOnly ? '' : steamUrl,
+      notOnSteam: g.isRawgOnly || false
     };
     
-    let thumbnails = [cover];
+    let cover_image = g.cover_image;
+    let thumbnails = [];
+    let finalName = g.name;
+    let finalYear = g.released ? new Date(g.released).getFullYear().toString() : new Date().getFullYear().toString();
 
     try {
-      const detailRes = await fetch(`https://api.rawg.io/api/games/${g.id}?key=${RAWG_API_KEY}`);
-      const detailsData = await detailRes.json();
-      
-      details = {
-        developer: detailsData.developers?.[0]?.name || details.developer,
-        publisher: detailsData.publishers?.[0]?.name || 'Unknown',
-        releaseDate: detailsData.released || details.releaseDate,
-        genres: detailsData.genres?.map(gn => gn.name).join(', ') || details.genres,
-        tags: detailsData.tags?.map(t => t.name).join(', ') || details.tags,
-      };
-      
-      const sRes = await fetch(`https://api.rawg.io/api/games/${g.id}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-      const sData = await sRes.json();
-      
-      if (sData.results) {
-        thumbnails = [cover, ...sData.results.map(x => x.image)].filter(Boolean);
-        thumbnails = [...new Set(thumbnails)];
+      if (g.isRawgOnly) {
+         // Full RAWG Fetch
+         const detailRes = await fetch(`https://api.rawg.io/api/games/${rid}?key=${RAWG_API_KEY}`);
+         const detailData = await detailRes.json();
+         details.developer = detailData.developers?.map(d => d.name).join(', ') || details.developer;
+         details.publisher = detailData.publishers?.map(p => p.name).join(', ') || details.publisher;
+         details.releaseDate = detailData.released || details.releaseDate;
+         details.genres = detailData.genres?.map(gn => gn.name).join(', ') || details.genres;
+         details.tags = detailData.tags?.filter(t => t.language === 'eng').map(t => t.name).join(', ') || details.tags;
+         
+         if (detailData.background_image) cover_image = detailData.background_image;
+
+         const sRes = await fetch(`https://api.rawg.io/api/games/${rid}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+         const sData = await sRes.json();
+         if (sData.results) {
+             thumbnails = sData.results.map(x => x.image).filter(Boolean);
+         }
+      } else {
+         // 1. Fetch from Steam API
+         const targetUrl = `/steam-api/api/appdetails?appids=${rid}&l=english`;
+         const res = await fetch(targetUrl);
+         const steamDataObj = await res.json();
+         
+         const gameDetails = steamDataObj[rid]?.data;
+         if (gameDetails) {
+           finalName = gameDetails.name || finalName;
+           const rDate = gameDetails.release_date?.date;
+           finalYear = rDate ? new Date(rDate).getFullYear().toString() : finalYear;
+           
+           details.developer = gameDetails.developers?.join(', ') || details.developer;
+           details.publisher = gameDetails.publishers?.join(', ') || 'Unknown';
+           details.releaseDate = rDate || finalYear;
+           details.genres = gameDetails.genres?.map(gn => gn.description).join(', ') || 'Unknown';
+           
+           if (gameDetails.header_image) cover_image = gameDetails.header_image;
+           if (gameDetails.screenshots) {
+             thumbnails = gameDetails.screenshots.map(s => s.path_full); // path_full is high resolution
+           }
+         }
+
+         // 2. Fetch User Tags and extra Screenshots from RAWG
+         try {
+           const cleanName = finalName.replace(/[:™®©]/g, '').trim();
+           const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+           const rawgSearchData = await rawgSearchRes.json();
+           
+           if (rawgSearchData.results && rawgSearchData.results[0]) {
+             const rawgGame = rawgSearchData.results[0];
+             
+             if (rawgGame.tags) {
+               const englishTags = rawgGame.tags.filter(t => t.language === 'eng').map(t => t.name);
+               if (englishTags.length > 0) {
+                 details.tags = englishTags.join(', ');
+               }
+             }
+
+             const rawgId = rawgGame.id;
+             const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+             const sData = await sRes.json();
+             if (sData.results) {
+               thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);
+             }
+           }
+         } catch (err) {
+           console.warn('RAWG fallback failed', err);
+         }
       }
-      notify(`Successfully added ${g.name}!`, 'success');
+      
+      thumbnails = [...new Set(thumbnails)];
+      notify(`Successfully added ${finalName}!`, 'success');
+      
     } catch(e) {
-      notify(`Added ${g.name}, but some images failed to load`, 'error');
+      notify(`Added ${finalName}, but some data failed to load`, 'error');
     }
 
     setStreamData(prev => ({
       ...prev,
       [rid]: {
-        game_name: g.name,
-        release_year: year,
+        game_name: finalName,
+        release_year: finalYear,
+        cover_image: cover_image,
         thumbnail_urls: thumbnails,
         cycles: {
           main: {
@@ -710,34 +984,73 @@ export default function App() {
     openGameProfile(rid);
   };
 
-  const updateGameLink = async (gameId, rawgLink) => {
-    let rawgId = rawgLink;
-    if (rawgLink.includes('rawg.io/games/')) rawgId = rawgLink.split('rawg.io/games/')[1].split('/')[0].split('?')[0];
-    notify('Syncing with RAWG...', 'info');
+  const updateGameLink = async (gameId, steamLink) => {
+    let steamId = steamLink;
+    if (steamLink.includes('steampowered.com/app/')) {
+      steamId = steamLink.split('steampowered.com/app/')[1].split('/')[0].split('?')[0];
+    }
+    notify('Syncing with Steam & RAWG...', 'info');
     try {
-      const res = await fetch(`https://api.rawg.io/api/games/${rawgId}?key=${RAWG_API_KEY}`);
-      const data = await res.json();
-      if (data.id) {
-        const sRes = await fetch(`https://api.rawg.io/api/games/${data.id}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-        const sData = await sRes.json();
-        const nd = JSON.parse(JSON.stringify(streamData));
-        nd[gameId].game_name = data.name;
-        nd[gameId].release_year = data.released?.substring(0, 4) || nd[gameId].release_year;
-        nd[gameId].thumbnail_urls = [data.background_image, ...sData.results.map(x => x.image)].filter(Boolean);
-        nd[gameId].details = {
-          developer: data.developers?.[0]?.name || 'Unknown',
-          publisher: data.publishers?.[0]?.name || 'Unknown',
-          releaseDate: data.released || nd[gameId].release_year,
-          genres: data.genres?.map(g => g.name).join(', ') || 'Unknown',
-          tags: data.tags?.map(t => t.name).join(', ') || 'Unknown',
-        };
-        setStreamData(nd);
-        notify('Game updated with RAWG metadata!', 'success');
-      } else notify('Invalid RAWG link', 'error');
+      const targetUrl = `/steam-api/api/appdetails?appids=${steamId}&l=english`;
+      const res = await fetch(targetUrl);
+      const steamDataObj = await res.json();
+      
+      const gameDetails = steamDataObj[steamId]?.data;
+      if (!gameDetails) {
+          notify('Invalid Steam link or ID', 'error');
+          return;
+      }
+
+      let cover_image = gameDetails.header_image;
+      let thumbnails = [];
+      if (gameDetails.screenshots) {
+        thumbnails = gameDetails.screenshots.map(s => s.path_full);
+      }
+      let tagsString = 'Unknown';
+
+      // Fetch RAWG data
+      try {
+        const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(gameDetails.name)}&page_size=1`);
+        const rawgSearchData = await rawgSearchRes.json();
+        
+        if (rawgSearchData.results && rawgSearchData.results[0]) {
+            const rawgGame = rawgSearchData.results[0];
+            if (rawgGame.tags) {
+              const engTags = rawgGame.tags.filter(t => t.language === 'eng').map(t => t.name);
+              if (engTags.length > 0) tagsString = engTags.join(', ');
+            }
+
+            const rawgId = rawgGame.id;
+            const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+            const sData = await sRes.json();
+            if (sData.results) {
+                thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);
+            }
+        }
+      } catch(e) {}
+
+      const nd = JSON.parse(JSON.stringify(streamData));
+      nd[gameId].game_name = gameDetails.name;
+      const rDate = gameDetails.release_date?.date;
+      nd[gameId].release_year = rDate ? new Date(rDate).getFullYear().toString() : nd[gameId].release_year;
+      nd[gameId].cover_image = cover_image;
+      nd[gameId].thumbnail_urls = [...new Set(thumbnails)];
+      nd[gameId].details = {
+        developer: gameDetails.developers?.join(', ') || 'Unknown',
+        publisher: gameDetails.publishers?.join(', ') || 'Unknown',
+        releaseDate: rDate || nd[gameId].release_year,
+        genres: gameDetails.genres?.map(g => g.description).join(', ') || 'Unknown',
+        tags: tagsString,
+        steamUrl: `https://store.steampowered.com/app/${steamId}/`,
+        notOnSteam: false
+      };
+      
+      setStreamData(nd);
+      notify('Game updated with Steam & RAWG data!', 'success');
     } catch(e) { notify('Update failed', 'error'); }
   };
 
-  const editGameDetails = (gameId, newName, newYear, developer, publisher, genres, tags, rawgId) => {
+  const editGameDetails = (gameId, newName, newYear, developer, publisher, genres, tags, steamIdToSync, steamUrl, notOnSteam) => {
     const nd = JSON.parse(JSON.stringify(streamData));
     if (nd[gameId]) {
       nd[gameId].game_name = newName;
@@ -748,11 +1061,13 @@ export default function App() {
       if (publisher !== undefined) nd[gameId].details.publisher = publisher;
       if (genres !== undefined) nd[gameId].details.genres = genres;
       if (tags !== undefined) nd[gameId].details.tags = tags;
+      if (steamUrl !== undefined) nd[gameId].details.steamUrl = steamUrl;
+      if (notOnSteam !== undefined) nd[gameId].details.notOnSteam = notOnSteam;
       
       setStreamData(nd);
       notify(`Game details updated!`, 'success');
       
-      if (rawgId) updateGameLink(gameId, rawgId);
+      if (steamIdToSync) updateGameLink(gameId, steamIdToSync);
     }
   };
 
@@ -939,7 +1254,7 @@ export default function App() {
 
         <div className={`absolute inset-0 transition-opacity duration-1000 ${hoverState.gameId ? 'opacity-100' : 'opacity-0'}`}>
           <CrossfadeImage 
-            src={globalImage || 'https://placehold.co/1920x1080/1a1a1a/333333?text=Loading'} 
+            src={getOptimizedImage(globalImage, 1280)} 
             className="absolute inset-0 w-full h-full"
             imgClassName="object-cover" 
           />
@@ -969,6 +1284,8 @@ export default function App() {
                 persistSettings={persistSettings}
                 setPersistSettings={setPersistSettings}
                 onWipeData={handleWipeData}
+                onRunSync={handleManualSync}
+                isSyncing={isSyncing}
               />
             </div>
           )}
@@ -1042,10 +1359,11 @@ export default function App() {
                     <input
                       type="text"
                       style={{ fontSize: `${scaledSystemFonts.searchBar}px` }}
-                      className="w-full bg-black/60 border border-white/10 rounded-none py-4 pl-12 pr-24 text-lg focus:outline-none transition-colors shadow-inner text-white peer relative z-0"
-                      placeholder="Search RAWG database..."
+                      className="w-full bg-black/60 border border-white/10 rounded-none py-4 pl-12 pr-6 text-lg focus:outline-none transition-colors shadow-inner text-white peer relative z-0"
+                      placeholder="Search Steam Database..."
                       value={sQ}
                       onChange={(e) => setSQ(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     />
                     <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 peer-focus:opacity-100 transition-opacity duration-300 z-20 pointer-events-none" />
                     {isS && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 animate-spin text-blue-400 z-10" size={22} />}
@@ -1056,25 +1374,21 @@ export default function App() {
                   <div style={gridStyle}>
                     {sR.map(g => {
                       const isInLibrary = Object.values(streamData).some(existing => 
-                        existing.game_name?.toLowerCase() === g.name?.toLowerCase() && 
-                        (existing.details?.releaseDate === g.released || existing.release_year === (g.released ? g.released.substring(0, 4) : ''))
+                        existing.game_name?.toLowerCase() === g.name?.toLowerCase()
                       ) || !!streamData[g.id.toString()];
 
                       return (
                         <div key={g.id} className="group relative overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300" style={cardStyle}>
                           <div className="aspect-video bg-black/40 overflow-hidden relative shrink-0">
-                            <img src={g.background_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover'} alt={g.name} className="absolute inset-0 w-full h-full object-cover" />
+                            <img src={getOptimizedImage(g.cover_image || g.background_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover', 600)} alt={g.name} className="absolute inset-0 w-full h-full object-cover" />
+                            {g.isRawgOnly && (
+                              <span className="absolute top-2 right-2 bg-purple-600/80 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full z-20 shadow">RAWG</span>
+                            )}
                             <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
                           </div>
                           
-                          <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${scaledLayoutPrefs.cardPadding}px, 20px)` }}>
-                            <h3 className="font-bold tracking-tight flex-1 drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${scaledSystemFonts.libTitle}px` }}>{g.name}</h3>
-                            <p className="text-white/80 mt-1 drop-shadow-md" style={{ fontSize: `${scaledSystemFonts.libYear}px` }}>
-                              {g.developers?.map(d => d.name).join(', ') || 'Unknown Developer'}
-                            </p>
-                            <p className="text-white/60 mt-1 mb-auto" style={{ fontSize: `${Math.max(10, scaledSystemFonts.libYear - 2)}px` }}>
-                              {g.released ? formatReleaseDate(g.released) : 'Unreleased'}
-                            </p>
+                          <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between" style={{ padding: `clamp(12px, ${scaledLayoutPrefs.cardPadding}px, 20px)` }}>
+                            <h3 className="font-bold tracking-tight drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${scaledSystemFonts.libTitle}px` }}>{g.name}</h3>
                             
                             {isInLibrary ? (
                               <div className="mt-4 w-full bg-white/5 py-2 rounded-none font-medium flex items-center justify-center text-white/50 cursor-not-allowed border border-white/5">

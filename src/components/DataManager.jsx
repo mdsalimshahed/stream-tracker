@@ -1,6 +1,6 @@
 // src/components/DataManager.jsx
 import React, { useState } from 'react';
-import { Type, Layout, Eye, AlertTriangle, Trash2, X } from 'lucide-react';
+import { Type, Layout, Eye, AlertTriangle, Trash2, X, RefreshCw, Loader2 } from 'lucide-react';
 import { RangeControl } from './common/UIComponents';
 
 const Toggle = ({ label, description, value, onChange }) => (
@@ -20,7 +20,9 @@ export default function DataManager({
   modalBgIntensity, setModalBgIntensity, 
   modalPanelOpacity, setModalPanelOpacity,
   persistSettings, setPersistSettings,
-  onWipeData
+  onWipeData,
+  onRunSync,
+  isSyncing
 }) {
   const [showWipeModal, setShowWipeModal] = useState(false);
 
@@ -91,6 +93,21 @@ export default function DataManager({
           <RangeControl label="Modal Panel Opacity" description="Transparency of Runs & Logs panels" value={modalPanelOpacity} min={0} max={1} step={0.01} onChange={setModalPanelOpacity} />
           <RangeControl label="Modal Background Dimming" description="0 = fully dimmed, 1 = full visibility" value={modalBgIntensity} min={0} max={1} step={0.01} onChange={setModalBgIntensity} />
           <RangeControl label="Background Cycle Speed" description="Image slideshow interval (ms)" value={layoutPrefs.cycleInterval ?? 4000} min={1000} max={20000} step={500} onChange={v => updateLayout('cycleInterval', v)} />
+        </div>
+
+        <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2"><RefreshCw size={24} /> Data Synchronization</h2>
+        <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5 mb-12 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-lg">
+          <div>
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">Sync Library Data</h3>
+            <p className="text-sm text-white/60 mt-1">Manually scan your library to fetch missing Steam URLs, update game details, and normalize developer/publisher names.</p>
+          </div>
+          <button 
+            onClick={onRunSync} 
+            disabled={isSyncing}
+            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-md whitespace-nowrap shrink-0 flex items-center justify-center gap-2 ${isSyncing ? 'bg-white/10 text-white/40 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+          >
+            {isSyncing ? <><Loader2 size={16} className="animate-spin" /> Syncing...</> : <><RefreshCw size={16} /> Run Sync</>}
+          </button>
         </div>
 
         {/* Danger Zone */}

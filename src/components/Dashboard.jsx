@@ -1,6 +1,6 @@
 // src/components/Dashboard.jsx
 import React, { useMemo } from 'react';
-import { parseCustomTimestamp } from '../utils/helpers';
+import { parseCustomTimestamp, getOptimizedImage } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
 
 export default function Dashboard({ streamData, openGameProfile, systemFonts, layoutPrefs, globalImage, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
@@ -19,7 +19,7 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
             count: cycleData.stream_count,
             lastTimeStr: timestamps[timestamps.length - 1],
             lastTimeDate: parseCustomTimestamp(timestamps[timestamps.length - 1]),
-            cover: game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover',
+            cover: game.cover_image || game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover',
             allThumbnails: game.thumbnail_urls || [],
             cycleDisplayName: cycleData.displayName || (cycleName === 'main' ? 'First Playthrough' : cycleName.replace(/_/g, ' '))
           });
@@ -80,7 +80,9 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
           {recentStreams.map((stream) => {
             const uniqueCardId = `${stream.appId}-${stream.cycleName}`;
             const isHovered = hoverState.cardId === uniqueCardId;
-            const activeImg = (isHovered && hoveredImage) ? hoveredImage : stream.cover;
+            const activeImg = (isHovered && hoveredImage?.gameId === stream.appId && hoveredImage?.url) 
+                ? hoveredImage.url 
+                : getOptimizedImage(stream.cover, 600);
 
             return (
               <div
@@ -98,18 +100,19 @@ export default function Dashboard({ streamData, openGameProfile, systemFonts, la
                     className="absolute inset-0 w-full h-full" 
                     imgClassName="object-cover" 
                   />
-                  <div className="absolute bottom-2 right-2 bg-blue-600/80 backdrop-blur-sm px-2 py-1 rounded-none text-[10px] sm:text-xs font-semibold text-white pointer-events-none shadow z-20 border border-white/10">
-                    Resume
-                  </div>
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
                 </div>
                 <div className="p-3 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
                   <h3 className="font-bold leading-tight drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${systemFonts.libTitle}px` }}>
                     {stream.gameName}
                   </h3>
-                  <p className="text-white/80 mt-1 drop-shadow-md mb-auto" style={{ fontSize: `${systemFonts.libYear}px` }}>
-                    {stream.cycleDisplayName} • Session #{stream.count}
-                  </p>
+                  
+                  <div className="flex flex-wrap gap-2 items-center mt-1 mb-auto">
+                    <p className="text-white/80 drop-shadow-md" style={{ fontSize: `${systemFonts.libYear}px` }}>
+                      {stream.cycleDisplayName} • Session #{stream.count}
+                    </p>
+                  </div>
+
                   <p className="text-white/50 mt-3 font-mono drop-shadow-md hidden min-[400px]:block" style={{ fontSize: `${systemFonts.dashboardTime || 10}px` }}>
                     {stream.lastTimeStr}
                   </p>

@@ -24,15 +24,28 @@ export default function LivestreamSetupWorkspace({
   const year = game.release_year || new Date().getFullYear();
   const cycleIsMain = cycle?.isMain || false;
   const [title] = useState(generateStreamTitle(game.game_name, year, nC, cycleDisplayName, cycleIsMain));
-  const [images, setImages] = useState(() => [...(game.thumbnail_urls || [])]);
+  
+  // Inject cover_image into the gallery if it exists
+  const [images, setImages] = useState(() => {
+    const urls = game.thumbnail_urls || [];
+    if (game.cover_image && !urls.includes(game.cover_image)) {
+      return [game.cover_image, ...urls];
+    }
+    return [...urls];
+  });
+  
   const [selImg, setSelImg] = useState(null);
   const [loadingS, setLoadingS] = useState(false);
-  const [cF, setCF] = useState(null);
   const [selEl, setSelEl] = useState('title');
   const [urlInput, setUrlInput] = useState('');
   const [embedCode, setEmbedCode] = useState('');
   const [hasCycleChanges, setHasCycleChanges] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState(null);
+  const [confirmFontDialog, setConfirmFontDialog] = useState(null);
+
+  // Directly track the custom font via persistent config instead of local reset-prone state
+  const cF = config.customFont || null;
+  const setCF = (font) => setConfig(p => ({ ...p, customFont: font }));
 
   const validI = images.filter(img => !isLocalPath(img));
   const workspaceCanvasRef = useRef(null);
@@ -54,7 +67,7 @@ export default function LivestreamSetupWorkspace({
 
   const saveImagesToStorage = (newImages) => {
     const updatedGame = JSON.parse(JSON.stringify(streamData[gameId]));
-    updatedGame.thumbnail_urls = newImages;
+    updatedGame.thumbnail_urls = newImages.filter(img => img !== game.cover_image);
     const newStreamData = { ...streamData, [gameId]: updatedGame };
     onSave(newStreamData);
   };
@@ -130,6 +143,11 @@ export default function LivestreamSetupWorkspace({
   };
 
   const handleDeleteImage = (idx, imgUrl) => {
+    if (imgUrl === game.cover_image) {
+      onNotify("Cannot delete the primary cover image", "error");
+      return;
+    }
+
     setConfirmDialog({
       title: 'Delete Image',
       message: `Delete this image from "${game.game_name}" gallery?`,
@@ -145,14 +163,12 @@ export default function LivestreamSetupWorkspace({
     });
   };
 
-  // Google Fonts extraction and gallery management logic
   const handleAddGoogleFont = async () => {
     if (!embedCode.trim()) return;
     const text = embedCode.trim();
     
     // Support parsing both the full HTML <link> embed block, or a direct URL paste
     const urlMatch = text.match(/(https:\/\/fonts\.googleapis\.com\/css2\?[^"'\s>]+)/);
-    // Replace HTML entities like &amp; just in case it was copied as raw HTML text
     const urlString = urlMatch ? urlMatch[1].replace(/&amp;/g, '&') : text.replace(/&amp;/g, '&');
     
     if (!urlString.includes('fonts.googleapis.com/css2')) {
@@ -175,8 +191,6 @@ export default function LivestreamSetupWorkspace({
       const newFamilies = [];
 
       families.forEach(famParam => {
-        // family parameter might look like "Oswald:wght@200..700"
-        // We only want the core name part before any colons
         const rawName = famParam.split(':')[0];
         const cleanName = rawName.replace(/\+/g, ' ');
 
@@ -188,7 +202,6 @@ export default function LivestreamSetupWorkspace({
       });
 
       if (addedCount > 0) {
-         // Sort alphabetically before saving
          newFontsList.sort((a, b) => a.family.localeCompare(b.family));
          setConfig(p => ({ ...p, savedFonts: newFontsList }));
          
@@ -198,7 +211,6 @@ export default function LivestreamSetupWorkspace({
             link.href = urlString;
             link.onload = async () => {
               try {
-                // Await the browser registering the font into memory before re-rendering canvas
                 await document.fonts.load(`16px "${newFamilies[0]}"`);
               } catch(e) {}
               setCF(newFamilies[0]);
@@ -218,12 +230,33 @@ export default function LivestreamSetupWorkspace({
   };
 
   const handleDeleteFont = (family) => {
-    setConfig(p => ({ ...p, savedFonts: (p.savedFonts || []).filter(f => f.family !== family) }));
-    if (cF === family) setCF(null);
+    setConfirmFontDialog({
+      title: 'Delete Font',
+      message: `Are you sure you want to remove "${family}" from your gallery?`,
+      onConfirm: () => {
+        setConfig(p => ({ ...p, savedFonts: (p.savedFonts || []).filter(f => f.family !== family) }));
+        if (cF === family) setCF(null);
+        onNotify('Font removed', 'info');
+        setConfirmFontDialog(null);
+      }
+    });
   };
 
   const handleSaveSession = () => {
     handleCopy(true);
+    
+    // Auto-download the thumbnail
+    if (workspaceCanvasRef.current) {
+      const dataUrl = workspaceCanvasRef.current.toDataURL('image/jpeg', 0.92);
+      const safeName = game.game_name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `${safeName}_ep${nC}_thumbnail.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     const nd = JSON.parse(JSON.stringify(streamData));
     if (!nd[gameId].cycles) nd[gameId].cycles = {};
     if (!nd[gameId].cycles[cycleName]) {
@@ -237,19 +270,21 @@ export default function LivestreamSetupWorkspace({
       sessionSaved.current = true;
       setHasCycleChanges(false);
       onSave(nd);
-      onNotify('Session saved & title copied!', 'success');
+      onNotify('Session saved, title copied & thumbnail downloaded!', 'success');
     } else {
       onSave(nd);
-      onNotify(selectedStreamNumber !== null ? 'Session settings saved' : 'Session saved', 'success');
+      onNotify(selectedStreamNumber !== null ? 'Session settings saved & thumbnail downloaded!' : 'Session saved & thumbnail downloaded!', 'success');
     }
   };
 
-  // Ensure fonts are sorted alphabetically for rendering
   const sortedFonts = [...(config.savedFonts || [])].sort((a, b) => a.family.localeCompare(b.family));
+  // Provide the default local repository font to the top of the array
+  const displayFonts = [{ family: 'Book Antiqua', isLocal: true }, ...sortedFonts];
 
   return (
     <>
       <div className="fixed inset-0 z-50 flex bg-black overflow-hidden">
+
         <div className="w-full h-full bg-neutral-900 flex flex-col">
           {/* Workspace Header */}
           <div className="flex flex-col sm:flex-row justify-between sm:items-center px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-neutral-900/80 backdrop-blur-sm shrink-0 gap-3">
@@ -272,7 +307,7 @@ export default function LivestreamSetupWorkspace({
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
+          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
             
             {/* Top/Left gallery */}
             <div className="w-full lg:w-1/4 xl:w-1/5 lg:min-w-[220px] lg:max-w-[320px] h-auto border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col bg-neutral-900/50 shrink-0">
@@ -312,7 +347,8 @@ export default function LivestreamSetupWorkspace({
                 <p className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wider">Stream Title (Click to Copy)</p>
                 <p className="text-white font-medium text-xs sm:text-sm break-all mt-1">{title}</p>
               </div>
-              <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
+              
+              <div className="flex-1 relative overflow-hidden">
                 {selImg ? (
                   <ThumbnailCanvas
                     canvasRef={workspaceCanvasRef}
@@ -324,13 +360,13 @@ export default function LivestreamSetupWorkspace({
                     customFont={cF}
                   />
                 ) : (
-                  <div className="text-white/30 text-center text-sm">Select an image from the gallery</div>
+                  <div className="flex w-full h-full items-center justify-center text-white/30 text-sm">Select an image from the gallery</div>
                 )}
               </div>
             </div>
 
             {/* Bottom/Right panel: Controls */}
-            <div className="w-full lg:w-1/4 xl:w-1/4 lg:min-w-[280px] lg:max-w-[400px] border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col bg-neutral-900/50 shrink-0 lg:h-full">
+            <div className="w-full lg:w-1/4 xl:w-1/4 lg:min-w-[280px] lg:max-w-[400px] border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col bg-neutral-900/50 shrink-0 lg:h-full h-[50vh] lg:h-auto">
               <div className="p-3 lg:p-4 border-b border-white/10 shrink-0">
                 <select value={selEl} onChange={(e) => setSelEl(e.target.value)} className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-sm outline-none focus:border-blue-500 shadow-inner">
                   <option value="title">Game Title</option>
@@ -341,9 +377,9 @@ export default function LivestreamSetupWorkspace({
                 </select>
               </div>
               
-              <div className="flex-1 flex flex-col overflow-hidden pb-12 lg:pb-0">
+              <div className="flex-1 flex flex-col overflow-hidden min-h-0">
                 {selEl === 'title' && (
-                  <div className="flex-1 overflow-y-auto lg:custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
                     <div className="flex gap-2">
                       <button onClick={() => setConfig(p => ({...p, titleBold: !p.titleBold}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.titleBold ? 'bg-blue-600' : 'bg-white/10'}`}><Bold size={16} /> Bold</button>
                       <button onClick={() => setConfig(p => ({...p, titleItalic: !p.titleItalic}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.titleItalic ? 'bg-blue-600' : 'bg-white/10'}`}><Italic size={16} /> Italic</button>
@@ -353,33 +389,38 @@ export default function LivestreamSetupWorkspace({
                       <button onClick={() => setConfig(p => ({...p, forceInvertTitle: !p.forceInvertTitle}))} className={`flex-1 py-2 rounded-lg text-xs font-medium transition shadow ${config.forceInvertTitle ? 'bg-amber-600' : 'bg-white/10'}`}>Invert Colors</button>
                     </div>
                     <RangeControl label="Title Size" value={config.titleSize} min={40} max={200} onChange={v => setConfig(p => ({...p, titleSize: v}))} />
+                    <RangeControl label="Title Letter Spacing" value={config.titleLetterSpacing || 0} min={-10} max={100} onChange={v => setConfig(p => ({...p, titleLetterSpacing: v}))} />
                     <RangeControl label="Subtitle Size" value={config.subtitleSize} min={40} max={150} onChange={v => setConfig(p => ({...p, subtitleSize: v}))} />
+                    <RangeControl label="Subtitle Letter Spacing" value={config.subtitleLetterSpacing || 0} min={-10} max={100} onChange={v => setConfig(p => ({...p, subtitleLetterSpacing: v}))} />
                     <RangeControl label="Outline Weight" value={config.strokeWidth} min={1} max={30} onChange={v => setConfig(p => ({...p, strokeWidth: v}))} />
                     <ColorOverride title="Manual Colors" element="title" config={config} toggle={() => setConfig(p => ({...p, manualColors: {...p.manualColors, title: !p.manualColors.title}}))} onChange={(el, k, v) => setConfig(p => ({...p, colors: {...p.colors, [`${el}${k}`]: v}}))} />
                   </div>
                 )}
                 {selEl === 'stream' && (
-                  <div className="flex-1 overflow-y-auto lg:custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
                     <div className="flex gap-2 mb-4">
                       <button onClick={() => setConfig(p => ({...p, streamBold: !p.streamBold}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.streamBold ? 'bg-blue-600' : 'bg-white/10'}`}><Bold size={16} /> Bold</button>
                       <button onClick={() => setConfig(p => ({...p, streamItalic: !p.streamItalic}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.streamItalic ? 'bg-blue-600' : 'bg-white/10'}`}><Italic size={16} /> Italic</button>
                     </div>
                     <RangeControl label="Scale" value={config.streamCountSize} min={40} max={280} onChange={v => setConfig(p => ({...p, streamCountSize: v}))} />
+                    <RangeControl label="Letter Spacing" value={config.streamCountLetterSpacing || 0} min={-10} max={100} onChange={v => setConfig(p => ({...p, streamCountLetterSpacing: v}))} />
                     <ColorOverride title="Manual Colors" element="stream" config={config} toggle={() => setConfig(p => ({...p, manualColors: {...p.manualColors, streamCount: !p.manualColors.streamCount}}))} onChange={(el, k, v) => setConfig(p => ({...p, colors: {...p.colors, [`${el}${k}`]: v}}))} />
                   </div>
                 )}
                 {selEl === 'cycle' && (
-                  <div className="flex-1 overflow-y-auto lg:custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
                     <div className="flex gap-2 mb-4">
                       <button onClick={() => setConfig(p => ({...p, cycleBold: !p.cycleBold}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.cycleBold ? 'bg-blue-600' : 'bg-white/10'}`}><Bold size={16} /> Bold</button>
                       <button onClick={() => setConfig(p => ({...p, cycleItalic: !p.cycleItalic}))} className={`flex-1 py-2 rounded-lg text-sm font-medium transition shadow flex items-center justify-center gap-1.5 ${config.cycleItalic ? 'bg-blue-600' : 'bg-white/10'}`}><Italic size={16} /> Italic</button>
                     </div>
                     <RangeControl label="Scale" value={config.cycleSize} min={30} max={220} onChange={v => setConfig(p => ({...p, cycleSize: v}))} />
+                    <RangeControl label="Letter Spacing" value={config.cycleLetterSpacing || 0} min={-10} max={100} onChange={v => setConfig(p => ({...p, cycleLetterSpacing: v}))} />
                     <ColorOverride title="Manual Colors" element="cycle" config={config} toggle={() => setConfig(p => ({...p, manualColors: {...p.manualColors, cycle: !p.manualColors.cycle}}))} onChange={(el, k, v) => setConfig(p => ({...p, colors: {...p.colors, [`${el}${k}`]: v}}))} />
                   </div>
                 )}
                 {selEl === 'layout' && (
-                  <div className="flex-1 overflow-y-auto lg:custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6 pb-12 lg:pb-4">
+                    <RangeControl label="Background Zoom" value={config.bgZoom || 100} min={10} max={300} onChange={v => setConfig(p => ({...p, bgZoom: v}))} />
                     <RangeControl label="Title Y Offset" value={config.titleYOffset} min={10} max={550} onChange={v => setConfig(p => ({...p, titleYOffset: v}))} />
                     <RangeControl label="Title Spacing" value={config.titleSpacing} min={0} max={300} onChange={v => setConfig(p => ({...p, titleSpacing: v}))} />
                     <button onClick={() => setConfig(p => ({...p, showBottomShadow: !p.showBottomShadow}))} className={`w-full py-2 rounded-lg text-xs font-medium transition shadow ${config.showBottomShadow ? 'bg-emerald-600' : 'bg-white/10'}`}>Toggle Shadow</button>
@@ -414,7 +455,7 @@ export default function LivestreamSetupWorkspace({
                       <label className="text-xs text-white/50 uppercase font-bold tracking-wider block mb-3 shrink-0">
                         Font Gallery (Current: <span className="text-white">{cF || 'System'}</span>)
                       </label>
-                      <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+                      <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2 pb-4">
                         <div 
                           onClick={() => setCF(null)}
                           className={`relative border rounded-lg p-4 cursor-pointer transition ${cF === null ? 'border-blue-500 bg-blue-500/10' : 'border-white/10 bg-black/40 hover:bg-white/5'}`}
@@ -422,27 +463,28 @@ export default function LivestreamSetupWorkspace({
                           <span className="text-lg block font-sans font-medium text-white/80">System Default Font</span>
                         </div>
 
-                        {sortedFonts.map((font, idx) => (
+                        {displayFonts.map((font, idx) => (
                           <div 
                             key={idx} 
                             onClick={() => setCF(font.family)}
                             className={`relative group border rounded-lg p-4 cursor-pointer transition ${cF === font.family ? 'border-blue-500 bg-blue-500/10' : 'border-white/10 bg-black/40 hover:bg-white/5'}`}
                           >
-                            <span style={{ fontFamily: `"${font.family}", sans-serif` }} className="text-2xl block truncate pr-8">
+                            <span style={{ fontFamily: font.isLocal ? `"${font.family}"` : `"${font.family}", sans-serif` }} className="text-2xl block truncate pr-16">
                               {font.family}
                             </span>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); handleDeleteFont(font.family); }} 
-                              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                            {!font.isLocal && (
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleDeleteFont(font.family); }} 
+                                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            )}
+                            {font.isLocal && (
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/40 uppercase font-bold px-2 py-1 bg-black/40 rounded">Local</span>
+                            )}
                           </div>
                         ))}
-
-                        {sortedFonts.length === 0 && (
-                          <div className="text-center py-6 text-white/50 text-sm">No Google Fonts added yet.</div>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -458,6 +500,15 @@ export default function LivestreamSetupWorkspace({
             message={confirmDialog.message}
             onConfirm={confirmDialog.onConfirm}
             onCancel={() => setConfirmDialog(null)}
+          />
+        )}
+        
+        {confirmFontDialog && (
+          <ConfirmBanner
+            title={confirmFontDialog.title}
+            message={confirmFontDialog.message}
+            onConfirm={confirmFontDialog.onConfirm}
+            onCancel={() => setConfirmFontDialog(null)}
           />
         )}
       </div>

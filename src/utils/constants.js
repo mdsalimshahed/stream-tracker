@@ -35,19 +35,21 @@ export const DEFAULT_LAYOUT_PREFS = {
 };
 
 export const DEFAULT_THUMBNAIL_CONFIG = {
+  customFont: null,
+  bgZoom: 100,
   titleSize: 93,
   subtitleSize: 66,
   titleAlign: "center",
-  titleYOffset: 10,
+  titleYOffset: 16,
   titleSpacing: 25,
   strokeWidth: 13,
-  splitTitle: true,
+  splitTitle: false,
   streamCountSize: 88,
   cycleSize: 55,
-  bottomSpacing: 81,
+  bottomSpacing: 68,
   bottomAlign: "left",
-  bottomPaddingX: 51,
-  bottomPaddingY: 62,
+  bottomPaddingX: 46,
+  bottomPaddingY: 60,
   showBottomShadow: true,
   forceInvertTitle: false,
   manualColors: {
@@ -123,7 +125,43 @@ export const DEFAULT_THUMBNAIL_CONFIG = {
   streamCountLetterSpacing: 2,
   streamCountDropShadow: true,
   streamCountYPadding: 10,
-  streamCountAlign: "left"
+  streamCountAlign: "left",
+  savedFonts: [
+    {
+      "family": "Google Sans",
+      "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    },
+    {
+      "family": "Intel One Mono",
+      "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    },
+    {
+      "family": "Montserrat",
+      "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    },
+    {
+      "family": "Roboto",
+      "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    },
+    {
+      "family": "Noto Serif Display",
+      "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    },
+    {
+      "family": "Playfair Display",
+      "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    },
+    {
+      "family": "EB Garamond",
+      "url": "https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    }
+  ],
+  "titleBold": true,
+  "titleItalic": false,
+  "streamBold": true,
+  "cycleBold": true,
+  "streamItalic": false,
+  "cycleItalic": false
 };
 
 export const DEFAULT_MODAL_BG_INTENSITY = 1;

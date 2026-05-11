@@ -1,7 +1,7 @@
 // src/components/Library.jsx
 import React, { useState, useRef } from 'react';
 import { Search, Clock, SortAsc, SortDesc, Maximize, Trash2, Edit3 } from 'lucide-react';
-import { parseCustomTimestamp } from '../utils/helpers';
+import { parseCustomTimestamp, getOptimizedImage } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditGameModal } from './modals/EditGameModal';
 import { CrossfadeImage } from './common/UIComponents';
@@ -23,7 +23,7 @@ const getLatestRun = (cycles) => {
     }
   });
   return latestRun;
-};
+}
 
 export default function Library({ streamData, openGameProfile, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, globalImage, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
   const [sortBy, setSortBy] = useState('recent');
@@ -75,8 +75,8 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
 
   const handleEditClick = (game) => setEditingGame(game);
   
-  const handleSaveEdit = (id, newName, newYear, developer, publisher, genres, tags, rawgId) => 
-    onEditGame(id, newName, newYear, developer, publisher, genres, tags, rawgId);
+  const handleSaveEdit = (id, newName, newYear, developer, publisher, genres, tags, steamIdToSync, steamUrl, notOnSteam) => 
+    onEditGame(id, newName, newYear, developer, publisher, genres, tags, steamIdToSync, steamUrl, notOnSteam);
 
   const containerStyle = {
     paddingLeft: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,
@@ -166,9 +166,14 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
               }}
             >
               {sorted.map(game => {
-                const cover = game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
+                const cover = game.cover_image || game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
                 const isHovered = hoverState.cardId === game.id;
-                const activeImg = (isHovered && hoveredImage) ? hoveredImage : cover;
+                
+                // Only use raw hovered image if this specific card is active. Otherwise, fallback to optimized cover.
+                const displayImg = (isHovered && hoveredImage?.gameId === game.id && hoveredImage?.url) 
+                    ? hoveredImage.url 
+                    : getOptimizedImage(cover, 600);
+
                 const labelInfo = getLabelStyle(game.label);
                 
                 return (
@@ -185,15 +190,11 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                   >
                     <div className="aspect-video overflow-hidden bg-black/40 relative shrink-0">
                       <CrossfadeImage 
-                        src={activeImg} 
+                        src={displayImg} 
                         alt={game.game_name} 
                         className="absolute inset-0 w-full h-full" 
                         imgClassName="object-cover" 
                       />
-                      <span className={`${labelInfo.bg} absolute bottom-2 right-2 text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
-                        {labelInfo.icon && <span className="hidden min-[400px]:block">{labelInfo.icon}</span>}
-                        {labelInfo.text}
-                      </span>
                       <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30" />
                     </div>
                     <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
@@ -204,8 +205,15 @@ export default function Library({ streamData, openGameProfile, onDeleteGame, onU
                         {game.details?.developer || 'Unknown Developer'}
                       </p>
                       <p className="text-white/60 mt-1 mb-auto" style={{ fontSize: `${Math.max(10, systemFonts.libYear - 2)}px` }}>{game.release_year}</p>
+                      
                       <div className="flex justify-between items-center mt-3">
-                        <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full shadow z-20">{game.totalStreams} streams</span>
+                        <div className="flex gap-2 items-center">
+                          <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full shadow z-20">{game.totalStreams} streams</span>
+                          <span className={`${labelInfo.bg} text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
+                            {labelInfo.icon && <span className="hidden min-[400px]:block">{labelInfo.icon}</span>}
+                            {labelInfo.text}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition z-30">

@@ -1314,7 +1314,7 @@ export default function App() {
       <div className="relative z-20 flex flex-col h-screen">
         <Header currentView={currentView} onViewChange={setCurrentView} onImport={handleImport} onExport={() => setShowExportModal(true)} />
 
-        <main className="flex-1 overflow-hidden flex flex-col relative">
+        <main key={currentView} className="page-transition flex-1 overflow-hidden flex flex-col relative">
           {currentView === 'data' && (
             <div className="flex flex-col h-full overflow-hidden bg-black/40 backdrop-blur-xl">
               <DataManager

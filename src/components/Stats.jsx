@@ -93,21 +93,10 @@ const STYLES = `
     padding: 24px; gap: 24px;
   }
   
-  /* Lock layout strictly to viewport on desktop to prevent scrolling/overflow */
   @media (min-width: 1024px) {
     .stats-scroll { overflow: hidden; }
   }
 
-  .mosaic-wrap { position: fixed; inset: 0; z-index: -10; overflow: hidden; pointer-events: none; }
-  .mosaic-rows { display: flex; flex-direction: column; height: 100%; }
-  .mosaic-row { flex: 1; display: flex; align-items: stretch; will-change: transform; }
-  .mosaic-img { flex-shrink: 0; width: 110px; height: 100%; object-fit: cover; display: block; }
-  .mosaic-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.70) 40%, rgba(0,0,0,0.95) 100%);
-  }
-  
-  /* EXACT FLEXBOX PROPORTIONS FOR DESKTOP */
   .stats-top-row {
     display: flex; flex-direction: column; gap: 0; flex-shrink: 0; 
   }
@@ -121,6 +110,9 @@ const STYLES = `
 
   .stats-left-col { 
     display: flex; flex-direction: row; gap: 0; flex: 1; z-index: 2;
+  }
+  @media (max-width: 640px) {
+    .stats-left-col { flex-direction: column; }
   }
   @media (min-width: 1024px) {
     .stats-left-col { 
@@ -161,12 +153,14 @@ const STYLES = `
   }
   .stat-card:hover::before { opacity: 1; }
   
-  /* Remove duplicate borders where cards touch */
   @media (min-width: 1024px) {
     .stat-card + .stat-card { margin-top: -1px; }
   }
   @media (max-width: 1023px) {
     .stat-card + .stat-card { margin-left: -1px; }
+  }
+  @media (max-width: 640px) {
+    .stat-card + .stat-card { margin-left: 0; margin-top: -1px; }
   }
 
   .stat-number { font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--c-text); transition: color 0.3s ease; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
@@ -174,13 +168,12 @@ const STYLES = `
 
   .stats-right-col:hover .latest-title { color: var(--c-accent) !important; }
 
-  /* DYNAMIC TEXT SCALING BOUNDS */
-  .top-number { font-size: clamp(2rem, calc(var(--sz-main) * 1.5vmin), 6rem); }
-  .stat-label { font-size: clamp(0.7rem, calc(var(--sz-main-label) * 0.9vmin), 2rem); letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  .top-number { font-size: calc(var(--sz-main) * 1rem); }
+  .stat-label { font-size: calc(var(--sz-main-label) * 1rem); letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
   
-  .latest-title { font-size: clamp(1.2rem, calc(var(--sz-title) * 1.5vmin), 4rem); font-weight: 600; margin-bottom: 8px; transition: color 0.3s; }
-  .latest-sub-3 { font-size: clamp(0.85rem, calc(var(--sz-sub) * 1vmin), 2rem); color: var(--c-accent2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .latest-sub-1, .latest-sub-2 { font-size: clamp(0.8rem, calc(var(--sz-sub) * 0.8vmin), 2rem); color: var(--c-muted); margin-top: 6px; }
+  .latest-title { font-size: calc(var(--sz-title) * 1rem); font-weight: 600; margin-bottom: 8px; transition: color 0.3s; line-height: 1.1; }
+  .latest-sub-3 { font-size: calc(var(--sz-sub) * 1rem); color: var(--c-accent2); margin-top: 4px; line-height: 1.3; }
+  .latest-sub-1, .latest-sub-2 { font-size: calc(var(--sz-sub) * 0.8rem); color: var(--c-muted); margin-top: 6px; }
   .latest-sub-time { font-weight: bold; color: var(--c-text); font-size: 1.25em; }
 
   .latest-bg { position: absolute; inset: 0; z-index: 0; }
@@ -204,17 +197,17 @@ const STYLES = `
   .cat-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 60%); }
   .cat-content { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; pointer-events: none;}
   
-  .cat-count { font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: #fff; text-shadow: 0 4px 16px rgba(0,0,0,0.8); font-size: clamp(2rem, calc(var(--sz-main) * 1.2vmin), 5rem); }
-  .cat-name { letter-spacing: 0.2em; text-transform: uppercase; margin-top: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); font-size: clamp(0.7rem, calc(var(--sz-label) * 0.9vmin), 2rem); }
+  .cat-count { font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: #fff; text-shadow: 0 4px 16px rgba(0,0,0,0.8); font-size: calc(var(--sz-main) * 0.8rem); }
+  .cat-name { letter-spacing: 0.2em; text-transform: uppercase; margin-top: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); font-size: calc(var(--sz-label) * 1rem); }
   
   .cat-ongoing .cat-name   { color: var(--c-green); }
   .cat-completed .cat-name { color: var(--c-orange); }
   .cat-abandoned .cat-name { color: var(--c-red); }
   
   .game-name-overlay { 
-    position: absolute; top: 20px; left: 20px; z-index: 3; font-weight: 600; color: white; pointer-events: none; white-space: nowrap; 
+    position: absolute; top: 20px; left: 20px; right: 20px; z-index: 3; font-weight: 600; color: white; pointer-events: none; 
     text-shadow: 0 4px 12px rgba(0,0,0,1), 0 2px 6px rgba(0,0,0,0.8); transition: color 0.3s ease;
-    font-size: clamp(0.9rem, calc(var(--sz-label) * 1.1vmin), 2.5rem);
+    font-size: calc(var(--sz-label) * 1.1rem); line-height: 1.2;
   }
   .cat-card:hover .game-name-overlay { color: var(--c-accent); }
 
@@ -222,21 +215,8 @@ const STYLES = `
   .fade-up  { animation: fadeUp 0.6s ease both; }
   .delay-1  { animation-delay: 0.1s; }
   .delay-2  { animation-delay: 0.2s; }
-
-  @media (min-width: 1024px) {
-    .top-number { font-size: calc(var(--sz-main) * 1vw); }
-    .stat-label { font-size: calc(var(--sz-main-label) * 1vw); margin-top: 0.5vw; }
-    .latest-title { font-size: calc(var(--sz-title) * 1vw); margin-bottom: 0.5vw; }
-    .latest-sub-3 { font-size: calc(var(--sz-sub) * 1vw); margin-top: 0.5vw; }
-    .latest-sub-1, .latest-sub-2 { font-size: calc(var(--sz-sub) * 0.8vw); margin-top: 0.5vw; }
-    .latest-sub-time { font-size: 1.25em; }
-    .cat-count { font-size: calc(var(--sz-main) * 1vw); }
-    .cat-name { font-size: calc(var(--sz-label) * 1vw); margin-top: 0.3vw; }
-    .game-name-overlay { font-size: calc(var(--sz-label) * 1.1vw); top: 1vw; left: 1vw; }
-  }
 `;
 
-// --- Helper Functions for Two-Level Randomization ---
 const shuffleArray = (array) => {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -269,7 +249,6 @@ const generatePlaylist = (games, lastGameName = null) => {
 
   return playlist;
 };
-// ----------------------------------------------------
 
 const CategoryCard = ({ title, games, cssClass }) => {
   const eligible = useMemo(() => games.filter(g => g.latestRunLabel === title), [games, title]);
@@ -344,7 +323,10 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   const games = useMemo(() =>
     Object.entries(streamData).map(([id, data]) => {
       const cycles = data.cycles || {};
-      const totalStreams = Object.values(cycles).reduce((acc, c) => acc + (c.stream_count || 0), 0);
+      
+      // FIXED: Enforced Number() to prevent string concatenation bugs
+      const totalStreams = Object.values(cycles).reduce((acc, c) => acc + Number(c.stream_count || 0), 0);
+      
       const latestRunInfo = getLatestRunWithTimestamp(cycles);
       const latestRunLabel = latestRunInfo.run ? (latestRunInfo.run.label || 'Ongoing') : 'Ongoing';
       const lastStreamTimestampMs = latestRunInfo.date ? latestRunInfo.date.getTime() : null;
@@ -424,9 +406,8 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
       }}
     >
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      {/* Mosaic Background is handled globally by App.jsx */}
 
-      <div className="stats-scroll">
+      <div className="stats-scroll custom-scrollbar">
         <div className="stats-top-row fade-up delay-1 shadow-2xl">
           <div className="stats-left-col">
             <div className="stat-card">

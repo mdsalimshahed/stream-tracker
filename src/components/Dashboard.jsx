@@ -1,7 +1,7 @@
 // src/components/Dashboard.jsx
 import React, { useMemo } from 'react';
-import { parseCustomTimestamp, getLowResUrl } from '../utils/helpers'; // Add getLowResUrl
-import { CrossfadeImage } from './common/UIComponents';
+import { parseCustomTimestamp, getLowResUrl } from '../utils/helpers';
+import { CrossfadeImage, MasonryLayout } from './common/UIComponents';
 
 export default function Dashboard({ streamData, handleCardClick, systemFonts, layoutPrefs, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
   
@@ -19,8 +19,8 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
             count: cycleData.stream_count,
             lastTimeStr: timestamps[timestamps.length - 1],
             lastTimeDate: parseCustomTimestamp(timestamps[timestamps.length - 1]),
-            // Optimize the base cover image
-            cover: getLowResUrl(game.cover_image || game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover', layoutPrefs.highResImages),            allThumbnails: game.thumbnail_urls || [],
+            cover: getLowResUrl(game.cover_image || game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover', layoutPrefs.highResImages),
+            allThumbnails: game.thumbnail_urls || [],
             cycleDisplayName: cycleData.displayName || (cycleName === 'main' ? 'First Playthrough' : cycleName.replace(/_/g, ' '))
           });
         }
@@ -28,7 +28,7 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
     });
     recent.sort((a, b) => b.lastTimeDate - a.lastTimeDate);
     return recent.slice(0, 15);
-  }, [streamData]);
+  }, [streamData, layoutPrefs.highResImages]);
 
   const containerStyle = {
     paddingLeft: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,
@@ -37,20 +37,15 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
     paddingBottom: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
   };
 
-  const gridStyle = {
-    display: 'grid',
-    gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${layoutPrefs.cardMaxWidth || 250}px), 1fr))`,
-    gap: `${layoutPrefs.cardGap}px`
-  };
-
   const cardStyle = {
     borderRadius: layoutPrefs.cardRounded ? `${layoutPrefs.cardRadius}px` : '0px',
     backgroundColor: `rgba(0, 0, 0, ${layoutPrefs.panelFillOpacity ?? 0.1})`,
     backdropFilter: 'blur(8px)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
-    transition: 'all 0.2s',
+    transition: 'transform 0.3s, box-shadow 0.3s',
     width: '100%',
-    margin: '0 auto'
+    display: 'flex',
+    flexDirection: 'column'
   };
 
   return (
@@ -76,22 +71,24 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
           No streams recorded yet. Add a game and start a session.
         </div>
       ) : (
-        <div style={gridStyle}>
-          {recentStreams.map((stream) => {
+        <MasonryLayout
+          items={recentStreams}
+          columnWidth={layoutPrefs.cardMaxWidth || 250}
+          gap={layoutPrefs.cardGap}
+          getItemId={(stream) => `${stream.appId}-${stream.cycleName}`}
+          enableAnimations={layoutPrefs.enableViewTransitions ?? true}
+          renderItem={(stream) => {
             const uniqueCardId = `${stream.appId}-${stream.cycleName}`;
             const isHovered = hoverState.cardId === uniqueCardId;
-            
-            // Sync check: Fall back instantly to card cover if global state hasn't caught up to hover target yet
             const isImageReady = hoveredImage?.gameId === stream.appId;
             const activeImg = (isHovered && isImageReady && hoveredImage?.url) ? hoveredImage.url : stream.cover;
 
             return (
               <div
-                key={uniqueCardId}
                 onClick={(e) => handleCardClick(e, uniqueCardId, stream.appId, stream.cycleName)}
                 onMouseEnter={() => onHoverGame(uniqueCardId, stream.appId)}
                 onMouseLeave={() => onHoverGame(null, null)}
-                className={`group cursor-pointer overflow-hidden flex flex-col transition-all duration-300 ${
+                className={`group cursor-pointer overflow-hidden ${
                   isHovered 
                     ? 'scale-105 shadow-2xl z-20 border-white/20' 
                     : 'shadow-xl hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300 delay-0'
@@ -108,7 +105,7 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
                   <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent transition-opacity duration-300 z-30 pointer-events-none ${isHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
                 </div>
                 <div className="p-3 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
-                  <h3 className={`font-bold leading-tight drop-shadow-md transition-colors duration-300 ${isHovered ? 'text-[#e8c87a]' : 'group-hover:text-[#e8c87a]'}`} style={{ fontSize: `${systemFonts.libTitle}px` }}>
+                  <h3 className={`font-bold leading-tight break-words drop-shadow-md transition-colors duration-300 ${isHovered ? 'text-[#e8c87a]' : 'group-hover:text-[#e8c87a]'}`} style={{ fontSize: `${systemFonts.libTitle}px` }}>
                     {stream.gameName}
                   </h3>
                   
@@ -118,14 +115,14 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
                     </p>
                   </div>
 
-                  <p className="text-white/50 mt-3 font-mono drop-shadow-md hidden min-[400px]:block" style={{ fontSize: `${systemFonts.dashboardTime || 10}px` }}>
+                  <p className="text-white/50 mt-3 font-mono drop-shadow-md" style={{ fontSize: `${systemFonts.dashboardTime || 10}px` }}>
                     {stream.lastTimeStr}
                   </p>
                 </div>
               </div>
             );
-          })}
-        </div>
+          }}
+        />
       )}
     </div>
   );

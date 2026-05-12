@@ -65,11 +65,11 @@ export default function App() {
 
   // --- Background image logic ---
   const isImageReady = hoverState.gameId && hoveredImage.gameId === hoverState.gameId;
-  let currentBgUrl = '';
+  let currentBgUrl = null;
   if (hoverState.gameId) {
-    currentBgUrl = isImageReady ? hoveredImage.url : getLowResUrl(streamData[hoverState.gameId]?.cover_image || streamData[hoverState.gameId]?.thumbnail_urls?.[0] || '', settings.layoutPrefs.highResImages);
+    currentBgUrl = isImageReady ? hoveredImage.url : getLowResUrl(streamData[hoverState.gameId]?.cover_image || streamData[hoverState.gameId]?.thumbnail_urls?.[0] || null, settings.layoutPrefs.highResImages);
   } else {
-    currentBgUrl = hoveredImage.url;
+    currentBgUrl = hoveredImage.url || null; // retain for fade-out
   }
 
   // --- Import / Export ---

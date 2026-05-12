@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Type, Layout, Eye, AlertTriangle, Trash2, X, RefreshCw, Loader2 } from 'lucide-react';
 import { RangeControl } from './common/UIComponents';
 
-const Toggle = ({ label, description, value, onChange }) => (
+const Toggle = ({ label, description, value, onChange, warning }) => (
   <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
     <div className="flex justify-between items-center">
       <div>
@@ -14,6 +14,7 @@ const Toggle = ({ label, description, value, onChange }) => (
         {value ? 'Enabled' : 'Disabled'}
       </button>
     </div>
+    {warning && <p className="text-[10px] text-amber-400/70 leading-tight pt-1">{warning}</p>}
   </div>
 );
 
@@ -91,7 +92,14 @@ export default function DataManager({
 
         <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2"><Eye size={24} /> UI Visibility & Opacity</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
-          {/* New Performance Toggle Here */}
+          
+          <Toggle 
+            label="Fluid Animations" 
+            description="Smooth morphing between views and sorting."
+            warning="Disable this if your page feels laggy during sorting or view switching."
+            value={layoutPrefs.enableViewTransitions ?? true} 
+            onChange={v => updateLayout('enableViewTransitions', v)} 
+          />
 
           <Toggle 
             label="High-Resolution Images" 

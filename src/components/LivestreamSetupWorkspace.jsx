@@ -270,9 +270,9 @@ export default function LivestreamSetupWorkspace({
               <button onClick={handleClose} className="p-2 hover:bg-white/10 rounded-full transition bg-white/5 shrink-0">
                 <ChevronLeft size={20} />
               </button>
-              <div className="overflow-hidden w-full hidden sm:block">
-                <h2 className="text-lg font-bold tracking-tight truncate w-full">{game.game_name}</h2>
-                <p className="text-xs text-white/50 truncate w-full">{cycleDisplayName} • Episode #{nC}</p>
+              <div className="w-full">
+                <h2 className="text-base sm:text-lg font-bold tracking-tight leading-tight break-words">{game.game_name}</h2>
+                <p className="text-[10px] sm:text-xs text-white/50 leading-tight">{cycleDisplayName} • Episode #{nC}</p>
               </div>
             </div>
 
@@ -280,13 +280,13 @@ export default function LivestreamSetupWorkspace({
             <div className="flex bg-black/60 p-1 rounded-xl border border-white/10 shrink-0">
               <button 
                 onClick={() => setActiveTab('thumbnail')}
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition ${activeTab === 'thumbnail' ? 'bg-white/20 text-white shadow-sm' : 'text-white/50 hover:text-white'}`}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition ${activeTab === 'thumbnail' ? 'bg-white/20 text-white shadow-sm' : 'text-white/50 hover:text-white'}`}
               >
                 <ImageIcon size={16} /> Thumbnail
               </button>
               <button 
                 onClick={() => setActiveTab('seo')}
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition ${activeTab === 'seo' ? 'bg-white/20 text-white shadow-sm' : 'text-white/50 hover:text-white'}`}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition ${activeTab === 'seo' ? 'bg-white/20 text-white shadow-sm' : 'text-white/50 hover:text-white'}`}
               >
                 <TextSelect size={16} /> Description
               </button>
@@ -294,7 +294,7 @@ export default function LivestreamSetupWorkspace({
 
             <div className="flex gap-2 sm:gap-3 w-full sm:w-auto shrink-0 justify-end">
               <button onClick={handleSaveSession} className="flex-1 sm:flex-none justify-center bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition shadow-lg text-sm">
-                <Save size={16} /> <span className="hidden lg:inline">Save Session</span>
+                <Save size={16} /> Save
               </button>
               <button onClick={handleClose} className="p-2 hover:bg-white/10 rounded-lg sm:rounded-full transition bg-white/5 flex items-center justify-center">
                 <X size={20} />

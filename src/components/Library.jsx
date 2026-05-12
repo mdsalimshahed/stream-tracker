@@ -1,10 +1,10 @@
 // src/components/Library.jsx
 import React, { useState, useRef } from 'react';
 import { Search, Clock, SortAsc, SortDesc, Maximize, Trash2, Edit3 } from 'lucide-react';
-import { parseCustomTimestamp, getLowResUrl } from '../utils/helpers'; // Add getLowResUrl
+import { parseCustomTimestamp, getLowResUrl } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditGameModal } from './modals/EditGameModal';
-import { CrossfadeImage } from './common/UIComponents';
+import { CrossfadeImage, MasonryLayout } from './common/UIComponents';
 
 const getLatestRun = (cycles) => {
   let latestRun = null;
@@ -31,12 +31,11 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
   const [editingGame, setEditingGame] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(null);
   
-  const [isSorting, setIsSorting] = useState(false);
   const scrollRef = useRef(null);
 
   const games = Object.entries(streamData).map(([id, data]) => {
     const cycles = data.cycles || {};
-    const totalStreams = Object.values(cycles).reduce((acc, c) => acc + (c.stream_count || 0), 0);
+    const totalStreams = Object.values(cycles).reduce((acc, c) => acc + Number(c.stream_count || 0), 0);
     const lastStreamDate = Object.values(cycles).reduce((latest, c) => {
       if (!c.timestamps || c.timestamps.length === 0) return latest;
       const d = parseCustomTimestamp(c.timestamps[c.timestamps.length - 1]);
@@ -48,26 +47,27 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
   });
 
   const filtered = games.filter(g => g.game_name?.toLowerCase().includes(searchFilter.toLowerCase()));
+  
   const sorted = [...filtered].sort((a, b) => {
     if (sortBy === 'alpha') return a.game_name.localeCompare(b.game_name);
     if (sortBy === 'recent') return b.lastStreamDate - a.lastStreamDate;
-    if (sortBy === 'high') return b.totalStreams - a.totalStreams;
-    if (sortBy === 'low') return a.totalStreams - b.totalStreams;
+    if (sortBy === 'high') {
+      if (b.totalStreams !== a.totalStreams) return b.totalStreams - a.totalStreams;
+      return b.lastStreamDate - a.lastStreamDate;
+    }
+    if (sortBy === 'low') {
+      if (a.totalStreams !== b.totalStreams) return a.totalStreams - b.totalStreams;
+      return b.lastStreamDate - a.lastStreamDate;
+    }
     return 0;
   });
 
   const handleSortClick = (newSort) => {
     if (sortBy === newSort) return;
-    setIsSorting(true);
+    if (scrollRef.current) scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    
-    setTimeout(() => {
-      setSortBy(newSort);
-      setTimeout(() => setIsSorting(false), 50); 
-    }, 150); 
+    // NATIVE STATE CHANGE: The new FLIP Engine perfectly handles the animation automatically!
+    setSortBy(newSort);
   };
 
   const handleEditClick = (game) => setEditingGame(game);
@@ -82,20 +82,15 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
     paddingBottom: `clamp(16px, ${layoutPrefs.containerPaddingY}px, 5vh)`,
   };
 
-  const gridStyle = {
-    display: 'grid',
-    gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${layoutPrefs.cardMaxWidth || 250}px), 1fr))`,
-    gap: `${layoutPrefs.cardGap}px`
-  };
-
   const cardStyle = {
     borderRadius: layoutPrefs.cardRounded ? `${layoutPrefs.cardRadius}px` : '0px',
     backgroundColor: `rgba(0, 0, 0, ${layoutPrefs.panelFillOpacity ?? 0.1})`,
     backdropFilter: 'blur(8px)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
-    transition: 'all 0.2s',
+    transition: 'transform 0.3s, box-shadow 0.3s',
     width: '100%',
-    margin: '0 auto'
+    display: 'flex',
+    flexDirection: 'column'
   };
 
   const getLabelStyle = (label) => {
@@ -147,44 +142,36 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
                 { id: 'low', label: 'Least', icon: SortDesc }
               ].map(opt => (
                 <button key={opt.id} onClick={() => handleSortClick(opt.id)} className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium flex items-center justify-center gap-1.5 transition whitespace-nowrap ${sortBy === opt.id ? 'bg-white/20 text-white shadow' : 'text-white/60 hover:text-white'}`}>
-                  <opt.icon size={14} className="hidden min-[360px]:block" /> {opt.label}
+                  <opt.icon size={14} /> {opt.label}
                 </button>
               ))}
             </div>
           </div>
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar" style={containerStyle}>
-            <div 
-              style={{ 
-                ...gridStyle,
-                opacity: isSorting ? 0 : 1,
-                transform: isSorting ? 'scale(0.97)' : 'scale(1)',
-                transition: 'opacity 0.15s ease-out, transform 0.15s ease-out'
-              }}
-            >
-              {sorted.map(game => {
+            <MasonryLayout
+              items={sorted}
+              columnWidth={layoutPrefs.cardMaxWidth || 250}
+              gap={layoutPrefs.cardGap}
+              getItemId={(game) => game.id}
+              enableAnimations={layoutPrefs.enableViewTransitions ?? true}
+              renderItem={(game) => {
                 const isHovered = hoverState.cardId === game.id;
                 const labelInfo = getLabelStyle(game.label);
-                
-                // Sync check: Fall back instantly to card cover if global state hasn't caught up to hover target yet
                 const isImageReady = hoveredImage?.gameId === game.id;
-                // Wrap the fallback in getLowResUrl
                 const displayImg = (isHovered && isImageReady && hoveredImage?.url) ? hoveredImage.url : getLowResUrl(game.cover_image || game.thumbnail_urls?.[0], layoutPrefs.highResImages);
+
                 return (
                   <div
-                    key={game.id}
                     onClick={(e) => handleCardClick(e, game.id, game.id)}
                     onMouseEnter={() => onHoverGame(game.id, game.id)}
                     onMouseLeave={() => onHoverGame(null, null)}
-                    className={`group relative cursor-pointer overflow-hidden flex flex-col transition-all duration-300 ${
+                    className={`group relative cursor-pointer overflow-hidden ${
                       isHovered 
                         ? 'scale-105 shadow-2xl z-20 border-white/20' 
                         : 'shadow-xl hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300 delay-0'
                     }`}
-                    style={{
-                      ...cardStyle,
-                      viewTransitionName: `game-card-${game.id.toString().replace(/[^a-zA-Z0-9]/g, '-')}`
-                    }}
+                    style={cardStyle}
                   >
                     <div className="aspect-video overflow-hidden bg-black/40 relative shrink-0">
                       <CrossfadeImage 
@@ -197,7 +184,7 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
                     </div>
                     <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
                       <div className="flex flex-wrap justify-between items-start gap-2">
-                        <h3 className={`font-bold tracking-tight flex-1 drop-shadow-md transition-colors duration-300 ${isHovered ? 'text-[#e8c87a]' : 'group-hover:text-[#e8c87a]'}`} style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
+                        <h3 className={`font-bold tracking-tight break-words flex-1 drop-shadow-md transition-colors duration-300 ${isHovered ? 'text-[#e8c87a]' : 'group-hover:text-[#e8c87a]'}`} style={{ fontSize: `${systemFonts.libTitle}px` }}>{game.game_name}</h3>
                       </div>
                       <p className="text-white/80 mt-1 drop-shadow-md" style={{ fontSize: `${systemFonts.libYear}px` }}>
                         {game.details?.developer || 'Unknown Developer'}
@@ -205,13 +192,12 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
                       <p className="text-white/60 mt-1 mb-auto" style={{ fontSize: `${Math.max(10, systemFonts.libYear - 2)}px` }}>{game.release_year}</p>
                       
                       <div className="flex justify-between items-center mt-3">
-                        <div className="flex gap-2 items-center">
-                          {/* Updated Pluralization Here */}
+                        <div className="flex gap-2 items-center flex-wrap">
                           <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full shadow z-20">
                             {game.totalStreams} stream{game.totalStreams === 1 ? '' : 's'}
                           </span>
                           <span className={`${labelInfo.bg} text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
-                            {labelInfo.icon && <span className="hidden min-[400px]:block">{labelInfo.icon}</span>}
+                            {labelInfo.icon && <span>{labelInfo.icon}</span>}
                             {labelInfo.text}
                           </span>
                         </div>
@@ -245,8 +231,8 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
                     </div>
                   </div>
                 );
-              })}
-            </div>
+              }}
+            />
           </div>
         </>
       )}

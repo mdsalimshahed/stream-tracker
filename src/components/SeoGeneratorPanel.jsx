@@ -132,7 +132,8 @@ Stream Quality: ${streamQuality.trim() || '1440p 60fps'}`;
     <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar animate-in fade-in duration-300">
       
       {/* Left Panel: Inputs */}
-      <div className="w-full lg:w-7/12 h-full border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col bg-neutral-900/50 p-4 sm:p-6 gap-4 overflow-y-auto custom-scrollbar shrink-0">
+      {/* FIXED MOBILE SCROLLING: changed h-full to lg:h-full so the right panel stacks underneath on mobile */}
+      <div className="w-full lg:w-7/12 lg:h-full border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col bg-neutral-900/50 p-4 sm:p-6 gap-4 lg:overflow-y-auto custom-scrollbar shrink-0">
         <div>
           <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-1"><Sparkles size={18} className="text-amber-400"/> Context & Configuration</h3>
           <p className="text-sm text-white/50">Fill out these details to generate a highly engineered SEO prompt. Configuration inputs save automatically.</p>
@@ -149,7 +150,6 @@ Stream Quality: ${streamQuality.trim() || '1440p 60fps'}`;
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          {/* Current Playlist Link */}
           <div className="flex-1 flex flex-col gap-2">
             <label className="text-sm font-semibold text-white/70 uppercase tracking-wider">2. Current Run Playlist</label>
             <input
@@ -161,7 +161,6 @@ Stream Quality: ${streamQuality.trim() || '1440p 60fps'}`;
             />
           </div>
 
-          {/* Stream Quality */}
           <div className="flex-1 flex flex-col gap-2">
             <label className="text-sm font-semibold text-white/70 uppercase tracking-wider">3. Stream Quality</label>
             <input
@@ -203,7 +202,8 @@ Stream Quality: ${streamQuality.trim() || '1440p 60fps'}`;
       </div>
 
       {/* Right Panel: Output & AI Linking */}
-      <div className="flex-1 flex flex-col bg-black p-4 sm:p-6 gap-4 min-w-[300px] overflow-y-auto custom-scrollbar">
+      {/* FIXED MOBILE SCROLLING: changed h-full to lg:h-full */}
+      <div className="flex-1 flex flex-col bg-black p-4 sm:p-6 gap-4 min-w-[300px] lg:h-full lg:overflow-y-auto custom-scrollbar">
         <div className="flex justify-between items-end">
           <div>
             <h3 className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-1">Generated Prompt</h3>

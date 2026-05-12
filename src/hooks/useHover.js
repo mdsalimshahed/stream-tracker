@@ -4,7 +4,7 @@ import { generateSingleGamePlaylist } from '../utils/dataUtils';
 import { getLowResUrl } from '../utils/helpers';
 
 export function useHover({ streamData, isModalOpen, layoutPrefs }) {
-  const [hoveredImage, setHoveredImage] = useState({ url: '', gameId: null });
+  const [hoveredImage, setHoveredImage] = useState({ url: null, gameId: null });
   const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
   const [mosaicPaused, setMosaicPaused] = useState(false);
 
@@ -12,13 +12,11 @@ export function useHover({ streamData, isModalOpen, layoutPrefs }) {
   const hoverTimeoutRef = useRef(null);
   const clearHoverTimeoutRef = useRef(null);
 
-  // Pause mosaic when modal open or hovering
   useEffect(() => {
     if (isModalOpen) { setMosaicPaused(true); return; }
     setMosaicPaused(!!hoverState.gameId);
   }, [isModalOpen, hoverState.gameId]);
 
-  // Image cycling on hover
   useEffect(() => {
     if (isModalOpen) return;
     const gameId = hoverState.gameId;
@@ -28,12 +26,10 @@ export function useHover({ streamData, isModalOpen, layoutPrefs }) {
     if (isHovering) {
       if (hoverPlaylistRef.current.gameId !== gameId) {
         hoverPlaylistRef.current = { gameId, list: generateSingleGamePlaylist(streamData[gameId].thumbnail_urls || []), index: -1 };
-        // Apply low-res toggle to the initial image 
-        setHoveredImage({ url: getLowResUrl(streamData[gameId].cover_image || hoverPlaylistRef.current.list[0] || '', layoutPrefs.highResImages), gameId });
+        setHoveredImage({ url: getLowResUrl(streamData[gameId].cover_image || hoverPlaylistRef.current.list[0] || null, layoutPrefs.highResImages), gameId });
       } else {
         const idx = hoverPlaylistRef.current.index;
-        // Apply low-res toggle to the fallback image
-        setHoveredImage({ url: getLowResUrl((idx >= 0 ? hoverPlaylistRef.current.list[idx] : null) || streamData[gameId].cover_image || '', layoutPrefs.highResImages), gameId });
+        setHoveredImage({ url: getLowResUrl((idx >= 0 ? hoverPlaylistRef.current.list[idx] : null) || streamData[gameId].cover_image || null, layoutPrefs.highResImages), gameId });
       }
       if (hoverPlaylistRef.current.list.length > 0) {
         intervalId = setInterval(() => {
@@ -43,15 +39,13 @@ export function useHover({ streamData, isModalOpen, layoutPrefs }) {
             idx = 0;
           }
           hoverPlaylistRef.current.index = idx;
-          // Apply low-res toggle to cycled images
-          setHoveredImage({ url: getLowResUrl(hoverPlaylistRef.current.list[idx], layoutPrefs.highResImages), gameId });
+          setHoveredImage({ url: getLowResUrl(hoverPlaylistRef.current.list[idx], layoutPrefs.highResImages) || null, gameId });
         }, layoutPrefs.hoverCycleInterval || 1500);
       }
     }
     return () => clearInterval(intervalId);
   }, [hoverState.gameId, streamData, isModalOpen, layoutPrefs.hoverCycleInterval, layoutPrefs.highResImages]);
 
-  // Clear hover on global click when hover effects disabled
   useEffect(() => {
     if (layoutPrefs.enableHoverEffects !== false) return;
     const handleGlobalClick = () => { if (hoverState.gameId) setHoverState({ cardId: null, gameId: null }); };

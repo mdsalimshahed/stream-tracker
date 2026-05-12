@@ -26,8 +26,16 @@ export function useStreamData(notify) {
 
   // --- Helpers ---
   const fetchSteamDetails = async (steamId) => {
-    const res = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
-    return (await res.json())[steamId]?.data;
+    try {
+      const res = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
+      if (res.ok && res.headers.get("content-type")?.includes("application/json")) {
+        const data = await res.json();
+        return data[steamId]?.data;
+      }
+    } catch (err) {
+      console.warn("Failed to fetch steam details:", err);
+    }
+    return null;
   };
 
   const fetchRawgScreenshots = async (gameName) => {
@@ -59,8 +67,10 @@ export function useStreamData(notify) {
             if (!steamId) {
               const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
               const searchRes = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=english&cc=US`);
-              const searchData = await searchRes.json();
-              if (searchData.items?.[0]) steamId = searchData.items[0].id;
+              if (searchRes.ok && searchRes.headers.get("content-type")?.includes("application/json")) {
+                const searchData = await searchRes.json();
+                if (searchData.items?.[0]) steamId = searchData.items[0].id;
+              }
             }
             if (steamId) {
               const gameDetails = await fetchSteamDetails(steamId);
@@ -110,7 +120,9 @@ export function useStreamData(notify) {
           if (!steamId) {
             const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
             const searchRes = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=english&cc=US`);
-            steamId = (await searchRes.json()).items?.[0]?.id;
+            if (searchRes.ok && searchRes.headers.get("content-type")?.includes("application/json")) {
+               steamId = (await searchRes.json()).items?.[0]?.id;
+            }
           }
           if (steamId) {
             const gameDetails = await fetchSteamDetails(steamId);

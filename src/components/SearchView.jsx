@@ -33,7 +33,7 @@ export default function SearchView({ searchQuery, setSearchQuery, searchResults,
             type="text"
             style={{ fontSize: `${scaledSystemFonts.searchBar}px` }}
             className="w-full bg-black/60 border border-white/10 rounded-none py-4 pl-12 pr-6 text-lg focus:outline-none transition-colors shadow-inner text-white peer relative z-0"
-            placeholder="Search Steam Database..."
+            placeholder="Search for any game and then press enter."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
@@ -50,7 +50,11 @@ export default function SearchView({ searchQuery, setSearchQuery, searchResults,
               <div key={g.id} className="group relative overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300" style={cardStyle}>
                 <div className="aspect-video bg-black/40 overflow-hidden relative shrink-0">
                   <img src={g.cover_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover'} alt={g.name} className="absolute inset-0 w-full h-full object-cover" />
-                  {g.isRawgOnly && <span className="absolute top-2 right-2 bg-purple-600/80 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full z-20 shadow">RAWG</span>}
+                  
+                  {/* Source Indicators */}
+                  {g.source === 'RAWG' && <span className="absolute top-2 right-2 bg-purple-600/80 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full z-20 shadow">RAWG</span>}
+                  {g.source === 'STEAM' && <span className="absolute top-2 right-2 bg-blue-600/80 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full z-20 shadow">STEAM</span>}
+                  
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
                 </div>
                 <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between" style={{ padding: `clamp(12px, ${scaledLayoutPrefs.cardPadding}px, 20px)` }}>

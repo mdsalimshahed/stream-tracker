@@ -13,35 +13,36 @@ export function useSearch() {
     
     try {
       let steamItems = [];
+      let usedSteam = false;
       
-      // STEP 1: Search Steam
+      // STEP 1: Search Steam FIRST
       try {
-        const res = await fetch(`/steam-api/api/storesearch/?term=${searchQuery}&l=english&cc=US`);
-        if (res.ok && res.headers.get("content-type")?.includes("application/json")) {
+        const res = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(searchQuery)}&l=english&cc=US`);
+        if (res.ok) {
             const data = await res.json();
-            if (data?.items?.length > 0) {
-                steamItems = data.items;
+            if (data?.items && data.items.length > 0) {
+                // Limit to 5 results to keep things fast
+                steamItems = data.items.slice(0, 5); 
+                usedSteam = true;
             }
         }
       } catch (e) {
-        console.warn("Steam search failed, will fallback to RAWG.", e);
+        console.warn("Steam search failed or returned empty, falling back to RAWG.", e);
       }
 
-      // STEP 2: Fetch Steam Details
-      if (steamItems.length > 0) {
-        // SPEED OPTIMIZATION & 400 ERROR FIX: Limit to 5 items
-        const topItems = steamItems.slice(0, 5);
-        const appIds = topItems.map(i => i.id).join(',');
+      // STEP 2: Fetch Steam Details (if Steam search succeeded)
+      if (usedSteam && steamItems.length > 0) {
+        const appIds = steamItems.map(i => i.id).join(',');
         
         try {
           const detailRes = await fetch(`/steam-api/api/appdetails?appids=${appIds}&l=english`);
           let detailData = null;
 
-          if (detailRes.ok && detailRes.headers.get("content-type")?.includes("application/json")) {
+          if (detailRes.ok) {
               detailData = await detailRes.json();
           }
 
-          setSearchResults(topItems.map(item => {
+          setSearchResults(steamItems.map(item => {
             const d = detailData?.[item.id]?.data;
             return { 
               id: item.id.toString(), 
@@ -49,20 +50,22 @@ export function useSearch() {
               cover_image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`, 
               developers: d?.developers ? d.developers.map(dev => ({ name: dev })) : [], 
               released: d?.release_date?.date || '', 
-              isRawgOnly: false 
+              isRawgOnly: false,
+              source: 'STEAM'
             };
           }));
         } catch (err) {
-          // Fast fallback if details fail
-          setSearchResults(topItems.map(item => ({ 
+          // Fast fallback if details fail but search succeeded
+          setSearchResults(steamItems.map(item => ({ 
               id: item.id.toString(), 
               name: item.name, 
               cover_image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`, 
-              isRawgOnly: false 
+              isRawgOnly: false,
+              source: 'STEAM'
           })));
         }
       } else {
-        // STEP 3: RAWG Fallback (SPEED OPTIMIZATION: page_size limited to 5)
+        // STEP 3: RAWG Fallback (if Steam fails or has 0 results)
         const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(searchQuery)}&page_size=5`);
         const rawgData = await rawgRes.json();
         setSearchResults(rawgData.results?.map(item => ({ 
@@ -71,7 +74,8 @@ export function useSearch() {
             cover_image: item.background_image, 
             developers: item.developers || [], 
             released: item.released || '', 
-            isRawgOnly: true 
+            isRawgOnly: true,
+            source: 'RAWG'
         })) || []);
       }
     } catch (err) { 

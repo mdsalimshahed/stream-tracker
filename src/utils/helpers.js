@@ -7,6 +7,16 @@ export const formatRunName = (str) => {
     .join(' ');
 };
 
+const getOrdinalSuffix = (day) => {
+  if (day > 3 && day < 21) return 'th';
+  switch (day % 10) {
+    case 1:  return "st";
+    case 2:  return "nd";
+    case 3:  return "rd";
+    default: return "th";
+  }
+};
+
 export const generateTimestamp = () => {
   const now = new Date();
   const day = now.getDate();
@@ -18,8 +28,7 @@ export const generateTimestamp = () => {
   const ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12 || 12;
   const strTime = `${hours.toString().padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
-  const suffix = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
-  const dayStr = `${day}${suffix[day % 10]}`;
+  const dayStr = `${day}${getOrdinalSuffix(day)}`;
   return `${dayStr} ${month} ${year}, ${strTime}`;
 };
 
@@ -52,21 +61,17 @@ export const formatReleaseDate = (dateString) => {
   const day = date.getDate();
   const month = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();
-  const suffix = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
-  const dayStr = `${day}${suffix[day % 10]}`;
+  const dayStr = `${day}${getOrdinalSuffix(day)}`;
   return `${dayStr} ${month} ${year}`;
 };
 
 export const getLowResUrl = (url, useHighRes = false) => {
-  // If the toggle is ON, immediately return the raw 1080p/4K URL
   if (!url || useHighRes) return url;
   
-  // Steam: Convert 1080p screenshots to 600x338 thumbnails
   if (url.includes('steamstatic.com') || url.includes('steamcdn')) {
     return url.replace(/\.1920x1080\.jpg/i, '.600x338.jpg');
   }
   
-  // RAWG: Inject resize parameters to compress heavy 4K raw images to 420p
   if (url.includes('media.rawg.io/media/') && !url.includes('/resize/')) {
     return url.replace('media.rawg.io/media/', 'media.rawg.io/media/resize/420/-/');
   }

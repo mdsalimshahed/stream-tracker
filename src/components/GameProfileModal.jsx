@@ -344,7 +344,10 @@ export default function GameProfileModal({
                           </div>
                         </div>
                         <div className="flex justify-between items-center mt-2">
-                          <span className="text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded-md">{streamCount} streams</span>
+                          {/* Updated Pluralization Here */}
+                          <span className="text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded-md">
+                            {streamCount} stream{streamCount === 1 ? '' : 's'}
+                          </span>
                         </div>
                       </div>
                     );

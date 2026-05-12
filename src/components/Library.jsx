@@ -206,7 +206,10 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
                       
                       <div className="flex justify-between items-center mt-3">
                         <div className="flex gap-2 items-center">
-                          <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full shadow z-20">{game.totalStreams} streams</span>
+                          {/* Updated Pluralization Here */}
+                          <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full shadow z-20">
+                            {game.totalStreams} stream{game.totalStreams === 1 ? '' : 's'}
+                          </span>
                           <span className={`${labelInfo.bg} text-white text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap shadow z-20`}>
                             {labelInfo.icon && <span className="hidden min-[400px]:block">{labelInfo.icon}</span>}
                             {labelInfo.text}

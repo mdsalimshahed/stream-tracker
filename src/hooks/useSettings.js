@@ -20,6 +20,7 @@ export function useSettings() {
     try {
       const s = localStorage.getItem('thumbnailConfig');
       if (s) {
+        if (s === JSON.stringify(DEFAULT_THUMBNAIL_CONFIG)) return DEFAULT_THUMBNAIL_CONFIG;
         const p = JSON.parse(s);
         return {
           ...DEFAULT_THUMBNAIL_CONFIG, ...p,
@@ -33,12 +34,20 @@ export function useSettings() {
 
   const [systemFonts, setSystemFonts] = useState(() => {
     if (!checkPersist()) return DEFAULT_SYSTEM_FONTS;
-    try { const s = localStorage.getItem('systemFonts'); return s ? JSON.parse(s) : DEFAULT_SYSTEM_FONTS; } catch (e) { return DEFAULT_SYSTEM_FONTS; }
+    try { 
+      const s = localStorage.getItem('systemFonts'); 
+      if (s === JSON.stringify(DEFAULT_SYSTEM_FONTS)) return DEFAULT_SYSTEM_FONTS;
+      return s ? { ...DEFAULT_SYSTEM_FONTS, ...JSON.parse(s) } : DEFAULT_SYSTEM_FONTS; 
+    } catch (e) { return DEFAULT_SYSTEM_FONTS; }
   });
 
   const [layoutPrefs, setLayoutPrefs] = useState(() => {
-    if (!checkPersist()) return { ...DEFAULT_LAYOUT_PREFS, enableHoverEffects: true };
-    try { const s = localStorage.getItem('layoutPrefs'); return s ? { enableHoverEffects: true, ...DEFAULT_LAYOUT_PREFS, ...JSON.parse(s) } : { ...DEFAULT_LAYOUT_PREFS, enableHoverEffects: true }; } catch (e) { return { ...DEFAULT_LAYOUT_PREFS, enableHoverEffects: true }; }
+    if (!checkPersist()) return DEFAULT_LAYOUT_PREFS;
+    try { 
+      const s = localStorage.getItem('layoutPrefs'); 
+      if (s === JSON.stringify(DEFAULT_LAYOUT_PREFS)) return DEFAULT_LAYOUT_PREFS;
+      return s ? { ...DEFAULT_LAYOUT_PREFS, ...JSON.parse(s) } : DEFAULT_LAYOUT_PREFS; 
+    } catch (e) { return DEFAULT_LAYOUT_PREFS; }
   });
 
   const [modalBgIntensity, setModalBgIntensity] = useState(() => {

@@ -202,7 +202,7 @@ export default function GameProfileModal({
     }
   };
 
-  const blurAmount = 8 + (1 - modalBgIntensity) * 24; 
+  const blurAmount = modalBgIntensity * 40; 
   
   const panelStyle = { 
     backgroundColor: `rgba(0, 0, 0, ${modalPanelOpacity})`, 
@@ -217,15 +217,16 @@ export default function GameProfileModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-[40] pointer-events-none overflow-hidden">
+      <div className="fixed inset-0 z-[40] pointer-events-none overflow-hidden bg-black">
         <div className="absolute -inset-[100px] transform scale-110">
-          <div className="absolute inset-0 bg-black/80 z-10" style={{ opacity: 1 - modalBgIntensity }} />
           <CrossfadeImage 
             src={bgImage} 
             className="w-full h-full" 
             imgClassName="object-cover" 
-            style={{ filter: `blur(${blurAmount}px)`, opacity: modalBgIntensity }} 
+            style={{ filter: `blur(${blurAmount}px)` }} 
           />
+          {/* Slight dark overlay to ensure text readability over the image */}
+          <div className="absolute inset-0 bg-black/50 z-10" />
         </div>
       </div>
 
@@ -344,7 +345,6 @@ export default function GameProfileModal({
                           </div>
                         </div>
                         <div className="flex justify-between items-center mt-2">
-                          {/* Updated Pluralization Here */}
                           <span className="text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded-md">
                             {streamCount} stream{streamCount === 1 ? '' : 's'}
                           </span>

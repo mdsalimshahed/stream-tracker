@@ -33,7 +33,9 @@ export const DEFAULT_LAYOUT_PREFS = {
   hoverCycleInterval: 1500,
   statsSplitRatio: 0.35,
   statsRowSplitRatio: 0.60,
-  highResImages: false // <--- Add this line
+  highResImages: false,
+  enableHoverEffects: true,
+  enableViewTransitions: true
 };
 
 export const DEFAULT_THUMBNAIL_CONFIG = {

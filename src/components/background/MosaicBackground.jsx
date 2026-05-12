@@ -1,23 +1,51 @@
 // src/components/background/MosaicBackground.jsx
 import React, { useRef, useMemo, useEffect } from 'react';
 
+// OPTIMIZATION 1: Intercept URLs and downgrade them to thumbnails to save RAM
+const getLowResUrl = (url) => {
+  if (!url) return url;
+  
+  // Steam: Convert 1080p screenshots to 600x338 thumbnails
+  if (url.includes('steamstatic.com') || url.includes('steamcdn')) {
+    return url.replace(/\.1920x1080\.jpg/i, '.600x338.jpg');
+  }
+  
+  // RAWG: Inject resize parameters to compress heavy 4K raw images to 420p
+  if (url.includes('media.rawg.io/media/') && !url.includes('/resize/')) {
+    return url.replace('media.rawg.io/media/', 'media.rawg.io/media/resize/420/-/');
+  }
+  
+  return url;
+};
+
 const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip }) => {
-  const ROWS = 7;
-  const IMGS_PER_ROW = 24;
+  // OPTIMIZATION 2: Cut DOM elements by over 50%
+  const ROWS = 6; // Down from 7
+  const IMGS_PER_ROW = 12; // Down from 24 (12 * 2 sets = 24 images per row instead of 48)
+  
   const rowRefs = useRef([]);
   const requestRef = useRef(null);
   const globalStateRef = useRef({ currentSpeed: isSlowMode ? 0.15 : 1 });
   const modeRef = useRef({ isPaused, isSlowMode });
 
-  useEffect(() => { modeRef.current = { isPaused, isSlowMode }; }, [isPaused, isSlowMode]);
+  useEffect(() => { 
+    modeRef.current = { isPaused, isSlowMode }; 
+  }, [isPaused, isSlowMode]);
 
   const rowsConfig = useMemo(() => {
     const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
-    const pool = mosaicImages?.length > 0 ? mosaicImages : [fallback];
+    
+    // Apply low-res formatting to the pool
+    const pool = mosaicImages?.length > 0 
+      ? mosaicImages.map(img => ({ ...img, url: getLowResUrl(img.url) })) 
+      : [fallback];
+      
     const aspectRatios = ['16/9', '4/3', '1/1'];
+    
     return Array.from({ length: ROWS }, (_, i) => {
       let sequence = [];
       let lastGameId = null;
+      
       while (sequence.length < IMGS_PER_ROW) {
         let shuffled = [...pool].sort(() => Math.random() - 0.5);
         let batch = [];
@@ -34,7 +62,9 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
         }
         sequence.push(...batch);
       }
+      
       let base = sequence.slice(0, IMGS_PER_ROW);
+      
       if (base.length > 2 && base[base.length - 1].gameId === base[0].gameId) {
         for (let k = base.length - 2; k >= 1; k--) {
           if (base[k].gameId !== base[0].gameId && base[k].gameId !== base[base.length - 2].gameId && base[base.length - 1].gameId !== base[k - 1].gameId && base[base.length - 1].gameId !== base[k + 1].gameId) {
@@ -42,27 +72,45 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
           }
         }
       }
+      
       const baseWithAspect = base.map(b => ({ url: b.url, aspect: aspectRatios[Math.floor(Math.random() * aspectRatios.length)] }));
       const duration = 40000 + Math.random() * 20000;
       const direction = i % 2 === 0 ? 'left' : 'right';
       const baseSpeed = 50 / duration;
-      return { imgs: [...baseWithAspect, ...baseWithAspect], baseSpeed, direction, state: { targetChaos: 1, currentChaos: 1, timer: 0 } };
+      
+      return { 
+        imgs: [...baseWithAspect, ...baseWithAspect], 
+        baseSpeed, 
+        direction, 
+        state: { targetChaos: 1, currentChaos: 1, timer: 0 } 
+      };
     });
   }, [mosaicImages]);
 
   useEffect(() => {
     let lastTime = performance.now();
     let positions = rowsConfig.map(c => c.direction === 'right' ? -50 : 0);
+    
     const animateLoop = (time) => {
-      const delta = time - lastTime; lastTime = time;
-      const safeDelta = Math.min(delta, 50);
+      const delta = time - lastTime; 
+      lastTime = time;
+      const safeDelta = Math.min(delta, 50); // Cap frame skips
+      
       const globalLerpFactor = 1 - Math.exp(-safeDelta * 0.0015);
       const chaosLerpFactor = 1 - Math.exp(-safeDelta * 0.0008);
-      let targetGlobalSpeed = 1.0;
-      if (modeRef.current.isPaused) targetGlobalSpeed = 0.0;
-      else if (modeRef.current.isSlowMode) targetGlobalSpeed = 0.15;
+      
+      let targetGlobalSpeed = modeRef.current.isPaused ? 0.0 : (modeRef.current.isSlowMode ? 0.15 : 1.0);
       globalStateRef.current.currentSpeed += (targetGlobalSpeed - globalStateRef.current.currentSpeed) * globalLerpFactor;
-      if (Math.abs(globalStateRef.current.currentSpeed) < 0.001 && targetGlobalSpeed === 0) globalStateRef.current.currentSpeed = 0;
+      
+      // OPTIMIZATION 3: Suspend calculations completely when paused
+      if (Math.abs(globalStateRef.current.currentSpeed) < 0.001 && targetGlobalSpeed === 0) {
+        globalStateRef.current.currentSpeed = 0;
+        if (modeRef.current.isPaused) {
+          requestRef.current = requestAnimationFrame(animateLoop);
+          return;
+        }
+      }
+
       rowsConfig.forEach((config, i) => {
         const state = config.state;
         state.timer -= safeDelta;
@@ -72,16 +120,27 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
           else if (rand < 0.35) { state.targetChaos = 1.5 + Math.random() * 1.5; state.timer = 2500 + Math.random() * 3500; }
           else { state.targetChaos = 0.8 + Math.random() * 0.4; state.timer = 3000 + Math.random() * 5000; }
         }
+        
         state.currentChaos += (state.targetChaos - state.currentChaos) * chaosLerpFactor;
         const actualSpeed = globalStateRef.current.currentSpeed * state.currentChaos * config.baseSpeed;
         const moveAmount = actualSpeed * safeDelta;
-        if (config.direction === 'left') { positions[i] -= moveAmount; if (positions[i] <= -50) positions[i] += 50; }
-        else { positions[i] += moveAmount; if (positions[i] >= 0) positions[i] -= 50; }
+        
+        if (config.direction === 'left') { 
+          positions[i] -= moveAmount; 
+          if (positions[i] <= -50) positions[i] += 50; 
+        } else { 
+          positions[i] += moveAmount; 
+          if (positions[i] >= 0) positions[i] -= 50; 
+        }
+        
         const el = rowRefs.current[i];
+        // translate3d forces GPU hardware acceleration
         if (el) el.style.transform = `translate3d(${positions[i]}%, 0, 0)`;
       });
+      
       requestRef.current = requestAnimationFrame(animateLoop);
     };
+    
     requestRef.current = requestAnimationFrame(animateLoop);
     return () => cancelAnimationFrame(requestRef.current);
   }, [rowsConfig]);
@@ -90,10 +149,22 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <div className="flex flex-col h-[100vh] w-full">
         {rowsConfig.map((row, ri) => (
-          <div key={ri} className="flex-none flex flex-row items-stretch will-change-transform" style={{ width: 'max-content', height: `${100 / ROWS}vh` }} ref={el => rowRefs.current[ri] = el}>
+          <div 
+            key={ri} 
+            className="flex-none flex flex-row items-stretch will-change-transform" 
+            style={{ width: 'max-content', height: `${100 / ROWS}vh` }} 
+            ref={el => rowRefs.current[ri] = el}
+          >
             {row.imgs.map((item, ii) => (
               <div key={ii} className="shrink-0 h-full perspective-1000" style={{ aspectRatio: item.aspect }}>
-                <div className={`relative w-full h-full transition-transform duration-[1200ms] ${shouldFlip ? 'rotate-y-180' : ''}`} style={{ transitionTimingFunction: 'cubic-bezier(0.25, 0.8, 0.25, 1)', transitionDelay: `${(ri * 40) + ((ii % IMGS_PER_ROW) * 20)}ms`, transformStyle: 'preserve-3d' }}>
+                <div 
+                  className={`relative w-full h-full transition-transform duration-[1200ms] ${shouldFlip ? 'rotate-y-180' : ''}`} 
+                  style={{ 
+                    transitionTimingFunction: 'cubic-bezier(0.25, 0.8, 0.25, 1)', 
+                    transitionDelay: `${(ri * 40) + ((ii % IMGS_PER_ROW) * 20)}ms`, 
+                    transformStyle: 'preserve-3d' 
+                  }}
+                >
                   <div className="absolute inset-0 bg-black" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
                     <img src={item.url} alt="" className="w-full h-full object-cover block" loading="lazy" decoding="async" />
                   </div>

@@ -18,7 +18,7 @@ export function useSearch() {
       // STEP 1: Search Steam FIRST
       try {
         const res = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(searchQuery)}&l=english&cc=US`);
-        if (res.ok) {
+        if (res.ok && res.headers.get("content-type")?.includes("application/json")) {
             const data = await res.json();
             if (data?.items && data.items.length > 0) {
                 // Limit to 5 results to keep things fast
@@ -38,7 +38,7 @@ export function useSearch() {
           const detailRes = await fetch(`/steam-api/api/appdetails?appids=${appIds}&l=english`);
           let detailData = null;
 
-          if (detailRes.ok) {
+          if (detailRes.ok && detailRes.headers.get("content-type")?.includes("application/json")) {
               detailData = await detailRes.json();
           }
 

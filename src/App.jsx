@@ -9,6 +9,9 @@ import { useHover } from './hooks/useHover';
 import { useScaling } from './hooks/useScaling';
 import { useSearch } from './hooks/useSearch';
 
+// Utilities (Add this line)
+import { migrateLabels } from './utils/dataUtils';
+
 // Components
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
@@ -18,7 +21,7 @@ import GameProfileModal from './components/GameProfileModal';
 import LivestreamSetupWorkspace from './components/LivestreamSetupWorkspace';
 import Stats from './components/Stats';
 import SearchView from './components/SearchView';
-import MosaicBackground from './components/background/MosaicBackground';
+import MosaicBackground from './components/background/MosaicBackground.jsx';
 import { Notification } from './components/Notification';
 import { CrossfadeImage } from './components/common/UIComponents';
 
@@ -68,12 +71,17 @@ export default function App() {
   }
 
   // --- Import / Export ---
+  // --- Import / Export ---
   const handleImport = (importedData) => {
     try {
-      const { migrateLabels } = require('./utils/dataUtils');
       const isSettingsOnly = importedData.type === 'settings_only';
       const isFullBackup = !isSettingsOnly && (importedData.type === 'full_backup' || importedData.streamData !== undefined);
-      if (isFullBackup || (!isSettingsOnly && !isFullBackup)) setStreamData(migrateLabels(isFullBackup ? importedData.streamData : importedData).data);
+      
+      if (isFullBackup || (!isSettingsOnly && !isFullBackup)) {
+        const dataToMigrate = isFullBackup ? importedData.streamData : importedData;
+        setStreamData(migrateLabels(dataToMigrate).data);
+      }
+      
       if (isFullBackup || isSettingsOnly) {
         if (importedData.thumbnailConfig) settings.setThumbnailConfig(importedData.thumbnailConfig);
         if (importedData.systemFonts) settings.setSystemFonts(importedData.systemFonts);
@@ -81,18 +89,67 @@ export default function App() {
         if (importedData.modalBgIntensity !== undefined) settings.setModalBgIntensity(importedData.modalBgIntensity);
         if (importedData.modalPanelOpacity !== undefined) settings.setModalPanelOpacity(importedData.modalPanelOpacity);
       }
-    } catch (e) { notify('Failed to parse import file', 'error'); }
+      
+      notify('Data imported successfully!', 'success');
+    } catch (e) { 
+      console.error(e);
+      notify('Failed to parse import file', 'error'); 
+    }
   };
 
   const handleExport = (type) => {
-    const dateStr = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-    let exportData = { version: '2.0.0', exportDate: new Date().toISOString() };
-    let fileName = `streamtracker_${dateStr}.json`;
-    if (type === 'stream') { exportData = streamData; fileName = `streamtracker_data_${dateStr}.json`; }
-    else if (type === 'settings') { exportData = { ...exportData, type: 'settings_only', thumbnailConfig: settings.thumbnailConfig, systemFonts: settings.systemFonts, layoutPrefs: settings.layoutPrefs, modalBgIntensity: settings.modalBgIntensity, modalPanelOpacity: settings.modalPanelOpacity }; fileName = `streamtracker_settings_${dateStr}.json`; }
-    else { exportData = { ...exportData, type: 'full_backup', streamData, thumbnailConfig: settings.thumbnailConfig, systemFonts: settings.systemFonts, layoutPrefs: settings.layoutPrefs, modalBgIntensity: settings.modalBgIntensity, modalPanelOpacity: settings.modalPanelOpacity }; }
+    const now = new Date();
+    
+    // Build a local date string (YYYY-MM-DD_HH-MM-SS)
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+    
+    let exportData = { version: '2.0.0', exportDate: now.toLocaleString() };
+    let fileName = '';
+
+    if (type === 'stream') { 
+      exportData = streamData; 
+      fileName = `streamtracker_stream_data_${dateStr}.json`; 
+    }
+    else if (type === 'settings') { 
+      exportData = { 
+        ...exportData, 
+        type: 'settings_only', 
+        thumbnailConfig: settings.thumbnailConfig, 
+        systemFonts: settings.systemFonts, 
+        layoutPrefs: settings.layoutPrefs, 
+        modalBgIntensity: settings.modalBgIntensity, 
+        modalPanelOpacity: settings.modalPanelOpacity 
+      }; 
+      fileName = `streamtracker_settings_${dateStr}.json`; 
+    }
+    else { 
+      exportData = { 
+        ...exportData, 
+        type: 'full_backup', 
+        streamData, 
+        thumbnailConfig: settings.thumbnailConfig, 
+        systemFonts: settings.systemFonts, 
+        layoutPrefs: settings.layoutPrefs, 
+        modalBgIntensity: settings.modalBgIntensity, 
+        modalPanelOpacity: settings.modalPanelOpacity 
+      }; 
+      fileName = `streamtracker_full_backup_${dateStr}.json`; 
+    }
+
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = fileName; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    const link = document.createElement('a'); 
+    link.href = URL.createObjectURL(blob); 
+    link.download = fileName; 
+    document.body.appendChild(link); 
+    link.click(); 
+    document.body.removeChild(link);
+    
     setShowExportModal(false);
   };
 

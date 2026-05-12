@@ -65,8 +65,6 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
   const handleSortClick = (newSort) => {
     if (sortBy === newSort) return;
     if (scrollRef.current) scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    // NATIVE STATE CHANGE: The new FLIP Engine perfectly handles the animation automatically!
     setSortBy(newSort);
   };
 
@@ -154,7 +152,7 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
               columnWidth={layoutPrefs.cardMaxWidth || 250}
               gap={layoutPrefs.cardGap}
               getItemId={(game) => game.id}
-              enableAnimations={layoutPrefs.enableViewTransitions ?? true}
+              enableAnimations={layoutPrefs.enableViewTransitions !== false}
               renderItem={(game) => {
                 const isHovered = hoverState.cardId === game.id;
                 const labelInfo = getLabelStyle(game.label);

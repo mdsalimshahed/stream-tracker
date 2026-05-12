@@ -76,7 +76,7 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
           columnWidth={layoutPrefs.cardMaxWidth || 250}
           gap={layoutPrefs.cardGap}
           getItemId={(stream) => `${stream.appId}-${stream.cycleName}`}
-          enableAnimations={layoutPrefs.enableViewTransitions ?? true}
+          enableAnimations={layoutPrefs.enableViewTransitions !== false}
           renderItem={(stream) => {
             const uniqueCardId = `${stream.appId}-${stream.cycleName}`;
             const isHovered = hoverState.cardId === uniqueCardId;

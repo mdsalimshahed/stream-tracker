@@ -2,7 +2,7 @@
 import React from 'react';
 import { Clock, BookOpen, Plus, Settings, Upload, Download, BarChart3 } from 'lucide-react';
 
-export default function Header({ currentView, onViewChange, onImport, onExport, enableAnimations = true }) {
+export default function Header({ currentView, onViewChange, onImport, onExport }) {
   const fileInputRef = React.useRef(null);
 
   const handleImportClick = () => {
@@ -25,23 +25,13 @@ export default function Header({ currentView, onViewChange, onImport, onExport, 
     e.target.value = '';
   };
 
-  const handleViewChange = (newView) => {
-    if (!enableAnimations || !document.startViewTransition) {
-      onViewChange(newView);
-      return;
-    }
-    document.startViewTransition(() => {
-      onViewChange(newView);
-    });
-  };
-
   return (
     <header className="sticky top-0 z-40 bg-transparent pointer-events-none border-b border-white/5 shrink-0 w-full max-w-full">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-3 w-full">
         
         {/* Left Side Glass Pod (Mobile Title + Actions) */}
         <div className="pointer-events-auto w-full md:w-auto bg-black/60 backdrop-blur-xl rounded-2xl shadow-lg border border-white/10 px-4 py-2 flex justify-between items-center shrink-0">
-          <button onClick={() => handleViewChange('library')} className="flex items-center gap-2.5 hover:opacity-80 transition">
+          <button onClick={() => onViewChange('library')} className="flex items-center gap-2.5 hover:opacity-80 transition">
             <img src="/favicon.svg" alt="StreamTracker Logo" className="w-7 h-7 drop-shadow-md" />
             <h1 className="text-lg font-semibold tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
               StreamTracker
@@ -89,7 +79,7 @@ export default function Header({ currentView, onViewChange, onImport, onExport, 
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
-                onClick={() => handleViewChange(id)}
+                onClick={() => onViewChange(id)}
                 className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 whitespace-nowrap ${
                   currentView === id
                     ? 'bg-white/20 text-white shadow-sm'

@@ -1,6 +1,6 @@
 // src/components/GameProfileModal.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ArrowRight, ArrowLeft, Gamepad2, Clock, Plus, Trash2, Edit3, Star } from 'lucide-react';
+import { X, ArrowRight, ArrowLeft, Gamepad2, Clock, Plus, Trash2, Edit3, Star, PlayCircle } from 'lucide-react';
 import { formatReleaseDate } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditRunModal } from './modals/EditRunModal';
@@ -58,7 +58,6 @@ export default function GameProfileModal({
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     
-    // Tied strictly to the exact same slider configuration used for cards
     const intervalTime = layoutPrefs?.hoverCycleInterval || 1500;
     let interval;
 
@@ -110,10 +109,18 @@ export default function GameProfileModal({
     if (!currentCycleData.timestamps?.length) return <div className="text-center text-white/30 py-12 text-sm">No logs yet</div>;
     
     const reversed = [...currentCycleData.timestamps].reverse();
+    const totalVideos = currentCycleData.playlistData?.videos?.length || 0;
+
     return reversed.map((ts, i) => {
       const realIdx = currentCycleData.timestamps.length - 1 - i;
       const active = selectedLogIndex === realIdx;
       const runName = currentCycle.displayName;
+      
+      // REVERSED MAPPING FIX:
+      // We subtract the realIdx from the total videos so Livestream #1 gets the last video 
+      // in the playlist array (which is the bottom of your YouTube playlist).
+      const ytData = currentCycleData.playlistData?.videos?.[totalVideos - 1 - realIdx];
+
       return (
         <div 
           key={i} 
@@ -122,7 +129,22 @@ export default function GameProfileModal({
         >
           <div className="flex justify-between items-center">
             <div>
-              <p className="font-medium" style={{ fontSize: `${systemFonts.logTitle}px` }}>Livestream #{realIdx + 1}</p>
+              <div className="flex items-center flex-wrap gap-2">
+                <p className="font-medium" style={{ fontSize: `${systemFonts.logTitle}px` }}>Livestream #{realIdx + 1}</p>
+                {/* Embedded Video Link Button */}
+                {ytData && (
+                  <a 
+                    href={ytData.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="flex items-center gap-1 bg-white/10 hover:bg-white/20 transition px-1.5 py-0.5 rounded text-[10px] text-white/70 hover:text-white border border-white/5" 
+                    onClick={e => e.stopPropagation()}
+                    title="Watch Video on YouTube"
+                  >
+                    <PlayCircle size={12} className="text-red-500" /> {ytData.durationStr}
+                  </a>
+                )}
+              </div>
               <p className="text-white/40 mt-0.5" style={{ fontSize: `${systemFonts.logSub}px` }}>{ts}</p>
             </div>
             <button
@@ -165,13 +187,13 @@ export default function GameProfileModal({
       displayName: cycle.displayName,
       isMain: cycle.isMain || false,
       youtubePlaylist: cycle.youtubePlaylist || '',
-      label: cycle.label || 'Ongoing'
+      label: cycle.label || 'Ongoing',
+      playlistData: cycle.playlistData || null
     });
   };
 
-  const handleSaveRunEdit = (newDisplayName, isMain, playlist, newLabel) => {
-    onUpdateCycle(gameId, editingRun.id, newDisplayName, isMain, playlist, newLabel);
-    onNotify('Run updated successfully', 'success');
+  const handleSaveRunEdit = (newDisplayName, isMain, playlist, newLabel, playlistData) => {
+    onUpdateCycle(gameId, editingRun.id, newDisplayName, isMain, playlist, newLabel, playlistData);
     setEditingRun(null);
   };
 
@@ -225,7 +247,6 @@ export default function GameProfileModal({
             imgClassName="object-cover" 
             style={{ filter: `blur(${blurAmount}px)` }} 
           />
-          {/* Slight dark overlay to ensure text readability over the image */}
           <div className="absolute inset-0 bg-black/50 z-10" />
         </div>
       </div>
@@ -345,9 +366,17 @@ export default function GameProfileModal({
                           </div>
                         </div>
                         <div className="flex justify-between items-center mt-2">
-                          <span className="text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded-md">
-                            {streamCount} stream{streamCount === 1 ? '' : 's'}
-                          </span>
+                          <div className="flex gap-2 items-center flex-wrap">
+                            <span className="text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded-md">
+                              {streamCount} stream{streamCount === 1 ? '' : 's'}
+                            </span>
+                            {/* Render Total Runtime if synced */}
+                            {cycle.playlistData && cycle.playlistData.totalRuntime && (
+                              <span className="text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm border border-white/5">
+                                <PlayCircle size={12} className="text-red-500" /> {cycle.playlistData.totalRuntime}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -397,6 +426,7 @@ export default function GameProfileModal({
           isMain={editingRun.isMain}
           youtubePlaylist={editingRun.youtubePlaylist}
           currentLabel={editingRun.label}
+          currentPlaylistData={editingRun.playlistData}
           onSave={handleSaveRunEdit}
           onClose={() => setEditingRun(null)}
         />

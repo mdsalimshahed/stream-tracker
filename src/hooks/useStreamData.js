@@ -281,17 +281,29 @@ export function useStreamData(notify) {
   const deleteCycle = (gid, cycId) => { const nd = JSON.parse(JSON.stringify(streamData)); delete nd[gid].cycles[cycId]; setStreamData(nd); notify('Removed run', 'error'); };
   const deleteTimestamp = (gid, cycId, idx) => { const nd = JSON.parse(JSON.stringify(streamData)); nd[gid].cycles[cycId].timestamps.splice(idx, 1); nd[gid].cycles[cycId].stream_count = nd[gid].cycles[cycId].timestamps.length; setStreamData(nd); notify('Deleted log entry', 'error'); };
 
-  const updateCycle = (gameId, oldCycleId, newDisplayName, isMain, youtubePlaylist, newLabel) => {
+  const updateCycle = (gameId, oldCycleId, newDisplayName, isMain, youtubePlaylist, newLabel, playlistData) => {
     const nd = JSON.parse(JSON.stringify(streamData));
     const cycles = nd[gameId].cycles;
     if (!cycles[oldCycleId]) return;
+    
     const cycleData = cycles[oldCycleId];
     const newId = newDisplayName === 'First Playthrough' ? 'main' : newDisplayName.toLowerCase().replace(/\s+/g, '_');
-    if (oldCycleId !== newId) { delete cycles[oldCycleId]; cycles[newId] = cycleData; }
+    
+    if (oldCycleId !== newId) { 
+      delete cycles[oldCycleId]; 
+      cycles[newId] = cycleData; 
+    }
+    
     cycles[newId].displayName = newDisplayName;
     cycles[newId].isMain = isMain;
     cycles[newId].youtubePlaylist = youtubePlaylist || '';
     if (newLabel) cycles[newId].label = newLabel;
+    
+    // --- THIS IS THE NEW LINE THAT SAVES THE YOUTUBE DATA ---
+    if (playlistData !== undefined) {
+      cycles[newId].playlistData = playlistData;
+    }
+    
     setStreamData(nd);
     notify(`Run updated to "${newDisplayName}"`, 'success');
   };

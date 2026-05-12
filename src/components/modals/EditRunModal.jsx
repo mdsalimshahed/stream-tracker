@@ -1,6 +1,8 @@
+// src/components/modals/EditRunModal.jsx
 import React, { useState, useCallback } from 'react';
-import { X, Save, Star } from 'lucide-react';
+import { X, Save, Star, RefreshCw, Loader2, PlayCircle } from 'lucide-react';
 import { formatRunName } from '../../utils/helpers';
+import { fetchPlaylistDetails } from '../../utils/youtubeUtils';
 
 // Helper to convert string to sentence case
 const toSentenceCase = (str) => {
@@ -8,18 +10,18 @@ const toSentenceCase = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
-export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, onSave, onClose }) => {
+export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, currentPlaylistData, onSave, onClose }) => {
   const [name, setName] = useState(runName);
   const [main, setMain] = useState(isMain);
   const [playlist, setPlaylist] = useState(youtubePlaylist || '');
   const [label, setLabel] = useState(currentLabel || 'Ongoing');
+  
+  const [playlistData, setPlaylistData] = useState(currentPlaylistData || null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState(null);
 
   const handleNameChange = (e) => {
     let raw = e.target.value;
-    // Apply sentence case as the user types (simple: only first char uppercase, rest lower)
-    // But we don't want to interfere with backspacing too much; apply on blur or after each key?
-    // We'll apply onBlur for simplicity, but user wants 'while typing'. We'll use a useEffect that formats on change.
-    // However, that can be jarring. Implement a custom onChange that formats only when needed.
     if (raw.length === 1) {
       raw = raw.toLocaleUpperCase();
     } else if (raw.length > 1 && raw[0] !== raw[0].toUpperCase()) {
@@ -32,9 +34,29 @@ export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, o
     setName(toSentenceCase(name));
   };
 
+  const handleSyncPlaylist = async () => {
+    if (!playlist.trim()) {
+      setSyncStatus({ text: "Please enter a valid playlist URL.", type: "error" });
+      return;
+    }
+    setIsSyncing(true);
+    setSyncStatus({ text: "Syncing with YouTube...", type: "info" });
+    
+    const data = await fetchPlaylistDetails(playlist.trim());
+    
+    if (data) {
+      setPlaylistData(data);
+      setSyncStatus({ text: `Success! Found ${data.videos.length} videos. Total time: ${data.totalRuntime}`, type: "success" });
+    } else {
+      setSyncStatus({ text: "Failed to fetch playlist. Check URL or API key.", type: "error" });
+    }
+    setIsSyncing(false);
+  };
+
   const handleSubmit = () => {
     if (!name.trim()) return;
-    onSave(formatRunName(name.trim()), main, playlist, label);
+    // Pass playlistData back alongside the other fields
+    onSave(formatRunName(name.trim()), main, playlist, label, playlistData);
     onClose();
   };
 
@@ -53,6 +75,7 @@ export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, o
           <h3 className="text-xl font-bold text-white">Edit Run</h3>
           <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full text-white"><X size={20} /></button>
         </div>
+        
         <div className="space-y-4">
           <div>
             <label className="text-sm text-white/50 block mb-1">Run Name</label>
@@ -64,6 +87,7 @@ export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, o
               className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 text-white"
             />
           </div>
+          
           <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={() => setMain(!main)}
@@ -75,6 +99,7 @@ export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, o
             </button>
             <span className="text-xs text-white/40">Main run name is omitted from stream title</span>
           </div>
+          
           <div>
             <label className="text-sm text-white/50 block mb-1">Status Label</label>
             <select
@@ -87,17 +112,40 @@ export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, o
               <option value="Abandoned">Abandoned</option>
             </select>
           </div>
+          
           <div>
             <label className="text-sm text-white/50 block mb-1">YouTube Playlist (for this run)</label>
-            <input
-              type="text"
-              value={playlist}
-              onChange={e => setPlaylist(e.target.value)}
-              placeholder="https://youtube.com/playlist?list=..."
-              className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-white"
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={playlist}
+                onChange={e => setPlaylist(e.target.value)}
+                placeholder="https://youtube.com/playlist?list=..."
+                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-white"
+              />
+              <button 
+                onClick={handleSyncPlaylist}
+                disabled={isSyncing}
+                className={`bg-white/10 hover:bg-white/20 p-2 rounded-lg transition shrink-0 border border-white/10 ${isSyncing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title="Sync Runtime Data"
+              >
+                {isSyncing ? <Loader2 size={20} className="animate-spin text-white" /> : <RefreshCw size={20} className="text-red-400" />}
+              </button>
+            </div>
+            
+            {syncStatus && (
+              <p className={`text-xs mt-2 ${syncStatus.type === 'error' ? 'text-red-400' : syncStatus.type === 'success' ? 'text-emerald-400' : 'text-blue-400'}`}>
+                {syncStatus.text}
+              </p>
+            )}
+            {!syncStatus && playlistData && (
+              <p className="text-xs mt-2 text-emerald-400 flex items-center gap-1">
+                <PlayCircle size={12}/> Synced: {playlistData.videos.length} videos, {playlistData.totalRuntime}
+              </p>
+            )}
           </div>
         </div>
+        
         <div className="flex gap-3 mt-6">
           <button
             onClick={handleSubmit}

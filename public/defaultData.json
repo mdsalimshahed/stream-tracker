@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "5/12/2026, 10:34:24 PM",
+  "exportDate": "5/13/2026, 1:39:39 AM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -602,7 +602,109 @@
           "isMain": false,
           "youtubePlaylist": "https://www.youtube.com/playlist?list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
           "name": "New Game+1",
-          "displayName": "New Game+1"
+          "displayName": "New Game+1",
+          "label": "Ongoing",
+          "playlistData": {
+            "totalRuntime": "20h 23m 26s",
+            "videos": [
+              {
+                "id": "MsCGBmWBpyY",
+                "url": "https://www.youtube.com/watch?v=MsCGBmWBpyY&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 4895,
+                "durationStr": "1h 21m 35s"
+              },
+              {
+                "id": "zNd0MIxswdc",
+                "url": "https://www.youtube.com/watch?v=zNd0MIxswdc&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 5562,
+                "durationStr": "1h 32m 42s"
+              },
+              {
+                "id": "m87yOwsZi0s",
+                "url": "https://www.youtube.com/watch?v=m87yOwsZi0s&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 4077,
+                "durationStr": "1h 7m 57s"
+              },
+              {
+                "id": "HOmZ_ZDo-wA",
+                "url": "https://www.youtube.com/watch?v=HOmZ_ZDo-wA&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 3650,
+                "durationStr": "1h 0m 50s"
+              },
+              {
+                "id": "sks28_vITYQ",
+                "url": "https://www.youtube.com/watch?v=sks28_vITYQ&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 6512,
+                "durationStr": "1h 48m 32s"
+              },
+              {
+                "id": "3uSkUrlm9CE",
+                "url": "https://www.youtube.com/watch?v=3uSkUrlm9CE&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 5460,
+                "durationStr": "1h 31m 0s"
+              },
+              {
+                "id": "2vHcs4CxKr4",
+                "url": "https://www.youtube.com/watch?v=2vHcs4CxKr4&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 4418,
+                "durationStr": "1h 13m 38s"
+              },
+              {
+                "id": "uQFEvpYU2D4",
+                "url": "https://www.youtube.com/watch?v=uQFEvpYU2D4&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 4147,
+                "durationStr": "1h 9m 7s"
+              },
+              {
+                "id": "U1P-BeCxzfU",
+                "url": "https://www.youtube.com/watch?v=U1P-BeCxzfU&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 2332,
+                "durationStr": "38m 52s"
+              },
+              {
+                "id": "wuhjrZGYZQw",
+                "url": "https://www.youtube.com/watch?v=wuhjrZGYZQw&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 2999,
+                "durationStr": "49m 59s"
+              },
+              {
+                "id": "WSrUgef4WWk",
+                "url": "https://www.youtube.com/watch?v=WSrUgef4WWk&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 7409,
+                "durationStr": "2h 3m 29s"
+              },
+              {
+                "id": "IvSwIfdn1KU",
+                "url": "https://www.youtube.com/watch?v=IvSwIfdn1KU&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 3622,
+                "durationStr": "1h 0m 22s"
+              },
+              {
+                "id": "sfe3iEIGAtQ",
+                "url": "https://www.youtube.com/watch?v=sfe3iEIGAtQ&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 4105,
+                "durationStr": "1h 8m 25s"
+              },
+              {
+                "id": "a0eHv9ZCeQs",
+                "url": "https://www.youtube.com/watch?v=a0eHv9ZCeQs&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 2616,
+                "durationStr": "43m 36s"
+              },
+              {
+                "id": "oODix09_jgk",
+                "url": "https://www.youtube.com/watch?v=oODix09_jgk&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 5067,
+                "durationStr": "1h 24m 27s"
+              },
+              {
+                "id": "Hje6lS6e958",
+                "url": "https://www.youtube.com/watch?v=Hje6lS6e958&list=PLLzuld5NPO9DMf9SLAriFsQLS53DNVZHw",
+                "durationSec": 6535,
+                "durationStr": "1h 48m 55s"
+              }
+            ]
+          }
         }
       },
       "details": {
@@ -992,6 +1094,44 @@
         "steamUrl": "https://store.steampowered.com/app/2407270/"
       },
       "cover_image": "https://media.rawg.io/media/games/f58/f5867ea18f8444660cd2892d4b282d30.jpg"
+    },
+    "2420110": {
+      "game_name": "Horizon Forbidden West™ Complete Edition",
+      "release_year": "2024",
+      "cover_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420110/header.jpg?t=1776465869",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420110/ss_7c1ead4b3d952fd0fb92735397945bd8732bba53.1920x1080.jpg?t=1776465869",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420110/ss_2d05273cef37bcc3651dc9dbea42dbeca5f5f196.1920x1080.jpg?t=1776465869",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420110/ss_87750b2dbc34d82d1ffef7aaab40a9f46d970d99.1920x1080.jpg?t=1776465869",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420110/ss_a4a19b86e80488f3d608e835e5ae3086760db866.1920x1080.jpg?t=1776465869",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420110/ss_16055ecb20ad2879811db3e97375aef43eef0a8c.1920x1080.jpg?t=1776465869",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420110/ss_b7d25b4a328003d340913377793e83c961f2d7ab.1920x1080.jpg?t=1776465869",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420110/ss_36d70cdb331ce82bc7310c64e1a5c3f44b8e6a7b.1920x1080.jpg?t=1776465869",
+        "https://media.rawg.io/media/screenshots/bd2/bd29d990ea3c10bb1f54edba73cce0a0.jpg",
+        "https://media.rawg.io/media/screenshots/271/27113e5ab0334f11fef340eb244c3791.jpg",
+        "https://media.rawg.io/media/screenshots/2ca/2ca36ead889762377b36d8b46e6c0b69.jpg",
+        "https://media.rawg.io/media/screenshots/010/010b81aac339370b998cf5611093136c_FNrNgpJ.jpg",
+        "https://media.rawg.io/media/screenshots/2b6/2b6a0a900177290dad466a3deaffe17a.jpg"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 0,
+          "timestamps": [],
+          "isMain": true,
+          "youtubePlaylist": "",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "Guerrilla, Nixxes Software",
+        "publisher": "PlayStation Publishing LLC",
+        "releaseDate": "21 Mar, 2024",
+        "genres": "Action, RPG",
+        "tags": "Singleplayer, Steam Achievements, Multiplayer, Full controller support, Steam Cloud, Atmospheric, Great Soundtrack, RPG, Story Rich, Open World, Third Person, Sci-fi, Exploration, Female Protagonist, Action-Adventure, Action RPG, Controller, Post-apocalyptic, VR, Robots, Family Sharing, Протагонистка, Постапокалипсис, HDR available",
+        "steamUrl": "https://store.steampowered.com/app/2420110/",
+        "notOnSteam": false
+      }
     },
     "2515020": {
       "game_name": "FINAL FANTASY XVI",
@@ -1571,7 +1711,38 @@
             "23rd March 2026, 06:53:31 PM"
           ],
           "isMain": false,
-          "youtubePlaylist": "https://www.youtube.com/playlist?list=PLLzuld5NPO9CLPC8BlsYIXRehSXU7Ys0t"
+          "youtubePlaylist": "https://www.youtube.com/playlist?list=PLLzuld5NPO9CLPC8BlsYIXRehSXU7Ys0t",
+          "displayName": "First Playthrough",
+          "label": "Ongoing",
+          "playlistData": {
+            "totalRuntime": "7h 2m 10s",
+            "videos": [
+              {
+                "id": "c6PTtW1HXuQ",
+                "url": "https://www.youtube.com/watch?v=c6PTtW1HXuQ&list=PLLzuld5NPO9CLPC8BlsYIXRehSXU7Ys0t",
+                "durationSec": 4490,
+                "durationStr": "1h 14m 50s"
+              },
+              {
+                "id": "0rV75U7KxjU",
+                "url": "https://www.youtube.com/watch?v=0rV75U7KxjU&list=PLLzuld5NPO9CLPC8BlsYIXRehSXU7Ys0t",
+                "durationSec": 7135,
+                "durationStr": "1h 58m 55s"
+              },
+              {
+                "id": "cXN_NXkpyCM",
+                "url": "https://www.youtube.com/watch?v=cXN_NXkpyCM&list=PLLzuld5NPO9CLPC8BlsYIXRehSXU7Ys0t",
+                "durationSec": 12912,
+                "durationStr": "3h 35m 12s"
+              },
+              {
+                "id": "pnA8syfm69Y",
+                "url": "https://www.youtube.com/watch?v=pnA8syfm69Y&list=PLLzuld5NPO9CLPC8BlsYIXRehSXU7Ys0t",
+                "durationSec": 793,
+                "durationStr": "13m 13s"
+              }
+            ]
+          }
         }
       },
       "details": {
@@ -1744,7 +1915,110 @@
             "2nd May 2026, 10:40:48 PM"
           ],
           "isMain": false,
-          "youtubePlaylist": "https://www.youtube.com/playlist?list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2"
+          "youtubePlaylist": "https://www.youtube.com/playlist?list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+          "displayName": "First Playthrough",
+          "label": "Ongoing",
+          "playlistData": {
+            "totalRuntime": "35h 29m 39s",
+            "videos": [
+              {
+                "id": "h68FgPkhm_M",
+                "url": "https://www.youtube.com/watch?v=h68FgPkhm_M&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 3215,
+                "durationStr": "53m 35s"
+              },
+              {
+                "id": "izRrsBk2TDo",
+                "url": "https://www.youtube.com/watch?v=izRrsBk2TDo&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 3824,
+                "durationStr": "1h 3m 44s"
+              },
+              {
+                "id": "VzUOXsq4kRc",
+                "url": "https://www.youtube.com/watch?v=VzUOXsq4kRc&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 8855,
+                "durationStr": "2h 27m 35s"
+              },
+              {
+                "id": "F5SJ4W7cz0Q",
+                "url": "https://www.youtube.com/watch?v=F5SJ4W7cz0Q&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 7677,
+                "durationStr": "2h 7m 57s"
+              },
+              {
+                "id": "VPM65NPlqco",
+                "url": "https://www.youtube.com/watch?v=VPM65NPlqco&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 7498,
+                "durationStr": "2h 4m 58s"
+              },
+              {
+                "id": "dpoNQw6NEnE",
+                "url": "https://www.youtube.com/watch?v=dpoNQw6NEnE&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 5784,
+                "durationStr": "1h 36m 24s"
+              },
+              {
+                "id": "H0RQyKyuoYY",
+                "url": "https://www.youtube.com/watch?v=H0RQyKyuoYY&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 8975,
+                "durationStr": "2h 29m 35s"
+              },
+              {
+                "id": "g3n8pgj19fs",
+                "url": "https://www.youtube.com/watch?v=g3n8pgj19fs&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 8762,
+                "durationStr": "2h 26m 2s"
+              },
+              {
+                "id": "sNEAYwtslE0",
+                "url": "https://www.youtube.com/watch?v=sNEAYwtslE0&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 9563,
+                "durationStr": "2h 39m 23s"
+              },
+              {
+                "id": "rHMvia-XGrs",
+                "url": "https://www.youtube.com/watch?v=rHMvia-XGrs&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 8436,
+                "durationStr": "2h 20m 36s"
+              },
+              {
+                "id": "8BTEcGXkj3w",
+                "url": "https://www.youtube.com/watch?v=8BTEcGXkj3w&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 12395,
+                "durationStr": "3h 26m 35s"
+              },
+              {
+                "id": "EVEovuLKIhw",
+                "url": "https://www.youtube.com/watch?v=EVEovuLKIhw&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 6893,
+                "durationStr": "1h 54m 53s"
+              },
+              {
+                "id": "7L3u5hkAQnA",
+                "url": "https://www.youtube.com/watch?v=7L3u5hkAQnA&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 10503,
+                "durationStr": "2h 55m 3s"
+              },
+              {
+                "id": "yIn4B_aG4Ak",
+                "url": "https://www.youtube.com/watch?v=yIn4B_aG4Ak&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 16061,
+                "durationStr": "4h 27m 41s"
+              },
+              {
+                "id": "hCH97Gn8zqY",
+                "url": "https://www.youtube.com/watch?v=hCH97Gn8zqY&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 4052,
+                "durationStr": "1h 7m 32s"
+              },
+              {
+                "id": "Nkmc8kkBZhk",
+                "url": "https://www.youtube.com/watch?v=Nkmc8kkBZhk&list=PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+                "durationSec": 5286,
+                "durationStr": "1h 28m 6s"
+              }
+            ]
+          }
         }
       },
       "details": {
@@ -1876,7 +2150,212 @@
             "30th April 2026, 01:14:16 PM"
           ],
           "isMain": false,
-          "youtubePlaylist": "https://www.youtube.com/playlist?list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV"
+          "youtubePlaylist": "https://www.youtube.com/playlist?list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+          "displayName": "First Playthrough",
+          "label": "Ongoing",
+          "playlistData": {
+            "totalRuntime": "43h 47m 35s",
+            "videos": [
+              {
+                "id": "jj1IF8WHyTg",
+                "url": "https://www.youtube.com/watch?v=jj1IF8WHyTg&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 1232,
+                "durationStr": "20m 32s"
+              },
+              {
+                "id": "6KTxo677AAQ",
+                "url": "https://www.youtube.com/watch?v=6KTxo677AAQ&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 5959,
+                "durationStr": "1h 39m 19s"
+              },
+              {
+                "id": "8uov3NhkOw0",
+                "url": "https://www.youtube.com/watch?v=8uov3NhkOw0&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 5863,
+                "durationStr": "1h 37m 43s"
+              },
+              {
+                "id": "hOemfbjV4W0",
+                "url": "https://www.youtube.com/watch?v=hOemfbjV4W0&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 2748,
+                "durationStr": "45m 48s"
+              },
+              {
+                "id": "aeQNYQPNJ5k",
+                "url": "https://www.youtube.com/watch?v=aeQNYQPNJ5k&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 5810,
+                "durationStr": "1h 36m 50s"
+              },
+              {
+                "id": "sUw5LgaLitQ",
+                "url": "https://www.youtube.com/watch?v=sUw5LgaLitQ&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 7296,
+                "durationStr": "2h 1m 36s"
+              },
+              {
+                "id": "6kjlxdgAuSc",
+                "url": "https://www.youtube.com/watch?v=6kjlxdgAuSc&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 9820,
+                "durationStr": "2h 43m 40s"
+              },
+              {
+                "id": "g8vNrNMdKog",
+                "url": "https://www.youtube.com/watch?v=g8vNrNMdKog&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 6772,
+                "durationStr": "1h 52m 52s"
+              },
+              {
+                "id": "CYpcoL4x3Z8",
+                "url": "https://www.youtube.com/watch?v=CYpcoL4x3Z8&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 3583,
+                "durationStr": "59m 43s"
+              },
+              {
+                "id": "Evw2Q6_3psw",
+                "url": "https://www.youtube.com/watch?v=Evw2Q6_3psw&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 2330,
+                "durationStr": "38m 50s"
+              },
+              {
+                "id": "mW14_izpIvM",
+                "url": "https://www.youtube.com/watch?v=mW14_izpIvM&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 3277,
+                "durationStr": "54m 37s"
+              },
+              {
+                "id": "_j9jdaibHUo",
+                "url": "https://www.youtube.com/watch?v=_j9jdaibHUo&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 6969,
+                "durationStr": "1h 56m 9s"
+              },
+              {
+                "id": "ZRFEkVoWr6Y",
+                "url": "https://www.youtube.com/watch?v=ZRFEkVoWr6Y&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 3964,
+                "durationStr": "1h 6m 4s"
+              },
+              {
+                "id": "j75GkK8D5QQ",
+                "url": "https://www.youtube.com/watch?v=j75GkK8D5QQ&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 10150,
+                "durationStr": "2h 49m 10s"
+              },
+              {
+                "id": "pXONXtVkc2k",
+                "url": "https://www.youtube.com/watch?v=pXONXtVkc2k&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 4594,
+                "durationStr": "1h 16m 34s"
+              },
+              {
+                "id": "XhNFzkgM9Zg",
+                "url": "https://www.youtube.com/watch?v=XhNFzkgM9Zg&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 3422,
+                "durationStr": "57m 2s"
+              },
+              {
+                "id": "WVsZZKJszlc",
+                "url": "https://www.youtube.com/watch?v=WVsZZKJszlc&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 2566,
+                "durationStr": "42m 46s"
+              },
+              {
+                "id": "Y_PsEiLENTw",
+                "url": "https://www.youtube.com/watch?v=Y_PsEiLENTw&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 6460,
+                "durationStr": "1h 47m 40s"
+              },
+              {
+                "id": "ZU7WcLKZevA",
+                "url": "https://www.youtube.com/watch?v=ZU7WcLKZevA&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 2701,
+                "durationStr": "45m 1s"
+              },
+              {
+                "id": "xXX3dlFQTKg",
+                "url": "https://www.youtube.com/watch?v=xXX3dlFQTKg&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 2487,
+                "durationStr": "41m 27s"
+              },
+              {
+                "id": "dlLI5Ykbze0",
+                "url": "https://www.youtube.com/watch?v=dlLI5Ykbze0&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 2446,
+                "durationStr": "40m 46s"
+              },
+              {
+                "id": "dNrCXRdhtNE",
+                "url": "https://www.youtube.com/watch?v=dNrCXRdhtNE&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 9105,
+                "durationStr": "2h 31m 45s"
+              },
+              {
+                "id": "Qbo9kCa-Y5Y",
+                "url": "https://www.youtube.com/watch?v=Qbo9kCa-Y5Y&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 5253,
+                "durationStr": "1h 27m 33s"
+              },
+              {
+                "id": "10KqeIV-I74",
+                "url": "https://www.youtube.com/watch?v=10KqeIV-I74&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 36,
+                "durationStr": "0m 36s"
+              },
+              {
+                "id": "Xj8HD-ovVGM",
+                "url": "https://www.youtube.com/watch?v=Xj8HD-ovVGM&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 420,
+                "durationStr": "7m 0s"
+              },
+              {
+                "id": "AX0gUpoNelA",
+                "url": "https://www.youtube.com/watch?v=AX0gUpoNelA&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 189,
+                "durationStr": "3m 9s"
+              },
+              {
+                "id": "_rD5pu_M1EI",
+                "url": "https://www.youtube.com/watch?v=_rD5pu_M1EI&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 802,
+                "durationStr": "13m 22s"
+              },
+              {
+                "id": "5bVRp8zfYXI",
+                "url": "https://www.youtube.com/watch?v=5bVRp8zfYXI&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 13192,
+                "durationStr": "3h 39m 52s"
+              },
+              {
+                "id": "eCv3cq2PxIA",
+                "url": "https://www.youtube.com/watch?v=eCv3cq2PxIA&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 7915,
+                "durationStr": "2h 11m 55s"
+              },
+              {
+                "id": "g8YBsBP6UWk",
+                "url": "https://www.youtube.com/watch?v=g8YBsBP6UWk&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 2109,
+                "durationStr": "35m 9s"
+              },
+              {
+                "id": "AaJQkxQAl70",
+                "url": "https://www.youtube.com/watch?v=AaJQkxQAl70&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 2864,
+                "durationStr": "47m 44s"
+              },
+              {
+                "id": "sdO6qlX6dc4",
+                "url": "https://www.youtube.com/watch?v=sdO6qlX6dc4&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 2390,
+                "durationStr": "39m 50s"
+              },
+              {
+                "id": "cIOgk0buSBo",
+                "url": "https://www.youtube.com/watch?v=cIOgk0buSBo&list=PLLzuld5NPO9A8bmb7haTwRwMYNtd_IipV",
+                "durationSec": 12931,
+                "durationStr": "3h 35m 31s"
+              }
+            ]
+          }
         }
       },
       "details": {
@@ -2262,7 +2741,7 @@
     "cycleItalic": false
   },
   "systemFonts": {
-    "libTitle": 22,
+    "libTitle": 20,
     "libYear": 16,
     "libBadge": 18,
     "dashboardTime": 13,
@@ -2271,13 +2750,12 @@
     "logSub": 12,
     "searchBar": 20,
     "statsMainCount": 3,
-    "statsTitle": 2.3,
-    "statsSub": 1,
+    "statsMainLabel": 1.3,
     "statsLabel": 0.9,
-    "statsMainLabel": 1.3
+    "statsTitle": 2.3,
+    "statsSub": 1
   },
   "layoutPrefs": {
-    "enableHoverEffects": true,
     "cardPadding": 0,
     "cardGap": 10,
     "cardRadius": 32,
@@ -2287,21 +2765,22 @@
     "containerPaddingX": 121,
     "containerPaddingY": 0,
     "cardRounded": false,
-    "panelFillOpacity": 0.49,
-    "bgDimming": 0.3,
+    "panelFillOpacity": 0.35,
+    "bgDimming": 0.6,
     "cycleInterval": 5000,
     "hoverCycleInterval": 1600,
     "statsSplitRatio": 0.44,
     "statsRowSplitRatio": 0.55,
     "highResImages": true,
+    "enableHoverEffects": true,
+    "enableViewTransitions": true,
     "statsLeftWidth": 5,
     "statsRightWidth": 5,
     "statsCardPadding": 25,
     "cardOpacity": 0.2,
     "bgCycleInterval": 2,
-    "statsCardRadius": 10,
-    "enableViewTransitions": true
+    "statsCardRadius": 10
   },
-  "modalBgIntensity": 1,
-  "modalPanelOpacity": 0.17
+  "modalBgIntensity": 0.03,
+  "modalPanelOpacity": 0.6
 }

@@ -25,7 +25,7 @@ const getLatestRun = (cycles) => {
   return latestRun;
 }
 
-export default function Library({ streamData, handleCardClick, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, activeBgUrl, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
+export default function Library({ streamData, handleCardClick, onDeleteGame, onUpdateGameLink, onEditGame, systemFonts, layoutPrefs, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
   const [sortBy, setSortBy] = useState('recent');
   const [searchFilter, setSearchFilter] = useState('');
   const [editingGame, setEditingGame] = useState(null);
@@ -163,15 +163,13 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
               }}
             >
               {sorted.map(game => {
-                const cover = game.cover_image || game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
                 const isHovered = hoverState.cardId === game.id;
-                
-                const displayImg = (isHovered && activeBgUrl) 
-                    ? activeBgUrl 
-                    : cover;
-
                 const labelInfo = getLabelStyle(game.label);
                 
+                // Sync check: Fall back instantly to card cover if global state hasn't caught up to hover target yet
+                const isImageReady = hoveredImage?.gameId === game.id;
+                const displayImg = (isHovered && isImageReady && hoveredImage?.url) ? hoveredImage.url : (game.cover_image || game.thumbnail_urls?.[0]);
+
                 return (
                   <div
                     key={game.id}

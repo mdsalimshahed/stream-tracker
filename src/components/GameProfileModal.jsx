@@ -1,7 +1,7 @@
 // src/components/GameProfileModal.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ArrowRight, ArrowLeft, Gamepad2, Clock, Plus, Trash2, Edit3, Save, Star } from 'lucide-react';
-import { formatRunName, formatReleaseDate } from '../utils/helpers';
+import { X, ArrowRight, ArrowLeft, Gamepad2, Clock, Plus, Trash2, Edit3, Star } from 'lucide-react';
+import { formatReleaseDate } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditRunModal } from './modals/EditRunModal';
 import { CrossfadeImage } from './common/UIComponents';
@@ -58,7 +58,8 @@ export default function GameProfileModal({
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     
-    const intervalTime = layoutPrefs?.cycleInterval || 4000;
+    // Tied strictly to the exact same slider configuration used for cards
+    const intervalTime = layoutPrefs?.hoverCycleInterval || 1500;
     let interval;
 
     if (playlistRef.current.length > 1) {
@@ -80,7 +81,7 @@ export default function GameProfileModal({
       document.body.style.overflow = 'unset';
       clearInterval(interval);
     };
-  }, [gameData, layoutPrefs?.cycleInterval]);
+  }, [gameData, layoutPrefs?.hoverCycleInterval]);
 
   if (!gameData) return null;
   const cycles = gameData.cycles || {};
@@ -234,6 +235,7 @@ export default function GameProfileModal({
             className="relative w-full max-w-7xl flex flex-col lg:flex-row lg:items-stretch gap-4 lg:gap-6 mx-auto cursor-auto lg:max-h-full" 
             onClick={e => e.stopPropagation()}
           >
+            {/* Left Column */}
             <div className="flex flex-col rounded-2xl shadow-2xl overflow-hidden shrink-0 lg:min-h-0" style={{ ...panelStyle, width: leftWidth }}>
               <div className="relative shrink-0 aspect-video bg-black/40 border-b border-white/10">
                 <CrossfadeImage src={bgImage} className="w-full h-full" imgClassName="object-cover" />
@@ -288,7 +290,10 @@ export default function GameProfileModal({
               </div>
             </div>
 
+            {/* Right Column */}
             <div className="flex flex-col gap-4 lg:gap-6 shrink-0 lg:min-h-0" style={{ width: rightWidth }}>
+              
+              {/* Runs Panel */}
               <div className="flex flex-col rounded-2xl shadow-xl overflow-hidden lg:flex-1 lg:min-h-0" style={panelStyle}>
                 <div className="shrink-0 flex justify-between items-center p-4 border-b border-white/5">
                   <h3 className="text-sm font-semibold text-white/50 flex items-center gap-2"><Gamepad2 size={16} /> Runs</h3>
@@ -370,6 +375,7 @@ export default function GameProfileModal({
                 </div>
               </div>
 
+              {/* Logs Panel */}
               <div className="flex flex-col rounded-2xl shadow-xl overflow-hidden lg:flex-1 lg:min-h-0" style={panelStyle}>
                 <h3 className="shrink-0 text-sm font-semibold text-white/50 flex items-center gap-2 p-4 border-b border-white/5"><Clock size={16} /> Session Logs</h3>
                 <div className="overflow-y-auto custom-scrollbar p-4 pt-2 space-y-2 max-h-[350px] lg:max-h-none lg:flex-1 lg:min-h-0">

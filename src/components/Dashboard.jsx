@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { parseCustomTimestamp } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
 
-export default function Dashboard({ streamData, handleCardClick, systemFonts, layoutPrefs, activeBgUrl, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
+export default function Dashboard({ streamData, handleCardClick, systemFonts, layoutPrefs, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
   
   const recentStreams = useMemo(() => {
     const recent = [];
@@ -80,9 +80,10 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
           {recentStreams.map((stream) => {
             const uniqueCardId = `${stream.appId}-${stream.cycleName}`;
             const isHovered = hoverState.cardId === uniqueCardId;
-            const activeImg = (isHovered && activeBgUrl) 
-                ? activeBgUrl 
-                : stream.cover;
+            
+            // Sync check: Fall back instantly to card cover if global state hasn't caught up to hover target yet
+            const isImageReady = hoveredImage?.gameId === stream.appId;
+            const activeImg = (isHovered && isImageReady && hoveredImage?.url) ? hoveredImage.url : stream.cover;
 
             return (
               <div

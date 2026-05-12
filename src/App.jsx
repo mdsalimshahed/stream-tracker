@@ -1,6 +1,15 @@
 // src/App.jsx
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Loader2, Plus, X } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { X } from 'lucide-react';
+
+// Hooks
+import { useSettings } from './hooks/useSettings';
+import { useStreamData } from './hooks/useStreamData';
+import { useHover } from './hooks/useHover';
+import { useScaling } from './hooks/useScaling';
+import { useSearch } from './hooks/useSearch';
+
+// Components
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import Library from './components/Library';
@@ -8,840 +17,82 @@ import DataManager from './components/DataManager';
 import GameProfileModal from './components/GameProfileModal';
 import LivestreamSetupWorkspace from './components/LivestreamSetupWorkspace';
 import Stats from './components/Stats';
+import SearchView from './components/SearchView';
+import MosaicBackground from './components/background/MosaicBackground';
 import { Notification } from './components/Notification';
 import { CrossfadeImage } from './components/common/UIComponents';
-import { RAWG_API_KEY, DEFAULT_SYSTEM_FONTS, DEFAULT_LAYOUT_PREFS, DEFAULT_THUMBNAIL_CONFIG, DEFAULT_MODAL_BG_INTENSITY, DEFAULT_MODAL_PANEL_OPACITY } from './utils/constants';
-import { formatRunName, formatReleaseDate } from './utils/helpers';
-
-// --- Two-Level Randomization Helpers ---
-const shuffleArray = (array) => {
-  const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-};
-
-const generateSingleGamePlaylist = (images, lastImageUrl = null) => {
-  const uniqueThumbs = [...new Set(images.filter(Boolean))];
-  if (uniqueThumbs.length === 0) return [];
-  if (uniqueThumbs.length === 1) return uniqueThumbs;
-
-  let shuffled = shuffleArray(uniqueThumbs);
-  if (lastImageUrl && shuffled[0] === lastImageUrl) {
-    const temp = shuffled[0];
-    shuffled[0] = shuffled[1];
-    shuffled[1] = temp;
-  }
-  return shuffled;
-};
-
-// --- Mosaic Component (Stadium Stunt Flip Reveal) ---
-const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip }) => {
-  const ROWS = 7;
-  const IMGS_PER_ROW = 24;
-
-  const rowRefs = useRef([]);
-  const requestRef = useRef(null);
-
-  const globalStateRef = useRef({ currentSpeed: isSlowMode ? 0.15 : 1 });
-  const modeRef = useRef({ isPaused, isSlowMode });
-
-  useEffect(() => {
-    modeRef.current = { isPaused, isSlowMode };
-  }, [isPaused, isSlowMode]);
-
-  const rowsConfig = useMemo(() => {
-    const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
-    const pool = mosaicImages && mosaicImages.length > 0 ? mosaicImages : [fallback];
-    const aspectRatios = ['16/9', '4/3', '1/1'];
-
-    return Array.from({ length: ROWS }, (_, i) => {
-      let sequence = [];
-      let lastGameId = null;
-      
-      while (sequence.length < IMGS_PER_ROW) {
-        let shuffled = [...pool].sort(() => Math.random() - 0.5);
-        let batch = [];
-        
-        while (shuffled.length > 0) {
-          let foundIdx = 0;
-          if (lastGameId !== null) {
-            while (foundIdx < shuffled.length && shuffled[foundIdx].gameId === lastGameId) {
-              foundIdx++;
-            }
-            if (foundIdx === shuffled.length) foundIdx = 0;
-          }
-          
-          const selected = shuffled[foundIdx];
-          batch.push(selected);
-          lastGameId = selected.gameId;
-          shuffled.splice(foundIdx, 1);
-        }
-        sequence.push(...batch);
-      }
-      
-      let base = sequence.slice(0, IMGS_PER_ROW);
-
-      if (base.length > 2 && base[base.length - 1].gameId === base[0].gameId) {
-        for (let k = base.length - 2; k >= 1; k--) {
-          if (
-            base[k].gameId !== base[0].gameId && 
-            base[k].gameId !== base[base.length - 2].gameId &&
-            base[base.length - 1].gameId !== base[k - 1].gameId &&
-            base[base.length - 1].gameId !== base[k + 1].gameId
-          ) {
-            const temp = base[k];
-            base[k] = base[base.length - 1];
-            base[base.length - 1] = temp;
-            break;
-          }
-        }
-      }
-
-      const baseWithAspect = base.map(b => ({
-        url: b.url,
-        aspect: aspectRatios[Math.floor(Math.random() * aspectRatios.length)]
-      }));
-
-      const duration = 40000 + Math.random() * 20000; 
-      const direction = i % 2 === 0 ? 'left' : 'right';
-      const baseSpeed = 50 / duration;
-
-      return {
-        imgs: [...baseWithAspect, ...baseWithAspect],
-        baseSpeed,
-        direction,
-        state: { targetChaos: 1, currentChaos: 1, timer: 0 }
-      };
-    });
-  }, [mosaicImages]);
-
-  useEffect(() => {
-    let lastTime = performance.now();
-    let positions = rowsConfig.map(c => c.direction === 'right' ? -50 : 0);
-
-    const animateLoop = (time) => {
-      const delta = time - lastTime;
-      lastTime = time;
-      const safeDelta = Math.min(delta, 50);
-
-      const globalLerpFactor = 1 - Math.exp(-safeDelta * 0.0015);
-      const chaosLerpFactor = 1 - Math.exp(-safeDelta * 0.0008);
-
-      let targetGlobalSpeed = 1.0;
-      if (modeRef.current.isPaused) targetGlobalSpeed = 0.0;
-      else if (modeRef.current.isSlowMode) targetGlobalSpeed = 0.15;
-
-      globalStateRef.current.currentSpeed += (targetGlobalSpeed - globalStateRef.current.currentSpeed) * globalLerpFactor;
-
-      if (Math.abs(globalStateRef.current.currentSpeed) < 0.001 && targetGlobalSpeed === 0) {
-        globalStateRef.current.currentSpeed = 0;
-      }
-
-      rowsConfig.forEach((config, i) => {
-        const state = config.state;
-        state.timer -= safeDelta;
-
-        if (state.timer <= 0) {
-          const rand = Math.random();
-          if (rand < 0.15) { 
-            state.targetChaos = 0.1 + Math.random() * 0.2;
-            state.timer = 2000 + Math.random() * 3000;
-          } else if (rand < 0.35) { 
-            state.targetChaos = 1.5 + Math.random() * 1.5;
-            state.timer = 2500 + Math.random() * 3500;
-          } else { 
-            state.targetChaos = 0.8 + Math.random() * 0.4;
-            state.timer = 3000 + Math.random() * 5000;
-          }
-        }
-
-        state.currentChaos += (state.targetChaos - state.currentChaos) * chaosLerpFactor;
-
-        const actualSpeed = globalStateRef.current.currentSpeed * state.currentChaos * config.baseSpeed;
-        const moveAmount = actualSpeed * safeDelta;
-
-        if (config.direction === 'left') {
-          positions[i] -= moveAmount;
-          if (positions[i] <= -50) positions[i] += 50;
-        } else {
-          positions[i] += moveAmount;
-          if (positions[i] >= 0) positions[i] -= 50;
-        }
-
-        const el = rowRefs.current[i];
-        if (el) {
-          el.style.transform = `translate3d(${positions[i]}%, 0, 0)`;
-        }
-      });
-
-      requestRef.current = requestAnimationFrame(animateLoop);
-    };
-
-    requestRef.current = requestAnimationFrame(animateLoop);
-
-    return () => {
-      cancelAnimationFrame(requestRef.current);
-    };
-  }, [rowsConfig]); 
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="flex flex-col h-[100vh] w-full">
-        {rowsConfig.map((row, ri) => (
-          <div 
-            key={ri} 
-            className="flex-none flex flex-row items-stretch will-change-transform" 
-            style={{ width: 'max-content', height: `${100 / ROWS}vh` }}
-            ref={el => rowRefs.current[ri] = el}
-          >
-            {row.imgs.map((item, ii) => (
-              <div 
-                key={ii} 
-                className="shrink-0 h-full perspective-1000" 
-                style={{ aspectRatio: item.aspect }}
-              >
-                <div 
-                  className={`relative w-full h-full transition-transform duration-[1200ms] ${shouldFlip ? 'rotate-y-180' : ''}`}
-                  style={{ 
-                    transitionTimingFunction: 'cubic-bezier(0.25, 0.8, 0.25, 1)',
-                    transitionDelay: `${(ri * 40) + ((ii % IMGS_PER_ROW) * 20)}ms`,
-                    transformStyle: 'preserve-3d'
-                  }}
-                >
-                  <div className="absolute inset-0 bg-black" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
-                    <img src={item.url} alt="" className="w-full h-full object-cover block" loading="lazy" decoding="async" />
-                  </div>
-                  <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: 'transparent' }}></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-});
-
-const migrateLabels = (data) => {
-  let changed = false;
-  const newData = JSON.parse(JSON.stringify(data));
-  for (const [gameId, game] of Object.entries(newData)) {
-    if (game.label && game.cycles) {
-      const firstRunKey = game.cycles['main'] ? 'main' : Object.keys(game.cycles)[0];
-      if (firstRunKey && game.cycles[firstRunKey]) {
-        game.cycles[firstRunKey].label = game.label;
-        changed = true;
-      }
-      delete game.label;
-    }
-  }
-  return { data: newData, changed };
-};
-
-const checkPersist = () => {
-  try { return localStorage.getItem('persistSettings') !== 'false'; } catch(e) { return true; }
-};
 
 export default function App() {
-  const [persistSettings, setPersistSettings] = useState(checkPersist);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [toast, setToast] = useState(null);
-
   const notify = (msg, type) => setToast({ message: msg, type });
 
-  const [streamData, setStreamData] = useState(() => {
-    try {
-      const s = localStorage.getItem('streamManagerData');
-      if (s) {
-        const parsed = JSON.parse(s);
-        const { data, changed } = migrateLabels(parsed);
-        if (changed) return data;
-        return parsed;
-      }
-    } catch (e) {}
-    return {};
-  });
+  // --- Hooks ---
+  const settings = useSettings();
+  const { streamData, setStreamData, isSyncing, handleManualSync, handleAddGame, updateGameLink, editGameDetails, deleteGame, deleteCycle, deleteTimestamp, updateCycle, addCycle } = useStreamData(notify);
+  const { scaledSystemFonts, scaledLayoutPrefs } = useScaling(settings.systemFonts, settings.layoutPrefs);
+  const { searchQuery, setSearchQuery, searchResults, isSearching, handleSearch } = useSearch();
 
-  const [thumbnailConfig, setThumbnailConfig] = useState(() => {
-    if (!checkPersist()) return DEFAULT_THUMBNAIL_CONFIG;
-    try {
-      const s = localStorage.getItem('thumbnailConfig');
-      if (s) {
-        const p = JSON.parse(s);
-        return {
-          ...DEFAULT_THUMBNAIL_CONFIG,
-          ...p,
-          manualColors: { ...DEFAULT_THUMBNAIL_CONFIG.manualColors, ...(p.manualColors || {}) },
-          colors: { ...DEFAULT_THUMBNAIL_CONFIG.colors, ...(p.colors || {}) }
-        };
-      }
-    } catch (e) {}
-    return DEFAULT_THUMBNAIL_CONFIG;
-  });
-
-  const [systemFonts, setSystemFonts] = useState(() => {
-    if (!checkPersist()) return DEFAULT_SYSTEM_FONTS;
-    try { const s = localStorage.getItem('systemFonts'); return s ? JSON.parse(s) : DEFAULT_SYSTEM_FONTS; } catch(e) { return DEFAULT_SYSTEM_FONTS; }
-  });
-
-  const [layoutPrefs, setLayoutPrefs] = useState(() => {
-    if (!checkPersist()) return { ...DEFAULT_LAYOUT_PREFS, enableHoverEffects: true };
-    try { const s = localStorage.getItem('layoutPrefs'); return s ? { enableHoverEffects: true, ...DEFAULT_LAYOUT_PREFS, ...JSON.parse(s) } : { ...DEFAULT_LAYOUT_PREFS, enableHoverEffects: true }; } catch(e) { return { ...DEFAULT_LAYOUT_PREFS, enableHoverEffects: true }; }
-  });
-
-  const [modalBgIntensity, setModalBgIntensity] = useState(() => {
-    if (!checkPersist()) return DEFAULT_MODAL_BG_INTENSITY;
-    try { const s = localStorage.getItem('modalBgIntensity'); return s !== null ? parseFloat(s) : DEFAULT_MODAL_BG_INTENSITY; } catch(e) { return DEFAULT_MODAL_BG_INTENSITY; }
-  });
-
-  const [modalPanelOpacity, setModalPanelOpacity] = useState(() => {
-    if (!checkPersist()) return DEFAULT_MODAL_PANEL_OPACITY;
-    try { const s = localStorage.getItem('modalPanelOpacity'); return s !== null ? parseFloat(s) : DEFAULT_MODAL_PANEL_OPACITY; } catch(e) { return DEFAULT_MODAL_PANEL_OPACITY; }
-  });
-
+  // --- Navigation ---
   const [currentView, setCurrentView] = useState(() => {
-    try { const s = localStorage.getItem('streamManagerData'); if (s && Object.keys(JSON.parse(s)).length > 0) return 'dashboard'; } catch(e) {}
+    try { const s = localStorage.getItem('streamManagerData'); if (s && Object.keys(JSON.parse(s)).length > 0) return 'dashboard'; } catch (e) {}
     return 'data';
   });
-  
+
+  // --- Modals ---
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [initialRunForModal, setInitialRunForModal] = useState(null);
-  const [wCf, setWCF] = useState(null);
-  const [sQ, setSQ] = useState('');
-  const [sR, setSR] = useState([]);
-  const [isS, setIsS] = useState(false);
+  const [workspaceConfig, setWorkspaceConfig] = useState(null); // { gameId, cycleId, selectedStreamNumber }
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const mosaicImages = useMemo(() => Object.entries(streamData).flatMap(([id, g]) => 
-    (g.thumbnail_urls || []).filter(Boolean).map(url => ({ url, gameId: id }))
-  ), [streamData]);
-
-  const hoverPlaylistRef = useRef({ gameId: null, list: [], index: -1 });
-  
-  // Track BOTH url and gameId tightly so cards NEVER flash old games' images
-  const [hoveredImage, setHoveredImage] = useState({ url: '', gameId: null });
-  
-  const [hoverState, setHoverState] = useState({ cardId: null, gameId: null });
-  const hoverTimeoutRef = useRef(null);
-  const clearHoverTimeoutRef = useRef(null);
-  const [mosaicPaused, setMosaicPaused] = useState(false);
-
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-  useEffect(() => {
-    let timeoutId;
-    const handleResize = () => { clearTimeout(timeoutId); timeoutId = setTimeout(() => setWindowWidth(window.innerWidth), 100); };
-    window.addEventListener('resize', handleResize);
-    return () => { window.removeEventListener('resize', handleResize); clearTimeout(timeoutId); };
-  }, []);
-
-  const scaleFactor = Math.max(0.45, windowWidth / 1920);
-
-  const scaledSystemFonts = useMemo(() => {
-    const scaled = { ...systemFonts };
-    ['libTitle', 'libYear', 'dashboardTime', 'modalHeader', 'logTitle', 'logSub', 'searchBar'].forEach(key => {
-      if (typeof scaled[key] === 'number') scaled[key] = Math.max(1, scaled[key] * scaleFactor);
-    });
-    return scaled;
-  }, [systemFonts, scaleFactor]);
-
-  const scaledLayoutPrefs = useMemo(() => {
-    const scaled = { ...layoutPrefs };
-    ['cardPadding', 'cardGap', 'cardMaxWidth', 'containerPaddingX', 'containerPaddingY', 'cardRadius'].forEach(key => {
-      if (typeof scaled[key] === 'number') scaled[key] = Math.max(0, scaled[key] * scaleFactor);
-    });
-    return scaled;
-  }, [layoutPrefs, scaleFactor]);
-
-  const hasCustomSettings = JSON.stringify(systemFonts) !== JSON.stringify(DEFAULT_SYSTEM_FONTS) || JSON.stringify(layoutPrefs) !== JSON.stringify(DEFAULT_LAYOUT_PREFS) || JSON.stringify(thumbnailConfig) !== JSON.stringify(DEFAULT_THUMBNAIL_CONFIG);
-
-  useEffect(() => { localStorage.setItem('streamManagerData', JSON.stringify(streamData)); }, [streamData]);
-  useEffect(() => { localStorage.setItem('persistSettings', persistSettings); }, [persistSettings]);
-  useEffect(() => { if (persistSettings) localStorage.setItem('thumbnailConfig', JSON.stringify(thumbnailConfig)); else localStorage.removeItem('thumbnailConfig'); }, [thumbnailConfig, persistSettings]);
-  useEffect(() => { if (persistSettings) localStorage.setItem('systemFonts', JSON.stringify(systemFonts)); else localStorage.removeItem('systemFonts'); }, [systemFonts, persistSettings]);
-  useEffect(() => { if (persistSettings) localStorage.setItem('layoutPrefs', JSON.stringify(layoutPrefs)); else localStorage.removeItem('layoutPrefs'); }, [layoutPrefs, persistSettings]);
-  useEffect(() => { if (persistSettings) localStorage.setItem('modalBgIntensity', modalBgIntensity); else localStorage.removeItem('modalBgIntensity'); }, [modalBgIntensity, persistSettings]);
-  useEffect(() => { if (persistSettings) localStorage.setItem('modalPanelOpacity', modalPanelOpacity); else localStorage.removeItem('modalPanelOpacity'); }, [modalPanelOpacity, persistSettings]);
-
-  useEffect(() => {
-    const handleGlobalClick = () => {
-      if (layoutPrefs.enableHoverEffects === false && hoverState.gameId) setHoverState({ cardId: null, gameId: null });
-    };
-    window.addEventListener('click', handleGlobalClick);
-    return () => window.removeEventListener('click', handleGlobalClick);
-  }, [layoutPrefs.enableHoverEffects, hoverState.gameId]);
-
-  const handleCardClick = (e, uniqueCardId, gameId, cycleId = null) => {
-    e.stopPropagation();
-    if (layoutPrefs.enableHoverEffects !== false) {
-      setHoverState({ cardId: null, gameId: null });
-      openGameProfile(gameId, cycleId);
-    } else {
-      if (hoverState.cardId === uniqueCardId) {
-        setHoverState({ cardId: null, gameId: null });
-        openGameProfile(gameId, cycleId);
-      } else {
-        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-        if (clearHoverTimeoutRef.current) clearTimeout(clearHoverTimeoutRef.current);
-        setHoverState({ cardId: uniqueCardId, gameId });
-      }
-    }
-  };
-
-  const handleHoverGame = (cardId, gameId) => {
-    if (layoutPrefs.enableHoverEffects === false) return; 
-
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-      hoverTimeoutRef.current = null;
-    }
-    
-    if (cardId === null) {
-      if (!clearHoverTimeoutRef.current) {
-        clearHoverTimeoutRef.current = setTimeout(() => {
-          setHoverState({ cardId: null, gameId: null });
-          clearHoverTimeoutRef.current = null;
-        }, 1500);
-      }
-    } else {
-      hoverTimeoutRef.current = setTimeout(() => {
-        if (clearHoverTimeoutRef.current) {
-          clearTimeout(clearHoverTimeoutRef.current);
-          clearHoverTimeoutRef.current = null;
-        }
-        setHoverState({ cardId, gameId });
-      }, 1500);
-    }
-  };
-
-  useEffect(() => {
-    if (selectedGameId || wCf) { setMosaicPaused(true); return; }
-    setMosaicPaused(!!hoverState.gameId);
-  }, [selectedGameId, wCf, hoverState.gameId]);
-
-  useEffect(() => {
-    const isPaused = selectedGameId || wCf; 
-    if (isPaused) return;
-
-    const gameId = hoverState.gameId;
-    const isHovering = Boolean(gameId && streamData[gameId]);
-    let intervalId;
-
-    if (isHovering) {
-      if (hoverPlaylistRef.current.gameId !== gameId) {
-        hoverPlaylistRef.current = { gameId, list: generateSingleGamePlaylist(streamData[gameId].thumbnail_urls || []), index: -1 };
-        setHoveredImage({ url: streamData[gameId].cover_image || hoverPlaylistRef.current.list[0] || '', gameId }); 
-      } else {
-        const idx = hoverPlaylistRef.current.index;
-        setHoveredImage({ url: (idx >= 0 ? hoverPlaylistRef.current.list[idx] : null) || streamData[gameId].cover_image || '', gameId });
-      }
-
-      if (hoverPlaylistRef.current.list.length > 0) {
-        intervalId = setInterval(() => {
-          let idx = hoverPlaylistRef.current.index + 1;
-          if (idx >= hoverPlaylistRef.current.list.length) {
-            hoverPlaylistRef.current.list = generateSingleGamePlaylist(streamData[gameId].thumbnail_urls || [], hoverPlaylistRef.current.list[hoverPlaylistRef.current.list.length - 1]);
-            idx = 0;
-          }
-          hoverPlaylistRef.current.index = idx;
-          setHoveredImage({ url: hoverPlaylistRef.current.list[idx], gameId });
-        }, layoutPrefs.hoverCycleInterval || 1500); 
-      }
-    }
-
-    return () => clearInterval(intervalId);
-  }, [hoverState.gameId, streamData, selectedGameId, wCf, layoutPrefs.hoverCycleInterval]);
-
-  // Handle data recovery and Steam Auto-Link on component load
-  useEffect(() => {
-    const recovery = async () => {
-      const dataCopy = JSON.parse(JSON.stringify(streamData));
-      let changed = false;
-      
-      for (const [id, game] of Object.entries(dataCopy)) {
-        if (!game.details) game.details = { developer: 'Unknown', publisher: 'Unknown', releaseDate: game.release_year, genres: 'Unknown', tags: 'Unknown' };
-        
-        if (!game.cover_image) {
-          if (game.thumbnail_urls && game.thumbnail_urls.length > 0) {
-            game.cover_image = game.thumbnail_urls[0];
-            game.thumbnail_urls = game.thumbnail_urls.filter(url => !url.includes('header.jpg') && !url.includes('capsule'));
-          } else {
-            game.cover_image = 'https://placehold.co/600x400/1e293b/475569?text=Cover';
-          }
-          changed = true;
-        }
-        
-        let isUpdated = false;
-
-        if (!game.details.steamUrl && !game.details.notOnSteam) {
-          try {
-             let steamId = null;
-             if (/^\d+$/.test(id)) {
-                steamId = id;
-             } else {
-                const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-                const searchRes = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=english&cc=US`);
-                const searchData = await searchRes.json();
-                if (searchData.items && searchData.items.length > 0) {
-                   steamId = searchData.items[0].id;
-                }
-             }
-
-             if (steamId) {
-                const detailRes = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
-                const detailsRaw = await detailRes.json();
-                const steamDataObj = detailsRaw[steamId]?.data;
-
-                if (steamDataObj) {
-                   game.cover_image = steamDataObj.header_image;
-                   
-                   let newUrls = [];
-                   if (steamDataObj.screenshots) {
-                     newUrls = steamDataObj.screenshots.map(s => s.path_full);
-                   }
-                   
-                   newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
-                   game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
-                   
-                   game.details.developer = steamDataObj.developers?.join(', ') || game.details.developer;
-                   game.details.publisher = steamDataObj.publishers?.join(', ') || game.details.publisher;
-                   game.details.releaseDate = steamDataObj.release_date?.date || game.details.releaseDate;
-                   game.details.genres = steamDataObj.genres?.map(g => g.description).join(', ') || game.details.genres;
-                   game.details.steamUrl = `https://store.steampowered.com/app/${steamId}/`;
-                   
-                   isUpdated = true;
-                }
-             }
-             
-             await new Promise(r => setTimeout(r, 400));
-          } catch(e) {}
-        }
-        
-        if (!game.thumbnail_urls || game.thumbnail_urls.length < 2) {
-          try {
-            const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-            const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-            const rawgSearchData = await rawgSearchRes.json();
-            
-            if (rawgSearchData.results && rawgSearchData.results[0]) {
-              const rawgId = rawgSearchData.results[0].id;
-              const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-              const sData = await sRes.json();
-              if (sData.results) {
-                let newUrls = [...(game.thumbnail_urls || []), ...sData.results.map(x => x.image)].filter(Boolean);
-                game.thumbnail_urls = [...new Set(newUrls)];
-                isUpdated = true;
-              }
-            }
-          } catch(e) {}
-        }
-
-        if (isUpdated) changed = true;
-      }
-      
-      if (changed) setStreamData(dataCopy);
-    };
-    
-    if (Object.keys(streamData).length > 0) recovery();
-  }, []);
-
-  const handleManualSync = async () => {
-    if (isSyncing) return;
-    setIsSyncing(true);
-    notify('Starting manual library sync...', 'info');
-    
-    const dataCopy = JSON.parse(JSON.stringify(streamData));
-    let changed = false;
-    
-    for (const [id, game] of Object.entries(dataCopy)) {
-      if (!game.details) game.details = { developer: 'Unknown', publisher: 'Unknown', releaseDate: game.release_year, genres: 'Unknown', tags: 'Unknown' };
-      
-      if (!game.cover_image) {
-        if (game.thumbnail_urls && game.thumbnail_urls.length > 0) {
-          game.cover_image = game.thumbnail_urls[0];
-          game.thumbnail_urls = game.thumbnail_urls.filter(url => !url.includes('header.jpg') && !url.includes('capsule'));
-        } else {
-          game.cover_image = 'https://placehold.co/600x400/1e293b/475569?text=Cover';
-        }
-        changed = true;
-      }
-      
-      if (!game.details.steamUrl && !game.details.notOnSteam) {
-        try {
-           let steamId = null;
-           if (/^\d+$/.test(id)) {
-              steamId = id;
-           } else {
-              const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-              const searchRes = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=english&cc=US`);
-              const searchData = await searchRes.json();
-              if (searchData.items && searchData.items.length > 0) {
-                 steamId = searchData.items[0].id;
-              }
-           }
-
-           if (steamId) {
-              const detailRes = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
-              const detailsRaw = await detailRes.json();
-              const steamDataObj = detailsRaw[steamId]?.data;
-
-              if (steamDataObj) {
-                 game.cover_image = steamDataObj.header_image;
-                 let newUrls = [];
-                 if (steamDataObj.screenshots) newUrls = steamDataObj.screenshots.map(s => s.path_full);
-                 newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
-                 game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
-                 game.details.developer = steamDataObj.developers?.join(', ') || game.details.developer;
-                 game.details.publisher = steamDataObj.publishers?.join(', ') || game.details.publisher;
-                 game.details.releaseDate = steamDataObj.release_date?.date || game.details.releaseDate;
-                 game.details.genres = steamDataObj.genres?.map(g => g.description).join(', ') || game.details.genres;
-                 game.details.steamUrl = `https://store.steampowered.com/app/${steamId}/`;
-                 changed = true;
-              }
-           }
-           await new Promise(r => setTimeout(r, 400));
-        } catch(e) {}
-      }
-      
-      if (!game.thumbnail_urls || game.thumbnail_urls.length < 2) {
-        try {
-          const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-          const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-          const rawgSearchData = await rawgSearchRes.json();
-          
-          if (rawgSearchData.results && rawgSearchData.results[0]) {
-            const rawgId = rawgSearchData.results[0].id;
-            const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-            const sData = await sRes.json();
-            if (sData.results) {
-              let newUrls = [...(game.thumbnail_urls || []), ...sData.results.map(x => x.image)].filter(Boolean);
-              game.thumbnail_urls = [...new Set(newUrls)];
-              changed = true;
-            }
-          }
-        } catch(e) {}
-      }
-    }
-    
-    if (changed) {
-      setStreamData(dataCopy);
-      notify('Library sync completed successfully!', 'success');
-    } else {
-      notify('Library is already up to date.', 'info');
-    }
-    
-    setIsSyncing(false);
-  };
-
-  const handleSearch = async () => {
-    if (!sQ.trim()) { setSR([]); return; }
-    setIsS(true);
-    try {
-      const targetUrl = `/steam-api/api/storesearch/?term=${sQ}&l=english&cc=US`;
-      const res = await fetch(targetUrl);
-      const data = await res.json();
-
-      if (data.items && data.items.length > 0) {
-        const appIds = data.items.map(i => i.id).join(',');
-        try {
-          const detailRes = await fetch(`/steam-api/api/appdetails?appids=${appIds}&l=english`);
-          const detailData = await detailRes.json();
-          
-          setSR(data.items.map(item => {
-            const d = detailData[item.id]?.data;
-            return {
-              id: item.id.toString(),
-              name: item.name,
-              cover_image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`,
-              developers: d?.developers ? d.developers.map(dev => ({name: dev})) : [],
-              released: d?.release_date?.date || '',
-              isRawgOnly: false
-            };
-          }));
-        } catch(err) {
-          setSR(data.items.map(item => ({ id: item.id.toString(), name: item.name, cover_image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`, isRawgOnly: false })));
-        }
-      } else {
-        const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(sQ)}&page_size=12`);
-        const rawgData = await rawgRes.json();
-        if (rawgData.results && rawgData.results.length > 0) {
-           setSR(rawgData.results.map(item => ({ id: item.id.toString(), name: item.name, cover_image: item.background_image, developers: item.developers || [], released: item.released || '', isRawgOnly: true })));
-        } else {
-           setSR([]);
-        }
-      }
-    } catch (err) { console.error("Search failed:", err); } finally { setIsS(false); }
-  };
-
+  const isModalOpen = !!(selectedGameId || workspaceConfig);
   const openGameProfile = (gameId, runId = null) => { setSelectedGameId(gameId); setInitialRunForModal(runId); };
-  const handleImportDefault = (type = 'full') => { fetch('defaultData.json').then(res => { if (res.ok) return res.json(); throw new Error(); }).then(data => { data.type = type === 'settings' ? 'settings_only' : 'full_backup'; handleImport(data); }).catch(() => notify('Could not find defaultData.json', 'error')); };
 
-  const handleAddGame = async (g) => {
-    const rid = g.id.toString();
-    if (streamData[rid]) { openGameProfile(rid); setCurrentView('library'); return; }
-    notify(g.isRawgOnly ? 'Fetching data from RAWG...' : 'Fetching Steam metadata & RAWG images...', 'info');
-    
-    let details = { developer: g.developers?.map(d => d.name).join(', ') || 'Unknown', publisher: 'Unknown', releaseDate: g.released || new Date().getFullYear().toString(), genres: 'Unknown', tags: 'Unknown', steamUrl: g.isRawgOnly ? '' : `https://store.steampowered.com/app/${rid}/`, notOnSteam: g.isRawgOnly || false };
-    let cover_image = g.cover_image, thumbnails = [], finalName = g.name, finalYear = g.released ? new Date(g.released).getFullYear().toString() : new Date().getFullYear().toString();
+  // --- Hover ---
+  const { hoveredImage, hoverState, mosaicPaused, onHoverGame, handleCardClick } = useHover({
+    streamData, isModalOpen, layoutPrefs: settings.layoutPrefs,
+  });
 
+  // --- Mosaic images ---
+  const mosaicImages = useMemo(() =>
+    Object.entries(streamData).flatMap(([id, g]) =>
+      (g.thumbnail_urls || []).filter(Boolean).map(url => ({ url, gameId: id }))
+    ), [streamData]);
+
+  // --- Background image logic ---
+  const isImageReady = hoverState.gameId && hoveredImage.gameId === hoverState.gameId;
+  let currentBgUrl = '';
+  if (hoverState.gameId) {
+    currentBgUrl = isImageReady ? hoveredImage.url : (streamData[hoverState.gameId]?.cover_image || streamData[hoverState.gameId]?.thumbnail_urls?.[0] || '');
+  } else {
+    currentBgUrl = hoveredImage.url; // retain for fade-out
+  }
+
+  // --- Import / Export ---
+  const handleImport = (importedData) => {
     try {
-      if (g.isRawgOnly) {
-         const detailRes = await fetch(`https://api.rawg.io/api/games/${rid}?key=${RAWG_API_KEY}`);
-         const detailData = await detailRes.json();
-         details.developer = detailData.developers?.map(d => d.name).join(', ') || details.developer;
-         details.publisher = detailData.publishers?.map(p => p.name).join(', ') || details.publisher;
-         details.releaseDate = detailData.released || details.releaseDate;
-         details.genres = detailData.genres?.map(gn => gn.name).join(', ') || details.genres;
-         details.tags = detailData.tags?.filter(t => t.language === 'eng').map(t => t.name).join(', ') || details.tags;
-         if (detailData.background_image) cover_image = detailData.background_image;
-         const sRes = await fetch(`https://api.rawg.io/api/games/${rid}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-         const sData = await sRes.json();
-         if (sData.results) thumbnails = sData.results.map(x => x.image).filter(Boolean);
-      } else {
-         const targetUrl = `/steam-api/api/appdetails?appids=${rid}&l=english`;
-         const res = await fetch(targetUrl);
-         const steamDataObj = await res.json();
-         const gameDetails = steamDataObj[rid]?.data;
-         if (gameDetails) {
-           finalName = gameDetails.name || finalName;
-           const rDate = gameDetails.release_date?.date;
-           finalYear = rDate ? new Date(rDate).getFullYear().toString() : finalYear;
-           details.developer = gameDetails.developers?.join(', ') || details.developer;
-           details.publisher = gameDetails.publishers?.join(', ') || 'Unknown';
-           details.releaseDate = rDate || finalYear;
-           details.genres = gameDetails.genres?.map(gn => gn.description).join(', ') || 'Unknown';
-           if (gameDetails.header_image) cover_image = gameDetails.header_image;
-           if (gameDetails.screenshots) thumbnails = gameDetails.screenshots.map(s => s.path_full);
-         }
-         try {
-           const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(finalName.replace(/[:™®©]/g, '').trim())}&page_size=1`);
-           const rawgSearchData = await rawgSearchRes.json();
-           if (rawgSearchData.results && rawgSearchData.results[0]) {
-             const rawgGame = rawgSearchData.results[0];
-             if (rawgGame.tags) { const engTags = rawgGame.tags.filter(t => t.language === 'eng').map(t => t.name); if (engTags.length > 0) details.tags = engTags.join(', '); }
-             const sRes = await fetch(`https://api.rawg.io/api/games/${rawgGame.id}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-             const sData = await sRes.json();
-             if (sData.results) thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);
-           }
-         } catch (err) {}
+      const { migrateLabels } = require('./utils/dataUtils');
+      const isSettingsOnly = importedData.type === 'settings_only';
+      const isFullBackup = !isSettingsOnly && (importedData.type === 'full_backup' || importedData.streamData !== undefined);
+      if (isFullBackup || (!isSettingsOnly && !isFullBackup)) setStreamData(migrateLabels(isFullBackup ? importedData.streamData : importedData).data);
+      if (isFullBackup || isSettingsOnly) {
+        if (importedData.thumbnailConfig) settings.setThumbnailConfig(importedData.thumbnailConfig);
+        if (importedData.systemFonts) settings.setSystemFonts(importedData.systemFonts);
+        if (importedData.layoutPrefs) settings.setLayoutPrefs(importedData.layoutPrefs);
+        if (importedData.modalBgIntensity !== undefined) settings.setModalBgIntensity(importedData.modalBgIntensity);
+        if (importedData.modalPanelOpacity !== undefined) settings.setModalPanelOpacity(importedData.modalPanelOpacity);
       }
-      notify(`Successfully added ${finalName}!`, 'success');
-    } catch(e) { notify(`Added ${finalName}, but some data failed to load`, 'error'); }
-
-    setStreamData(prev => ({
-      ...prev,
-      [rid]: { game_name: finalName, release_year: finalYear, cover_image, thumbnail_urls: [...new Set(thumbnails)], cycles: { main: { stream_count: 0, timestamps: [], isMain: true, youtubePlaylist: '', displayName: 'First Playthrough', label: 'Ongoing' } }, details }
-    }));
-    openGameProfile(rid);
+    } catch (e) { notify('Failed to parse import file', 'error'); }
   };
-
-  const updateGameLink = async (gameId, steamLink) => {
-    let steamId = steamLink.includes('steampowered.com/app/') ? steamLink.split('steampowered.com/app/')[1].split('/')[0].split('?')[0] : steamLink;
-    notify('Syncing with Steam & RAWG...', 'info');
-    try {
-      const res = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
-      const gameDetails = (await res.json())[steamId]?.data;
-      if (!gameDetails) return notify('Invalid Steam link or ID', 'error');
-
-      let thumbnails = gameDetails.screenshots ? gameDetails.screenshots.map(s => s.path_full) : [];
-      let tagsString = 'Unknown';
-      try {
-        const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(gameDetails.name)}&page_size=1`);
-        const rawgSearchData = await rawgSearchRes.json();
-        if (rawgSearchData.results && rawgSearchData.results[0]) {
-            const rawgGame = rawgSearchData.results[0];
-            if (rawgGame.tags) { const engTags = rawgGame.tags.filter(t => t.language === 'eng').map(t => t.name); if (engTags.length > 0) tagsString = engTags.join(', '); }
-            const sRes = await fetch(`https://api.rawg.io/api/games/${rawgGame.id}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-            const sData = await sRes.json();
-            if (sData.results) thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);
-        }
-      } catch(e) {}
-
-      const nd = JSON.parse(JSON.stringify(streamData));
-      nd[gameId].game_name = gameDetails.name;
-      nd[gameId].release_year = gameDetails.release_date?.date ? new Date(gameDetails.release_date.date).getFullYear().toString() : nd[gameId].release_year;
-      nd[gameId].cover_image = gameDetails.header_image;
-      nd[gameId].thumbnail_urls = [...new Set(thumbnails)];
-      nd[gameId].details = { developer: gameDetails.developers?.join(', ') || 'Unknown', publisher: gameDetails.publishers?.join(', ') || 'Unknown', releaseDate: gameDetails.release_date?.date || nd[gameId].release_year, genres: gameDetails.genres?.map(g => g.description).join(', ') || 'Unknown', tags: tagsString, steamUrl: `https://store.steampowered.com/app/${steamId}/`, notOnSteam: false };
-      
-      setStreamData(nd);
-      notify('Game updated with Steam & RAWG data!', 'success');
-    } catch(e) { notify('Update failed', 'error'); }
-  };
-
-  const editGameDetails = (gameId, newName, newYear, developer, publisher, genres, tags, steamIdToSync, steamUrl, notOnSteam) => {
-    const nd = JSON.parse(JSON.stringify(streamData));
-    if (nd[gameId]) {
-      nd[gameId].game_name = newName;
-      if (newYear) nd[gameId].release_year = newYear;
-      if (!nd[gameId].details) nd[gameId].details = {};
-      if (developer !== undefined) nd[gameId].details.developer = developer;
-      if (publisher !== undefined) nd[gameId].details.publisher = publisher;
-      if (genres !== undefined) nd[gameId].details.genres = genres;
-      if (tags !== undefined) nd[gameId].details.tags = tags;
-      if (steamUrl !== undefined) nd[gameId].details.steamUrl = steamUrl;
-      if (notOnSteam !== undefined) nd[gameId].details.notOnSteam = notOnSteam;
-      setStreamData(nd);
-      notify(`Game details updated!`, 'success');
-      if (steamIdToSync) updateGameLink(gameId, steamIdToSync);
-    }
-  };
-
-  const deleteGame = (id, name) => { const nd = { ...streamData }; delete nd[id]; setStreamData(nd); notify(`Deleted ${name}`, 'error'); };
-  const deleteCycle = (gid, cycId) => { const nd = JSON.parse(JSON.stringify(streamData)); delete nd[gid].cycles[cycId]; setStreamData(nd); notify(`Removed run`, 'error'); };
-  const deleteTimestamp = (gid, cycId, idx) => { const nd = JSON.parse(JSON.stringify(streamData)); nd[gid].cycles[cycId].timestamps.splice(idx, 1); nd[gid].cycles[cycId].stream_count = nd[gid].cycles[cycId].timestamps.length; setStreamData(nd); notify(`Deleted log entry`, 'error'); };
-
-  const updateCycle = (gameId, oldCycleId, newDisplayName, isMain, youtubePlaylist, newLabel) => {
-    const nd = JSON.parse(JSON.stringify(streamData));
-    const cycles = nd[gameId].cycles;
-    if (!cycles[oldCycleId]) return;
-    const cycleData = cycles[oldCycleId];
-    const newId = newDisplayName === 'First Playthrough' ? 'main' : newDisplayName.toLowerCase().replace(/\s+/g, '_');
-    if (oldCycleId !== newId) { delete cycles[oldCycleId]; cycles[newId] = cycleData; }
-    cycles[newId].displayName = newDisplayName;
-    cycles[newId].isMain = isMain;
-    cycles[newId].youtubePlaylist = youtubePlaylist || '';
-    if (newLabel) cycles[newId].label = newLabel;
-    setStreamData(nd);
-    notify(`Run updated to "${newDisplayName}"`, 'success');
-  };
-
-  const addCycle = (gameId, displayName) => {
-    const formattedName = formatRunName(displayName);
-    const newId = formattedName === 'First Playthrough' ? 'main' : formattedName.toLowerCase().replace(/\s+/g, '_');
-    const nd = JSON.parse(JSON.stringify(streamData));
-    if (nd[gameId].cycles[newId]) { notify('A run with that name already exists', 'error'); return false; }
-    nd[gameId].cycles[newId] = { stream_count: 0, timestamps: [], isMain: false, youtubePlaylist: '', displayName: formattedName, label: 'Ongoing' };
-    setStreamData(nd);
-    notify(`Run "${formattedName}" created`, 'success');
-    return true;
-  };
-
-  const handleStartWorkspace = (gameId, cycleId, selectedStreamNumber) => { setSelectedGameId(null); setWCF({ gameId, cycleId, selectedStreamNumber }); };
 
   const handleExport = (type) => {
-    const dateStr = new Date().toISOString().slice(0,19).replace(/:/g, '-');
-    let exportData = { version: "2.0.0", exportDate: new Date().toISOString() };
-    let fileNameStr = `streamtracker_${dateStr}.json`;
-    
-    if (type === 'stream') { 
-        exportData = streamData; 
-        fileNameStr = `streamtracker_data_${dateStr}.json`; 
-    } 
-    else if (type === 'settings') { 
-        exportData = { ...exportData, type: "settings_only", thumbnailConfig, systemFonts, layoutPrefs, modalBgIntensity, modalPanelOpacity }; 
-        fileNameStr = `streamtracker_settings_${dateStr}.json`; 
-    } 
-    else { 
-        exportData = { ...exportData, type: "full_backup", streamData, thumbnailConfig, systemFonts, layoutPrefs, modalBgIntensity, modalPanelOpacity }; 
-        fileNameStr = `streamtracker_full_backup_${dateStr}.json`; 
-    }
-    
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = fileNameStr; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    const dateStr = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    let exportData = { version: '2.0.0', exportDate: new Date().toISOString() };
+    let fileName = `streamtracker_${dateStr}.json`;
+    if (type === 'stream') { exportData = streamData; fileName = `streamtracker_data_${dateStr}.json`; }
+    else if (type === 'settings') { exportData = { ...exportData, type: 'settings_only', thumbnailConfig: settings.thumbnailConfig, systemFonts: settings.systemFonts, layoutPrefs: settings.layoutPrefs, modalBgIntensity: settings.modalBgIntensity, modalPanelOpacity: settings.modalPanelOpacity }; fileName = `streamtracker_settings_${dateStr}.json`; }
+    else { exportData = { ...exportData, type: 'full_backup', streamData, thumbnailConfig: settings.thumbnailConfig, systemFonts: settings.systemFonts, layoutPrefs: settings.layoutPrefs, modalBgIntensity: settings.modalBgIntensity, modalPanelOpacity: settings.modalPanelOpacity }; }
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = fileName; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     setShowExportModal(false);
   };
 
@@ -849,46 +100,36 @@ export default function App() {
     handleExport(type);
     setTimeout(() => {
       if (type === 'stream' || type === 'full') setStreamData({});
-      if (type === 'settings' || type === 'full') { setThumbnailConfig(DEFAULT_THUMBNAIL_CONFIG); setSystemFonts(DEFAULT_SYSTEM_FONTS); setLayoutPrefs(DEFAULT_LAYOUT_PREFS); setModalBgIntensity(DEFAULT_MODAL_BG_INTENSITY); setModalPanelOpacity(DEFAULT_MODAL_PANEL_OPACITY); }
+      if (type === 'settings' || type === 'full') settings.resetSettings();
       notify(`Deleted and backed up ${type === 'full' ? 'all' : type} data.`, 'success');
-    }, 500); 
+    }, 500);
   };
 
-  const handleImport = (importedData) => {
-    try {
-      const isSettingsOnly = importedData.type === 'settings_only';
-      const isFullBackup = !isSettingsOnly && (importedData.type === 'full_backup' || importedData.streamData !== undefined);
-      if (isFullBackup || (!isSettingsOnly && !isFullBackup)) setStreamData(migrateLabels(isFullBackup ? importedData.streamData : importedData).data);
-      if (isFullBackup || isSettingsOnly) {
-        if (importedData.thumbnailConfig) setThumbnailConfig(importedData.thumbnailConfig);
-        if (importedData.systemFonts) setSystemFonts(importedData.systemFonts);
-        if (importedData.layoutPrefs) setLayoutPrefs(importedData.layoutPrefs);
-        if (importedData.modalBgIntensity !== undefined) setModalBgIntensity(importedData.modalBgIntensity);
-        if (importedData.modalPanelOpacity !== undefined) setModalPanelOpacity(importedData.modalPanelOpacity);
-      }
-    } catch (e) { notify('Failed to parse import file', 'error'); }
+  const handleImportDefault = (type = 'full') => {
+    fetch('defaultData.json').then(res => { if (res.ok) return res.json(); throw new Error(); })
+      .then(data => { data.type = type === 'settings' ? 'settings_only' : 'full_backup'; handleImport(data); })
+      .catch(() => notify('Could not find defaultData.json', 'error'));
   };
 
-  // Synchronous readiness check: The mosaic and fade ONLY trigger when hoveredImage strictly equals the currently hovered gameId.
-  const isImageReady = hoverState.gameId && hoveredImage.gameId === hoverState.gameId;
-  
-  // Safe rendering url that prevents the background from snapping incorrectly while fading out.
-  let currentBgUrl = '';
-  if (hoverState.gameId) {
-    if (isImageReady) {
-      currentBgUrl = hoveredImage.url;
-    } else {
-      currentBgUrl = streamData[hoverState.gameId]?.cover_image || streamData[hoverState.gameId]?.thumbnail_urls?.[0] || '';
-    }
-  } else {
-    // Crucial: retains the last hovered image's url so it fades out gracefully instead of flashing!
-    currentBgUrl = hoveredImage.url;
-  }
+  // --- Add game wrapper (opens profile after add) ---
+  const onAddGame = async (g) => {
+    const rid = g.id.toString();
+    if (streamData[rid]) { openGameProfile(rid); setCurrentView('library'); return; }
+    const newId = await handleAddGame(g);
+    if (newId) openGameProfile(newId);
+  };
+
+  // --- Shared card props ---
+  const cardProps = { streamData, hoveredImage, hoverState, onHoverGame, systemFonts: scaledSystemFonts, layoutPrefs: scaledLayoutPrefs };
+
+  const makeHandleCardClick = (cycleId = null) => (e, uniqueCardId, gameId) =>
+    handleCardClick(e, uniqueCardId, gameId, openGameProfile, cycleId);
 
   return (
     <div className="min-h-screen text-white font-sans antialiased relative bg-black overflow-hidden flex flex-col">
-      <style>{`.custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #555; border-radius: 8px; } .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #888; } .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
+      <style>{`.custom-scrollbar::-webkit-scrollbar{width:8px;height:8px}.custom-scrollbar::-webkit-scrollbar-track{background:transparent}.custom-scrollbar::-webkit-scrollbar-thumb{background:#555;border-radius:8px}.custom-scrollbar::-webkit-scrollbar-thumb:hover{background:#888}.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}`}</style>
 
+      {/* Background layer */}
       <div className="absolute inset-0 z-0 pointer-events-none bg-black">
         <div className={`absolute inset-0 transition-opacity duration-[1200ms] ease-out ${isImageReady ? 'opacity-100' : 'opacity-0'}`}>
           <CrossfadeImage src={currentBgUrl} className="absolute inset-0 w-full h-full" imgClassName="object-cover" />
@@ -896,68 +137,47 @@ export default function App() {
         <div className="absolute inset-0 z-10">
           <MosaicBackground mosaicImages={mosaicImages} isPaused={mosaicPaused} isSlowMode={currentView !== 'stats'} shouldFlip={isImageReady} />
         </div>
-        <div className="absolute inset-0 bg-black transition-opacity duration-300 z-20 pointer-events-none" style={{ opacity: layoutPrefs.bgDimming ?? 0.5 }} />
+        <div className="absolute inset-0 bg-black transition-opacity duration-300 z-20 pointer-events-none" style={{ opacity: settings.layoutPrefs.bgDimming ?? 0.5 }} />
       </div>
 
+      {/* App shell */}
       <div className="relative z-20 flex flex-col h-screen">
         <Header currentView={currentView} onViewChange={setCurrentView} onImport={handleImport} onExport={() => setShowExportModal(true)} />
 
         <main key={currentView} className="page-transition flex-1 overflow-hidden flex flex-col relative">
           {currentView === 'data' && (
             <div className="flex flex-col h-full overflow-hidden bg-black/40 backdrop-blur-xl">
-              <DataManager systemFonts={systemFonts} setSystemFonts={setSystemFonts} layoutPrefs={layoutPrefs} setLayoutPrefs={setLayoutPrefs} modalBgIntensity={modalBgIntensity} setModalBgIntensity={setModalBgIntensity} modalPanelOpacity={modalPanelOpacity} setModalPanelOpacity={setModalPanelOpacity} persistSettings={persistSettings} setPersistSettings={setPersistSettings} onWipeData={handleWipeData} onRunSync={handleManualSync} isSyncing={isSyncing} />
+              <DataManager
+                systemFonts={settings.systemFonts} setSystemFonts={settings.setSystemFonts}
+                layoutPrefs={settings.layoutPrefs} setLayoutPrefs={settings.setLayoutPrefs}
+                modalBgIntensity={settings.modalBgIntensity} setModalBgIntensity={settings.setModalBgIntensity}
+                modalPanelOpacity={settings.modalPanelOpacity} setModalPanelOpacity={settings.setModalPanelOpacity}
+                persistSettings={settings.persistSettings} setPersistSettings={settings.setPersistSettings}
+                onWipeData={handleWipeData} onRunSync={handleManualSync} isSyncing={isSyncing}
+              />
             </div>
           )}
           {currentView === 'dashboard' && (
-            <Dashboard streamData={streamData} handleCardClick={handleCardClick} systemFonts={scaledSystemFonts} layoutPrefs={scaledLayoutPrefs} hoveredImage={hoveredImage} hoverState={hoverState} onHoverGame={handleHoverGame} onImportDefault={handleImportDefault} hasCustomSettings={hasCustomSettings} />
+            <Dashboard {...cardProps} handleCardClick={(e, id, gid, cid) => handleCardClick(e, id, gid, openGameProfile, cid)} onImportDefault={handleImportDefault} hasCustomSettings={settings.hasCustomSettings} />
           )}
           {currentView === 'library' && (
-            <Library streamData={streamData} handleCardClick={handleCardClick} onDeleteGame={deleteGame} onUpdateGameLink={updateGameLink} onEditGame={editGameDetails} systemFonts={scaledSystemFonts} layoutPrefs={scaledLayoutPrefs} hoveredImage={hoveredImage} hoverState={hoverState} onHoverGame={handleHoverGame} onImportDefault={handleImportDefault} hasCustomSettings={hasCustomSettings} />
+            <Library {...cardProps} handleCardClick={(e, id, gid) => handleCardClick(e, id, gid, openGameProfile)} onDeleteGame={deleteGame} onUpdateGameLink={updateGameLink} onEditGame={editGameDetails} onImportDefault={handleImportDefault} hasCustomSettings={settings.hasCustomSettings} />
           )}
           {currentView === 'stats' && (
             <Stats streamData={streamData} systemFonts={scaledSystemFonts} layoutPrefs={scaledLayoutPrefs} />
           )}
-          {currentView === 'search' && (() => {
-            const containerStyle = { paddingLeft: `clamp(16px, ${scaledLayoutPrefs.containerPaddingX}px, 5vw)`, paddingRight: `clamp(16px, ${scaledLayoutPrefs.containerPaddingX}px, 5vw)`, paddingTop: `clamp(16px, ${scaledLayoutPrefs.containerPaddingY}px, 5vh)`, paddingBottom: `clamp(16px, ${scaledLayoutPrefs.containerPaddingY}px, 5vh)` };
-            const gridStyle = { display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${scaledLayoutPrefs.cardMaxWidth || 250}px), 1fr))`, gap: `${scaledLayoutPrefs.cardGap}px` };
-            const cardStyle = { borderRadius: scaledLayoutPrefs.cardRounded ? `${scaledLayoutPrefs.cardRadius}px` : '0px', backgroundColor: `rgba(0, 0, 0, ${scaledLayoutPrefs.panelFillOpacity ?? 0.1})`, backdropFilter: 'blur(8px)', border: '1px solid rgba(255, 255, 255, 0.1)', transition: 'all 0.2s', width: '100%', margin: '0 auto' };
-
-            return (
-              <div className="flex flex-col h-full overflow-hidden">
-                <div className="sticky top-0 z-10 border-b border-white/10 px-6 py-4">
-                  <div className="max-w-4xl mx-auto relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 z-10" size={22} />
-                    <input type="text" style={{ fontSize: `${scaledSystemFonts.searchBar}px` }} className="w-full bg-black/60 border border-white/10 rounded-none py-4 pl-12 pr-6 text-lg focus:outline-none transition-colors shadow-inner text-white peer relative z-0" placeholder="Search Steam Database..." value={sQ} onChange={(e) => setSQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearch()} />
-                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 peer-focus:opacity-100 transition-opacity duration-300 z-20 pointer-events-none" />
-                    {isS && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 animate-spin text-blue-400 z-10" size={22} />}
-                  </div>
-                </div>
-                <div className="flex-1 overflow-y-auto custom-scrollbar" style={containerStyle}>
-                  <div style={gridStyle}>
-                    {sR.map(g => {
-                      const isInLibrary = Object.values(streamData).some(existing => existing.game_name?.toLowerCase() === g.name?.toLowerCase()) || !!streamData[g.id.toString()];
-                      return (
-                        <div key={g.id} className="group relative overflow-hidden shadow-xl flex flex-col transition-all duration-300 delay-0 hover:scale-105 hover:shadow-2xl hover:z-10 hover:delay-300" style={cardStyle}>
-                          <div className="aspect-video bg-black/40 overflow-hidden relative shrink-0">
-                            <img src={g.cover_image || g.background_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover'} alt={g.name} className="absolute inset-0 w-full h-full object-cover" />
-                            {g.isRawgOnly && <span className="absolute top-2 right-2 bg-purple-600/80 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full z-20 shadow">RAWG</span>}
-                            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
-                          </div>
-                          <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between" style={{ padding: `clamp(12px, ${scaledLayoutPrefs.cardPadding}px, 20px)` }}>
-                            <h3 className="font-bold tracking-tight drop-shadow-md group-hover:text-[#e8c87a] transition-colors duration-300" style={{ fontSize: `${scaledSystemFonts.libTitle}px` }}>{g.name}</h3>
-                            {isInLibrary ? <div className="mt-4 w-full bg-white/5 py-2 rounded-none font-medium flex items-center justify-center text-white/50 cursor-not-allowed border border-white/5">Already in Library</div> : <button onClick={() => handleAddGame(g)} className="mt-4 w-full bg-white/10 hover:bg-white/20 active:scale-95 py-2 rounded-none font-medium flex items-center justify-center gap-2 transition-all border border-white/10"><Plus size={18} /> Add to Library</button>}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
+          {currentView === 'search' && (
+            <SearchView
+              searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+              searchResults={searchResults} isSearching={isSearching} handleSearch={handleSearch}
+              handleAddGame={onAddGame} streamData={streamData}
+              scaledSystemFonts={scaledSystemFonts} scaledLayoutPrefs={scaledLayoutPrefs}
+            />
+          )}
         </main>
       </div>
 
+      {/* Export modal */}
       {showExportModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-[4px]" onClick={() => setShowExportModal(false)}>
           <div className="rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl flex flex-col gap-3 bg-black/85 border border-white/10 backdrop-blur-md" onClick={e => e.stopPropagation()}>
@@ -970,14 +190,29 @@ export default function App() {
         </div>
       )}
 
+      {/* Notifications */}
       {toast && <Notification message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
+      {/* Game Profile Modal */}
       {selectedGameId && (
-        <GameProfileModal gameId={selectedGameId} gameData={streamData[selectedGameId]} streamData={streamData} onClose={() => { setSelectedGameId(null); setInitialRunForModal(null); }} onStartWorkspace={handleStartWorkspace} onDeleteCycle={deleteCycle} onDeleteTimestamp={deleteTimestamp} onNotify={notify} systemFonts={scaledSystemFonts} modalBgIntensity={modalBgIntensity} modalPanelOpacity={modalPanelOpacity} initialRunId={initialRunForModal} onUpdateCycle={updateCycle} onAddCycle={addCycle} layoutPrefs={scaledLayoutPrefs} />
+        <GameProfileModal
+          gameId={selectedGameId} gameData={streamData[selectedGameId]} streamData={streamData}
+          onClose={() => { setSelectedGameId(null); setInitialRunForModal(null); }}
+          onStartWorkspace={(gameId, cycleId, selectedStreamNumber) => { setSelectedGameId(null); setWorkspaceConfig({ gameId, cycleId, selectedStreamNumber }); }}
+          onDeleteCycle={deleteCycle} onDeleteTimestamp={deleteTimestamp} onNotify={notify}
+          systemFonts={scaledSystemFonts} modalBgIntensity={settings.modalBgIntensity} modalPanelOpacity={settings.modalPanelOpacity}
+          initialRunId={initialRunForModal} onUpdateCycle={updateCycle} onAddCycle={addCycle} layoutPrefs={scaledLayoutPrefs}
+        />
       )}
 
-      {wCf && (
-        <LivestreamSetupWorkspace gameId={wCf.gameId} cycleName={wCf.cycleId} streamData={streamData} onBack={(returnedCycleId) => { setSelectedGameId(wCf.gameId); setInitialRunForModal(returnedCycleId || wCf.cycleId); setWCF(null); }} onSave={setStreamData} config={thumbnailConfig} setConfig={setThumbnailConfig} onNotify={notify} selectedStreamNumber={wCf.selectedStreamNumber} systemFonts={scaledSystemFonts} />
+      {/* Workspace */}
+      {workspaceConfig && (
+        <LivestreamSetupWorkspace
+          gameId={workspaceConfig.gameId} cycleName={workspaceConfig.cycleId} streamData={streamData}
+          onBack={(returnedCycleId) => { setSelectedGameId(workspaceConfig.gameId); setInitialRunForModal(returnedCycleId || workspaceConfig.cycleId); setWorkspaceConfig(null); }}
+          onSave={setStreamData} config={settings.thumbnailConfig} setConfig={settings.setThumbnailConfig}
+          onNotify={notify} selectedStreamNumber={workspaceConfig.selectedStreamNumber} systemFonts={scaledSystemFonts}
+        />
       )}
     </div>
   );

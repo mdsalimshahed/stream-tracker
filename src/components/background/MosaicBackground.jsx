@@ -2,13 +2,15 @@
 import React, { useRef, useMemo, useEffect } from 'react';
 import { getLowResUrl } from '../../utils/helpers';
 
-const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip, highResImages }) => {  // OPTIMIZATION: Cut DOM elements by over 50% to save RAM
-  const ROWS = 6; // Down from 7
-  const IMGS_PER_ROW = 12; // Down from 24 (12 * 2 sets = 24 images per row instead of 48)
+const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip, highResImages }) => {  
+  const ROWS = 6; 
+  const IMGS_PER_ROW = 12; 
   
   const rowRefs = useRef([]);
   const requestRef = useRef(null);
-  const globalStateRef = useRef({ currentSpeed: isSlowMode ? 0.15 : 1 });
+  
+  // Bumped up the base start speeds
+  const globalStateRef = useRef({ currentSpeed: isSlowMode ? 0.05 : 2.8 });
   const modeRef = useRef({ isPaused, isSlowMode });
 
   useEffect(() => { 
@@ -18,9 +20,9 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
   const rowsConfig = useMemo(() => {
     const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
     
-    // OPTIMIZATION: Apply low-res formatting to the pool
+    // HARDCODED LOW-RES
     const pool = mosaicImages?.length > 0 
-      ? mosaicImages.map(img => ({ ...img, url: getLowResUrl(img.url, highResImages) }))
+      ? mosaicImages.map(img => ({ ...img, url: getLowResUrl(img.url, false) }))
       : [fallback];
       
     const aspectRatios = ['16/9', '4/3', '1/1'];
@@ -57,15 +59,16 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
       }
       
       const baseWithAspect = base.map(b => ({ url: b.url, aspect: aspectRatios[Math.floor(Math.random() * aspectRatios.length)] }));
-      const duration = 40000 + Math.random() * 20000;
+      
+      // INCREASED BASE SPEED slightly to give the math more room to work with
+      const baseSpeed = 0.0004 + Math.random() * 0.0008;
       const direction = i % 2 === 0 ? 'left' : 'right';
-      const baseSpeed = 50 / duration;
       
       return { 
         imgs: [...baseWithAspect, ...baseWithAspect], 
         baseSpeed, 
         direction, 
-        state: { targetChaos: 1, currentChaos: 1, timer: 0 } 
+        state: { targetChaos: 1, currentChaos: 1, timer: 0, lerp: 0.001 } 
       };
     });
   }, [mosaicImages, highResImages]);
@@ -77,15 +80,14 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
     const animateLoop = (time) => {
       const delta = time - lastTime; 
       lastTime = time;
-      const safeDelta = Math.min(delta, 50); // Cap frame skips
+      const safeDelta = Math.min(delta, 50); 
       
-      const globalLerpFactor = 1 - Math.exp(-safeDelta * 0.0015);
-      const chaosLerpFactor = 1 - Math.exp(-safeDelta * 0.0008);
+      const globalLerpFactor = 1 - Math.exp(-safeDelta * 0.0002);
       
-      let targetGlobalSpeed = modeRef.current.isPaused ? 0.0 : (modeRef.current.isSlowMode ? 0.15 : 1.0);
+      // INCREASED STATS SPEED (2.8) AND TWEAKED SNAIL PACE (0.05)
+      let targetGlobalSpeed = modeRef.current.isPaused ? 0.0 : (modeRef.current.isSlowMode ? 0.05 : 2.8);
       globalStateRef.current.currentSpeed += (targetGlobalSpeed - globalStateRef.current.currentSpeed) * globalLerpFactor;
       
-      // OPTIMIZATION: Suspend calculations completely when paused
       if (Math.abs(globalStateRef.current.currentSpeed) < 0.001 && targetGlobalSpeed === 0) {
         globalStateRef.current.currentSpeed = 0;
         if (modeRef.current.isPaused) {
@@ -97,14 +99,32 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
       rowsConfig.forEach((config, i) => {
         const state = config.state;
         state.timer -= safeDelta;
+        
         if (state.timer <= 0) {
           const rand = Math.random();
-          if (rand < 0.15) { state.targetChaos = 0.1 + Math.random() * 0.2; state.timer = 2000 + Math.random() * 3000; }
-          else if (rand < 0.35) { state.targetChaos = 1.5 + Math.random() * 1.5; state.timer = 2500 + Math.random() * 3500; }
-          else { state.targetChaos = 0.8 + Math.random() * 0.4; state.timer = 3000 + Math.random() * 5000; }
+          if (rand < 0.15) { 
+             state.targetChaos = Math.random() * 0.05; 
+             state.timer = 1000 + Math.random() * 3000; 
+          }
+          else if (rand < 0.40) { 
+             state.targetChaos = 0.3 + Math.random() * 0.4; 
+             state.timer = 2000 + Math.random() * 3000; 
+          }
+          else if (rand < 0.65) { 
+             state.targetChaos = 1.5 + Math.random() * 2.0; 
+             state.timer = 1500 + Math.random() * 2500; 
+          }
+          else { 
+             state.targetChaos = 0.8 + Math.random() * 0.6; 
+             state.timer = 2000 + Math.random() * 4000; 
+          }
+          
+          state.lerp = 0.0005 + Math.random() * 0.002;
         }
         
+        const chaosLerpFactor = 1 - Math.exp(-safeDelta * state.lerp);
         state.currentChaos += (state.targetChaos - state.currentChaos) * chaosLerpFactor;
+        
         const actualSpeed = globalStateRef.current.currentSpeed * state.currentChaos * config.baseSpeed;
         const moveAmount = actualSpeed * safeDelta;
         
@@ -117,7 +137,6 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
         }
         
         const el = rowRefs.current[i];
-        // translate3d forces GPU hardware acceleration
         if (el) el.style.transform = `translate3d(${positions[i]}%, 0, 0)`;
       });
       

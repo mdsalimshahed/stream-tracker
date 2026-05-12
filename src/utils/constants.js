@@ -32,7 +32,8 @@ export const DEFAULT_LAYOUT_PREFS = {
   cycleInterval: 3000,
   hoverCycleInterval: 1500,
   statsSplitRatio: 0.35,
-  statsRowSplitRatio: 0.60
+  statsRowSplitRatio: 0.60,
+  highResImages: false // <--- Add this line
 };
 
 export const DEFAULT_THUMBNAIL_CONFIG = {

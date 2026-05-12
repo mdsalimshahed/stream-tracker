@@ -24,6 +24,8 @@ import SearchView from './components/SearchView';
 import MosaicBackground from './components/background/MosaicBackground.jsx';
 import { Notification } from './components/Notification';
 import { CrossfadeImage } from './components/common/UIComponents';
+// ... existing imports
+import { parseCustomTimestamp, getLowResUrl } from './utils/helpers'; // Ensure getLowResUrl is imported
 
 export default function App() {
   const [toast, setToast] = useState(null);
@@ -65,9 +67,9 @@ export default function App() {
   const isImageReady = hoverState.gameId && hoveredImage.gameId === hoverState.gameId;
   let currentBgUrl = '';
   if (hoverState.gameId) {
-    currentBgUrl = isImageReady ? hoveredImage.url : (streamData[hoverState.gameId]?.cover_image || streamData[hoverState.gameId]?.thumbnail_urls?.[0] || '');
+    currentBgUrl = isImageReady ? hoveredImage.url : getLowResUrl(streamData[hoverState.gameId]?.cover_image || streamData[hoverState.gameId]?.thumbnail_urls?.[0] || '', settings.layoutPrefs.highResImages);
   } else {
-    currentBgUrl = hoveredImage.url; // retain for fade-out
+    currentBgUrl = hoveredImage.url;
   }
 
   // --- Import / Export ---
@@ -192,7 +194,13 @@ export default function App() {
           <CrossfadeImage src={currentBgUrl} className="absolute inset-0 w-full h-full" imgClassName="object-cover" />
         </div>
         <div className="absolute inset-0 z-10">
-          <MosaicBackground mosaicImages={mosaicImages} isPaused={mosaicPaused} isSlowMode={currentView !== 'stats'} shouldFlip={isImageReady} />
+          <MosaicBackground 
+            mosaicImages={mosaicImages} 
+            isPaused={mosaicPaused} 
+            isSlowMode={currentView !== 'stats'} 
+            shouldFlip={isImageReady} 
+            highResImages={settings.layoutPrefs.highResImages} 
+          />
         </div>
         <div className="absolute inset-0 bg-black transition-opacity duration-300 z-20 pointer-events-none" style={{ opacity: settings.layoutPrefs.bgDimming ?? 0.5 }} />
       </div>

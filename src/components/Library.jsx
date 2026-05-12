@@ -1,7 +1,7 @@
 // src/components/Library.jsx
 import React, { useState, useRef } from 'react';
 import { Search, Clock, SortAsc, SortDesc, Maximize, Trash2, Edit3 } from 'lucide-react';
-import { parseCustomTimestamp } from '../utils/helpers';
+import { parseCustomTimestamp, getLowResUrl } from '../utils/helpers'; // Add getLowResUrl
 import { ConfirmBanner } from './Notification';
 import { EditGameModal } from './modals/EditGameModal';
 import { CrossfadeImage } from './common/UIComponents';
@@ -168,8 +168,8 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
                 
                 // Sync check: Fall back instantly to card cover if global state hasn't caught up to hover target yet
                 const isImageReady = hoveredImage?.gameId === game.id;
-                const displayImg = (isHovered && isImageReady && hoveredImage?.url) ? hoveredImage.url : (game.cover_image || game.thumbnail_urls?.[0]);
-
+                // Wrap the fallback in getLowResUrl
+                const displayImg = (isHovered && isImageReady && hoveredImage?.url) ? hoveredImage.url : getLowResUrl(game.cover_image || game.thumbnail_urls?.[0], layoutPrefs.highResImages);
                 return (
                   <div
                     key={game.id}

@@ -56,3 +56,20 @@ export const formatReleaseDate = (dateString) => {
   const dayStr = `${day}${suffix[day % 10]}`;
   return `${dayStr} ${month} ${year}`;
 };
+
+export const getLowResUrl = (url, useHighRes = false) => {
+  // If the toggle is ON, immediately return the raw 1080p/4K URL
+  if (!url || useHighRes) return url;
+  
+  // Steam: Convert 1080p screenshots to 600x338 thumbnails
+  if (url.includes('steamstatic.com') || url.includes('steamcdn')) {
+    return url.replace(/\.1920x1080\.jpg/i, '.600x338.jpg');
+  }
+  
+  // RAWG: Inject resize parameters to compress heavy 4K raw images to 420p
+  if (url.includes('media.rawg.io/media/') && !url.includes('/resize/')) {
+    return url.replace('media.rawg.io/media/', 'media.rawg.io/media/resize/420/-/');
+  }
+  
+  return url;
+};

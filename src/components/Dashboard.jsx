@@ -1,6 +1,6 @@
 // src/components/Dashboard.jsx
 import React, { useMemo } from 'react';
-import { parseCustomTimestamp } from '../utils/helpers';
+import { parseCustomTimestamp, getLowResUrl } from '../utils/helpers'; // Add getLowResUrl
 import { CrossfadeImage } from './common/UIComponents';
 
 export default function Dashboard({ streamData, handleCardClick, systemFonts, layoutPrefs, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
@@ -19,8 +19,8 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
             count: cycleData.stream_count,
             lastTimeStr: timestamps[timestamps.length - 1],
             lastTimeDate: parseCustomTimestamp(timestamps[timestamps.length - 1]),
-            cover: game.cover_image || game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover',
-            allThumbnails: game.thumbnail_urls || [],
+            // Optimize the base cover image
+            cover: getLowResUrl(game.cover_image || game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover', layoutPrefs.highResImages),            allThumbnails: game.thumbnail_urls || [],
             cycleDisplayName: cycleData.displayName || (cycleName === 'main' ? 'First Playthrough' : cycleName.replace(/_/g, ' '))
           });
         }

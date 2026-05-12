@@ -1,25 +1,8 @@
 // src/components/background/MosaicBackground.jsx
 import React, { useRef, useMemo, useEffect } from 'react';
+import { getLowResUrl } from '../../utils/helpers';
 
-// OPTIMIZATION 1: Intercept URLs and downgrade them to thumbnails to save RAM
-const getLowResUrl = (url) => {
-  if (!url) return url;
-  
-  // Steam: Convert 1080p screenshots to 600x338 thumbnails
-  if (url.includes('steamstatic.com') || url.includes('steamcdn')) {
-    return url.replace(/\.1920x1080\.jpg/i, '.600x338.jpg');
-  }
-  
-  // RAWG: Inject resize parameters to compress heavy 4K raw images to 420p
-  if (url.includes('media.rawg.io/media/') && !url.includes('/resize/')) {
-    return url.replace('media.rawg.io/media/', 'media.rawg.io/media/resize/420/-/');
-  }
-  
-  return url;
-};
-
-const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip }) => {
-  // OPTIMIZATION 2: Cut DOM elements by over 50%
+const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip, highResImages }) => {  // OPTIMIZATION: Cut DOM elements by over 50% to save RAM
   const ROWS = 6; // Down from 7
   const IMGS_PER_ROW = 12; // Down from 24 (12 * 2 sets = 24 images per row instead of 48)
   
@@ -35,9 +18,9 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
   const rowsConfig = useMemo(() => {
     const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
     
-    // Apply low-res formatting to the pool
+    // OPTIMIZATION: Apply low-res formatting to the pool
     const pool = mosaicImages?.length > 0 
-      ? mosaicImages.map(img => ({ ...img, url: getLowResUrl(img.url) })) 
+      ? mosaicImages.map(img => ({ ...img, url: getLowResUrl(img.url, highResImages) }))
       : [fallback];
       
     const aspectRatios = ['16/9', '4/3', '1/1'];
@@ -85,7 +68,7 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
         state: { targetChaos: 1, currentChaos: 1, timer: 0 } 
       };
     });
-  }, [mosaicImages]);
+  }, [mosaicImages, highResImages]);
 
   useEffect(() => {
     let lastTime = performance.now();
@@ -102,7 +85,7 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
       let targetGlobalSpeed = modeRef.current.isPaused ? 0.0 : (modeRef.current.isSlowMode ? 0.15 : 1.0);
       globalStateRef.current.currentSpeed += (targetGlobalSpeed - globalStateRef.current.currentSpeed) * globalLerpFactor;
       
-      // OPTIMIZATION 3: Suspend calculations completely when paused
+      // OPTIMIZATION: Suspend calculations completely when paused
       if (Math.abs(globalStateRef.current.currentSpeed) < 0.001 && targetGlobalSpeed === 0) {
         globalStateRef.current.currentSpeed = 0;
         if (modeRef.current.isPaused) {

@@ -92,6 +92,14 @@ export default function DataManager({
         <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2"><Eye size={24} /> UI Visibility & Opacity</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
           {/* New Performance Toggle Here */}
+
+          <Toggle 
+            label="High-Resolution Images" 
+            description="Use full-quality 1080p/4K images. Disable to force lower-res thumbnails (saves RAM/bandwidth on older devices)." 
+            value={layoutPrefs.highResImages || false} 
+            onChange={v => updateLayout('highResImages', v)} 
+          />
+          
           <Toggle 
             label="3D Hover Effects" 
             description="Toggles the flipping mosaic background on hover. If disabled, clicking a card once previews it, and clicking twice opens it (saves performance on lower-end computers)." 

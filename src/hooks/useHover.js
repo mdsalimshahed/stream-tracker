@@ -1,6 +1,7 @@
 // src/hooks/useHover.js
 import { useState, useRef, useEffect } from 'react';
 import { generateSingleGamePlaylist } from '../utils/dataUtils';
+import { getLowResUrl } from '../utils/helpers';
 
 export function useHover({ streamData, isModalOpen, layoutPrefs }) {
   const [hoveredImage, setHoveredImage] = useState({ url: '', gameId: null });
@@ -23,13 +24,16 @@ export function useHover({ streamData, isModalOpen, layoutPrefs }) {
     const gameId = hoverState.gameId;
     const isHovering = Boolean(gameId && streamData[gameId]);
     let intervalId;
+    
     if (isHovering) {
       if (hoverPlaylistRef.current.gameId !== gameId) {
         hoverPlaylistRef.current = { gameId, list: generateSingleGamePlaylist(streamData[gameId].thumbnail_urls || []), index: -1 };
-        setHoveredImage({ url: streamData[gameId].cover_image || hoverPlaylistRef.current.list[0] || '', gameId });
+        // Apply low-res toggle to the initial image 
+        setHoveredImage({ url: getLowResUrl(streamData[gameId].cover_image || hoverPlaylistRef.current.list[0] || '', layoutPrefs.highResImages), gameId });
       } else {
         const idx = hoverPlaylistRef.current.index;
-        setHoveredImage({ url: (idx >= 0 ? hoverPlaylistRef.current.list[idx] : null) || streamData[gameId].cover_image || '', gameId });
+        // Apply low-res toggle to the fallback image
+        setHoveredImage({ url: getLowResUrl((idx >= 0 ? hoverPlaylistRef.current.list[idx] : null) || streamData[gameId].cover_image || '', layoutPrefs.highResImages), gameId });
       }
       if (hoverPlaylistRef.current.list.length > 0) {
         intervalId = setInterval(() => {
@@ -39,12 +43,13 @@ export function useHover({ streamData, isModalOpen, layoutPrefs }) {
             idx = 0;
           }
           hoverPlaylistRef.current.index = idx;
-          setHoveredImage({ url: hoverPlaylistRef.current.list[idx], gameId });
+          // Apply low-res toggle to cycled images
+          setHoveredImage({ url: getLowResUrl(hoverPlaylistRef.current.list[idx], layoutPrefs.highResImages), gameId });
         }, layoutPrefs.hoverCycleInterval || 1500);
       }
     }
     return () => clearInterval(intervalId);
-  }, [hoverState.gameId, streamData, isModalOpen, layoutPrefs.hoverCycleInterval]);
+  }, [hoverState.gameId, streamData, isModalOpen, layoutPrefs.hoverCycleInterval, layoutPrefs.highResImages]);
 
   // Clear hover on global click when hover effects disabled
   useEffect(() => {

@@ -15,22 +15,22 @@ export function useSearch() {
       let steamItems = [];
       let usedSteam = false;
       
-      // STEP 1: Search Steam FIRST
+      // STEP 1: Search Steam FIRST via Worker Proxy
       try {
         const res = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(searchQuery)}&l=english&cc=US`);
-        if (res.ok && res.headers.get("content-type")?.includes("application/json")) {
+        const contentType = res.headers.get("content-type");
+        if (res.ok && contentType && contentType.includes("application/json")) {
             const data = await res.json();
             if (data?.items && data.items.length > 0) {
-                // Limit to 5 results to keep things fast
-                steamItems = data.items.slice(0, 5); 
+                steamItems = data.items.slice(0, 8); 
                 usedSteam = true;
             }
         }
       } catch (e) {
-        console.warn("Steam search failed or returned empty, falling back to RAWG.", e);
+        console.warn("Steam search failed, falling back to RAWG.", e);
       }
 
-      // STEP 2: Fetch Steam Details (if Steam search succeeded)
+      // STEP 2: Fetch Steam Details
       if (usedSteam && steamItems.length > 0) {
         const appIds = steamItems.map(i => i.id).join(',');
         
@@ -38,7 +38,8 @@ export function useSearch() {
           const detailRes = await fetch(`/steam-api/api/appdetails?appids=${appIds}&l=english`);
           let detailData = null;
 
-          if (detailRes.ok && detailRes.headers.get("content-type")?.includes("application/json")) {
+          const contentType = detailRes.headers.get("content-type");
+          if (detailRes.ok && contentType && contentType.includes("application/json")) {
               detailData = await detailRes.json();
           }
 
@@ -55,7 +56,6 @@ export function useSearch() {
             };
           }));
         } catch (err) {
-          // Fast fallback if details fail but search succeeded
           setSearchResults(steamItems.map(item => ({ 
               id: item.id.toString(), 
               name: item.name, 
@@ -65,18 +65,34 @@ export function useSearch() {
           })));
         }
       } else {
-        // STEP 3: RAWG Fallback (if Steam fails or has 0 results)
-        const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(searchQuery)}&page_size=5`);
+        // STEP 3: RAWG Fallback
+        const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(searchQuery)}&page_size=8`);
         const rawgData = await rawgRes.json();
-        setSearchResults(rawgData.results?.map(item => ({ 
-            id: item.id.toString(), 
-            name: item.name, 
-            cover_image: item.background_image, 
-            developers: item.developers || [], 
-            released: item.released || '', 
-            isRawgOnly: true,
-            source: 'RAWG'
-        })) || []);
+        
+        if (rawgData.results) {
+          const detailed = await Promise.all(
+            rawgData.results.map(async (g) => {
+              try {
+                if (g.developers) return g;
+                const dRes = await fetch(`https://api.rawg.io/api/games/${g.id}?key=${RAWG_API_KEY}`);
+                const dData = await dRes.json();
+                return { ...g, developers: dData.developers };
+              } catch (e) { return g; }
+            })
+          );
+          
+          setSearchResults(detailed.map(item => ({ 
+              id: item.id.toString(), 
+              name: item.name, 
+              cover_image: item.background_image || 'https://placehold.co/600x400/1e293b/475569?text=Cover', 
+              developers: item.developers || [], 
+              released: item.released || '', 
+              isRawgOnly: true,
+              source: 'RAWG'
+          })));
+        } else {
+          setSearchResults([]);
+        }
       }
     } catch (err) { 
         console.error('Search failed entirely:', err); 

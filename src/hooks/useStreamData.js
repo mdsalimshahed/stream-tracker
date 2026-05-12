@@ -24,31 +24,6 @@ export function useStreamData(notify) {
     localStorage.setItem('streamManagerData', JSON.stringify(streamData));
   }, [streamData]);
 
-  // --- Helpers ---
-  const fetchSteamDetails = async (steamId) => {
-    try {
-      const res = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
-      if (res.ok && res.headers.get("content-type")?.includes("application/json")) {
-        const data = await res.json();
-        return data[steamId]?.data;
-      }
-    } catch (err) {
-      console.warn("Failed to fetch steam details:", err);
-    }
-    return null;
-  };
-
-  const fetchRawgScreenshots = async (gameName) => {
-    const cleanName = gameName.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-    const searchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-    const searchData = await searchRes.json();
-    if (!searchData.results?.[0]) return [];
-    const rawgId = searchData.results[0].id;
-    const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-    const sData = await sRes.json();
-    return sData.results?.map(x => x.image) || [];
-  };
-
   // --- Auto-recovery on mount ---
   useEffect(() => {
     if (Object.keys(streamData).length === 0) return;
@@ -67,24 +42,31 @@ export function useStreamData(notify) {
             if (!steamId) {
               const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
               const searchRes = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=english&cc=US`);
-              if (searchRes.ok && searchRes.headers.get("content-type")?.includes("application/json")) {
+              const contentType = searchRes.headers.get("content-type");
+              if (searchRes.ok && contentType && contentType.includes("application/json")) {
                 const searchData = await searchRes.json();
                 if (searchData.items?.[0]) steamId = searchData.items[0].id;
               }
             }
             if (steamId) {
-              const gameDetails = await fetchSteamDetails(steamId);
-              if (gameDetails) {
-                game.cover_image = gameDetails.header_image;
-                let newUrls = gameDetails.screenshots ? gameDetails.screenshots.map(s => s.path_full) : [];
-                newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
-                game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
-                game.details.developer = gameDetails.developers?.join(', ') || game.details.developer;
-                game.details.publisher = gameDetails.publishers?.join(', ') || game.details.publisher;
-                game.details.releaseDate = gameDetails.release_date?.date || game.details.releaseDate;
-                game.details.genres = gameDetails.genres?.map(g => g.description).join(', ') || game.details.genres;
-                game.details.steamUrl = `https://store.steampowered.com/app/${steamId}/`;
-                changed = true;
+              const detailRes = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
+              const contentType = detailRes.headers.get("content-type");
+              if (detailRes.ok && contentType && contentType.includes("application/json")) {
+                const detailsRaw = await detailRes.json();
+                const steamDataObj = detailsRaw[steamId]?.data;
+                
+                if (steamDataObj) {
+                  game.cover_image = steamDataObj.header_image;
+                  let newUrls = steamDataObj.screenshots ? steamDataObj.screenshots.map(s => s.path_full) : [];
+                  newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
+                  game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
+                  game.details.developer = steamDataObj.developers?.join(', ') || game.details.developer;
+                  game.details.publisher = steamDataObj.publishers?.join(', ') || game.details.publisher;
+                  game.details.releaseDate = steamDataObj.release_date?.date || game.details.releaseDate;
+                  game.details.genres = steamDataObj.genres?.map(g => g.description).join(', ') || game.details.genres;
+                  game.details.steamUrl = `https://store.steampowered.com/app/${steamId}/`;
+                  changed = true;
+                }
               }
             }
             await new Promise(r => setTimeout(r, 400));
@@ -92,10 +74,17 @@ export function useStreamData(notify) {
         }
         if (!game.thumbnail_urls || game.thumbnail_urls.length < 2) {
           try {
-            const shots = await fetchRawgScreenshots(game.game_name);
-            if (shots.length) {
-              game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...shots])];
-              changed = true;
+            const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+            const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+            const rawgSearchData = await rawgSearchRes.json();
+            if (rawgSearchData.results?.[0]) {
+              const rawgId = rawgSearchData.results[0].id;
+              const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+              const sData = await sRes.json();
+              if (sData.results) {
+                game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...sData.results.map(x => x.image)])].filter(Boolean);
+                changed = true;
+              }
             }
           } catch (e) {}
         }
@@ -120,26 +109,32 @@ export function useStreamData(notify) {
           if (!steamId) {
             const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
             const searchRes = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=english&cc=US`);
-            if (searchRes.ok && searchRes.headers.get("content-type")?.includes("application/json")) {
+            const contentType = searchRes.headers.get("content-type");
+            if (searchRes.ok && contentType && contentType.includes("application/json")) {
                steamId = (await searchRes.json()).items?.[0]?.id;
             }
           }
           if (steamId) {
-            const gameDetails = await fetchSteamDetails(steamId);
-            if (gameDetails) {
-              game.cover_image = gameDetails.header_image;
-              let newUrls = gameDetails.screenshots ? gameDetails.screenshots.map(s => s.path_full) : [];
-              newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
-              game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
-              game.details = {
-                developer: gameDetails.developers?.join(', ') || game.details.developer,
-                publisher: gameDetails.publishers?.join(', ') || game.details.publisher,
-                releaseDate: gameDetails.release_date?.date || game.details.releaseDate,
-                genres: gameDetails.genres?.map(g => g.description).join(', ') || game.details.genres,
-                steamUrl: `https://store.steampowered.com/app/${steamId}/`,
-                notOnSteam: false,
-              };
-              changed = true;
+            const detailRes = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
+            const contentType = detailRes.headers.get("content-type");
+            if (detailRes.ok && contentType && contentType.includes("application/json")) {
+                const detailsRaw = await detailRes.json();
+                const steamDataObj = detailsRaw[steamId]?.data;
+                if (steamDataObj) {
+                  game.cover_image = steamDataObj.header_image;
+                  let newUrls = steamDataObj.screenshots ? steamDataObj.screenshots.map(s => s.path_full) : [];
+                  newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
+                  game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
+                  game.details = {
+                    developer: steamDataObj.developers?.join(', ') || game.details.developer,
+                    publisher: steamDataObj.publishers?.join(', ') || game.details.publisher,
+                    releaseDate: steamDataObj.release_date?.date || game.details.releaseDate,
+                    genres: steamDataObj.genres?.map(g => g.description).join(', ') || game.details.genres,
+                    steamUrl: `https://store.steampowered.com/app/${steamId}/`,
+                    notOnSteam: false,
+                  };
+                  changed = true;
+                }
             }
           }
           await new Promise(r => setTimeout(r, 400));
@@ -147,8 +142,15 @@ export function useStreamData(notify) {
       }
       if (!game.thumbnail_urls || game.thumbnail_urls.length < 2) {
         try {
-          const shots = await fetchRawgScreenshots(game.game_name);
-          if (shots.length) { game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...shots])]; changed = true; }
+          const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+          const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+          const rawgSearchData = await rawgSearchRes.json();
+          if (rawgSearchData.results?.[0]) {
+            const rawgId = rawgSearchData.results[0].id;
+            const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+            const sData = await sRes.json();
+            if (sData.results) { game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...sData.results.map(x=>x.image)])].filter(Boolean); changed = true; }
+          }
         } catch (e) {}
       }
     }
@@ -160,7 +162,7 @@ export function useStreamData(notify) {
   // --- Add Game ---
   const handleAddGame = async (g) => {
     const rid = g.id.toString();
-    if (streamData[rid]) return rid; // already exists, just open it
+    if (streamData[rid]) return rid;
     notify(g.isRawgOnly ? 'Fetching data from RAWG...' : 'Fetching Steam metadata & RAWG images...', 'info');
     let details = { developer: g.developers?.map(d => d.name).join(', ') || 'Unknown', publisher: 'Unknown', releaseDate: g.released || new Date().getFullYear().toString(), genres: 'Unknown', tags: 'Unknown', steamUrl: g.isRawgOnly ? '' : `https://store.steampowered.com/app/${rid}/`, notOnSteam: g.isRawgOnly || false };
     let cover_image = g.cover_image, thumbnails = [], finalName = g.name, finalYear = g.released ? new Date(g.released).getFullYear().toString() : new Date().getFullYear().toString();
@@ -178,27 +180,36 @@ export function useStreamData(notify) {
         const sData = await sRes.json();
         if (sData.results) thumbnails = sData.results.map(x => x.image).filter(Boolean);
       } else {
-        const gameDetails = await fetchSteamDetails(rid);
-        if (gameDetails) {
-          finalName = gameDetails.name || finalName;
-          const rDate = gameDetails.release_date?.date;
-          finalYear = rDate ? new Date(rDate).getFullYear().toString() : finalYear;
-          details.developer = gameDetails.developers?.join(', ') || details.developer;
-          details.publisher = gameDetails.publishers?.join(', ') || 'Unknown';
-          details.releaseDate = rDate || finalYear;
-          details.genres = gameDetails.genres?.map(gn => gn.description).join(', ') || 'Unknown';
-          if (gameDetails.header_image) cover_image = gameDetails.header_image;
-          if (gameDetails.screenshots) thumbnails = gameDetails.screenshots.map(s => s.path_full);
+        const detailRes = await fetch(`/steam-api/api/appdetails?appids=${rid}&l=english`);
+        const contentType = detailRes.headers.get("content-type");
+        if (detailRes.ok && contentType && contentType.includes("application/json")) {
+           const steamDataObj = await detailRes.json();
+           const gameDetails = steamDataObj[rid]?.data;
+           if (gameDetails) {
+             finalName = gameDetails.name || finalName;
+             const rDate = gameDetails.release_date?.date;
+             finalYear = rDate ? new Date(rDate).getFullYear().toString() : finalYear;
+             details.developer = gameDetails.developers?.join(', ') || details.developer;
+             details.publisher = gameDetails.publishers?.join(', ') || 'Unknown';
+             details.releaseDate = rDate || finalYear;
+             details.genres = gameDetails.genres?.map(gn => gn.description).join(', ') || 'Unknown';
+             if (gameDetails.header_image) cover_image = gameDetails.header_image;
+             if (gameDetails.screenshots) thumbnails = gameDetails.screenshots.map(s => s.path_full);
+           }
         }
         try {
-          const rawgScreenshots = await fetchRawgScreenshots(finalName);
           const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(finalName.replace(/[:™®©]/g, '').trim())}&page_size=1`);
           const rawgSearchData = await rawgSearchRes.json();
-          if (rawgSearchData.results?.[0]?.tags) {
-            const engTags = rawgSearchData.results[0].tags.filter(t => t.language === 'eng').map(t => t.name);
-            if (engTags.length > 0) details.tags = engTags.join(', ');
+          if (rawgSearchData.results?.[0]) {
+            const rawgId = rawgSearchData.results[0].id;
+            if (rawgSearchData.results[0].tags) {
+              const engTags = rawgSearchData.results[0].tags.filter(t => t.language === 'eng').map(t => t.name);
+              if (engTags.length > 0) details.tags = engTags.join(', ');
+            }
+            const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+            const sData = await sRes.json();
+            if (sData.results) thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);
           }
-          thumbnails = [...thumbnails, ...rawgScreenshots].filter(Boolean);
         } catch (err) {}
       }
       notify(`Successfully added ${finalName}!`, 'success');
@@ -210,13 +221,21 @@ export function useStreamData(notify) {
     return rid;
   };
 
-  // --- Update Game Link ---
   const updateGameLink = async (gameId, steamLink) => {
     let steamId = steamLink.includes('steampowered.com/app/') ? steamLink.split('steampowered.com/app/')[1].split('/')[0].split('?')[0] : steamLink;
     notify('Syncing with Steam & RAWG...', 'info');
     try {
-      const gameDetails = await fetchSteamDetails(steamId);
+      const detailRes = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
+      const contentType = detailRes.headers.get("content-type");
+      if (!detailRes.ok || !contentType || !contentType.includes("application/json")) {
+          return notify('Invalid Steam link or ID', 'error');
+      }
+
+      const steamDataObj = await detailRes.json();
+      const gameDetails = steamDataObj[steamId]?.data;
       if (!gameDetails) return notify('Invalid Steam link or ID', 'error');
+
+      let cover_image = gameDetails.header_image;
       let thumbnails = gameDetails.screenshots ? gameDetails.screenshots.map(s => s.path_full) : [];
       let tagsString = 'Unknown';
       try {
@@ -233,7 +252,7 @@ export function useStreamData(notify) {
       const nd = JSON.parse(JSON.stringify(streamData));
       nd[gameId].game_name = gameDetails.name;
       nd[gameId].release_year = gameDetails.release_date?.date ? new Date(gameDetails.release_date.date).getFullYear().toString() : nd[gameId].release_year;
-      nd[gameId].cover_image = gameDetails.header_image;
+      nd[gameId].cover_image = cover_image;
       nd[gameId].thumbnail_urls = [...new Set(thumbnails)];
       nd[gameId].details = { developer: gameDetails.developers?.join(', ') || 'Unknown', publisher: gameDetails.publishers?.join(', ') || 'Unknown', releaseDate: gameDetails.release_date?.date || nd[gameId].release_year, genres: gameDetails.genres?.map(g => g.description).join(', ') || 'Unknown', tags: tagsString, steamUrl: `https://store.steampowered.com/app/${steamId}/`, notOnSteam: false };
       setStreamData(nd);
@@ -241,7 +260,6 @@ export function useStreamData(notify) {
     } catch (e) { notify('Update failed', 'error'); }
   };
 
-  // --- Edit Game Details ---
   const editGameDetails = (gameId, newName, newYear, developer, publisher, genres, tags, steamIdToSync, steamUrl, notOnSteam) => {
     const nd = JSON.parse(JSON.stringify(streamData));
     if (!nd[gameId]) return;
@@ -259,12 +277,10 @@ export function useStreamData(notify) {
     if (steamIdToSync) updateGameLink(gameId, steamIdToSync);
   };
 
-  // --- Delete ---
   const deleteGame = (id, name) => { const nd = { ...streamData }; delete nd[id]; setStreamData(nd); notify(`Deleted ${name}`, 'error'); };
   const deleteCycle = (gid, cycId) => { const nd = JSON.parse(JSON.stringify(streamData)); delete nd[gid].cycles[cycId]; setStreamData(nd); notify('Removed run', 'error'); };
   const deleteTimestamp = (gid, cycId, idx) => { const nd = JSON.parse(JSON.stringify(streamData)); nd[gid].cycles[cycId].timestamps.splice(idx, 1); nd[gid].cycles[cycId].stream_count = nd[gid].cycles[cycId].timestamps.length; setStreamData(nd); notify('Deleted log entry', 'error'); };
 
-  // --- Cycle Management ---
   const updateCycle = (gameId, oldCycleId, newDisplayName, isMain, youtubePlaylist, newLabel) => {
     const nd = JSON.parse(JSON.stringify(streamData));
     const cycles = nd[gameId].cycles;

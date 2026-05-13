@@ -1,25 +1,54 @@
-// src/components/stats/styles.js
 export const STYLES = `
   @keyframes fillLine {
     0% { width: 0%; opacity: 1; }
     95% { width: 100%; opacity: 1; }
     100% { width: 100%; opacity: 0; }
   }
+  
+  @keyframes fillLineVert {
+    0% { height: 0%; opacity: 1; }
+    95% { height: 100%; opacity: 1; }
+    100% { height: 100%; opacity: 0; }
+  }
+  
   .stats-progress-track {
-    height: 2px;
-    width: 100%;
     background: var(--c-border);
     position: relative;
     z-index: 20;
+    width: 100%;
+    height: 2px;
+    margin-top: -1px;
+    margin-bottom: -1px;
   }
+  
   .stats-progress-fill {
     position: absolute;
     top: 0;
     left: 0;
     height: 100%;
+    width: 0%;
     background: linear-gradient(to right, rgba(232, 200, 122, 0.2), var(--c-accent));
     animation: fillLine 5s linear infinite;
   }
+
+  /* Switch to Vertical Divider in Row Layout (Tablets) */
+  @media (min-width: 641px) and (max-width: 1023px) {
+    .stats-progress-track {
+      width: 2px;
+      height: auto;
+      margin-top: 0;
+      margin-bottom: 0;
+      margin-left: -1px;
+      margin-right: -1px;
+    }
+    .stats-progress-fill {
+      width: 100%;
+      height: 0%;
+      background: linear-gradient(to bottom, rgba(232, 200, 122, 0.2), var(--c-accent));
+      animation: fillLineVert 5s linear infinite;
+    }
+  }
+
   .stats-root {
     --c-bg:      #080a0f;
     --c-surface: #0d1117;
@@ -101,16 +130,6 @@ export const STYLES = `
   }
   .stat-card:hover::before { opacity: 1; }
   
-  @media (min-width: 1024px) {
-    .stat-card + .stat-card { margin-top: -1px; }
-  }
-  @media (max-width: 1023px) {
-    .stat-card + .stat-card { margin-left: -1px; }
-  }
-  @media (max-width: 640px) {
-    .stat-card + .stat-card { margin-left: 0; margin-top: -1px; }
-  }
-
   .stat-number { font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--c-text); transition: color 0.3s ease; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
   .stat-card:hover .stat-number { color: var(--c-accent); }
 

@@ -1,6 +1,7 @@
 // src/components/Dashboard.jsx
 import React, { useMemo } from 'react';
-import { parseCustomTimestamp, getLowResUrl, getTsDateStr } from '../utils/helpers';
+import { PlayCircle } from 'lucide-react';
+import { parseCustomTimestamp, getLowResUrl, getTsDateStr, formatDuration } from '../utils/helpers';
 import { CrossfadeImage, MasonryLayout } from './common/UIComponents';
 
 export default function Dashboard({ streamData, handleCardClick, systemFonts, layoutPrefs, hoveredImage, hoverState, onHoverGame, onImportDefault, hasCustomSettings }) {
@@ -12,6 +13,8 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
         const timestamps = cycleData.timestamps || [];
         if (timestamps.length > 0) {
           const lastTs = timestamps[timestamps.length - 1];
+          const runTimeSecs = timestamps.reduce((acc, ts) => acc + (ts.duration || 0), 0);
+          
           recent.push({
             appId,
             gameName: game.game_name,
@@ -20,6 +23,7 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
             count: cycleData.stream_count,
             lastTimeStr: getTsDateStr(lastTs),
             lastTimeDate: parseCustomTimestamp(lastTs),
+            runTimeSecs,
             cover: getLowResUrl(game.cover_image || game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover', layoutPrefs.highResImages),
             allThumbnails: game.thumbnail_urls || [],
             cycleDisplayName: cycleData.displayName || (cycleName === 'main' ? 'First Playthrough' : cycleName.replace(/_/g, ' '))
@@ -119,6 +123,14 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
                   <p className="text-white/50 mt-3 font-mono drop-shadow-md" style={{ fontSize: `${systemFonts.dashboardTime || 10}px` }}>
                     {stream.lastTimeStr}
                   </p>
+
+                  {stream.runTimeSecs > 0 && (
+                    <div className="mt-2 flex">
+                      <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full inline-flex items-center gap-1 shadow z-20 text-white w-fit">
+                        <PlayCircle size={10} className="text-red-400" /> {formatDuration(stream.runTimeSecs)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             );

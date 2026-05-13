@@ -1,7 +1,7 @@
 // src/components/Library.jsx
 import React, { useState, useRef } from 'react';
-import { Search, Clock, SortAsc, SortDesc, Maximize, Trash2, Edit3 } from 'lucide-react';
-import { parseCustomTimestamp, getLowResUrl } from '../utils/helpers';
+import { Search, Clock, SortAsc, SortDesc, Maximize, Trash2, Edit3, PlayCircle } from 'lucide-react';
+import { parseCustomTimestamp, getLowResUrl, formatDuration } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditGameModal } from './modals/EditGameModal';
 import { CrossfadeImage, MasonryLayout } from './common/UIComponents';
@@ -36,6 +36,10 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
   const games = Object.entries(streamData).map(([id, data]) => {
     const cycles = data.cycles || {};
     const totalStreams = Object.values(cycles).reduce((acc, c) => acc + Number(c.stream_count || 0), 0);
+    const totalDuration = Object.values(cycles).reduce((acc, c) => {
+      return acc + (c.timestamps?.reduce((sum, ts) => sum + (ts.duration || 0), 0) || 0);
+    }, 0);
+    
     const lastStreamDate = Object.values(cycles).reduce((latest, c) => {
       if (!c.timestamps || c.timestamps.length === 0) return latest;
       const d = parseCustomTimestamp(c.timestamps[c.timestamps.length - 1]);
@@ -43,7 +47,7 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
     }, new Date(0));
     const latestRun = getLatestRun(cycles);
     const label = latestRun?.label || 'Ongoing';
-    return { id, ...data, totalStreams, lastStreamDate, label };
+    return { id, ...data, totalStreams, totalDuration, lastStreamDate, label };
   });
 
   const filtered = games.filter(g => g.game_name?.toLowerCase().includes(searchFilter.toLowerCase()));
@@ -191,6 +195,11 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
                       
                       <div className="flex justify-between items-center mt-3">
                         <div className="flex gap-2 items-center flex-wrap">
+                          {game.totalDuration > 0 && (
+                            <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full flex items-center gap-1 shadow z-20 text-white">
+                              <PlayCircle size={10} className="text-red-400" /> {formatDuration(game.totalDuration)}
+                            </span>
+                          )}
                           <span className="text-[10px] sm:text-xs bg-white/20 backdrop-blur px-2 py-0.5 rounded-full shadow z-20">
                             {game.totalStreams} stream{game.totalStreams === 1 ? '' : 's'}
                           </span>

@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { RAWG_API_KEY } from '../utils/constants';
 import { migrateLabels } from '../utils/dataUtils';
-import { formatRunName, formatYtDate } from '../utils/helpers';
+import { formatRunName, formatYtDate, formatDuration } from '../utils/helpers';
+import { fetchPlaylistDetails } from '../utils/youtubeUtils';
 
 export function useStreamData(notify) {
   const [streamData, setStreamData] = useState(() => {
@@ -98,65 +99,142 @@ export function useStreamData(notify) {
   const handleManualSync = async () => {
     if (isSyncing) return;
     setIsSyncing(true);
-    notify('Starting manual library sync...', 'info');
-    const dataCopy = JSON.parse(JSON.stringify(streamData));
-    let changed = false;
-    for (const [id, game] of Object.entries(dataCopy)) {
-      if (!game.details) game.details = { developer: 'Unknown', publisher: 'Unknown', releaseDate: game.release_year, genres: 'Unknown', tags: 'Unknown' };
-      if (!game.details.steamUrl && !game.details.notOnSteam) {
-        try {
-          let steamId = /^\d+$/.test(id) ? id : null;
-          if (!steamId) {
+    notify('Starting manual library sync (Steam, RAWG, and YouTube)...', 'info');
+    
+    try {
+      const dataCopy = JSON.parse(JSON.stringify(streamData));
+      let changed = false;
+      
+      // Steam and RAWG Data syncing
+      for (const [id, game] of Object.entries(dataCopy)) {
+        if (!game.details) game.details = { developer: 'Unknown', publisher: 'Unknown', releaseDate: game.release_year, genres: 'Unknown', tags: 'Unknown' };
+        if (!game.details.steamUrl && !game.details.notOnSteam) {
+          try {
+            let steamId = /^\d+$/.test(id) ? id : null;
+            if (!steamId) {
+              const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+              const searchRes = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=english&cc=US`);
+              const contentType = searchRes.headers.get("content-type");
+              if (searchRes.ok && contentType && contentType.includes("application/json")) {
+                 steamId = (await searchRes.json()).items?.[0]?.id;
+              }
+            }
+            if (steamId) {
+              const detailRes = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
+              const contentType = detailRes.headers.get("content-type");
+              if (detailRes.ok && contentType && contentType.includes("application/json")) {
+                  const detailsRaw = await detailRes.json();
+                  const steamDataObj = detailsRaw[steamId]?.data;
+                  if (steamDataObj) {
+                    game.cover_image = steamDataObj.header_image;
+                    let newUrls = steamDataObj.screenshots ? steamDataObj.screenshots.map(s => s.path_full) : [];
+                    newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
+                    game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
+                    game.details = {
+                      developer: steamDataObj.developers?.join(', ') || game.details.developer,
+                      publisher: steamDataObj.publishers?.join(', ') || game.details.publisher,
+                      releaseDate: steamDataObj.release_date?.date || game.details.releaseDate,
+                      genres: steamDataObj.genres?.map(g => g.description).join(', ') || game.details.genres,
+                      steamUrl: `https://store.steampowered.com/app/${steamId}/`,
+                      notOnSteam: false,
+                    };
+                    changed = true;
+                  }
+              }
+            }
+            await new Promise(r => setTimeout(r, 400));
+          } catch (e) {}
+        }
+        if (!game.thumbnail_urls || game.thumbnail_urls.length < 2) {
+          try {
             const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-            const searchRes = await fetch(`/steam-api/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=english&cc=US`);
-            const contentType = searchRes.headers.get("content-type");
-            if (searchRes.ok && contentType && contentType.includes("application/json")) {
-               steamId = (await searchRes.json()).items?.[0]?.id;
+            const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+            const rawgSearchData = await rawgSearchRes.json();
+            if (rawgSearchData.results?.[0]) {
+              const rawgId = rawgSearchData.results[0].id;
+              const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+              const sData = await sRes.json();
+              if (sData.results) { game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...sData.results.map(x=>x.image)])].filter(Boolean); changed = true; }
             }
-          }
-          if (steamId) {
-            const detailRes = await fetch(`/steam-api/api/appdetails?appids=${steamId}&l=english`);
-            const contentType = detailRes.headers.get("content-type");
-            if (detailRes.ok && contentType && contentType.includes("application/json")) {
-                const detailsRaw = await detailRes.json();
-                const steamDataObj = detailsRaw[steamId]?.data;
-                if (steamDataObj) {
-                  game.cover_image = steamDataObj.header_image;
-                  let newUrls = steamDataObj.screenshots ? steamDataObj.screenshots.map(s => s.path_full) : [];
-                  newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
-                  game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
-                  game.details = {
-                    developer: steamDataObj.developers?.join(', ') || game.details.developer,
-                    publisher: steamDataObj.publishers?.join(', ') || game.details.publisher,
-                    releaseDate: steamDataObj.release_date?.date || game.details.releaseDate,
-                    genres: steamDataObj.genres?.map(g => g.description).join(', ') || game.details.genres,
-                    steamUrl: `https://store.steampowered.com/app/${steamId}/`,
-                    notOnSteam: false,
-                  };
-                  changed = true;
+          } catch (e) {}
+        }
+      }
+      
+      // YouTube Data syncing
+      for (const [id, game] of Object.entries(dataCopy)) {
+        if (!game.cycles) continue;
+        for (const [cycleId, cycle] of Object.entries(game.cycles)) {
+          if (cycle.youtubePlaylist) {
+            const metaMap = {};
+            (cycle.timestamps || []).forEach(ts => {
+              if (ts.videoId) {
+                metaMap[ts.videoId] = { 
+                  duration: ts.duration, 
+                  startTime: ts.startTime || ts.publishedAt,
+                  endTime: ts.endTime,
+                  title: ts.title 
+                };
+              }
+            });
+            
+            try {
+              const videos = await fetchPlaylistDetails(cycle.youtubePlaylist.trim(), metaMap);
+              if (videos && videos.length > 0) {
+                cycle.timestamps = cycle.timestamps.map((tsObj, i) => {
+                  const streamNumber = i + 1;
+                  const matchingVideo = videos.find(v => {
+                    if (!v.title) return false;
+                    const match = v.title.match(/Livestream\s*#(\d+)/i);
+                    return match && parseInt(match[1], 10) === streamNumber;
+                  });
+                  
+                  if (matchingVideo) {
+                    return {
+                      ...tsObj,
+                      videoId: matchingVideo.videoId,
+                      duration: matchingVideo.duration,
+                      startTime: matchingVideo.startTime,
+                      endTime: matchingVideo.endTime,
+                      date: formatYtDate(matchingVideo.startTime)
+                    };
+                  }
+                  return tsObj;
+                });
+                
+                if (videos.length > 0) {
+                  cycle.playlistData = {
+                    totalRuntime: formatDuration(videos.reduce((acc, v) => acc + (v.duration || 0), 0)),
+                    videos: videos.map(v => ({ 
+                      id: v.videoId, 
+                      url: `https://www.youtube.com/watch?v=${v.videoId}&list=${cycle.youtubePlaylist.match(/[&?]list=([^&]+)/i)?.[1] || ''}`, 
+                      durationSec: v.duration, 
+                      durationStr: formatDuration(v.duration) 
+                    }))
+                  }
                 }
+                changed = true;
+              }
+            } catch (e) {
+              console.error(`Failed to sync playlist for ${game.game_name} - ${cycleId}`, e);
             }
           }
-          await new Promise(r => setTimeout(r, 400));
-        } catch (e) {}
+        }
       }
-      if (!game.thumbnail_urls || game.thumbnail_urls.length < 2) {
-        try {
-          const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-          const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-          const rawgSearchData = await rawgSearchRes.json();
-          if (rawgSearchData.results?.[0]) {
-            const rawgId = rawgSearchData.results[0].id;
-            const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-            const sData = await sRes.json();
-            if (sData.results) { game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...sData.results.map(x=>x.image)])].filter(Boolean); changed = true; }
-          }
-        } catch (e) {}
+
+      if (changed) { 
+        setStreamData(dataCopy); 
+        notify('Library sync & YouTube refresh completed!', 'success'); 
+      } else {
+        notify('Library & Playlists are already up to date.', 'info');
       }
+
+    } catch (error) {
+      console.error("Critical error during sync:", error);
+      notify('An error occurred during synchronization. Check console.', 'error');
+    } finally {
+      // Ensure the button state always resets so it doesn't get stuck!
+      setIsSyncing(false);
     }
-    if (changed) { setStreamData(dataCopy); notify('Library sync completed!', 'success'); }
-    else notify('Library is already up to date.', 'info');
-    setIsSyncing(false);
   };
 
   // --- Add Game ---
@@ -299,12 +377,10 @@ export function useStreamData(notify) {
     cycles[newId].youtubePlaylist = youtubePlaylist || '';
     if (newLabel) cycles[newId].label = newLabel;
     
-    // EMBED YOUTUBE DATA DIRECTLY INTO TIMESTAMPS via Title Matching
     if (playlistData && playlistData.length > 0) {
       cycles[newId].timestamps = cycles[newId].timestamps.map((tsObj, i) => {
         const streamNumber = i + 1;
         
-        // Find the video where the title contains "Livestream #<streamNumber>"
         const matchingVideo = playlistData.find(v => {
           if (!v.title) return false;
           const match = v.title.match(/Livestream\s*#(\d+)/i);
@@ -316,9 +392,9 @@ export function useStreamData(notify) {
             ...tsObj,
             videoId: matchingVideo.videoId,
             duration: matchingVideo.duration,
-            startTime: matchingVideo.startTime, // Primary stream start time
-            endTime: matchingVideo.endTime,     // Stream end time
-            date: formatYtDate(matchingVideo.startTime) // Overwrite local date perfectly
+            startTime: matchingVideo.startTime, 
+            endTime: matchingVideo.endTime,     
+            date: formatYtDate(matchingVideo.startTime) 
           };
         }
         return tsObj;

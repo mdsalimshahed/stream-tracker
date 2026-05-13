@@ -41,30 +41,20 @@ export const formatDuration = (totalSeconds) => {
   return `${minutes}m ${seconds}s`;
 };
 
-// STRICT UNIX TO GMT+6 FORMATTER
+// FORMATTER (Uses Local Browser Timezone)
 export const formatYtDate = (isoString) => {
   if (!isoString) return '';
 
-  // 1. Turn the YouTube ISO string strictly into UNIX time (milliseconds)
-  const unixTimeMs = new Date(isoString).getTime();
-  
-  // 2. Convert that UNIX time into GMT+6 by adding exactly 6 hours
-  // (6 hours * 60 minutes * 60 seconds * 1000 milliseconds)
-  const gmt6OffsetMs = 6 * 60 * 60 * 1000;
-  const gmt6Date = new Date(unixTimeMs + gmt6OffsetMs);
+  const localDate = new Date(isoString);
 
-  // 3. Extract the exact components using UTC methods so the browser CANNOT interfere
-  const day = gmt6Date.getUTCDate();
-  const year = gmt6Date.getUTCFullYear();
-  
-  // Use a strict array for months to guarantee exact English formatting
+  const day = localDate.getDate();
+  const year = localDate.getFullYear();
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  const month = monthNames[gmt6Date.getUTCMonth()];
+  const month = monthNames[localDate.getMonth()];
   
-  // Extract and format time
-  let hours = gmt6Date.getUTCHours();
-  const minutes = gmt6Date.getUTCMinutes().toString().padStart(2, '0');
-  const seconds = gmt6Date.getUTCSeconds().toString().padStart(2, '0');
+  let hours = localDate.getHours();
+  const minutes = localDate.getMinutes().toString().padStart(2, '0');
+  const seconds = localDate.getSeconds().toString().padStart(2, '0');
   
   const ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12 || 12;
@@ -72,20 +62,85 @@ export const formatYtDate = (isoString) => {
   const strTime = `${hours.toString().padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
   const dayStr = `${day}${getOrdinalSuffix(day)}`;
   
-  // Return your exact original format
   return `${dayStr} ${month} ${year}, ${strTime}`;
+};
+
+// Only returns the time block (e.g. 06:42:27 PM)
+export const formatTimeOnly = (isoString) => {
+  if (!isoString) return '';
+  const localDate = new Date(isoString);
+  let hours = localDate.getHours();
+  const minutes = localDate.getMinutes().toString().padStart(2, '0');
+  const seconds = localDate.getSeconds().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  return `${hours.toString().padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+};
+
+// Intelligently formats the start to end time, checking if the date crossed over midnight
+export const formatStreamTimeRange = (startIso, endIso) => {
+  if (!startIso) return '';
+  if (!endIso) return formatYtDate(startIso);
+  
+  const start = new Date(startIso);
+  const end = new Date(endIso);
+  
+  const isSameDay = 
+    start.getDate() === end.getDate() && 
+    start.getMonth() === end.getMonth() && 
+    start.getFullYear() === end.getFullYear();
+                    
+  if (isSameDay) {
+    return `${formatYtDate(startIso)} — ${formatTimeOnly(endIso)}`;
+  } else {
+    // If the stream crossed midnight into a new day, show the full date for the end time too
+    return `${formatYtDate(startIso)} — ${formatYtDate(endIso)}`;
+  }
+};
+
+// Calculates the deficit between stream uptime and VOD duration
+export const calculateDeficit = (startIso, endIso, durationSecs) => {
+  if (!startIso || !endIso || durationSecs == null) return '';
+  
+  const start = new Date(startIso).getTime();
+  const end = new Date(endIso).getTime();
+  const uptimeSecs = Math.floor((end - start) / 1000);
+  
+  const diffSecs = uptimeSecs - durationSecs;
+  if (diffSecs === 0) return '';
+  
+  // If uptime > duration, time was lost from the VOD
+  // If uptime < duration, time was magically gained (sometimes happens due to YT processing)
+  const status = diffSecs > 0 ? 'lost' : 'gained';
+  const absDef = Math.abs(diffSecs);
+  
+  const h = Math.floor(absDef / 3600);
+  const m = Math.floor((absDef % 3600) / 60);
+  const s = absDef % 60;
+  
+  let str = '';
+  if (h > 0) str += `${h}h `;
+  if (m > 0 || h > 0) str += `${m}m `;
+  str += `${s}s`;
+  
+  return ` (${str.trim()} ${status})`;
 };
 
 export const getTsDateStr = (ts) => {
   if (!ts) return '';
   if (typeof ts === 'string') return ts;
+  
+  if (ts.startTime) return formatYtDate(ts.startTime);
   if (ts.publishedAt) return formatYtDate(ts.publishedAt);
-  return ts.date || '';
+  if (ts.date) return ts.date; 
+  
+  return '';
 };
 
 export const parseCustomTimestamp = (ts) => {
   if (!ts) return new Date(0);
   if (typeof ts === 'object') {
+    if (ts.startTime) return new Date(ts.startTime);
     if (ts.publishedAt) return new Date(ts.publishedAt);
     ts = ts.date || '';
   }

@@ -1,6 +1,6 @@
 // src/components/modals/EditRunModal.jsx
 import React, { useState } from 'react';
-import { X, Save, Star, RefreshCw, Loader2, PlayCircle } from 'lucide-react';
+import { X, Save, Star, RefreshCw, Loader2, Copy, Check } from 'lucide-react';
 import { formatRunName, formatDuration } from '../../utils/helpers';
 import { fetchPlaylistDetails } from '../../utils/youtubeUtils';
 
@@ -9,7 +9,11 @@ const toSentenceCase = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
-export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, onSave, onClose }) => {
+export const EditRunModal = ({ 
+  runName, isMain, youtubePlaylist, currentLabel, 
+  gameName, releaseYear, 
+  existingTimestamps = [], onSave, onClose 
+}) => {
   const [name, setName] = useState(runName);
   const [main, setMain] = useState(isMain);
   const [playlist, setPlaylist] = useState(youtubePlaylist || '');
@@ -18,6 +22,18 @@ export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, o
   const [playlistData, setPlaylistData] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState(null);
+
+  const [copied, setCopied] = useState(false);
+  
+  const suggestedTitle = (main || name === 'First Playthrough') 
+    ? `${gameName} (${releaseYear})` 
+    : `${gameName} (${releaseYear}) — [${name}]`;
+
+  const handleCopyTitle = () => {
+    navigator.clipboard.writeText(suggestedTitle);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleNameChange = (e) => {
     let raw = e.target.value;
@@ -31,7 +47,20 @@ export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, o
     setIsSyncing(true);
     setSyncStatus({ text: "Syncing with YouTube...", type: "info" });
     
-    const videos = await fetchPlaylistDetails(playlist.trim());
+    // Create a lookup map of what we already know to save API quota
+    const metaMap = {};
+    (existingTimestamps || []).forEach(ts => {
+      if (ts.videoId) {
+        metaMap[ts.videoId] = { 
+          duration: ts.duration, 
+          startTime: ts.startTime || ts.publishedAt,
+          endTime: ts.endTime,
+          title: ts.title 
+        };
+      }
+    });
+    
+    const videos = await fetchPlaylistDetails(playlist.trim(), metaMap);
     if (videos) {
       setPlaylistData(videos);
       const totalSec = videos.reduce((acc, v) => acc + v.duration, 0);
@@ -81,6 +110,18 @@ export const EditRunModal = ({ runName, isMain, youtubePlaylist, currentLabel, o
                 {isSyncing ? <Loader2 size={20} className="animate-spin text-white" /> : <RefreshCw size={20} className="text-red-400" />}
               </button>
             </div>
+            
+            <div className="mt-2 text-xs text-white/50 bg-white/5 p-2 rounded-lg border border-white/5">
+               <p className="mb-1">Recommended Playlist Name:</p>
+               <button 
+                  onClick={handleCopyTitle}
+                  className="text-left w-full bg-black/40 hover:bg-white/10 p-2 rounded transition flex justify-between items-center group shadow-inner"
+               >
+                  <span className="text-blue-400 font-medium group-hover:text-blue-300 truncate mr-2">{suggestedTitle}</span>
+                  {copied ? <Check size={14} className="text-emerald-400 shrink-0" /> : <Copy size={14} className="text-white/40 group-hover:text-white/80 shrink-0" />}
+               </button>
+            </div>
+
             {syncStatus && <p className={`text-xs mt-2 ${syncStatus.type === 'error' ? 'text-red-400' : syncStatus.type === 'success' ? 'text-emerald-400' : 'text-blue-400'}`}>{syncStatus.text}</p>}
           </div>
         </div>

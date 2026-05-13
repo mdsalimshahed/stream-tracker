@@ -11,45 +11,79 @@ const parseISODuration = (duration) => {
   return hours * 3600 + minutes * 60 + seconds;
 };
 
-export const fetchPlaylistDetails = async (playlistUrl) => {
+/**
+ * Fetches playlist items and merges with existing metadata to minimize API calls.
+ * @param {string} playlistUrl 
+ * @param {Object} existingMetadata - Map of { videoId: { duration, startTime, endTime, title } }
+ */
+export const fetchPlaylistDetails = async (playlistUrl, existingMetadata = {}) => {
   try {
     const listMatch = playlistUrl.match(/[&?]list=([^&]+)/i);
     if (!listMatch || !listMatch[1]) throw new Error("Invalid Playlist URL");
     const playlistId = listMatch[1];
 
-    let videoItems = [];
+    let playlistItemsList = [];
     let nextPageToken = '';
 
+    // Step 1: Get the raw list of video IDs & snippet titles (Cost: 1 unit per 50 items)
     do {
-      const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
+      const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails,snippet&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
       const res = await fetch(url);
       const data = await res.json();
       
       if (!data.items) break;
-      videoItems.push(...data.items.map(item => item.contentDetails.videoId));
+      data.items.forEach(item => {
+        playlistItemsList.push({
+          videoId: item.contentDetails.videoId,
+          publishedAt: item.snippet.publishedAt,
+          title: item.snippet.title // Extract the title for matching
+        });
+      });
       nextPageToken = data.nextPageToken;
     } while (nextPageToken);
 
-    if (videoItems.length === 0) return null;
+    if (playlistItemsList.length === 0) return null;
 
-    let videos = [];
-    for (let i = 0; i < videoItems.length; i += 50) {
-      const chunk = videoItems.slice(i, i + 50).join(',');
-      const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${chunk}&key=${YOUTUBE_API_KEY}`;
-      const videoRes = await fetch(videoUrl);
-      const videoData = await videoRes.json();
-      
-      if (videoData.items) {
-        videoData.items.forEach(video => {
-          videos.push({
-            videoId: video.id,
-            duration: parseISODuration(video.contentDetails.duration),
-            publishedAt: video.snippet.publishedAt
+    // Step 2: Filter for IDs that don't have duration OR startTime cached locally
+    const idsToFetch = playlistItemsList.filter(v => !existingMetadata[v.videoId]?.duration || !existingMetadata[v.videoId]?.startTime).map(v => v.videoId);
+
+    const freshDetails = {};
+    if (idsToFetch.length > 0) {
+      // Step 3: Fetch details ONLY for the unknown videos (Cost: 1 unit per 50 items)
+      for (let i = 0; i < idsToFetch.length; i += 50) {
+        const chunk = idsToFetch.slice(i, i + 50).join(',');
+        const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,liveStreamingDetails&id=${chunk}&key=${YOUTUBE_API_KEY}`;
+        const videoRes = await fetch(videoUrl);
+        const videoData = await videoRes.json();
+        
+        if (videoData.items) {
+          videoData.items.forEach(video => {
+            const actualStart = video.liveStreamingDetails?.actualStartTime;
+            const actualEnd = video.liveStreamingDetails?.actualEndTime;
+            const published = video.snippet?.publishedAt;
+            
+            freshDetails[video.id] = {
+              duration: parseISODuration(video.contentDetails?.duration || "PT0S"),
+              startTime: actualStart || published,
+              endTime: actualEnd || null
+            };
           });
-        });
+        }
       }
     }
-    return videos;
+
+    // Step 4: Construct the final list using Cache -> API
+    return playlistItemsList.map(item => {
+      const fresh = freshDetails[item.videoId];
+      const cached = existingMetadata[item.videoId];
+      return {
+        videoId: item.videoId,
+        title: item.title, 
+        startTime: fresh?.startTime || cached?.startTime || item.publishedAt,
+        endTime: fresh?.endTime || cached?.endTime || null,
+        duration: fresh?.duration || cached?.duration || 0
+      };
+    }).filter(v => v.startTime); 
   } catch (error) {
     console.error("Error fetching playlist data:", error);
     return null;

@@ -1,8 +1,7 @@
 // src/components/GameProfileModal.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { X, ArrowRight, ArrowLeft, Gamepad2, Clock, Plus, Trash2, Edit3, Star, PlayCircle } from 'lucide-react';
-// FIX: Added formatDuration and formatYtDate to the import list below
-import { formatReleaseDate, formatDuration, formatYtDate } from '../utils/helpers';
+import { formatReleaseDate, formatDuration, formatYtDate, formatStreamTimeRange, calculateDeficit } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditRunModal } from './modals/EditRunModal';
 import { CrossfadeImage } from './common/UIComponents';
@@ -114,7 +113,6 @@ export default function GameProfileModal({
     return reversed.map((ts, i) => {
       const realIdx = currentCycleData.timestamps.length - 1 - i;
       const active = selectedLogIndex === realIdx;
-      const runName = currentCycle.displayName;
 
       return (
         <div 
@@ -126,7 +124,6 @@ export default function GameProfileModal({
             <div>
               <div className="flex items-center flex-wrap gap-2">
                 <p className="font-medium" style={{ fontSize: `${systemFonts.logTitle}px` }}>Livestream #{realIdx + 1}</p>
-                {/* Dynamically reads duration from the embedded JSON object! */}
                 {ts.videoId && (
                   <a 
                     href={`https://youtube.com/watch?v=${ts.videoId}`}
@@ -142,8 +139,17 @@ export default function GameProfileModal({
                 )}
               </div>
               <p className="text-white/40 mt-0.5" style={{ fontSize: `${systemFonts.logSub}px` }}>
-                 {/* Uses formatYtDate from helpers.js if it exists, otherwise uses creation date */}
-                 {ts.publishedAt ? formatYtDate(ts.publishedAt) : ts.date}
+                 {(() => {
+                    // Uses the new smart time range logic
+                    if (ts.startTime && ts.endTime) {
+                      const rangeStr = formatStreamTimeRange(ts.startTime, ts.endTime);
+                      const deficit = calculateDeficit(ts.startTime, ts.endTime, ts.duration);
+                      return `${rangeStr}${deficit}`;
+                    }
+                    if (ts.startTime) return formatYtDate(ts.startTime);
+                    if (ts.publishedAt) return formatYtDate(ts.publishedAt);
+                    return ts.date;
+                 })()}
               </p>
             </div>
             <button
@@ -327,7 +333,7 @@ export default function GameProfileModal({
                     const isSelected = selectedCycleId === cycle.id;
                     const labelInfo = getLabelStyle(cycle.label || 'Ongoing');
                     
-                    // NEW: Compute Total Runtime Pill
+                    // Total Runtime Pill
                     const runTimeSecs = cycle.timestamps?.reduce((acc, ts) => acc + (ts.duration || 0), 0) || 0;
 
                     return (
@@ -422,6 +428,9 @@ export default function GameProfileModal({
           youtubePlaylist={editingRun.youtubePlaylist}
           currentLabel={editingRun.label}
           currentPlaylistData={editingRun.playlistData}
+          gameName={gameData.game_name}
+          releaseYear={gameData.release_year}
+          existingTimestamps={gameData.cycles[editingRun.id]?.timestamps || []}
           onSave={handleSaveRunEdit}
           onClose={() => setEditingRun(null)}
         />

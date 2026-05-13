@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { RAWG_API_KEY } from '../utils/constants';
 import { migrateLabels } from '../utils/dataUtils';
-import { formatRunName } from '../utils/helpers';
+import { formatRunName, formatYtDate } from '../utils/helpers';
 
 export function useStreamData(notify) {
   const [streamData, setStreamData] = useState(() => {
@@ -299,17 +299,26 @@ export function useStreamData(notify) {
     cycles[newId].youtubePlaylist = youtubePlaylist || '';
     if (newLabel) cycles[newId].label = newLabel;
     
-    // EMBED YOUTUBE DATA DIRECTLY INTO TIMESTAMPS
+    // EMBED YOUTUBE DATA DIRECTLY INTO TIMESTAMPS via Title Matching
     if (playlistData && playlistData.length > 0) {
-      const totalVideos = playlistData.length;
       cycles[newId].timestamps = cycles[newId].timestamps.map((tsObj, i) => {
-        const video = playlistData[totalVideos - 1 - i]; // Reverse map to match Livestream 1 with oldest video
-        if (video) {
+        const streamNumber = i + 1;
+        
+        // Find the video where the title contains "Livestream #<streamNumber>"
+        const matchingVideo = playlistData.find(v => {
+          if (!v.title) return false;
+          const match = v.title.match(/Livestream\s*#(\d+)/i);
+          return match && parseInt(match[1], 10) === streamNumber;
+        });
+        
+        if (matchingVideo) {
           return {
             ...tsObj,
-            videoId: video.videoId,
-            duration: video.duration,
-            publishedAt: video.publishedAt
+            videoId: matchingVideo.videoId,
+            duration: matchingVideo.duration,
+            startTime: matchingVideo.startTime, // Primary stream start time
+            endTime: matchingVideo.endTime,     // Stream end time
+            date: formatYtDate(matchingVideo.startTime) // Overwrite local date perfectly
           };
         }
         return tsObj;

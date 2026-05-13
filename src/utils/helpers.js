@@ -17,19 +17,14 @@ const getOrdinalSuffix = (day) => {
   }
 };
 
+export const extractPlaylistId = (urlOrId) => {
+  if (!urlOrId) return '';
+  const match = urlOrId.match(/[&?]list=([^&]+)/i);
+  return match ? match[1] : urlOrId;
+};
+
 export const generateTimestamp = () => {
-  const now = new Date();
-  const day = now.getDate();
-  const month = now.toLocaleString('en-US', { month: 'long' });
-  const year = now.getFullYear();
-  let hours = now.getHours();
-  const minutes = now.getMinutes().toString().padStart(2, '0');
-  const seconds = now.getSeconds().toString().padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12 || 12;
-  const strTime = `${hours.toString().padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
-  const dayStr = `${day}${getOrdinalSuffix(day)}`;
-  return `${dayStr} ${month} ${year}, ${strTime}`;
+  return Date.now();
 };
 
 export const formatDuration = (totalSeconds) => {
@@ -42,10 +37,10 @@ export const formatDuration = (totalSeconds) => {
 };
 
 // FORMATTER (Uses Local Browser Timezone)
-export const formatYtDate = (isoString) => {
-  if (!isoString) return '';
+export const formatYtDate = (ts) => {
+  if (!ts) return '';
 
-  const localDate = new Date(isoString);
+  const localDate = new Date(ts);
 
   const day = localDate.getDate();
   const year = localDate.getFullYear();
@@ -66,9 +61,9 @@ export const formatYtDate = (isoString) => {
 };
 
 // Only returns the time block (e.g. 06:42:27 PM)
-export const formatTimeOnly = (isoString) => {
-  if (!isoString) return '';
-  const localDate = new Date(isoString);
+export const formatTimeOnly = (ts) => {
+  if (!ts) return '';
+  const localDate = new Date(ts);
   let hours = localDate.getHours();
   const minutes = localDate.getMinutes().toString().padStart(2, '0');
   const seconds = localDate.getSeconds().toString().padStart(2, '0');
@@ -78,12 +73,12 @@ export const formatTimeOnly = (isoString) => {
 };
 
 // Intelligently formats the start to end time, checking if the date crossed over midnight
-export const formatStreamTimeRange = (startIso, endIso) => {
-  if (!startIso) return '';
-  if (!endIso) return formatYtDate(startIso);
+export const formatStreamTimeRange = (startTs, endTs) => {
+  if (!startTs) return '';
+  if (!endTs) return formatYtDate(startTs);
   
-  const start = new Date(startIso);
-  const end = new Date(endIso);
+  const start = new Date(startTs);
+  const end = new Date(endTs);
   
   const isSameDay = 
     start.getDate() === end.getDate() && 
@@ -91,26 +86,24 @@ export const formatStreamTimeRange = (startIso, endIso) => {
     start.getFullYear() === end.getFullYear();
                     
   if (isSameDay) {
-    return `${formatYtDate(startIso)} — ${formatTimeOnly(endIso)}`;
+    return `${formatYtDate(startTs)} — ${formatTimeOnly(endTs)}`;
   } else {
     // If the stream crossed midnight into a new day, show the full date for the end time too
-    return `${formatYtDate(startIso)} — ${formatYtDate(endIso)}`;
+    return `${formatYtDate(startTs)} — ${formatYtDate(endTs)}`;
   }
 };
 
 // Calculates the deficit between stream uptime and VOD duration
-export const calculateDeficit = (startIso, endIso, durationSecs) => {
-  if (!startIso || !endIso || durationSecs == null) return '';
+export const calculateDeficit = (startTs, endTs, durationSecs) => {
+  if (!startTs || !endTs || durationSecs == null) return '';
   
-  const start = new Date(startIso).getTime();
-  const end = new Date(endIso).getTime();
+  const start = new Date(startTs).getTime();
+  const end = new Date(endTs).getTime();
   const uptimeSecs = Math.floor((end - start) / 1000);
   
   const diffSecs = uptimeSecs - durationSecs;
   if (diffSecs === 0) return '';
   
-  // If uptime > duration, time was lost from the VOD
-  // If uptime < duration, time was magically gained (sometimes happens due to YT processing)
   const status = diffSecs > 0 ? 'lost' : 'gained';
   const absDef = Math.abs(diffSecs);
   
@@ -128,11 +121,11 @@ export const calculateDeficit = (startIso, endIso, durationSecs) => {
 
 export const getTsDateStr = (ts) => {
   if (!ts) return '';
-  if (typeof ts === 'string') return ts;
+  if (typeof ts === 'string' || typeof ts === 'number') return formatYtDate(ts);
   
   if (ts.startTime) return formatYtDate(ts.startTime);
   if (ts.publishedAt) return formatYtDate(ts.publishedAt);
-  if (ts.date) return ts.date; 
+  if (ts.date) return formatYtDate(ts.date); 
   
   return '';
 };
@@ -144,8 +137,9 @@ export const parseCustomTimestamp = (ts) => {
     if (ts.publishedAt) return new Date(ts.publishedAt);
     ts = ts.date || '';
   }
+  if (typeof ts === 'number') return new Date(ts);
   try {
-    const cleanTs = ts.replace(/(st|nd|rd|th)/, '');
+    const cleanTs = String(ts).replace(/(st|nd|rd|th)/, '');
     const d = new Date(cleanTs);
     if (!isNaN(d.getTime())) return d;
   } catch (e) { }

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { RAWG_API_KEY } from '../utils/constants';
 import { migrateLabels } from '../utils/dataUtils';
-import { formatRunName, formatYtDate, formatDuration } from '../utils/helpers';
+import { formatRunName, extractPlaylistId } from '../utils/helpers';
 import { fetchPlaylistDetails } from '../utils/youtubeUtils';
 
 export function useStreamData(notify) {
@@ -165,12 +165,13 @@ export function useStreamData(notify) {
         if (!game.cycles) continue;
         for (const [cycleId, cycle] of Object.entries(game.cycles)) {
           if (cycle.youtubePlaylist) {
+            const playlistId = extractPlaylistId(cycle.youtubePlaylist);
             const metaMap = {};
             (cycle.timestamps || []).forEach(ts => {
               if (ts.videoId) {
                 metaMap[ts.videoId] = { 
                   duration: ts.duration, 
-                  startTime: ts.startTime || ts.publishedAt,
+                  startTime: ts.startTime,
                   endTime: ts.endTime,
                   title: ts.title 
                 };
@@ -178,7 +179,7 @@ export function useStreamData(notify) {
             });
             
             try {
-              const videos = await fetchPlaylistDetails(cycle.youtubePlaylist.trim(), metaMap);
+              const videos = await fetchPlaylistDetails(playlistId, metaMap);
               if (videos && videos.length > 0) {
                 cycle.timestamps = cycle.timestamps.map((tsObj, i) => {
                   const streamNumber = i + 1;
@@ -195,23 +196,11 @@ export function useStreamData(notify) {
                       duration: matchingVideo.duration,
                       startTime: matchingVideo.startTime,
                       endTime: matchingVideo.endTime,
-                      date: formatYtDate(matchingVideo.startTime)
+                      date: matchingVideo.startTime // Align default date sorting cleanly
                     };
                   }
                   return tsObj;
                 });
-                
-                if (videos.length > 0) {
-                  cycle.playlistData = {
-                    totalRuntime: formatDuration(videos.reduce((acc, v) => acc + (v.duration || 0), 0)),
-                    videos: videos.map(v => ({ 
-                      id: v.videoId, 
-                      url: `https://www.youtube.com/watch?v=${v.videoId}&list=${cycle.youtubePlaylist.match(/[&?]list=([^&]+)/i)?.[1] || ''}`, 
-                      durationSec: v.duration, 
-                      durationStr: formatDuration(v.duration) 
-                    }))
-                  }
-                }
                 changed = true;
               }
             } catch (e) {
@@ -232,7 +221,6 @@ export function useStreamData(notify) {
       console.error("Critical error during sync:", error);
       notify('An error occurred during synchronization. Check console.', 'error');
     } finally {
-      // Ensure the button state always resets so it doesn't get stuck!
       setIsSyncing(false);
     }
   };
@@ -374,7 +362,7 @@ export function useStreamData(notify) {
     
     cycles[newId].displayName = newDisplayName;
     cycles[newId].isMain = isMain;
-    cycles[newId].youtubePlaylist = youtubePlaylist || '';
+    cycles[newId].youtubePlaylist = extractPlaylistId(youtubePlaylist);
     if (newLabel) cycles[newId].label = newLabel;
     
     if (playlistData && playlistData.length > 0) {
@@ -394,7 +382,7 @@ export function useStreamData(notify) {
             duration: matchingVideo.duration,
             startTime: matchingVideo.startTime, 
             endTime: matchingVideo.endTime,     
-            date: formatYtDate(matchingVideo.startTime) 
+            date: matchingVideo.startTime // Fallback Unix
           };
         }
         return tsObj;

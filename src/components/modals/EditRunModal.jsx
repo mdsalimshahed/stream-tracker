@@ -16,7 +16,13 @@ export const EditRunModal = ({
 }) => {
   const [name, setName] = useState(runName);
   const [main, setMain] = useState(isMain);
-  const [playlist, setPlaylist] = useState(youtubePlaylist || '');
+  
+  // Create full link on component load if it's just an ID
+  const initialPlaylistLink = youtubePlaylist && !youtubePlaylist.includes('http') 
+    ? `https://youtube.com/playlist?list=${youtubePlaylist}` 
+    : (youtubePlaylist || '');
+    
+  const [playlist, setPlaylist] = useState(initialPlaylistLink);
   const [label, setLabel] = useState(currentLabel || 'Ongoing');
   
   const [playlistData, setPlaylistData] = useState(null);
@@ -53,7 +59,7 @@ export const EditRunModal = ({
       if (ts.videoId) {
         metaMap[ts.videoId] = { 
           duration: ts.duration, 
-          startTime: ts.startTime || ts.publishedAt,
+          startTime: ts.startTime,
           endTime: ts.endTime,
           title: ts.title 
         };
@@ -63,7 +69,7 @@ export const EditRunModal = ({
     const videos = await fetchPlaylistDetails(playlist.trim(), metaMap);
     if (videos) {
       setPlaylistData(videos);
-      const totalSec = videos.reduce((acc, v) => acc + v.duration, 0);
+      const totalSec = videos.reduce((acc, v) => acc + (v.duration || 0), 0);
       setSyncStatus({ text: `Success! Linked ${videos.length} videos. Total time: ${formatDuration(totalSec)}`, type: "success" });
     } else {
       setSyncStatus({ text: "Failed to fetch playlist. Check URL or API key.", type: "error" });

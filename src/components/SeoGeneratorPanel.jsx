@@ -7,12 +7,12 @@ export default function SeoGeneratorPanel({ game, gameId, year, nC, cycle, cycle
   const [streamSummary, setStreamSummary] = useState('');
   const [aiPrompt, setAiPrompt] = useState('');
   
-  // Current Playlist State (Auto-populates if one exists for this run)
-  const [currentPlaylistInput, setCurrentPlaylistInput] = useState(cycle?.youtubePlaylist || '');
+  // Current Playlist State
+  const [currentPlaylistInput, setCurrentPlaylistInput] = useState(cycle?.youtubePlaylist ? `https://youtube.com/playlist?list=${cycle.youtubePlaylist}` : '');
 
   // Keep it synced if the user switches cycles
   useEffect(() => {
-    setCurrentPlaylistInput(cycle?.youtubePlaylist || '');
+    setCurrentPlaylistInput(cycle?.youtubePlaylist ? `https://youtube.com/playlist?list=${cycle.youtubePlaylist}` : '');
   }, [cycle]);
 
   // Persistent SEO Configuration States
@@ -61,7 +61,7 @@ export default function SeoGeneratorPanel({ game, gameId, year, nC, cycle, cycle
       Object.entries(gData.cycles || {}).forEach(([cId, cData]) => {
         if (gId === gameId && cId === cycleName) return; // Skip current
         if (cData.youtubePlaylist) {
-          const entry = `► ${gData.game_name} (${gData.release_year}) Playlist: ${cData.youtubePlaylist}`;
+          const entry = `► ${gData.game_name} (${gData.release_year}) Playlist: https://youtube.com/playlist?list=${cData.youtubePlaylist}`;
           if (cData.label === 'Completed') completed.push(entry);
           else ongoing.push(entry);
         }

@@ -19,13 +19,13 @@ const parseISODuration = (duration) => {
 export const fetchPlaylistDetails = async (playlistUrl, existingMetadata = {}) => {
   try {
     const listMatch = playlistUrl.match(/[&?]list=([^&]+)/i);
-    if (!listMatch || !listMatch[1]) throw new Error("Invalid Playlist URL");
-    const playlistId = listMatch[1];
+    const playlistId = listMatch ? listMatch[1] : playlistUrl;
+    if (!playlistId) throw new Error("Invalid Playlist URL or ID");
 
     let playlistItemsList = [];
     let nextPageToken = '';
 
-    // Step 1: Get the raw list of video IDs & snippet titles (Cost: 1 unit per 50 items)
+    // Step 1: Get the raw list of video IDs & snippet titles
     do {
       const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails,snippet&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
       const res = await fetch(url);
@@ -35,8 +35,8 @@ export const fetchPlaylistDetails = async (playlistUrl, existingMetadata = {}) =
       data.items.forEach(item => {
         playlistItemsList.push({
           videoId: item.contentDetails.videoId,
-          publishedAt: item.snippet.publishedAt,
-          title: item.snippet.title // Extract the title for matching
+          publishedAt: new Date(item.snippet.publishedAt).getTime(),
+          title: item.snippet.title
         });
       });
       nextPageToken = data.nextPageToken;
@@ -49,7 +49,7 @@ export const fetchPlaylistDetails = async (playlistUrl, existingMetadata = {}) =
 
     const freshDetails = {};
     if (idsToFetch.length > 0) {
-      // Step 3: Fetch details ONLY for the unknown videos (Cost: 1 unit per 50 items)
+      // Step 3: Fetch details ONLY for the unknown videos
       for (let i = 0; i < idsToFetch.length; i += 50) {
         const chunk = idsToFetch.slice(i, i + 50).join(',');
         const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,liveStreamingDetails&id=${chunk}&key=${YOUTUBE_API_KEY}`;
@@ -64,15 +64,15 @@ export const fetchPlaylistDetails = async (playlistUrl, existingMetadata = {}) =
             
             freshDetails[video.id] = {
               duration: parseISODuration(video.contentDetails?.duration || "PT0S"),
-              startTime: actualStart || published,
-              endTime: actualEnd || null
+              startTime: (actualStart || published) ? new Date(actualStart || published).getTime() : null,
+              endTime: actualEnd ? new Date(actualEnd).getTime() : null
             };
           });
         }
       }
     }
 
-    // Step 4: Construct the final list using Cache -> API
+    // Step 4: Construct the final list
     return playlistItemsList.map(item => {
       const fresh = freshDetails[item.videoId];
       const cached = existingMetadata[item.videoId];

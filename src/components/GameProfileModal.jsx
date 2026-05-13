@@ -140,15 +140,14 @@ export default function GameProfileModal({
               </div>
               <p className="text-white/40 mt-0.5" style={{ fontSize: `${systemFonts.logSub}px` }}>
                  {(() => {
-                    // Uses the new smart time range logic
                     if (ts.startTime && ts.endTime) {
                       const rangeStr = formatStreamTimeRange(ts.startTime, ts.endTime);
                       const deficit = calculateDeficit(ts.startTime, ts.endTime, ts.duration);
                       return `${rangeStr}${deficit}`;
                     }
                     if (ts.startTime) return formatYtDate(ts.startTime);
-                    if (ts.publishedAt) return formatYtDate(ts.publishedAt);
-                    return ts.date;
+                    if (ts.date) return formatYtDate(ts.date);
+                    return '';
                  })()}
               </p>
             </div>
@@ -186,7 +185,6 @@ export default function GameProfileModal({
       isMain: cycle.isMain || false,
       youtubePlaylist: cycle.youtubePlaylist || '',
       label: cycle.label || 'Ongoing',
-      playlistData: cycle.playlistData || null
     });
   };
 
@@ -293,10 +291,11 @@ export default function GameProfileModal({
                   <div className="space-y-1">
                     {cycleEntries.map(cycle => {
                       if (!cycle.youtubePlaylist) return null;
+                      const link = cycle.youtubePlaylist.includes('http') ? cycle.youtubePlaylist : `https://youtube.com/playlist?list=${cycle.youtubePlaylist}`;
                       return (
                         <div key={cycle.id} className="flex items-center gap-2">
                           <Star size={12} className="text-yellow-500/60 shrink-0" />
-                          <a href={cycle.youtubePlaylist} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline text-sm break-all">
+                          <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline text-sm break-all">
                             {cycle.displayName}
                           </a>
                         </div>
@@ -427,7 +426,6 @@ export default function GameProfileModal({
           isMain={editingRun.isMain}
           youtubePlaylist={editingRun.youtubePlaylist}
           currentLabel={editingRun.label}
-          currentPlaylistData={editingRun.playlistData}
           gameName={gameData.game_name}
           releaseYear={gameData.release_year}
           existingTimestamps={gameData.cycles[editingRun.id]?.timestamps || []}

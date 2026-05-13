@@ -1,6 +1,6 @@
 // src/components/Stats.jsx
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { parseCustomTimestamp, getLowResUrl, getTsDateStr } from '../utils/helpers';
+import React, { useState, useEffect, useMemo } from 'react';
+import { parseCustomTimestamp, getLowResUrl, getTsDateStr, formatDuration } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
 
 const getLatestRunWithTimestamp = (cycles) => {
@@ -110,6 +110,7 @@ const STYLES = `
 
   .stats-left-col { 
     display: flex; flex-direction: row; gap: 0; flex: 1; z-index: 2;
+    position: relative;
   }
   @media (max-width: 640px) {
     .stats-left-col { flex-direction: column; }
@@ -215,6 +216,37 @@ const STYLES = `
   .fade-up  { animation: fadeUp 0.6s ease both; }
   .delay-1  { animation-delay: 0.1s; }
   .delay-2  { animation-delay: 0.2s; }
+
+  /* New Content Animation */
+  @keyframes contentFade {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-content {
+    animation: contentFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  
+  /* Carousel Dots */
+  .carousel-dots {
+    position: absolute;
+    bottom: 8px;
+    left: 24px;
+    display: flex;
+    gap: 6px;
+    z-index: 10;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+  }
+  .dot.active {
+    background: var(--c-accent);
+    width: 12px;
+    border-radius: 4px;
+  }
 `;
 
 const shuffleArray = (array) => {
@@ -319,12 +351,13 @@ const CategoryCard = ({ title, games, cssClass, highResImages }) => {
 
 export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   const [latestBgIndex, setLatestBgIndex] = useState(0);
+  const [slideIndex, setSlideIndex] = useState(0);
 
   const games = useMemo(() =>
     Object.entries(streamData).map(([id, data]) => {
       const cycles = data.cycles || {};
-      
       const totalStreams = Object.values(cycles).reduce((acc, c) => acc + Number(c.stream_count || 0), 0);
+      const totalDuration = Object.values(cycles).reduce((acc, c) => acc + (c.timestamps?.reduce((sum, ts) => sum + (ts.duration || 0), 0) || 0), 0);
       
       const latestRunInfo = getLatestRunWithTimestamp(cycles);
       const latestRunLabel = latestRunInfo.run ? (latestRunInfo.run.label || 'Ongoing') : 'Ongoing';
@@ -333,15 +366,11 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
       
       let latestRunName = '';
       if (latestRunInfo.run) {
-        if (latestRunInfo.run.displayName) {
-          latestRunName = latestRunInfo.run.displayName;
-        } else if (latestRunInfo.cycleId) {
-          latestRunName = latestRunInfo.cycleId === 'main' ? 'First Playthrough' : latestRunInfo.cycleId.replace(/_/g, ' ');
-        }
+        latestRunName = latestRunInfo.run.displayName || (latestRunInfo.cycleId === 'main' ? 'First Playthrough' : latestRunInfo.cycleId.replace(/_/g, ' '));
       }
 
       return {
-        id, ...data, totalStreams, latestRunLabel, lastStreamTimestampMs,
+        id, ...data, totalStreams, totalDuration, latestRunLabel, lastStreamTimestampMs,
         lastStreamTimestampRaw, latestRunName, thumbnail_urls: data.thumbnail_urls || []
       };
     }),
@@ -360,6 +389,89 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   const timeSinceLastStream = useDynamicTime(mostRecentGame?.lastStreamTimestampMs);
   const totalStreamsCount   = useCountUp(totalStreams);
   const totalGamesCount     = useCountUp(totalGames);
+
+  // Deep Insights Calculations
+  const statsData = useMemo(() => {
+    let totalSecs = 0;
+    let longestStream = { duration: 0, name: '' };
+    const dayMap = {};
+
+    games.forEach(g => {
+      totalSecs += g.totalDuration;
+      Object.values(g.cycles || {}).forEach(cycle => {
+        (cycle.timestamps || []).forEach(ts => {
+          if (ts.duration > longestStream.duration) {
+            longestStream = { duration: ts.duration, name: g.game_name };
+          }
+          const d = parseCustomTimestamp(ts);
+          if (d > new Date(2000, 0, 1)) {
+            const dateKey = d.toDateString();
+            dayMap[dateKey] = (dayMap[dateKey] || 0) + 1;
+          }
+        });
+      });
+    });
+
+    const activeDaysArr = Object.entries(dayMap).sort((a, b) => b[1] - a[1]);
+    const busiestDay = activeDaysArr[0] ? { date: activeDaysArr[0][0], count: activeDaysArr[0][1] } : null;
+
+    const streamDays = Object.keys(dayMap).map(d => new Date(d).getTime()).sort((a, b) => a - b);
+    let maxStreak = 0, curStreak = 0, bestStreakStart = null, currentStreakStart = null;
+    for (let i = 0; i < streamDays.length; i++) {
+      if (i === 0 || streamDays[i] - streamDays[i - 1] === 86400000) {
+        curStreak++;
+        if (curStreak === 1) currentStreakStart = new Date(streamDays[i]);
+      } else {
+        curStreak = 1;
+        currentStreakStart = new Date(streamDays[i]);
+      }
+      if (curStreak > maxStreak) {
+        maxStreak = curStreak;
+        bestStreakStart = currentStreakStart;
+      }
+    }
+
+    const mostPlayedGame = [...games].sort((a, b) => b.totalDuration - a.totalDuration)[0];
+    const avgSessionSecs = totalStreams > 0 ? totalSecs / totalStreams : 0;
+
+    return {
+      totalSecs,
+      longestStream,
+      busiestDay,
+      maxStreak,
+      bestStreakStart,
+      mostPlayedGame,
+      avgSessionSecs
+    };
+  }, [games, totalStreams]);
+
+  // Slides array containing pairs of factoids
+  const slides = useMemo(() => [
+    [
+      { label: 'Streams', value: totalStreamsCount.toLocaleString() },
+      { label: 'Games in Library', value: totalGamesCount.toLocaleString() }
+    ],
+    [
+      { label: 'Total Playtime', value: formatDuration(statsData.totalSecs) || '0m 0s' },
+      { label: 'Avg. Session', value: formatDuration(Math.round(statsData.avgSessionSecs)) || '0m 0s' }
+    ],
+    [
+      { label: 'Longest Streak', value: `${statsData.maxStreak} Days`, sub: statsData.bestStreakStart ? `from ${statsData.bestStreakStart.toLocaleDateString()}` : '' },
+      { label: 'Busiest Day', value: statsData.busiestDay ? `${statsData.busiestDay.count} Streams` : '—', sub: statsData.busiestDay ? new Date(statsData.busiestDay.date).toLocaleDateString() : '' }
+    ],
+    [
+      { label: 'Most Played Game', value: statsData.mostPlayedGame ? formatDuration(statsData.mostPlayedGame.totalDuration) : '—', sub: statsData.mostPlayedGame?.game_name },
+      { label: 'Longest Stream', value: formatDuration(statsData.longestStream.duration) || '—', sub: statsData.longestStream.name }
+    ]
+  ], [totalStreamsCount, totalGamesCount, statsData]);
+
+  // Carousel Interval
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSlideIndex(prev => (prev + 1) % slides.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
 
   const latestGameImages = mostRecentGame?.thumbnail_urls || [];
 
@@ -384,8 +496,9 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
 
   const heroThumb = latestGameImages[0] || '';
   const rawLatestBgImage = latestGameImages[latestBgIndex] || heroThumb;
-  
   const latestBgImage = getLowResUrl(rawLatestBgImage, layoutPrefs?.highResImages);
+
+  const currentSlide = slides[slideIndex];
 
   return (
     <div 
@@ -410,20 +523,37 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
 
       <div className="stats-scroll custom-scrollbar">
         <div className="stats-top-row fade-up delay-1 shadow-2xl">
+          
           <div className="stats-left-col">
-            <div className="stat-card">
-              <div className="stat-number top-number">
-                {totalStreamsCount.toLocaleString()}
+            <div className="stat-card" key={`card1-${slideIndex}`}>
+              <div className="animate-content">
+                <div className="stat-number top-number">{currentSlide[0].value}</div>
+                <div className="stat-label">{currentSlide[0].label}</div>
+                {currentSlide[0].sub && (
+                  <div className="stat-sub latest-sub-2" style={{ marginTop: '8px' }}>
+                    {currentSlide[0].sub}
+                  </div>
+                )}
               </div>
-              <div className="stat-label">{totalStreams === 1 ? 'Stream' : 'Streams'}</div>
             </div>
-            <div className="stat-card">
-              <div className="stat-number top-number">
-                {totalGamesCount}
+            
+            <div className="stat-card" key={`card2-${slideIndex}`}>
+              <div className="animate-content">
+                <div className="stat-number top-number">{currentSlide[1].value}</div>
+                <div className="stat-label">{currentSlide[1].label}</div>
+                {currentSlide[1].sub && (
+                  <div className="stat-sub latest-sub-2" style={{ marginTop: '8px' }}>
+                    {currentSlide[1].sub}
+                  </div>
+                )}
               </div>
-              <div className="stat-label">
-                {totalGames === 1 ? 'Game in Library' : 'Games in Library'}
-              </div>
+            </div>
+
+            {/* Dots to indicate carousel position */}
+            <div className="carousel-dots">
+              {slides.map((_, i) => (
+                <div key={i} className={`dot ${i === slideIndex ? 'active' : ''}`} />
+              ))}
             </div>
           </div>
 

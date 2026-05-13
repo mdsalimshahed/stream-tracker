@@ -75,7 +75,8 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
               { id: 'library', label: 'Library', icon: BookOpen },
               { id: 'search', label: 'Add', icon: Plus },
               { id: 'data', label: 'Styles', icon: Settings },
-              { id: 'stats', label: 'Stats', icon: BarChart3 }
+              { id: 'stats', label: 'Stats', icon: BarChart3 },
+              { id: 'insights', label: 'Insights', icon: BarChart3 } // <-- ADD THIS LINE
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}

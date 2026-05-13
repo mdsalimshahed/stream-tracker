@@ -10,6 +10,8 @@ import { useHover } from './hooks/useHover';
 import { useScaling } from './hooks/useScaling';
 import { useSearch } from './hooks/useSearch';
 
+import Insights from './components/Insights';
+
 // Utilities (Add this line)
 import { migrateLabels } from './utils/dataUtils';
 
@@ -231,6 +233,13 @@ export default function App() {
           )}
           {currentView === 'stats' && (
             <Stats streamData={streamData} systemFonts={scaledSystemFonts} layoutPrefs={scaledLayoutPrefs} />
+          )}
+          {currentView === 'insights' && (
+            <Insights 
+              streamData={streamData} 
+              systemFonts={scaledSystemFonts} 
+              layoutPrefs={scaledLayoutPrefs} 
+            />
           )}
           {currentView === 'search' && (
             <SearchView

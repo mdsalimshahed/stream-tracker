@@ -25,13 +25,32 @@ export default function Insights({ streamData }) {
   GAMES.forEach(g => g.genres.forEach(gg => { genreCount[gg] = (genreCount[gg] || 0) + 1; }));
   const genreEntries = Object.entries(genreCount).sort((a, b) => b[1] - a[1]).map(e => ({ name: e[0], value: e[1] }));
   
-  const pgSorted = [...gameStats].sort((a, b) => b.streamCount - a.streamCount);
-  
-  let cum = 0;
-  const cumulativePts = [...allStreams].sort((a, b) => a.date - b.date).map((s, i) => {
-    cum += s.dur / 3600;
-    return { label: new Date(s.date).toLocaleDateString(), hours: parseFloat(cum.toFixed(1)) };
-  });
+  // 1. Streams Per Game plotted horizontally using Date of First Stream on X-axis
+  const streamsPerGameTime = [...gameStats]
+    .filter(g => g.firstDate)
+    .sort((a, b) => a.firstDate - b.firstDate)
+    .map(g => ({
+      name: new Date(g.firstDate).toLocaleDateString('en', { month: 'short', year: '2-digit' }),
+      gameName: g.name.substring(0, 25),
+      value: g.streamCount,
+      fill: g.status === 'Completed' ? '#6cfacc' : g.status === 'Ongoing' ? '#fac86c' : '#f87171'
+    }));
+
+  // 2. Backlog Delay (Release Date vs First Stream) Horizontal Graph
+  const backlogDelayData = [...gameStats]
+    .filter(g => g.firstDate)
+    .map(g => {
+      let releaseTime = new Date(`${g.releaseYear}-01-01`).getTime();
+      if (g.releaseDateStr && !isNaN(new Date(g.releaseDateStr).getTime())) {
+        releaseTime = new Date(g.releaseDateStr).getTime();
+      }
+      const diffYears = Math.max(0, (g.firstDate - releaseTime) / (1000 * 3600 * 24 * 365.25));
+      return { 
+        name: g.name.substring(0, 22), 
+        value: parseFloat(diffYears.toFixed(2)) 
+      };
+    })
+    .sort((a, b) => b.value - a.value);
 
   // Games Data
   const devTypes = { Indie: 0, AAA: 0, MidTier: 0 };
@@ -138,6 +157,27 @@ export default function Insights({ streamData }) {
     }
     return best;
   })();
+  
+  const compGames = gameStats.filter(g => g.status === 'Completed' && g.firstDate && g.lastDate);
+  const avgDaysToBeat = compGames.length > 0 
+    ? compGames.reduce((acc, g) => acc + (g.lastDate - g.firstDate)/86400000, 0) / compGames.length 
+    : 0;
+  
+  const longestToBeat = compGames.length > 0 
+    ? compGames.reduce((m, g) => (g.lastDate - g.firstDate) > (m.lastDate - m.firstDate) ? g : m, compGames[0]) 
+    : null;
+    
+  const fastestToBeat = compGames.length > 0 
+    ? compGames.reduce((m, g) => (g.lastDate - g.firstDate) < (m.lastDate - m.firstDate) ? g : m, compGames[0]) 
+    : null;
+
+  const weekendWarriors = allStreams.filter(s => [0, 6].includes(new Date(s.date).getDay())).length;
+  const weekdayWarriors = allStreams.length - weekendWarriors;
+
+  const nightOwls = allStreams.filter(s => {
+    const hr = new Date(s.date).getHours();
+    return hr >= 20 || hr <= 4;
+  }).length;
 
   const radarData = Object.entries(gameStats.reduce((acc, g) => { g.genres.forEach(gg => { acc[gg] = (acc[gg] || 0) + g.hours; }); return acc; }, {})).map(e => ({ subject: e[0], A: parseFloat(e[1].toFixed(1)), fullMark: 100 }));
   const trendData = [...gameStats].sort((a, b) => b.streamCount - a.streamCount).slice(0, 5).map((g, i) => {
@@ -251,11 +291,11 @@ export default function Insights({ streamData }) {
                 <BasicBar data={genreEntries} dataKey="value" xKey="name" colors={PALETTE} />
               </ChartCard>
             </div>
-            <ChartCard title="Streams Per Game — All Time" sub="sorted by total stream count" height={pgSorted.length * 38 + 60}>
-              <BasicBar data={pgSorted.map(g => ({ name: g.name.substring(0, 28), value: g.streamCount, fill: g.status === 'Completed' ? '#6cfacc' : g.status === 'Ongoing' ? '#fac86c' : '#f87171' }))} dataKey="value" xKey="name" isVertical formatTooltip={v => `${v} streams`} />
+            <ChartCard title="Streams Per Game — Timeline" sub="sorted by the date of your first stream" height={280}>
+              <BasicBar data={streamsPerGameTime} dataKey="value" xKey="name" isVertical={false} formatTooltip={(v, p) => `${p.payload.gameName} — ${v} streams`} />
             </ChartCard>
-            <ChartCard title="Cumulative Hours Over Time" sub="how your stream library grew" height={280}>
-              <SmoothLine data={cumulativePts} dataKey="hours" xKey="label" color="#7c6cfa" formatTooltip={v => `${v}h`} fill />
+            <ChartCard title="Backlog Delay (Years)" sub="time passed from game's release to your first stream" height={backlogDelayData.length * 38 + 60}>
+              <BasicBar data={backlogDelayData} dataKey="value" xKey="name" isVertical color="#c084fc" formatTooltip={v => `${v} years`} />
             </ChartCard>
           </div>
         )}
@@ -391,6 +431,11 @@ export default function Insights({ streamData }) {
               <FunCard emoji="🏃" title="Abandon Rate" value={`${Math.round(abandoned / Math.max(GAMES.length, 1) * 100)}%`} desc={`${abandoned} out of ${GAMES.length} games were abandoned. ${completed} completed. You finish what you love.`} />
               <FunCard emoji="⏱️" title="Total Stream Time" value={`${totalHours.toFixed(0)}h`} desc={`That's ${(totalHours / 24).toFixed(1)} full days, or ${(totalHours / 8).toFixed(0)} 8-hour workdays. Gaming is your second job.`} />
               <FunCard emoji="🚀" title="2025 Game Preference" value={`${GAMES.filter(g => g.releaseYear === 2025).length} of ${GAMES.length}`} desc={`You strongly prefer new releases. ${GAMES.filter(g => g.releaseYear === 2025).length} games from 2025 in your library.`} />
+              <FunCard emoji="🐢" title="The Slow Burn" value={longestToBeat ? longestToBeat.name.substring(0, 22) : 'N/A'} desc={longestToBeat ? `Took ${Math.round((longestToBeat.lastDate - longestToBeat.firstDate) / 86400000)} days from start to finish.` : 'Finish a game first.'} />
+              <FunCard emoji="🐇" title="The Speedrun" value={fastestToBeat ? fastestToBeat.name.substring(0, 22) : 'N/A'} desc={fastestToBeat ? `Beat in just ${Math.max(1, Math.round((fastestToBeat.lastDate - fastestToBeat.firstDate) / 86400000))} days start to finish.` : 'Finish a game first.'} />
+              <FunCard emoji="⏳" title="Avg Time to Beat" value={`${Math.round(avgDaysToBeat)} days`} desc="On average, how many real-life calendar days it takes you to finish a game." />
+              <FunCard emoji="🦇" title="Night Owl" value={`${Math.round(nightOwls / Math.max(allStreams.length, 1) * 100)}%`} desc={`${nightOwls} of your ${allStreams.length} streams started between 8 PM and 4 AM.`} />
+              <FunCard emoji="🌞" title="Weekend Warrior" value={`${Math.round(weekendWarriors / Math.max(allStreams.length, 1) * 100)}%`} desc={`Only ${weekendWarriors} of ${allStreams.length} streams happened on weekends. Weekday gamer: ${weekdayWarriors}.`} />
             </div>
 
             <div className="section-title">Genre DNA</div>

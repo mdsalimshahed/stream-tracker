@@ -29,6 +29,7 @@ export const processInsightsData = (streamData) => {
       developer: game.details?.developer || 'Unknown',
       publisher: game.details?.publisher || 'Unknown',
       releaseYear: parseInt(game.release_year) || new Date().getFullYear(),
+      releaseDateStr: game.details?.releaseDate,
       genres,
       status,
       streams: streams.sort((a, b) => a.date - b.date)

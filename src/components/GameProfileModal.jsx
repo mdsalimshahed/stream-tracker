@@ -1,7 +1,8 @@
 // src/components/GameProfileModal.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { X, ArrowRight, ArrowLeft, Gamepad2, Clock, Plus, Trash2, Edit3, Star, PlayCircle } from 'lucide-react';
-import { formatReleaseDate } from '../utils/helpers';
+// FIX: Added formatDuration and formatYtDate to the import list below
+import { formatReleaseDate, formatDuration, formatYtDate } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditRunModal } from './modals/EditRunModal';
 import { CrossfadeImage } from './common/UIComponents';
@@ -109,17 +110,11 @@ export default function GameProfileModal({
     if (!currentCycleData.timestamps?.length) return <div className="text-center text-white/30 py-12 text-sm">No logs yet</div>;
     
     const reversed = [...currentCycleData.timestamps].reverse();
-    const totalVideos = currentCycleData.playlistData?.videos?.length || 0;
 
     return reversed.map((ts, i) => {
       const realIdx = currentCycleData.timestamps.length - 1 - i;
       const active = selectedLogIndex === realIdx;
       const runName = currentCycle.displayName;
-      
-      // REVERSED MAPPING FIX:
-      // We subtract the realIdx from the total videos so Livestream #1 gets the last video 
-      // in the playlist array (which is the bottom of your YouTube playlist).
-      const ytData = currentCycleData.playlistData?.videos?.[totalVideos - 1 - realIdx];
 
       return (
         <div 
@@ -131,33 +126,30 @@ export default function GameProfileModal({
             <div>
               <div className="flex items-center flex-wrap gap-2">
                 <p className="font-medium" style={{ fontSize: `${systemFonts.logTitle}px` }}>Livestream #{realIdx + 1}</p>
-                {/* Embedded Video Link Button */}
-                {ytData && (
+                {/* Dynamically reads duration from the embedded JSON object! */}
+                {ts.videoId && (
                   <a 
-                    href={ytData.url} 
+                    href={`https://youtube.com/watch?v=${ts.videoId}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="flex items-center gap-1 bg-white/10 hover:bg-white/20 transition px-1.5 py-0.5 rounded text-[10px] text-white/70 hover:text-white border border-white/5" 
+                    className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 transition px-2 py-0.5 rounded text-[10px] text-white/70 hover:text-white border border-white/5" 
                     onClick={e => e.stopPropagation()}
                     title="Watch Video on YouTube"
                   >
-                    <PlayCircle size={12} className="text-red-500" /> {ytData.durationStr}
+                    <PlayCircle size={12} className="text-red-500" /> 
+                    <span>{formatDuration(ts.duration)}</span>
                   </a>
                 )}
               </div>
-              <p className="text-white/40 mt-0.5" style={{ fontSize: `${systemFonts.logSub}px` }}>{ts}</p>
+              <p className="text-white/40 mt-0.5" style={{ fontSize: `${systemFonts.logSub}px` }}>
+                 {/* Uses formatYtDate from helpers.js if it exists, otherwise uses creation date */}
+                 {ts.publishedAt ? formatYtDate(ts.publishedAt) : ts.date}
+              </p>
             </div>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setConfirmDialog({
-                  title: 'Delete Log Entry',
-                  message: `Delete Livestream #${realIdx + 1} for "${runName}" run of "${gameData.game_name}"? This cannot be undone.`,
-                  onConfirm: () => {
-                    onDeleteTimestamp(gameId, currentCycle.id, realIdx, ts);
-                    setConfirmDialog(null);
-                  }
-                });
+                setConfirmDialog({ title: 'Delete Log Entry', message: `Delete Livestream #${realIdx + 1}?`, onConfirm: () => { onDeleteTimestamp(gameId, currentCycle.id, realIdx, ts); setConfirmDialog(null); } });
               }}
               className="text-red-400 hover:text-red-300 transition hover:scale-110 p-2"
             >
@@ -334,6 +326,10 @@ export default function GameProfileModal({
                     const streamCount = cycle.stream_count || 0;
                     const isSelected = selectedCycleId === cycle.id;
                     const labelInfo = getLabelStyle(cycle.label || 'Ongoing');
+                    
+                    // NEW: Compute Total Runtime Pill
+                    const runTimeSecs = cycle.timestamps?.reduce((acc, ts) => acc + (ts.duration || 0), 0) || 0;
+
                     return (
                       <div
                         key={cycle.id}
@@ -370,10 +366,9 @@ export default function GameProfileModal({
                             <span className="text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded-md">
                               {streamCount} stream{streamCount === 1 ? '' : 's'}
                             </span>
-                            {/* Render Total Runtime if synced */}
-                            {cycle.playlistData && cycle.playlistData.totalRuntime && (
+                            {runTimeSecs > 0 && (
                               <span className="text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm border border-white/5">
-                                <PlayCircle size={12} className="text-red-500" /> {cycle.playlistData.totalRuntime}
+                                <PlayCircle size={12} className="text-red-500" /> {formatDuration(runTimeSecs)}
                               </span>
                             )}
                           </div>

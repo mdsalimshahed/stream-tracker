@@ -1,6 +1,6 @@
 // src/components/Stats.jsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { parseCustomTimestamp } from '../utils/helpers';
+import { parseCustomTimestamp, getLowResUrl, getTsDateStr } from '../utils/helpers';
 import { CrossfadeImage } from './common/UIComponents';
 
 const getLatestRunWithTimestamp = (cycles) => {
@@ -250,7 +250,7 @@ const generatePlaylist = (games, lastGameName = null) => {
   return playlist;
 };
 
-const CategoryCard = ({ title, games, cssClass }) => {
+const CategoryCard = ({ title, games, cssClass, highResImages }) => {
   const eligible = useMemo(() => games.filter(g => g.latestRunLabel === title), [games, title]);
 
   const playlistRef = useRef([]);
@@ -295,7 +295,7 @@ const CategoryCard = ({ title, games, cssClass }) => {
   }, [eligible]);
 
   const fallback = 'https://placehold.co/480x270/0d1117/1e2938?text=';
-  const currentSrc = currentData.url || fallback;
+  const currentSrc = currentData.url ? getLowResUrl(currentData.url, highResImages) : fallback;
   const gameName = currentData.gameName || '';
 
   return (
@@ -324,13 +324,12 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
     Object.entries(streamData).map(([id, data]) => {
       const cycles = data.cycles || {};
       
-      // FIXED: Enforced Number() to prevent string concatenation bugs
       const totalStreams = Object.values(cycles).reduce((acc, c) => acc + Number(c.stream_count || 0), 0);
       
       const latestRunInfo = getLatestRunWithTimestamp(cycles);
       const latestRunLabel = latestRunInfo.run ? (latestRunInfo.run.label || 'Ongoing') : 'Ongoing';
       const lastStreamTimestampMs = latestRunInfo.date ? latestRunInfo.date.getTime() : null;
-      const lastStreamTimestampRaw = latestRunInfo.timestamp;
+      const lastStreamTimestampRaw = getTsDateStr(latestRunInfo.timestamp);
       
       let latestRunName = '';
       if (latestRunInfo.run) {
@@ -384,7 +383,9 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   }, [latestGameImages]);
 
   const heroThumb = latestGameImages[0] || '';
-  const latestBgImage = latestGameImages[latestBgIndex] || heroThumb;
+  const rawLatestBgImage = latestGameImages[latestBgIndex] || heroThumb;
+  
+  const latestBgImage = getLowResUrl(rawLatestBgImage, layoutPrefs?.highResImages);
 
   return (
     <div 
@@ -455,9 +456,9 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
         </div>
 
         <div className="cat-row fade-up delay-2">
-          <CategoryCard title="Ongoing" games={games} cssClass="cat-ongoing" />
-          <CategoryCard title="Completed" games={games} cssClass="cat-completed" />
-          <CategoryCard title="Abandoned" games={games} cssClass="cat-abandoned" />
+          <CategoryCard title="Ongoing" games={games} cssClass="cat-ongoing" highResImages={layoutPrefs?.highResImages} />
+          <CategoryCard title="Completed" games={games} cssClass="cat-completed" highResImages={layoutPrefs?.highResImages} />
+          <CategoryCard title="Abandoned" games={games} cssClass="cat-abandoned" highResImages={layoutPrefs?.highResImages} />
         </div>
       </div>
     </div>

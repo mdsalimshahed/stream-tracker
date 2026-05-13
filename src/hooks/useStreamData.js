@@ -289,9 +289,9 @@ export function useStreamData(notify) {
     const cycleData = cycles[oldCycleId];
     const newId = newDisplayName === 'First Playthrough' ? 'main' : newDisplayName.toLowerCase().replace(/\s+/g, '_');
     
-    if (oldCycleId !== newId) { 
-      delete cycles[oldCycleId]; 
-      cycles[newId] = cycleData; 
+    if (oldCycleId !== newId) {
+      delete cycles[oldCycleId];
+      cycles[newId] = cycleData;
     }
     
     cycles[newId].displayName = newDisplayName;
@@ -299,9 +299,21 @@ export function useStreamData(notify) {
     cycles[newId].youtubePlaylist = youtubePlaylist || '';
     if (newLabel) cycles[newId].label = newLabel;
     
-    // --- THIS IS THE NEW LINE THAT SAVES THE YOUTUBE DATA ---
-    if (playlistData !== undefined) {
-      cycles[newId].playlistData = playlistData;
+    // EMBED YOUTUBE DATA DIRECTLY INTO TIMESTAMPS
+    if (playlistData && playlistData.length > 0) {
+      const totalVideos = playlistData.length;
+      cycles[newId].timestamps = cycles[newId].timestamps.map((tsObj, i) => {
+        const video = playlistData[totalVideos - 1 - i]; // Reverse map to match Livestream 1 with oldest video
+        if (video) {
+          return {
+            ...tsObj,
+            videoId: video.videoId,
+            duration: video.duration,
+            publishedAt: video.publishedAt
+          };
+        }
+        return tsObj;
+      });
     }
     
     setStreamData(nd);

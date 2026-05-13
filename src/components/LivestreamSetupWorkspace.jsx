@@ -245,7 +245,7 @@ export default function LivestreamSetupWorkspace({
     if (selectedStreamNumber === null && !sessionSaved.current) {
       const ts = generateTimestamp();
       nd[gameId].cycles[cycleName].stream_count = nC;
-      nd[gameId].cycles[cycleName].timestamps.push(ts);
+      nd[gameId].cycles[cycleName].timestamps.push({ date: ts }); // UPDATED TO PUSH OBJECT
       sessionSaved.current = true;
       setHasCycleChanges(false);
       onSave(nd);

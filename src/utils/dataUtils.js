@@ -32,6 +32,20 @@ export const migrateLabels = (data) => {
       }
       delete game.label;
     }
+    // MIGRATION: Convert string timestamps to dictionary objects safely
+    if (game.cycles) {
+      for (const [cycleId, cycle] of Object.entries(game.cycles)) {
+        if (cycle.timestamps && cycle.timestamps.length > 0) {
+          cycle.timestamps = cycle.timestamps.map(ts => {
+            if (typeof ts === 'string') {
+              changed = true;
+              return { date: ts };
+            }
+            return ts;
+          });
+        }
+      }
+    }
   }
   return { data: newData, changed };
 };

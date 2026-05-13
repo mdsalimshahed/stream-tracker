@@ -14,7 +14,10 @@ export const DEFAULT_SYSTEM_FONTS = {
   statsMainLabel: 1.1,
   statsLabel: 1.1,
   statsTitle: 2.2,
-  statsSub: 1.1
+  statsSub: 1.1,
+  statsCountSpacing: -2,
+  statsSubSpacing: 0,
+  statsLabelSpacing: 2
 };
 
 export const DEFAULT_LAYOUT_PREFS = {
@@ -33,6 +36,7 @@ export const DEFAULT_LAYOUT_PREFS = {
   hoverCycleInterval: 1500,
   statsSplitRatio: 0.35,
   statsRowSplitRatio: 0.60,
+  statsInnerGap: 14,
   highResImages: false,
   enableHoverEffects: true,
   enableViewTransitions: true

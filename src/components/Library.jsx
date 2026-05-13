@@ -1,6 +1,6 @@
 // src/components/Library.jsx
 import React, { useState, useRef } from 'react';
-import { Search, Clock, SortAsc, SortDesc, Maximize, Trash2, Edit3, PlayCircle } from 'lucide-react';
+import { Search, Clock, SortAsc, SortDesc, Maximize, Minimize, Trash2, Edit3, PlayCircle, ArrowDown, ArrowUp } from 'lucide-react';
 import { parseCustomTimestamp, getLowResUrl, formatDuration } from '../utils/helpers';
 import { ConfirmBanner } from './Notification';
 import { EditGameModal } from './modals/EditGameModal';
@@ -54,7 +54,10 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
   
   const sorted = [...filtered].sort((a, b) => {
     if (sortBy === 'alpha') return a.game_name.localeCompare(b.game_name);
+    if (sortBy === 'alpha_rev') return b.game_name.localeCompare(a.game_name);
     if (sortBy === 'recent') return b.lastStreamDate - a.lastStreamDate;
+    if (sortBy === 'oldest') return a.lastStreamDate - b.lastStreamDate;
+    
     if (sortBy === 'high') {
       if (b.totalStreams !== a.totalStreams) return b.totalStreams - a.totalStreams;
       return b.lastStreamDate - a.lastStreamDate;
@@ -63,10 +66,38 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
       if (a.totalStreams !== b.totalStreams) return a.totalStreams - b.totalStreams;
       return b.lastStreamDate - a.lastStreamDate;
     }
+
+    if (sortBy === 'playtime_high') {
+      if (b.totalDuration !== a.totalDuration) return b.totalDuration - a.totalDuration;
+      return b.lastStreamDate - a.lastStreamDate;
+    }
+    if (sortBy === 'playtime_low') {
+      if (a.totalDuration !== b.totalDuration) return a.totalDuration - b.totalDuration;
+      return b.lastStreamDate - a.lastStreamDate;
+    }
     return 0;
   });
 
-  const handleSortClick = (newSort) => {
+  const handleSortClick = (category) => {
+    let newSort = sortBy;
+    if (category === 'recent') {
+      if (sortBy === 'recent') newSort = 'oldest';
+      else if (sortBy === 'oldest') newSort = 'recent';
+      else newSort = 'recent';
+    } else if (category === 'alpha') {
+      if (sortBy === 'alpha') newSort = 'alpha_rev';
+      else if (sortBy === 'alpha_rev') newSort = 'alpha';
+      else newSort = 'alpha';
+    } else if (category === 'count') {
+      if (sortBy === 'high') newSort = 'low';
+      else if (sortBy === 'low') newSort = 'high';
+      else newSort = 'high';
+    } else if (category === 'playtime') {
+      if (sortBy === 'playtime_high') newSort = 'playtime_low';
+      else if (sortBy === 'playtime_low') newSort = 'playtime_high';
+      else newSort = 'playtime_high';
+    }
+
     if (sortBy === newSort) return;
     if (scrollRef.current) scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     setSortBy(newSort);
@@ -138,12 +169,36 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
             </div>
             <div className="flex w-full sm:w-auto bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl p-1 gap-1 shadow-inner overflow-x-auto no-scrollbar shrink-0">
               {[
-                { id: 'recent', label: 'Recent', icon: Clock },
-                { id: 'alpha', label: 'A-Z', icon: SortAsc },
-                { id: 'high', label: 'Most', icon: Maximize },
-                { id: 'low', label: 'Least', icon: SortDesc }
+                { 
+                  category: 'recent', 
+                  isActive: sortBy === 'recent' || sortBy === 'oldest',
+                  label: sortBy === 'oldest' ? 'Oldest' : 'Recent', 
+                  icon: Clock 
+                },
+                { 
+                  category: 'alpha', 
+                  isActive: sortBy === 'alpha' || sortBy === 'alpha_rev',
+                  label: sortBy === 'alpha_rev' ? 'Z-A' : 'A-Z', 
+                  icon: sortBy === 'alpha_rev' ? SortDesc : SortAsc 
+                },
+                { 
+                  category: 'count', 
+                  isActive: sortBy === 'high' || sortBy === 'low',
+                  label: sortBy === 'low' ? 'Least' : 'Most', 
+                  icon: sortBy === 'low' ? Minimize : Maximize 
+                },
+                { 
+                  category: 'playtime', 
+                  isActive: sortBy === 'playtime_high' || sortBy === 'playtime_low',
+                  label: 'Playtime', 
+                  icon: sortBy === 'playtime_low' ? ArrowUp : ArrowDown 
+                }
               ].map(opt => (
-                <button key={opt.id} onClick={() => handleSortClick(opt.id)} className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium flex items-center justify-center gap-1.5 transition whitespace-nowrap ${sortBy === opt.id ? 'bg-white/20 text-white shadow' : 'text-white/60 hover:text-white'}`}>
+                <button 
+                  key={opt.category} 
+                  onClick={() => handleSortClick(opt.category)} 
+                  className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium flex items-center justify-center gap-1.5 transition whitespace-nowrap ${opt.isActive ? 'bg-white/20 text-white shadow' : 'text-white/60 hover:text-white'}`}
+                >
                   <opt.icon size={14} /> {opt.label}
                 </button>
               ))}
@@ -182,7 +237,7 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
                         className="absolute inset-0 w-full h-full" 
                         imgClassName="object-cover" 
                       />
-                      <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent transition-opacity duration-300 z-30 pointer-events-none ${isHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
+                      <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none ${isHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
                     </div>
                     <div className="p-3 sm:p-4 flex flex-col flex-1" style={{ padding: `clamp(12px, ${layoutPrefs.cardPadding}px, 20px)` }}>
                       <div className="flex flex-wrap justify-between items-start gap-2">

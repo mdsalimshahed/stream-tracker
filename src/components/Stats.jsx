@@ -1,49 +1,90 @@
 // src/components/Stats.jsx
-import React, { useState, useEffect, useMemo } from 'react';
-import { getLowResUrl, getTsDateStr } from '../utils/helpers';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { getLowResUrl, getTsDateStr, parseCustomTimestamp } from '../utils/helpers';
 import { getLatestRunWithTimestamp } from './stats/utils';
 import { useDynamicTime, useCountUp } from './stats/hooks';
 import { CategoryCard } from './stats/CategoryCard';
 import { STYLES } from './stats/styles';
 
-// Import our newly abstracted slide components
 import { getCard1Slide } from './stats/slides/Card1Slides';
 import { getCard2Slide } from './stats/slides/Card2Slides';
 import { getCard3Slide } from './stats/slides/Card3Slides';
 
-export default function Stats({ streamData, systemFonts, layoutPrefs }) {
-  const [latestBgIndex, setLatestBgIndex] = useState(0);
-  
-  // --- PERFECT SYNC STATE ---
-  const [flipCycle, setFlipCycle] = useState(0);
+const FlipperCard = ({ globalFlipCycle, getSlideContent, slideData, className }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [localFlipCycle, setLocalFlipCycle] = useState(0);
   const [frontFaceSlide, setFrontFaceSlide] = useState(0);
   const [backFaceSlide, setBackFaceSlide] = useState(1);
 
-  // Fires the exact millisecond the yellow progress bar resets
-  const handleAnimationIteration = () => {
-    setFlipCycle(prev => prev + 1);
-  };
+  const prevGlobal = useRef(globalFlipCycle);
 
-  // Only swap the hidden face's text when the physical rotation is finished
+  useEffect(() => {
+    if (globalFlipCycle !== prevGlobal.current) {
+      prevGlobal.current = globalFlipCycle;
+      if (!isHovered) {
+        setLocalFlipCycle(prev => prev + 1);
+      }
+    }
+  }, [globalFlipCycle, isHovered]);
+
   const handleTransitionEnd = (e) => {
     if (e.target !== e.currentTarget || e.propertyName !== 'transform') return;
     
-    if (flipCycle % 2 !== 0) {
-      setFrontFaceSlide((flipCycle + 1) % 6);
+    if (localFlipCycle % 2 !== 0) {
+      setFrontFaceSlide((localFlipCycle + 1) % 6);
     } else {
-      if (flipCycle > 0) {
-        setBackFaceSlide((flipCycle + 1) % 6);
+      if (localFlipCycle > 0) {
+        setBackFaceSlide((localFlipCycle + 1) % 6);
       }
     }
   };
 
-  const flipDegree = flipCycle * 180;
+  const flipDegree = localFlipCycle * 180;
 
-  // --- DATA PROCESSING ---
+  return (
+    <div 
+      className="flipper" 
+      style={{ transform: `rotateY(${flipDegree}deg)` }} 
+      onTransitionEnd={handleTransitionEnd}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className={`${className} flipper-face flip-front`}>
+        {getSlideContent(frontFaceSlide, slideData)}
+      </div>
+      <div className={`${className} flipper-face flip-back`}>
+        {getSlideContent(backFaceSlide, slideData)}
+      </div>
+    </div>
+  );
+};
+
+export default function Stats({ streamData, systemFonts, layoutPrefs }) {
+  const [latestBgIndex, setLatestBgIndex] = useState(0);
+  const [flipCycle, setFlipCycle] = useState(0);
+
+  const handleAnimationIteration = () => {
+    setFlipCycle(prev => prev + 1);
+  };
+
   const games = useMemo(() =>
     Object.entries(streamData).map(([id, data]) => {
       const cycles = data.cycles || {};
       const totalStreams = Object.values(cycles).reduce((acc, c) => acc + Number(c.stream_count || 0), 0);
+      
+      let totalDuration = 0;
+      let firstStreamTimestampMs = null;
+
+      Object.values(cycles).forEach(c => {
+        (c.timestamps || []).forEach(ts => {
+          totalDuration += (ts.duration || 0);
+          const d = parseCustomTimestamp(ts).getTime();
+          if (!firstStreamTimestampMs || d < firstStreamTimestampMs) {
+            firstStreamTimestampMs = d;
+          }
+        });
+      });
+
       const latestRunInfo = getLatestRunWithTimestamp(cycles);
       const latestRunLabel = latestRunInfo.run ? (latestRunInfo.run.label || 'Ongoing') : 'Ongoing';
       const lastStreamTimestampMs = latestRunInfo.date ? latestRunInfo.date.getTime() : null;
@@ -59,7 +100,7 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
       }
 
       return {
-        id, ...data, totalStreams, latestRunLabel, lastStreamTimestampMs,
+        id, ...data, totalStreams, totalDuration, firstStreamTimestampMs, latestRunLabel, lastStreamTimestampMs,
         lastStreamTimestampRaw, latestRunName, thumbnail_urls: data.thumbnail_urls || []
       };
     }),
@@ -67,6 +108,21 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
 
   const totalStreams = useMemo(() => games.reduce((s, g) => s + g.totalStreams, 0), [games]);
   const totalGames  = games.length;
+
+  const gamesTimeline = useMemo(() => {
+    return [...games]
+      .filter(g => g.totalDuration > 0 && g.firstStreamTimestampMs)
+      .sort((a, b) => a.firstStreamTimestampMs - b.firstStreamTimestampMs)
+      .map(g => {
+        const d = new Date(g.firstStreamTimestampMs);
+        const monthStr = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        return {
+          name: g.game_name,
+          hours: parseFloat((g.totalDuration / 3600).toFixed(1)),
+          month: monthStr
+        };
+      });
+  }, [games]);
 
   const mostRecentGame = useMemo(() =>
     games.reduce((latest, g) => {
@@ -98,10 +154,9 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   const rawLatestBgImage = latestGameImages[latestBgIndex] || heroThumb;
   const latestBgImage = getLowResUrl(rawLatestBgImage, layoutPrefs?.highResImages);
 
-  // Bundle properties required by the slide definitions
   const slideData1 = { totalStreamsCount, totalStreams };
   const slideData2 = { totalGamesCount, totalGames };
-  const slideData3 = { latestBgImage, mostRecentGame, timeSinceLastStream };
+  const slideData3 = { latestBgImage, mostRecentGame, timeSinceLastStream, gamesTimeline };
 
   return (
     <div 
@@ -121,47 +176,37 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
           
           <div className="stats-left-col">
             
-            {/* --- CARD 1 (Top Left) --- */}
             <div className="card-wrapper-left">
-              <div className="flipper" style={{ transform: `rotateY(${flipDegree}deg)` }} onTransitionEnd={handleTransitionEnd}>
-                <div className="stat-card flipper-face flip-front">
-                  {getCard1Slide(frontFaceSlide, slideData1)}
-                </div>
-                <div className="stat-card flipper-face flip-back">
-                  {getCard1Slide(backFaceSlide, slideData1)}
-                </div>
-              </div>
+              <FlipperCard 
+                globalFlipCycle={flipCycle} 
+                getSlideContent={getCard1Slide} 
+                slideData={slideData1} 
+                className="stat-card" 
+              />
             </div>
 
-            {/* PROGRESS DIVIDER */}
             <div className="stats-progress-track">
               <div className="stats-progress-fill" onAnimationIteration={handleAnimationIteration} />
             </div>
 
-            {/* --- CARD 2 (Bottom Left) --- */}
             <div className="card-wrapper-left">
-              <div className="flipper" style={{ transform: `rotateY(${flipDegree}deg)` }} onTransitionEnd={handleTransitionEnd}>
-                <div className="stat-card flipper-face flip-front">
-                  {getCard2Slide(frontFaceSlide, slideData2)}
-                </div>
-                <div className="stat-card flipper-face flip-back">
-                  {getCard2Slide(backFaceSlide, slideData2)}
-                </div>
-              </div>
+              <FlipperCard 
+                globalFlipCycle={flipCycle} 
+                getSlideContent={getCard2Slide} 
+                slideData={slideData2} 
+                className="stat-card" 
+              />
             </div>
 
           </div>
 
-          {/* --- CARD 3 (Right Column) --- */}
           <div className="card-wrapper-right group">
-            <div className="flipper" style={{ transform: `rotateY(${flipDegree}deg)` }} onTransitionEnd={handleTransitionEnd}>
-              <div className="stats-right-col flipper-face flip-front">
-                {getCard3Slide(frontFaceSlide, slideData3)}
-              </div>
-              <div className="stats-right-col flipper-face flip-back">
-                {getCard3Slide(backFaceSlide, slideData3)}
-              </div>
-            </div>
+            <FlipperCard 
+              globalFlipCycle={flipCycle} 
+              getSlideContent={getCard3Slide} 
+              slideData={slideData3} 
+              className="stats-right-col" 
+            />
           </div>
           
         </div>

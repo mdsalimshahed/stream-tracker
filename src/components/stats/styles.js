@@ -5,20 +5,16 @@ export const STYLES = `
     100% { width: 100%; opacity: 0; }
   }
   
-  @keyframes fillLineVert {
-    0% { height: 0%; opacity: 1; }
-    95% { height: 100%; opacity: 1; }
-    100% { height: 100%; opacity: 0; }
-  }
-  
   .stats-progress-track {
     background: var(--c-border);
     position: relative;
     z-index: 20;
     width: 100%;
     height: 2px;
+    min-height: 2px;
     margin-top: -1px;
     margin-bottom: -1px;
+    flex-shrink: 0;
   }
   
   .stats-progress-fill {
@@ -31,23 +27,7 @@ export const STYLES = `
     animation: fillLine 5s linear infinite;
   }
 
-  /* Switch to Vertical Divider in Row Layout (Tablets) */
-  @media (min-width: 641px) and (max-width: 1023px) {
-    .stats-progress-track {
-      width: 2px;
-      height: auto;
-      margin-top: 0;
-      margin-bottom: 0;
-      margin-left: -1px;
-      margin-right: -1px;
-    }
-    .stats-progress-fill {
-      width: 100%;
-      height: 0%;
-      background: linear-gradient(to bottom, rgba(232, 200, 122, 0.2), var(--c-accent));
-      animation: fillLineVert 5s linear infinite;
-    }
-  }
+  /* Note: The buggy tablet media query that made the line vertical has been completely removed */
 
   .stats-root {
     --c-bg:      #080a0f;
@@ -85,21 +65,18 @@ export const STYLES = `
     }
   }
 
+  /* Always stack Card 1 and Card 2 vertically */
   .stats-left-col { 
-    display: flex; flex-direction: row; gap: 0; flex: 1; z-index: 2;
-  }
-  @media (max-width: 640px) {
-    .stats-left-col { flex-direction: column; }
+    display: flex; flex-direction: column; gap: 0; flex: 1; z-index: 2;
   }
   @media (min-width: 1024px) {
     .stats-left-col { 
-      flex-direction: column; 
       flex: 0 0 calc(var(--flex-left) * 1%); 
       width: calc(var(--flex-left) * 1%); 
       min-height: 0; gap: 0; 
     }
   }
-  
+
   .stats-right-col { 
     flex: 1; background: rgba(13,17,23,0.35); position: relative; overflow: hidden; 
     border: 1px solid var(--c-border); border-radius: 0;
@@ -132,7 +109,6 @@ export const STYLES = `
   
   .stat-number { font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--c-text); transition: color 0.3s ease; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
   .stat-card:hover .stat-number { color: var(--c-accent); }
-
   .stats-right-col:hover .latest-title { color: var(--c-accent) !important; }
 
   .top-number { font-size: calc(var(--sz-main) * 1rem); }
@@ -182,4 +158,89 @@ export const STYLES = `
   .fade-up  { animation: fadeUp 0.6s ease both; }
   .delay-1  { animation-delay: 0.1s; }
   .delay-2  { animation-delay: 0.2s; }
+
+
+  /* =========================================================
+     SAFE FLIP WRAPPERS (Maintains Flex Layout)
+     ========================================================= */
+
+  .card-wrapper-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    perspective: 1200px;
+    min-height: 160px; /* Guarantees mobile cards don't collapse to 0 */
+  }
+
+  .card-wrapper-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    perspective: 1200px;
+    min-height: 300px;
+    z-index: 1;
+  }
+  @media (min-width: 1024px) {
+    .card-wrapper-right { 
+      flex: 0 0 calc(var(--flex-right) * 1%); 
+      width: calc(var(--flex-right) * 1%); 
+      min-height: 0; 
+      margin-left: -1px; 
+    }
+  }
+  @media (max-width: 1023px) {
+    .card-wrapper-right { margin-top: -1px; }
+  }
+
+  .flipper {
+    flex: 1;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .flipper-face {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  /* The Front Face stays in the normal document flow (position: relative).
+    This pushes the outer wrappers open, forcing them to maintain proper height.
+  */
+  .flip-front {
+    position: relative; 
+    flex: 1;
+    z-index: 2;
+  }
+
+  /* The Back Face is absolute, simply overlaying exactly on top of the front face 
+  */
+  .flip-back {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    transform: rotateY(180deg);
+  }
+
+  /* =========================================================
+     STRICT SLIDE CONTENT BOUNDARY (PREVENTS OVERFLOWS)
+     ========================================================= */
+
+  .slide-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden !important; 
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 `;

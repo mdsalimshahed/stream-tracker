@@ -9,7 +9,6 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
   const rowRefs = useRef([]);
   const requestRef = useRef(null);
   
-  // Bumped up the base start speeds
   const globalStateRef = useRef({ currentSpeed: isSlowMode ? 0.05 : 2.8 });
   const modeRef = useRef({ isPaused, isSlowMode });
 
@@ -20,7 +19,7 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
   const rowsConfig = useMemo(() => {
     const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
     
-    // HARDCODED LOW-RES
+    // Hardcode to low res for mosaic to prevent memory leaks and black flashes
     const pool = mosaicImages?.length > 0 
       ? mosaicImages.map(img => ({ ...img, url: getLowResUrl(img.url, false) }))
       : [fallback];
@@ -60,7 +59,6 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
       
       const baseWithAspect = base.map(b => ({ url: b.url, aspect: aspectRatios[Math.floor(Math.random() * aspectRatios.length)] }));
       
-      // INCREASED BASE SPEED slightly to give the math more room to work with
       const baseSpeed = 0.0004 + Math.random() * 0.0008;
       const direction = i % 2 === 0 ? 'left' : 'right';
       
@@ -84,7 +82,6 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
       
       const globalLerpFactor = 1 - Math.exp(-safeDelta * 0.0002);
       
-      // INCREASED STATS SPEED (2.8) AND TWEAKED SNAIL PACE (0.05)
       let targetGlobalSpeed = modeRef.current.isPaused ? 0.0 : (modeRef.current.isSlowMode ? 0.05 : 2.8);
       globalStateRef.current.currentSpeed += (targetGlobalSpeed - globalStateRef.current.currentSpeed) * globalLerpFactor;
       
@@ -167,8 +164,10 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
                     transformStyle: 'preserve-3d' 
                   }}
                 >
-                  <div className="absolute inset-0 bg-black" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
-                    <img src={item.url} alt="" className="w-full h-full object-cover block" loading="lazy" decoding="async" />
+                  {/* Removed bg-black to avoid harsh black artifacting when images load */}
+                  <div className="absolute inset-0 bg-transparent" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
+                    {/* Removed loading="lazy" and decoding="async" so the browser doesn't try to unload the images when they loop off screen */}
+                    <img src={item.url} alt="" className="w-full h-full object-cover block" />
                   </div>
                   <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: 'transparent' }} />
                 </div>

@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "5/14/2026, 4:17:17 PM",
+  "exportDate": "5/15/2026, 1:20:07 AM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -118,6 +118,152 @@
         "genres": "Adventure, Indie",
         "tags": "Singleplayer, Steam Achievements, Full controller support, Steam Cloud, Atmospheric, Story Rich, Open World, First-Person, Sci-fi, Exploration, Survival, Point & Click, Mystery, Choices Matter, Walking Simulator, Story, Robots, Drama, character, Choose Your Own Adventure, Family Sharing, Thriller, secrets, Narrative, Conversation, environment, hell, relationship, dodge, elements, Stereo Sound, Custom Volume Controls, Surround Sound, Playable without Timed Input, characters, Camera Comfort, search, Save Anytime, town, choices, plane, man, drop",
         "steamUrl": "https://store.steampowered.com/app/1275550/",
+        "notOnSteam": false
+      }
+    },
+    "1934570": {
+      "game_name": "South of Midnight",
+      "release_year": "2025",
+      "cover_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/56f64e713504dd2558077d038eb7470c8689a559/header.jpg?t=1776971609",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_40596f6708fcabef80fb7ef72c1b03e4134a3869.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_d00b68da2754c5003dc01f73a62365bc8de03c1a.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_103bb6df9ddfd8e93cbe28ad2066e4a2bfbce54e.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_49c8bb3ebf011820f9069e91eaf2d346d65bda19.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_592785179712f4f4a22dee03e68bd7204a6ecfa7.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_d55880395d165fae7086311c306dbc598160da84.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_176b21b4e07b7d2cadec6317c3cbcb13bea0a1d9.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_eb127afa9163c723bc51b2ac61175b468e3eed87.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_1c5e1b46354abdfcfd7bd660eff71a21c8692392.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_2124db7c5ee5495f8902b250af1f76c210cd51a2.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_cce0d8da20bf90e2ce2d50f3a31ee224a1833779.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_94b26f4edcf561ad7392be25fe4833e50cfa27f1.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_2dc9726e8f44c5f178858881bb045649997f4db9.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_303e701f221493903aa3574d5c53421096673b9f.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_6e00b62a0f0c6f3c6da3d3323625ad03c70d859a.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_6aa0f7e85860d10154513f09364aa46acdefb58f.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_e4708af1f2f56baf18f19f7f7c37152a0b29e947.1920x1080.jpg?t=1776971609",
+        "https://media.rawg.io/media/screenshots/283/28326b57b7fbeb0da66d86a31772f022.jpg",
+        "https://media.rawg.io/media/screenshots/1d4/1d457fd29b2c6853f37d751bc89b250e.jpg",
+        "https://media.rawg.io/media/screenshots/c14/c147275e1b3b0666747da89702bb3e03.jpg"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 7,
+          "timestamps": [
+            {
+              "date": 1762181251000,
+              "videoId": "mRZvdvo3nTc",
+              "duration": 8981,
+              "startTime": 1762181251000,
+              "endTime": 1762190750000
+            },
+            {
+              "date": 1762228607000,
+              "videoId": "1vAHPGS2CnA",
+              "duration": 6729,
+              "startTime": 1762228607000,
+              "endTime": 1762235338000
+            },
+            {
+              "date": 1762235504000,
+              "videoId": "qslVSO990Qg",
+              "duration": 4171,
+              "startTime": 1762235504000,
+              "endTime": 1762239677000
+            },
+            {
+              "date": 1762316041000,
+              "videoId": "W7-eLEJkH-M",
+              "duration": 4325,
+              "startTime": 1762316041000,
+              "endTime": 1762320367000
+            },
+            {
+              "date": 1762320526000,
+              "videoId": "_hk2xveH2_o",
+              "duration": 5539,
+              "startTime": 1762320526000,
+              "endTime": 1762326066000
+            },
+            {
+              "date": 1762331826000,
+              "videoId": "DcbbqMGgcxM",
+              "duration": 7781,
+              "startTime": 1762331826000,
+              "endTime": 1762339612000
+            },
+            {
+              "date": 1762342545000,
+              "videoId": "ISIej4iA-Qo",
+              "duration": 4061,
+              "startTime": 1762342545000,
+              "endTime": 1762346603000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLLzuld5NPO9B49_5jVWTal79RFZfjiu5i",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "Compulsion Games",
+        "publisher": "Xbox Game Studios",
+        "releaseDate": "8 Apr, 2025",
+        "genres": "Action, Adventure",
+        "tags": "Singleplayer, Steam Achievements, Full controller support, Steam Cloud, Atmospheric, Great Soundtrack, Story Rich, Third Person, Horror, Fantasy, Funny, Female Protagonist, Action-Adventure, Controller, Dark, Captions available, Dark Fantasy, combat, Magic, Surreal, Stylized, 3D Platformer, Family Sharing, Протагонистка, HDR available",
+        "steamUrl": "https://store.steampowered.com/app/1934570/",
+        "notOnSteam": false
+      }
+    },
+    "2840770": {
+      "game_name": "Avatar: Frontiers of Pandora™",
+      "release_year": "2024",
+      "cover_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/27aa6d8f9c3f11dc93a557164d30a9ba08a7c46a/header.jpg?t=1778598692",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/5d96569712304414f21cddbedbe82d5d2b598bcb/ss_5d96569712304414f21cddbedbe82d5d2b598bcb.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/75b20da8e11285fb3f33f550dafb7d842b70e31f/ss_75b20da8e11285fb3f33f550dafb7d842b70e31f.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/b441eb8a77c901dae889a8605d2266b6defd7851/ss_b441eb8a77c901dae889a8605d2266b6defd7851.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/f75613a079f078740df1d898d55e0aebf8031fb9/ss_f75613a079f078740df1d898d55e0aebf8031fb9.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/3ea537adac955cda608c07dd428e2cd1388cbd70/ss_3ea537adac955cda608c07dd428e2cd1388cbd70.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/894849eb55a6870c0ad3cf6dfe1d8b772abe578c/ss_894849eb55a6870c0ad3cf6dfe1d8b772abe578c.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/36d908bb5f643c5b7e9c450b168bcc021fce9db0/ss_36d908bb5f643c5b7e9c450b168bcc021fce9db0.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/aae462048e7aefe5e05108b3202527dc2a417a1b/ss_aae462048e7aefe5e05108b3202527dc2a417a1b.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/570c150bd2e003e3b623820f1842525fb5abba4c/ss_570c150bd2e003e3b623820f1842525fb5abba4c.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/5337d86a544274c8798ba18dd54b901b02ce5d3a/ss_5337d86a544274c8798ba18dd54b901b02ce5d3a.1920x1080.jpg?t=1778598692",
+        "https://media.rawg.io/media/screenshots/e79/e79b32462dcd1efa695f55c044701433.jpg",
+        "https://media.rawg.io/media/screenshots/178/178a97b5bb8949c07bc1f9af83b38bf7.jpg",
+        "https://media.rawg.io/media/screenshots/2e0/2e038844d38e05ee5b6ccfe46da83a6b.jpg",
+        "https://media.rawg.io/media/screenshots/acd/acd86cd5db28ca8d09c4dc2fc8d587c6.jpg",
+        "https://media.rawg.io/media/screenshots/bc5/bc5c425bf90589619139a88f7a044678.jpg",
+        "https://media.rawg.io/media/screenshots/baf/baf9be70d6b3bc16733c1fbefdd71e8a.jpg"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 1,
+          "timestamps": [
+            {
+              "date": 1766392376000,
+              "videoId": "5R3X2zubdkQ",
+              "duration": 10279,
+              "startTime": 1766392376000,
+              "endTime": 1766403454000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLLzuld5NPO9CHDVKfyMM-0rIvIVqVygPx",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "Massive Entertainment – A Ubisoft Studio",
+        "publisher": "Ubisoft",
+        "releaseDate": "17 Jun, 2024",
+        "genres": "Action, Adventure",
+        "tags": "Singleplayer, Steam Achievements, Multiplayer, Atmospheric, Co-op, Story Rich, Open World, First-Person, Sci-fi, Partial Controller Support, Online Co-Op, Exploration, In-App Purchases, Character Customization, 3D, Family Sharing, Immersive Sim",
+        "steamUrl": "https://store.steampowered.com/app/2840770/",
         "notOnSteam": false
       }
     },

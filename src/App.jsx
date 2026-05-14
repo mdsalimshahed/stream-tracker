@@ -12,7 +12,7 @@ import { useSearch } from './hooks/useSearch';
 
 import Insights from './components/Insights';
 
-// Utilities (Add this line)
+// Utilities
 import { migrateLabels } from './utils/dataUtils';
 
 // Components
@@ -23,12 +23,12 @@ import DataManager from './components/DataManager';
 import GameProfileModal from './components/GameProfileModal';
 import LivestreamSetupWorkspace from './components/LivestreamSetupWorkspace';
 import Stats from './components/Stats';
+import DebugSlides from './components/DebugSlides';
 import SearchView from './components/SearchView';
 import MosaicBackground from './components/background/MosaicBackground.jsx';
 import { Notification } from './components/Notification';
 import { CrossfadeImage } from './components/common/UIComponents';
-// ... existing imports
-import { parseCustomTimestamp, getLowResUrl } from './utils/helpers'; // Ensure getLowResUrl is imported
+import { parseCustomTimestamp, getLowResUrl } from './utils/helpers';
 
 export default function App() {
   const [toast, setToast] = useState(null);
@@ -49,7 +49,7 @@ export default function App() {
   // --- Modals ---
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [initialRunForModal, setInitialRunForModal] = useState(null);
-  const [workspaceConfig, setWorkspaceConfig] = useState(null); // { gameId, cycleId, selectedStreamNumber }
+  const [workspaceConfig, setWorkspaceConfig] = useState(null); 
   const [showExportModal, setShowExportModal] = useState(false);
 
   const isModalOpen = !!(selectedGameId || workspaceConfig);
@@ -72,10 +72,9 @@ export default function App() {
   if (hoverState.gameId) {
     currentBgUrl = isImageReady ? hoveredImage.url : getLowResUrl(streamData[hoverState.gameId]?.cover_image || streamData[hoverState.gameId]?.thumbnail_urls?.[0] || null, settings.layoutPrefs.highResImages);
   } else {
-    currentBgUrl = hoveredImage.url || null; // retain for fade-out
+    currentBgUrl = hoveredImage.url || null; 
   }
 
-  // --- Import / Export ---
   // --- Import / Export ---
   const handleImport = (importedData) => {
     try {
@@ -104,8 +103,6 @@ export default function App() {
 
   const handleExport = (type) => {
     const now = new Date();
-    
-    // Build a local date string (YYYY-MM-DD_HH-MM-SS)
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
@@ -173,7 +170,6 @@ export default function App() {
       .catch(() => notify('Could not find defaultData.json', 'error'));
   };
 
-  // --- Add game wrapper (opens profile after add) ---
   const onAddGame = async (g) => {
     const rid = g.id.toString();
     if (streamData[rid]) { openGameProfile(rid); setCurrentView('library'); return; }
@@ -181,11 +177,7 @@ export default function App() {
     if (newId) openGameProfile(newId);
   };
 
-  // --- Shared card props ---
   const cardProps = { streamData, hoveredImage, hoverState, onHoverGame, systemFonts: scaledSystemFonts, layoutPrefs: scaledLayoutPrefs };
-
-  const makeHandleCardClick = (cycleId = null) => (e, uniqueCardId, gameId) =>
-    handleCardClick(e, uniqueCardId, gameId, openGameProfile, cycleId);
 
   return (
     <div className="min-h-screen text-white font-sans antialiased relative bg-black overflow-hidden flex flex-col">
@@ -200,7 +192,7 @@ export default function App() {
           <MosaicBackground 
             mosaicImages={mosaicImages} 
             isPaused={mosaicPaused} 
-            isSlowMode={currentView !== 'stats'} 
+            isSlowMode={currentView !== 'stats' && currentView !== 'debug'} 
             shouldFlip={isImageReady} 
             highResImages={settings.layoutPrefs.highResImages} 
           />
@@ -247,6 +239,13 @@ export default function App() {
               searchResults={searchResults} isSearching={isSearching} handleSearch={handleSearch}
               handleAddGame={onAddGame} streamData={streamData}
               scaledSystemFonts={scaledSystemFonts} scaledLayoutPrefs={scaledLayoutPrefs}
+            />
+          )}
+          {currentView === 'debug' && (
+            <DebugSlides 
+              streamData={streamData} 
+              systemFonts={scaledSystemFonts} 
+              layoutPrefs={scaledLayoutPrefs} 
             />
           )}
         </main>

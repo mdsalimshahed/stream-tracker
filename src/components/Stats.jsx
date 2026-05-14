@@ -1,11 +1,15 @@
 // src/components/Stats.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { getLowResUrl, getTsDateStr } from '../utils/helpers';
-import { CrossfadeImage } from './common/UIComponents';
 import { getLatestRunWithTimestamp } from './stats/utils';
 import { useDynamicTime, useCountUp } from './stats/hooks';
 import { CategoryCard } from './stats/CategoryCard';
 import { STYLES } from './stats/styles';
+
+// Import our newly abstracted slide components
+import { getCard1Slide } from './stats/slides/Card1Slides';
+import { getCard2Slide } from './stats/slides/Card2Slides';
+import { getCard3Slide } from './stats/slides/Card3Slides';
 
 export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   const [latestBgIndex, setLatestBgIndex] = useState(0);
@@ -22,14 +26,11 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
 
   // Only swap the hidden face's text when the physical rotation is finished
   const handleTransitionEnd = (e) => {
-    // Only trigger on the container's transform transition, ignore children
     if (e.target !== e.currentTarget || e.propertyName !== 'transform') return;
     
     if (flipCycle % 2 !== 0) {
-      // Back is visible. Front is hidden. Safe to silently update front.
       setFrontFaceSlide((flipCycle + 1) % 6);
     } else {
-      // Front is visible. Back is hidden. Safe to silently update back.
       if (flipCycle > 0) {
         setBackFaceSlide((flipCycle + 1) % 6);
       }
@@ -97,81 +98,10 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   const rawLatestBgImage = latestGameImages[latestBgIndex] || heroThumb;
   const latestBgImage = getLowResUrl(rawLatestBgImage, layoutPrefs?.highResImages);
 
-  // =========================================================
-  // --- 18 EXPLICIT SLIDES (Encapsulated in .slide-container) ---
-  // =========================================================
-
-  const renderPlaceholder = (num) => (
-    <div className="slide-container items-center justify-center">
-      <span className="font-bold text-[#e8c87a] uppercase tracking-widest drop-shadow-md text-2xl lg:text-3xl">
-        Slide {num}
-      </span>
-    </div>
-  );
-
-  // --- CARD 1 (Top Left) ---
-  const getCard1Slide = (index) => {
-    switch (index) {
-      case 0: return (
-        <div className="slide-container">
-          <div className="stat-number top-number">{totalStreamsCount.toLocaleString()}</div>
-          <div className="stat-label">{totalStreams === 1 ? 'Stream' : 'Streams'}</div>
-        </div>
-      );
-      case 1: return renderPlaceholder(4);
-      case 2: return renderPlaceholder(7);
-      case 3: return renderPlaceholder(10);
-      case 4: return renderPlaceholder(13);
-      case 5: return renderPlaceholder(16);
-      default: return null;
-    }
-  };
-
-  // --- CARD 2 (Bottom Left) ---
-  const getCard2Slide = (index) => {
-    switch (index) {
-      case 0: return (
-        <div className="slide-container">
-          <div className="stat-number top-number">{totalGamesCount}</div>
-          <div className="stat-label">{totalGames === 1 ? 'Game in Library' : 'Games in Library'}</div>
-        </div>
-      );
-      case 1: return renderPlaceholder(5);
-      case 2: return renderPlaceholder(8);
-      case 3: return renderPlaceholder(11);
-      case 4: return renderPlaceholder(14);
-      case 5: return renderPlaceholder(17);
-      default: return null;
-    }
-  };
-
-  // --- CARD 3 (Right Column) ---
-  const getCard3Slide = (index) => {
-    switch (index) {
-      case 0: return (
-        <div className="slide-container justify-end">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
-          <div className="latest-bg">
-            <CrossfadeImage src={latestBgImage} alt="latest game" className="w-full h-full" imgClassName="object-cover" duration={700} />
-          </div>
-          <div className="latest-content">
-            <div className="stat-number drop-shadow-xl latest-title transition-colors duration-300">
-              {mostRecentGame?.game_name || '—'}
-            </div>
-            <div className="stat-sub latest-sub-3">{mostRecentGame?.latestRunName || ''}</div>
-            <div className="stat-sub latest-sub-1">Last streamed: <span className="latest-sub-time">{timeSinceLastStream}</span></div>
-            <div className="stat-sub latest-sub-2">{mostRecentGame?.lastStreamTimestampRaw ? `On ${mostRecentGame.lastStreamTimestampRaw}` : 'Unknown'}</div>
-          </div>
-        </div>
-      );
-      case 1: return <div className="slide-container items-center justify-center bg-black/60"><span className="text-3xl font-bold text-[#e8c87a] uppercase tracking-widest drop-shadow-md">Slide 6</span></div>;
-      case 2: return <div className="slide-container items-center justify-center bg-black/60"><span className="text-3xl font-bold text-[#e8c87a] uppercase tracking-widest drop-shadow-md">Slide 9</span></div>;
-      case 3: return <div className="slide-container items-center justify-center bg-black/60"><span className="text-3xl font-bold text-[#e8c87a] uppercase tracking-widest drop-shadow-md">Slide 12</span></div>;
-      case 4: return <div className="slide-container items-center justify-center bg-black/60"><span className="text-3xl font-bold text-[#e8c87a] uppercase tracking-widest drop-shadow-md">Slide 15</span></div>;
-      case 5: return <div className="slide-container items-center justify-center bg-black/60"><span className="text-3xl font-bold text-[#e8c87a] uppercase tracking-widest drop-shadow-md">Slide 18</span></div>;
-      default: return null;
-    }
-  };
+  // Bundle properties required by the slide definitions
+  const slideData1 = { totalStreamsCount, totalStreams };
+  const slideData2 = { totalGamesCount, totalGames };
+  const slideData3 = { latestBgImage, mostRecentGame, timeSinceLastStream };
 
   return (
     <div 
@@ -195,17 +125,16 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
             <div className="card-wrapper-left">
               <div className="flipper" style={{ transform: `rotateY(${flipDegree}deg)` }} onTransitionEnd={handleTransitionEnd}>
                 <div className="stat-card flipper-face flip-front">
-                  {getCard1Slide(frontFaceSlide)}
+                  {getCard1Slide(frontFaceSlide, slideData1)}
                 </div>
                 <div className="stat-card flipper-face flip-back">
-                  {getCard1Slide(backFaceSlide)}
+                  {getCard1Slide(backFaceSlide, slideData1)}
                 </div>
               </div>
             </div>
 
             {/* PROGRESS DIVIDER */}
             <div className="stats-progress-track">
-              {/* Triggers flip safely on animation repeat */}
               <div className="stats-progress-fill" onAnimationIteration={handleAnimationIteration} />
             </div>
 
@@ -213,10 +142,10 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
             <div className="card-wrapper-left">
               <div className="flipper" style={{ transform: `rotateY(${flipDegree}deg)` }} onTransitionEnd={handleTransitionEnd}>
                 <div className="stat-card flipper-face flip-front">
-                  {getCard2Slide(frontFaceSlide)}
+                  {getCard2Slide(frontFaceSlide, slideData2)}
                 </div>
                 <div className="stat-card flipper-face flip-back">
-                  {getCard2Slide(backFaceSlide)}
+                  {getCard2Slide(backFaceSlide, slideData2)}
                 </div>
               </div>
             </div>
@@ -226,12 +155,11 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
           {/* --- CARD 3 (Right Column) --- */}
           <div className="card-wrapper-right group">
             <div className="flipper" style={{ transform: `rotateY(${flipDegree}deg)` }} onTransitionEnd={handleTransitionEnd}>
-              {/* Uses your exact stats-right-col class */}
               <div className="stats-right-col flipper-face flip-front">
-                {getCard3Slide(frontFaceSlide)}
+                {getCard3Slide(frontFaceSlide, slideData3)}
               </div>
               <div className="stats-right-col flipper-face flip-back">
-                {getCard3Slide(backFaceSlide)}
+                {getCard3Slide(backFaceSlide, slideData3)}
               </div>
             </div>
           </div>

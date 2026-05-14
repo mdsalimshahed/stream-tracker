@@ -164,9 +164,11 @@ const Slide6Wrapper = ({ gamesTimeline }) => {
               ticks={xTicks} 
               stroke="#8a88a8" 
               tickLine={false} 
-              axisLine={false} 
+              axisLine={true} 
               tickMargin={8}
-              dy={20} 
+              dy={0} 
+            //   interval={0}        // Force all calculated ticks to show
+              minTickGap={5}      // Allow them to be very close together
               tick={{ fill: '#8a88a8', fontSize: 11, fontFamily: '"Space Mono", monospace' }}
               tickFormatter={(val) => { const g = gamesTimeline[val]; const p = g?.month.split(' '); return p?.length === 2 ? `${p[0]} '${p[1].slice(-2)}` : g?.month; }} 
             />
@@ -174,7 +176,7 @@ const Slide6Wrapper = ({ gamesTimeline }) => {
             <YAxis 
               stroke="#8a88a8" 
               tickLine={false} 
-              axisLine={false} 
+              axisLine={true} 
               tickCount={6} 
               tickFormatter={(v) => `${Math.round(v)}h`} 
               width={30} 
@@ -315,18 +317,18 @@ const Slide9Wrapper = ({ streamProgressionLines, progressionDates, gamesTimeline
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             
             <XAxis 
-              type="number" 
+              type="index" 
               dataKey="date" 
               scale="time"
               domain={xDomain}
               allowDataOverflow={true} 
               stroke="#8a88a8" 
-              axisLine={false} 
+              axisLine={true} 
               tickLine={false} 
               tickMargin={8}
-              dy={20} 
+              dy={0} 
               tickCount={8}
-              minTickGap={20}
+              minTickGap={5}
               tick={{ fill: '#8a88a8', fontSize: 11, fontFamily: '"Space Mono", monospace' }}
               tickFormatter={(val) => {
                 if (!val) return '';
@@ -337,7 +339,7 @@ const Slide9Wrapper = ({ streamProgressionLines, progressionDates, gamesTimeline
             
             <YAxis 
               stroke="#8a88a8" 
-              axisLine={false} 
+              axisLine={true} 
               tickLine={false} 
               tickFormatter={(v) => `${Math.round(v)}h`} 
               width={30}

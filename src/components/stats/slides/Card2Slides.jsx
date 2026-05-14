@@ -56,8 +56,16 @@ export const getCard2Slide = (index, data) => {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-              <XAxis dataKey="name" stroke="#8a88a8" fontSize={11} fontFamily='"Space Mono", monospace' tickLine={false} axisLine={false} dy={10} />
-              <YAxis stroke="#8a88a8" fontSize={11} fontFamily='"Space Mono", monospace' tickLine={false} axisLine={false} tickFormatter={(v) => `${v}h`} width={45} />
+              <XAxis 
+                dataKey="name" 
+                tick={false}          // Hides the text labels
+                axisLine={true}       // Ensures the X-axis line is shown
+                stroke="#8a88a8" 
+                tickLine={false} 
+                height={10}
+                dy={0} 
+              />
+              <YAxis stroke="#8a88a8" fontSize={11} fontFamily='"Space Mono", monospace' tickLine={false} axisLine={true} tickFormatter={(v) => `${v}h`} interval={3} width={45} tick={{ angle: -90, textAnchor: 'middle', fill: '#8a88a8', fontSize: 11, fontFamily: '"Space Mono", monospace' }} />
               <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} isAnimationActive={false} />
               <Area type="monotone" dataKey="hours" stroke="url(#strokeStatusGradient)" strokeWidth={3} fill="url(#areaStatusGradient)" activeDot={{ r: 6, fill: '#fff', stroke: 'none' }} isAnimationActive={false} />
             </AreaChart>

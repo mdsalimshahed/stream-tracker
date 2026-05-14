@@ -10,6 +10,7 @@ import { getCard2Slide } from './stats/slides/Card2Slides';
 import { getCard3Slide } from './stats/slides/Card3Slides';
 
 export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
+  // ─── Base game list (Mirrored from Stats.jsx) ─────────────────────────────
   const games = useMemo(() =>
     Object.entries(streamData).map(([id, data]) => {
       const cycles = data.cycles || {};
@@ -29,45 +30,42 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
       });
 
       const latestRunInfo = getLatestRunWithTimestamp(cycles);
+      const latestRunLabel = latestRunInfo.run ? (latestRunInfo.run.label || 'Ongoing') : 'Ongoing';
       const lastStreamTimestampMs = latestRunInfo.date ? latestRunInfo.date.getTime() : null;
       const lastStreamTimestampRaw = getTsDateStr(latestRunInfo.timestamp);
       
       let latestRunName = '';
       if (latestRunInfo.run) {
-        if (latestRunInfo.run.displayName) {
-          latestRunName = latestRunInfo.run.displayName;
-        } else if (latestRunInfo.cycleId) {
-          latestRunName = latestRunInfo.cycleId === 'main' ? 'First Playthrough' : latestRunInfo.cycleId.replace(/_/g, ' ');
-        }
+        latestRunName = latestRunInfo.run.displayName || 
+          (latestRunInfo.cycleId === 'main' ? 'First Playthrough' : (latestRunInfo.cycleId || '').replace(/_/g, ' '));
       }
 
       return {
-        id, ...data, totalStreams, totalDuration, firstStreamTimestampMs, lastStreamTimestampMs,
-        lastStreamTimestampRaw, latestRunName, latestRunLabel: latestRunInfo.run?.label || 'Ongoing', thumbnail_urls: data.thumbnail_urls || []
+        id, ...data, totalStreams, totalDuration, firstStreamTimestampMs, 
+        latestRunLabel, lastStreamTimestampMs, lastStreamTimestampRaw, latestRunName, 
+        thumbnail_urls: data.thumbnail_urls || []
       };
     }),
   [streamData]);
 
+  // ─── Shared Calculations ──────────────────────────────────────────────────
   const totalStreams = useMemo(() => games.reduce((s, g) => s + g.totalStreams, 0), [games]);
   const totalGames = games.length;
   const totalDurationOverall = useMemo(() => games.reduce((acc, g) => acc + g.totalDuration, 0), [games]);
 
   const statusData = useMemo(() => {
-    let cumC = 0, cumO = 0, cumA = 0;
+    const sums = { Completed: 0, Ongoing: 0, Abandoned: 0 };
     games.forEach(g => {
-      const h = g.totalDuration / 3600;
-      if (g.latestRunLabel === 'Completed') cumC += h;
-      else if (g.latestRunLabel === 'Ongoing') cumO += h;
-      else if (g.latestRunLabel === 'Abandoned') cumA += h;
+      const label = g.latestRunLabel || 'Ongoing';
+      sums[label] = (sums[label] || 0) + g.totalDuration / 3600;
     });
     return [
-      { name: 'Ongoing', hours: parseFloat(cumO.toFixed(1)), color: '#3ddc84' },
-      { name: 'Completed', hours: parseFloat(cumC.toFixed(1)), color: '#f5a623' },
-      { name: 'Abandoned', hours: parseFloat(cumA.toFixed(1)), color: '#ff5c5c' },
+      { name: 'Ongoing',   hours: parseFloat((sums.Ongoing   || 0).toFixed(1)), color: '#3ddc84' },
+      { name: 'Completed', hours: parseFloat((sums.Completed || 0).toFixed(1)), color: '#f5a623' },
+      { name: 'Abandoned', hours: parseFloat((sums.Abandoned || 0).toFixed(1)), color: '#ff5c5c' },
     ];
   }, [games]);
 
-  // Generate a master list of all unique stream dates for Slide 9's X-Axis
   const progressionDates = useMemo(() => {
     const s = new Set();
     games.forEach(g => Object.values(g.cycles||{}).forEach(c => (c.timestamps||[]).forEach(ts => {
@@ -77,13 +75,14 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     return Array.from(s).sort((a,b) => a-b);
   }, [games]);
 
+  // ─── Cumulative Session Lines (Slide 9) ───────────────────────────────────
   const streamProgressionLines = useMemo(() => {
     const dateToIndex = new Map(progressionDates.map((d, i) => [d, i]));
 
     return games
       .filter(g => g.totalDuration > 0)
       .map(g => {
-        let cumHours = 0;
+        let cumSecs = 0; // Tracking raw seconds to prevent precision loss
         const allStreams = [];
         
         Object.values(g.cycles || {}).forEach(c => {
@@ -96,50 +95,50 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
         allStreams.sort((a, b) => a.date - b.date);
 
         const dataPoints = allStreams.map(ts => {
-          cumHours += ts.duration / 3600;
+          cumSecs += ts.duration;
           return {
             xIndex: dateToIndex.get(ts.date),
-            cumulativeHours: parseFloat(cumHours.toFixed(1)),
+            cumulativeHours: parseFloat((cumSecs / 3600).toFixed(2)),
+            rawSeconds: cumSecs, // Passed for accurate tooltip formatting
             date: ts.date,
             gameName: g.game_name
           };
         });
 
-        let color = "#e8c87a";
-        if (g.latestRunLabel === 'Completed') color = "#f5a623";
-        if (g.latestRunLabel === 'Ongoing') color = "#3ddc84";
-        if (g.latestRunLabel === 'Abandoned') color = "#ff5c5c";
+        const color = g.latestRunLabel === 'Completed' ? '#f5a623' : 
+                      g.latestRunLabel === 'Ongoing'   ? '#3ddc84' : '#ff5c5c';
 
-        return { gameName: g.game_name, color, data: dataPoints };
+        return { 
+          gameName: g.game_name, 
+          color, 
+          status: g.latestRunLabel,
+          image: getLowResUrl(g.thumbnail_urls?.[0] || '', layoutPrefs?.highResImages),
+          data: dataPoints 
+        };
       });
-  }, [games, progressionDates]);
+  }, [games, progressionDates, layoutPrefs?.highResImages]);
 
+  // ─── Timeline (Slide 6) ──────────────────────────────────────────────────
   const gamesTimeline = useMemo(() => {
     return [...games]
       .filter(g => g.totalDuration > 0 && g.firstStreamTimestampMs)
       .sort((a, b) => a.firstStreamTimestampMs - b.firstStreamTimestampMs)
       .map((g, index) => {
         const d = new Date(g.firstStreamTimestampMs);
-        const fullDate = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-        const monthStr = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-        const totalSec = g.totalDuration;
-        const hours = Math.floor(totalSec / 3600);
-        const mins = Math.floor((totalSec % 3600) / 60);
-        const runTime = `${hours}h ${mins}m`;
-
         return {
           index,
           name: g.game_name,
           hours: parseFloat((g.totalDuration / 3600).toFixed(1)),
-          runTime,
-          fullDate,
-          month: monthStr,
+          rawSeconds: g.totalDuration,
+          fullDate: d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+          month: d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
           status: g.latestRunLabel,
-          image: g.thumbnail_urls?.[0] ? getLowResUrl(g.thumbnail_urls[0], layoutPrefs?.highResImages) : 'https://placehold.co/100x100/1e293b/475569?text=Game'
+          image: getLowResUrl(g.thumbnail_urls?.[0] || '', layoutPrefs?.highResImages),
         };
       });
   }, [games, layoutPrefs?.highResImages]);
 
+  // ─── Hero Data ────────────────────────────────────────────────────────────
   const mostRecentGame = useMemo(() =>
     games.reduce((latest, g) => {
       if (!latest || (g.lastStreamTimestampMs && g.lastStreamTimestampMs > (latest.lastStreamTimestampMs || 0))) return g;
@@ -175,7 +174,7 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
       <div className="stats-scroll custom-scrollbar" style={{ overflowY: 'auto', display: 'block' }}>
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 text-white tracking-tight">Slide Debug Panel</h1>
-          <p className="text-white/60">Previewing Slide 3, Slide 6, and Slide 9 with full interactive progression data.</p>
+          <p className="text-white/60">Previewing Slide 3, Slide 6, and Slide 9 with synced data logic.</p>
         </div>
 
         {[0, 1, 2, 3, 4, 5].map(i => (

@@ -4,6 +4,23 @@ import { CrossfadeImage } from '../../common/UIComponents';
 import { ResponsiveContainer, AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 // ==========================================
+// TIME FORMATTER HELPER
+// ==========================================
+const formatFullTime = (totalSecs) => {
+  if (totalSecs == null) return "0 hours 0 minutes 0 seconds";
+  const h = Math.floor(totalSecs / 3600);
+  const m = Math.floor((totalSecs % 3600) / 60);
+  const s = totalSecs % 60;
+  
+  let result = [];
+  if (h > 0) result.push(`${h} hour${h !== 1 ? 's' : ''}`);
+  if (m > 0 || h > 0) result.push(`${m} minute${m !== 1 ? 's' : ''}`);
+  result.push(`${s} second${s !== 1 ? 's' : ''}`);
+  
+  return result.join(' ');
+};
+
+// ==========================================
 // TOOLTIP COMPONENTS
 // ==========================================
 const Slide6Tooltip = ({ active, payload, selectedNode }) => {
@@ -13,7 +30,6 @@ const Slide6Tooltip = ({ active, payload, selectedNode }) => {
     
     let ringColor = data.status === 'Completed' ? "#f5a623" : data.status === 'Ongoing' ? "#3ddc84" : "#ff5c5c"; 
 
-    // Date formatting matching Slide 9 (Ordinal Dates)
     const getOrdinal = (n) => {
       const s = ["th", "st", "nd", "rd"];
       const v = n % 100;
@@ -27,8 +43,9 @@ const Slide6Tooltip = ({ active, payload, selectedNode }) => {
         <div className="text-white font-bold mb-1 text-sm">{data.name}</div>
         <div className="text-white/50 mb-2" style={{ fontSize: '10px' }}>Started: {formattedDate}</div>
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ringColor }}></span>
-          <span className="font-bold text-[#e8c87a]">{data.hours} hrs</span>
+          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ringColor }}></span>
+          {/* Using raw exact seconds directly from memory source */}
+          <span className="font-bold text-[#e8c87a]">{formatFullTime(data.rawSeconds ?? Math.round(data.hours * 3600))}</span>
         </div>
       </div>
     );
@@ -36,14 +53,12 @@ const Slide6Tooltip = ({ active, payload, selectedNode }) => {
   return null;
 };
 
-// SLIDE 9 TOOLTIP
 const Slide9Tooltip = ({ active, payload, selectedGame }) => {
   if (!selectedGame || !active || !payload || !payload.length) return null;
   
   const data = payload[0].payload;
   if (data.gameName !== selectedGame) return null;
 
-  // Ordinal Date Formatter (e.g., 1st, 2nd, 3rd, 10th)
   const getOrdinal = (n) => {
     const s = ["th", "st", "nd", "rd"];
     const v = n % 100;
@@ -58,8 +73,9 @@ const Slide9Tooltip = ({ active, payload, selectedGame }) => {
       <div className="text-white font-bold mb-1 text-sm">{data.gameName}</div>
       <div className="text-white/50 mb-2" style={{ fontSize: '10px' }}>{formattedDate}</div>
       <div className="flex items-center gap-2">
-        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: payload[0].stroke }}></span>
-        <span className="font-bold text-[#e8c87a]">{data.cumulativeHours} hrs</span>
+        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: payload[0].stroke }}></span>
+        {/* Using raw exact seconds directly from memory source */}
+        <span className="font-bold text-[#e8c87a]">{formatFullTime(data.rawSeconds ?? Math.round(data.cumulativeHours * 3600))}</span>
       </div>
     </div>
   );
@@ -71,11 +87,14 @@ const Slide9Tooltip = ({ active, payload, selectedGame }) => {
 const Slide6StaticDot = (props) => {
   const { cx, cy, payload, selectedNode, onSelect } = props;
   if (cx === undefined || cy === undefined) return null;
+  
   const clipId = `clip-${payload.name.replace(/[^a-zA-Z0-9]/g, '')}-${cx}-${cy}`;
   let ringColor = payload.status === 'Completed' ? "#f5a623" : payload.status === 'Ongoing' ? "#3ddc84" : "#ff5c5c"; 
+  
   const isSelected = selectedNode === payload.name;
-  const ringRadius = isSelected ? 31 : 18;
-  const imgRadius = isSelected ? 27 : 15;
+  
+  const ringRadius = isSelected ? 31 : 12;
+  const imgRadius = isSelected ? 27 : 10;
   const imgSize = imgRadius * 2;
   
   return (
@@ -86,17 +105,17 @@ const Slide6StaticDot = (props) => {
         onSelect(isSelected ? null : payload.name); 
       }}
     >
-      <circle cx={cx} cy={cy} r={32} fill="transparent" /> 
+      <circle cx={cx} cy={cy} r={isSelected ? 32 : 16} fill="transparent" /> 
       <circle cx={cx} cy={cy} r={ringRadius} fill={ringColor} style={{ transition: 'r 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }} />
       <clipPath id={clipId}><circle cx={cx} cy={cy} r={imgRadius} style={{ transition: 'r 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }} /></clipPath>
       <image x={cx - imgRadius} y={cy - imgRadius} width={imgSize} height={imgSize} href={payload.image} clipPath={`url(#${clipId})`} preserveAspectRatio="xMidYMid slice" style={{ transition: 'all 0.3s' }} />
-      {isSelected && <circle cx={cx} cy={cy} r={37} fill="none" stroke="#ffffff" strokeWidth={3} />}
     </g>
   );
 };
 
 const Slide6Wrapper = ({ gamesTimeline }) => {
   const [selectedNode, setSelectedNode] = useState(null);
+  
   const xTicks = useMemo(() => {
     const ticks = []; let lastMonth = '';
     gamesTimeline?.forEach((g, i) => {
@@ -108,19 +127,74 @@ const Slide6Wrapper = ({ gamesTimeline }) => {
   }, [gamesTimeline]);
 
   return (
-    <div className="slide-container justify-start bg-black/40 pt-10 pb-4 h-full outline-none" onClick={(e) => {
+    <div className="slide-container flex flex-col justify-start bg-black/40 pt-4 pb-2 px-4 h-full outline-none" onClick={(e) => {
       if (e.target.tagName?.toLowerCase() === 'circle' || e.target.tagName?.toLowerCase() === 'image') return;
       setSelectedNode(null);
     }}>
-      <h3 className="text-sm sm:text-base font-bold text-white/50 uppercase tracking-widest mb-16 drop-shadow-md text-center pointer-events-none">Library Playtime Timeline</h3>
-      <div className="w-full h-56 sm:h-64 outline-none">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={gamesTimeline} margin={{ top: 40, right: 35, left: 10, bottom: 20 }}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .recharts-wrapper, .recharts-surface, .recharts-responsive-container, svg { overflow: visible !important; outline: none !important; }
+        .recharts-wrapper * { outline: none !important; }
+        .recharts-line-dots, .recharts-area-dots { clip-path: none !important; }
+        *:focus { outline: none !important; }
+      `}} />
+      <h3 className="text-xs sm:text-sm font-bold text-white/50 uppercase tracking-widest mb-1 drop-shadow-md text-center pointer-events-none shrink-0">Library Playtime Timeline</h3>
+      <div className="w-full flex-1 min-h-0 outline-none overflow-visible">
+        <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
+          <AreaChart data={gamesTimeline} margin={{ top: 35, right: 35, left: 10, bottom: 10 }} style={{ overflow: 'visible' }}>
+            <defs>
+              <linearGradient id="slide6GradientFill" x1="0" y1="0" x2="1" y2="0">
+                {gamesTimeline?.map((g, i) => {
+                  const offset = `${(i / Math.max(1, gamesTimeline.length - 1)) * 100}%`;
+                  const color = g.status === 'Completed' ? "#f5a623" : g.status === 'Ongoing' ? "#3ddc84" : "#ff5c5c";
+                  return <stop key={`fill-${i}`} offset={offset} stopColor={color} stopOpacity={0.8} />;
+                })}
+              </linearGradient>
+              <linearGradient id="slide6GradientStroke" x1="0" y1="0" x2="1" y2="0">
+                {gamesTimeline?.map((g, i) => {
+                  const offset = `${(i / Math.max(1, gamesTimeline.length - 1)) * 100}%`;
+                  const color = g.status === 'Completed' ? "#f5a623" : g.status === 'Ongoing' ? "#3ddc84" : "#ff5c5c";
+                  return <stop key={`stroke-${i}`} offset={offset} stopColor={color} stopOpacity={1} />;
+                })}
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-            <XAxis dataKey="index" ticks={xTicks} stroke="#8a88a8" fontSize={11} fontFamily='"Space Mono", monospace' tickLine={false} axisLine={false} dy={15} tickFormatter={(val) => { const g = gamesTimeline[val]; const p = g?.month.split(' '); return p?.length === 2 ? `${p[0]} '${p[1].slice(-2)}` : g?.month; }} />
-            <YAxis stroke="#8a88a8" fontSize={11} fontFamily='"Space Mono", monospace' tickLine={false} axisLine={false} tickCount={5} tickFormatter={(v) => `${Math.round(v)}h`} dx={-10} width={45} domain={[0, 200]} />
+            
+            <XAxis 
+              dataKey="index" 
+              ticks={xTicks} 
+              stroke="#8a88a8" 
+              tickLine={false} 
+              axisLine={false} 
+              tickMargin={8}
+              dy={20} 
+              tick={{ fill: '#8a88a8', fontSize: 11, fontFamily: '"Space Mono", monospace' }}
+              tickFormatter={(val) => { const g = gamesTimeline[val]; const p = g?.month.split(' '); return p?.length === 2 ? `${p[0]} '${p[1].slice(-2)}` : g?.month; }} 
+            />
+            
+            <YAxis 
+              stroke="#8a88a8" 
+              tickLine={false} 
+              axisLine={false} 
+              tickCount={6} 
+              tickFormatter={(v) => `${Math.round(v)}h`} 
+              width={30} 
+              tickMargin={5}
+              domain={[0, 200]}
+              tick={{ angle: -90, textAnchor: 'middle', fill: '#8a88a8', fontSize: 11, fontFamily: '"Space Mono", monospace' }}
+            />
+            
             <Tooltip content={<Slide6Tooltip selectedNode={selectedNode} />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} isAnimationActive={false} />
-            <Area type="monotone" dataKey="hours" stroke="#e8c87a" strokeWidth={3} fill="rgba(232, 200, 122, 0.1)" isAnimationActive={false} dot={(props) => <Slide6StaticDot {...props} selectedNode={selectedNode} onSelect={setSelectedNode} />} />
+            
+            <Area 
+              type="monotone" 
+              dataKey="hours" 
+              stroke="url(#slide6GradientStroke)" 
+              strokeWidth={3} 
+              fill="url(#slide6GradientFill)" 
+              isAnimationActive={false} 
+              activeDot={false} 
+              dot={(props) => <Slide6StaticDot {...props} selectedNode={selectedNode} onSelect={setSelectedNode} />} 
+            />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -141,8 +215,8 @@ const Slide9TrailEndDot = (props) => {
   
   let ringColor = status === 'Completed' ? "#f5a623" : status === 'Ongoing' ? "#3ddc84" : "#ff5c5c";
 
-  const ringRadius = isSelected ? 31 : 18;
-  const imgRadius = isSelected ? 27 : 15;
+  const ringRadius = isSelected ? 31 : 12;
+  const imgRadius = isSelected ? 27 : 10;
   const imgSize = imgRadius * 2;
   
   return (
@@ -153,7 +227,7 @@ const Slide9TrailEndDot = (props) => {
         onSelect(); 
       }}
     >
-      <circle cx={cx} cy={cy} r={32} fill="transparent" style={{ outline: 'none' }} /> 
+      <circle cx={cx} cy={cy} r={isSelected ? 32 : 16} fill="transparent" style={{ outline: 'none' }} /> 
       <circle cx={cx} cy={cy} r={ringRadius} fill={ringColor} style={{ transition: 'r 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)', outline: 'none' }} />
       <clipPath id={clipId}><circle cx={cx} cy={cy} r={imgRadius} style={{ transition: 'r 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }} /></clipPath>
       <image x={cx - imgRadius} y={cy - imgRadius} width={imgSize} height={imgSize} href={imgSrc} clipPath={`url(#${clipId})`} preserveAspectRatio="xMidYMid slice" style={{ outline: 'none', transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }} />
@@ -166,6 +240,30 @@ const Slide9TrailEndDot = (props) => {
 const Slide9Wrapper = ({ streamProgressionLines, progressionDates, gamesTimeline }) => {
   const [selectedGame, setSelectedGame] = useState(null);
 
+  const xDomain = useMemo(() => {
+    const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+    let minDate, maxDate;
+
+    if (selectedGame) {
+      const gameLine = streamProgressionLines.find(l => l.gameName === selectedGame);
+      if (gameLine && gameLine.data.length > 0) {
+        const timestamps = gameLine.data.map(d => d.date).filter(Boolean);
+        if (timestamps.length) {
+          minDate = Math.min(...timestamps);
+          maxDate = Math.max(...timestamps);
+        }
+      }
+    }
+    
+    if (!minDate || !maxDate) {
+      if (!progressionDates || progressionDates.length === 0) return ['dataMin', 'dataMax'];
+      minDate = progressionDates[0];
+      maxDate = progressionDates[progressionDates.length - 1];
+    }
+
+    return [minDate - ONE_WEEK_MS, maxDate + ONE_WEEK_MS];
+  }, [selectedGame, streamProgressionLines, progressionDates]);
+
   const processedLines = useMemo(() => {
     return streamProgressionLines.map(line => {
       const isSelected = selectedGame === line.gameName;
@@ -177,6 +275,7 @@ const Slide9Wrapper = ({ streamProgressionLines, progressionDates, gamesTimeline
       
       const continuousData = [];
       let lastKnownHours = 0;
+      let lastKnownSecs = 0;
 
       progressionDates.forEach((date, idx) => {
         if (idx < minX || idx > maxX) return;
@@ -184,9 +283,10 @@ const Slide9Wrapper = ({ streamProgressionLines, progressionDates, gamesTimeline
         if (dataMap.has(idx)) {
           const point = dataMap.get(idx);
           lastKnownHours = point.cumulativeHours;
+          lastKnownSecs = point.rawSeconds;
           continuousData.push(point);
         } else {
-          continuousData.push({ xIndex: idx, cumulativeHours: lastKnownHours, date: date, gameName: line.gameName });
+          continuousData.push({ xIndex: idx, cumulativeHours: lastKnownHours, rawSeconds: lastKnownSecs, date: date, gameName: line.gameName });
         }
       });
 
@@ -201,28 +301,49 @@ const Slide9Wrapper = ({ streamProgressionLines, progressionDates, gamesTimeline
   };
 
   return (
-    <div className="slide-container justify-start bg-black/40 pt-10 pb-4 h-full outline-none" onClick={handleBackgroundClick}>
+    <div className="slide-container flex flex-col justify-start bg-black/40 pt-4 pb-2 px-4 h-full outline-none" onClick={handleBackgroundClick}>
       <style dangerouslySetInnerHTML={{ __html: `
-        .recharts-wrapper, .recharts-surface, .recharts-responsive-container, svg { outline: none !important; }
+        .recharts-wrapper, .recharts-surface, .recharts-responsive-container, svg { overflow: visible !important; outline: none !important; }
         .recharts-wrapper * { outline: none !important; }
+        .recharts-line-dots, .recharts-area-dots { clip-path: none !important; }
         *:focus { outline: none !important; }
       `}} />
-      <h3 className="text-sm sm:text-base font-bold text-white/50 uppercase tracking-widest mb-12 drop-shadow-md text-center pointer-events-none">Cumulative Session Progression</h3>
-      <div className="w-full h-56 sm:h-64 outline-none">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart margin={{ top: 20, right: 35, left: 10, bottom: 20 }}>
+      <h3 className="text-xs sm:text-sm font-bold text-white/50 uppercase tracking-widest mb-1 drop-shadow-md text-center pointer-events-none shrink-0">Cumulative Session Progression</h3>
+      <div className="w-full flex-1 min-h-0 outline-none overflow-visible">
+        <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
+          <LineChart margin={{ top: 35, right: 35, left: 10, bottom: 10 }} style={{ overflow: 'visible' }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+            
             <XAxis 
               type="number" 
-              dataKey="xIndex" 
-              domain={['dataMin', 'dataMax']} 
+              dataKey="date" 
+              scale="time"
+              domain={xDomain}
+              allowDataOverflow={true} 
               stroke="#8a88a8" 
-              fontSize={11} 
-              fontFamily='"Space Mono", monospace'
-              axisLine={false} tickLine={false} dy={15} 
-              tickFormatter={(val) => progressionDates?.[val] ? new Date(progressionDates[val]).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) : ''} 
+              axisLine={false} 
+              tickLine={false} 
+              tickMargin={8}
+              dy={20} 
+              tickCount={8}
+              minTickGap={20}
+              tick={{ fill: '#8a88a8', fontSize: 11, fontFamily: '"Space Mono", monospace' }}
+              tickFormatter={(val) => {
+                if (!val) return '';
+                const d = new Date(val);
+                return `${d.toLocaleDateString('en-US', { month: 'short' })} '${d.toLocaleDateString('en-US', { year: '2-digit' })}`;
+              }} 
             />
-            <YAxis stroke="#8a88a8" fontSize={11} fontFamily='"Space Mono", monospace' axisLine={false} tickLine={false} tickFormatter={(v) => `${v}h`} dx={-10} width={45} />
+            
+            <YAxis 
+              stroke="#8a88a8" 
+              axisLine={false} 
+              tickLine={false} 
+              tickFormatter={(v) => `${Math.round(v)}h`} 
+              width={30}
+              tickMargin={5}
+              tick={{ angle: -90, textAnchor: 'middle', fill: '#8a88a8', fontSize: 11, fontFamily: '"Space Mono", monospace' }}
+            />
             
             <Tooltip 
               content={<Slide9Tooltip selectedGame={selectedGame} />} 
@@ -236,15 +357,11 @@ const Slide9Wrapper = ({ streamProgressionLines, progressionDates, gamesTimeline
               const hasSelection = selectedGame !== null;
               const isDimmed = hasSelection && !isSelected;
               
-              // Cross-reference gamesTimeline to fetch thumbnail images and status colors reliably
               const gameInfo = gamesTimeline?.find(g => g.name === line.gameName);
               const imageUrl = line.image || gameInfo?.image;
               const gameStatus = line.status || gameInfo?.status;
 
               const tooltipHandling = isSelected ? "hover" : "none";
-              const activeDotHandling = isSelected 
-                ? { r: 5, fill: '#fff', strokeWidth: 0, style: { pointerEvents: 'none' } } 
-                : { r: 0, fill: 'transparent', opacity: 0, strokeWidth: 0 };
 
               return (
                 <Line 
@@ -252,11 +369,11 @@ const Slide9Wrapper = ({ streamProgressionLines, progressionDates, gamesTimeline
                   data={line.data}
                   type="monotone" 
                   dataKey="cumulativeHours" 
-                  stroke={line.color} 
-                  strokeWidth={isSelected ? 2.5 : 1.5}
+                  stroke={line.color}
+                  strokeWidth={isSelected ? 3 : 1.5}
                   strokeOpacity={isDimmed ? 0.1 : 1}
                   tooltipType={tooltipHandling}
-                  activeDot={activeDotHandling}
+                  activeDot={false}
                   dot={(props) => (
                     <Slide9TrailEndDot 
                       {...props} 
@@ -301,6 +418,6 @@ export const getCard3Slide = (index, data) => {
     );
     case 1: return <Slide6Wrapper gamesTimeline={gamesTimeline} />;
     case 2: return <Slide9Wrapper streamProgressionLines={streamProgressionLines} progressionDates={progressionDates} gamesTimeline={gamesTimeline} />;
-    default: return <div className="slide-container items-center justify-center bg-black/60"><span className="text-3xl font-bold text-[#e8c87a] uppercase tracking-widest drop-shadow-md">Placeholder</span></div>;
+    default: return <div className="slide-container flex items-center justify-center bg-black/60"><span className="text-3xl font-bold text-[#e8c87a] uppercase tracking-widest drop-shadow-md">Placeholder</span></div>;
   }
 };

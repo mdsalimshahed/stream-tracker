@@ -136,7 +136,7 @@ export default function Card3Slide1({ data }) {
               tickFormatter={(val) => { const g = gamesTimeline[val]; const p = g?.month.split(' '); return p?.length === 2 ? `${p[0]} '${p[1].slice(-2)}` : g?.month; }} 
             />
             <YAxis 
-            stroke="#8a88a8" tickLine={false} axisLine={true} tickCount={4} tickFormatter={(v) => v === 0 ? '' : `${Math.round(v)}h`} 
+            stroke="#8a88a8" tickLine={false} axisLine={true} tickCount={4} tickFormatter={(v) => v === 0 ? '' : `${Math.round(v)}h`} tickCount={3}
             width={30} tickMargin={5} domain={[0, yMax]} tick={{ angle: -90, textAnchor: 'middle', fill: '#8a88a8', fontSize: 11}}
             />
             <Tooltip content={<Slide6Tooltip selectedNode={selectedNode} />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} isAnimationActive={false} />

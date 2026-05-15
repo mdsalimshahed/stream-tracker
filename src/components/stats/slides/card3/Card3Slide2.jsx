@@ -2,9 +2,15 @@ import React, { useState, useMemo } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceDot } from 'recharts';
 import { formatFullTime } from '../SlideHelpers';
 
-const Slide9Tooltip = ({ active, payload }) => {
+const Slide9Tooltip = ({ active, payload, selectedGame }) => {
   if (!active || !payload || !payload.length) return null;
-  const data = payload[0].payload;
+  const originalData = payload[0].payload;
+
+  if (selectedGame && originalData.gameName !== selectedGame) return null;
+
+  // If no game is selected, we want the tooltip to snap/persist the data for the END dot 
+  // of whatever line the user is currently hovering closest to.
+  const data = (!selectedGame && originalData.endDotData) ? originalData.endDotData : originalData;
 
   const getOrdinal = (n) => {
     const s = ["th", "st", "nd", "rd"];
@@ -88,7 +94,13 @@ export default function Card3Slide2({ data }) {
 
       const endDot = continuousData[continuousData.length - 1];
 
-      return { ...line, data: continuousData, endDot, minX, maxX };
+      // Attach the endDot to every data point so the Tooltip can snap to it when unselected
+      const fullyPopulatedData = continuousData.map(d => ({
+        ...d,
+        endDotData: endDot
+      }));
+
+      return { ...line, data: fullyPopulatedData, endDot, minX, maxX };
     });
   }, [streamProgressionLines, progressionDates]);
 
@@ -133,7 +145,6 @@ export default function Card3Slide2({ data }) {
             <LineChart margin={{ top: 60, right: 35, left: 10, bottom: 10 }} style={{ overflow: 'visible' }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               
-              {/* Added allowDecimals={false} here for consistency */}
               <XAxis type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} height={30} tick={false} axisLine={true} tickLine={false} />
               <YAxis domain={[0, yMax]} width={45} tick={false} axisLine={true} tickLine={false} />
               
@@ -177,14 +188,13 @@ export default function Card3Slide2({ data }) {
                 Progression
               </text>
               
-              {/* Added allowDecimals={false} and the safety check inside tickFormatter */}
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               <XAxis 
                 type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} stroke="#8a88a8" axisLine={false} 
                 tickLine={false} tickMargin={8} height={30} tickCount={8} minTickGap={5}
                 tick={{ fill: '#8a88a8', fontSize: 11 }}
                 tickFormatter={(val) => {
-                  if (!Number.isInteger(val)) return ''; // Prevent fractional ticks
+                  if (!Number.isInteger(val)) return ''; 
                   if (val >= 0 && val < progressionDates.length) {
                     const ts = progressionDates[val];
                     if (!ts) return '';
@@ -201,7 +211,7 @@ export default function Card3Slide2({ data }) {
               />
               
               <Tooltip 
-                content={<Slide9Tooltip />} 
+                content={<Slide9Tooltip selectedGame={selectedGame} />} 
                 cursor={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 1 }} 
                 isAnimationActive={false} 
                 shared={false} 
@@ -215,13 +225,18 @@ export default function Card3Slide2({ data }) {
                 if (!selectedGame) {
                   return (
                     <Line 
-                      key={`fg-dot-${idx}`}
-                      data={[line.endDot]} 
+                      key={`fg-line-${idx}`} 
+                      data={line.data} 
                       type="monotone" 
                       dataKey="cumulativeHours" 
                       stroke="transparent" 
                       activeDot={false}
-                      dot={(props) => <Slide9TrailEndDot {...props} image={line.image || gameInfo?.image} status={line.status || gameInfo?.status} isSelected={false} onSelect={() => setSelectedGame(line.gameName)} />}
+                      dot={(props) => {
+                        if (props.index === line.data.length - 1) {
+                          return <Slide9TrailEndDot {...props} image={line.image || gameInfo?.image} status={line.status || gameInfo?.status} isSelected={false} onSelect={() => setSelectedGame(line.gameName)} />
+                        }
+                        return null;
+                      }}
                       isAnimationActive={false}
                     />
                   );

@@ -43,12 +43,12 @@ export default function Card2Slide1({ data }) {
           <AreaChart data={statusData} margin={{ top: 50, right: 20, left: -10, bottom: 5 }} style={{ overflow: 'visible' }}>
             
             <text 
-              x="50%" 
-              y={15} 
+              x="35%" 
+              y={30} 
               textAnchor="middle" 
               fill="rgba(255,255,255,0.5)" 
-              fontSize={14} 
-              fontWeight="bold" 
+              fontSize={16} 
+              fontWeight="regular" 
               letterSpacing={2} 
               className="uppercase pointer-events-none"
             >

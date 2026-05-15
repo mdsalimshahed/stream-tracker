@@ -1,16 +1,19 @@
 import React, { useMemo } from 'react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Label } from 'recharts';
 
 const FULL_DAYS = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
+    const count = data.realCount;
+    const dayFull = FULL_DAYS[data.displayDay] || data.displayDay;
+
     return (
-      <div className="bg-black/95 border border-white/20 p-3 rounded-lg text-xs font-mono text-white shadow-2xl z-50 pointer-events-none">
-        <div className="font-bold text-white/50 mb-1">{data.displayDay}</div>
+      <div className="bg-[#0a0a0a] border border-white/20 p-3 rounded-lg text-xs font-mono text-white shadow-2xl z-50">
+        <div className="font-bold text-white/50 mb-1">{dayFull}</div>
         <div className="flex items-center gap-2 text-[#fa6ca0] font-bold">
-          {data.realCount} {data.realCount === 1 ? 'stream' : 'streams'}
+          {count} stream{count !== 1 ? 's' : ''}
         </div>
       </div>
     );
@@ -21,92 +24,83 @@ const CustomTooltip = ({ active, payload }) => {
 export default function Card2Slide2({ data }) {
   const { dowStreamData } = data;
 
-  const { processedData, yAxisConfig } = useMemo(() => {
-    // Fallback for empty data
-    if (!dowStreamData || dowStreamData.length === 0) {
-      return { processedData: [], yAxisConfig: { ticks: [0, 10], domain: [0, 10], formatTick: v => v === 0 ? '' : v } };
+  const orderedDowData = useMemo(() => {
+    if (!dowStreamData || dowStreamData.length === 0) return [];
+    const dayOrder = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return [...dowStreamData].sort((a, b) => dayOrder.indexOf(a.displayDay) - dayOrder.indexOf(b.displayDay));
+  }, [dowStreamData]);
+
+  const { processedData, domainMax, validTicks, tickMap } = useMemo(() => {
+    if (!orderedDowData || orderedDowData.length === 0) {
+      return { processedData: [], domainMax: 10, validTicks: [10], tickMap: {} };
     }
     
-    const counts = dowStreamData.map(d => d.count);
+    const counts = orderedDowData.map(d => d.count);
     const nonZeroCounts = counts.filter(c => c > 0);
     const minCount = nonZeroCounts.length > 0 ? Math.min(...nonZeroCounts) : 0;
-    const maxCount = Math.max(...counts);
+    const maxCount = Math.max(...counts, 0);
 
-    // If counts are very small, just use standard scaling
-    if (minCount <= 5 || maxCount === 0 || (maxCount - minCount <= 2)) {
-      const step = maxCount < 50 ? 10 : 50;
-      const yMax = Math.max(step, Math.ceil(maxCount / step) * step);
+    let step = 10;
+    if (maxCount > 80) step = 20;
+
+    const roundedMin = Math.floor(minCount / 10) * 10;
+
+    if (roundedMin === 0 || maxCount < 10 || maxCount - roundedMin <= 5) {
       const ticks = [];
-      for (let i = 0; i <= yMax; i += step) ticks.push(i);
+      for (let i = step; i <= maxCount + step; i += step) ticks.push(i);
       
       return {
-        processedData: dowStreamData.map(d => ({ ...d, fakeCount: d.count, realCount: d.count })),
-        yAxisConfig: { ticks, domain: [0, yMax], formatTick: v => v === 0 ? '' : v }
+        processedData: orderedDowData.map(d => ({ ...d, fakeCount: d.count, realCount: d.count })),
+        domainMax: maxCount === 0 ? 10 : maxCount,
+        validTicks: ticks, // Automatically contains no 0 values
+        tickMap: {}
       };
     }
 
-    // Broken axis scaling for large numbers with small variance
-    const diff = maxCount - minCount;
-    const step = Math.max(1, Math.ceil(diff / 4));
-    const base = Math.max(0, minCount - step);
-
-    const ticks = [0];
-    const tickMap = { 0: 0 };
+    const VISUAL_GAP = step; 
+    // Stripped out '0' position value entirely to cleanly hide zero metric mapping
+    const ticks = [VISUAL_GAP];
+    const mapping = { [VISUAL_GAP]: roundedMin };
     
-    let currentFake = step;
-    let currentReal = base;
+    let currentReal = roundedMin + step;
+    let currentFake = VISUAL_GAP + step;
     
     while (currentReal <= maxCount + step) {
       ticks.push(currentFake);
-      tickMap[currentFake] = currentReal;
-      currentFake += step;
+      mapping[currentFake] = currentReal;
       currentReal += step;
+      currentFake += step;
     }
 
-    const processed = dowStreamData.map(d => {
-      let fakeCount = 0;
-      if (d.count > 0) {
-        fakeCount = d.count - base + step; // Map the real count to the fake axis scale
+    const processed = orderedDowData.map(d => {
+      let visualValue = 0;
+      if (d.count >= roundedMin) {
+        visualValue = VISUAL_GAP + (d.count - roundedMin);
+      } else if (d.count > 0) {
+        visualValue = (d.count / roundedMin) * VISUAL_GAP;
       }
       return {
         ...d,
-        fakeCount,         
+        fakeCount: visualValue,
         realCount: d.count 
       };
     });
 
+    const maxVisualValue = Math.max(...processed.map(d => d.fakeCount));
+
     return {
       processedData: processed,
-      yAxisConfig: {
-        ticks,
-        domain: [0, ticks[ticks.length - 1]],
-        formatTick: v => {
-          const real = tickMap[v] !== undefined ? tickMap[v] : v;
-          return real === 0 ? '' : real;
-        }
-      }
+      domainMax: maxVisualValue === 0 ? 10 : maxVisualValue,
+      validTicks: ticks.filter(t => t <= maxVisualValue), 
+      tickMap: mapping
     };
-  }, [dowStreamData]);
-
-  const dynamicTitle = useMemo(() => {
-    if (!processedData || processedData.length === 0) return 'No streams recorded yet';
-    const max = processedData.reduce((prev, curr) => (prev.realCount > curr.realCount) ? prev : curr, processedData[0]);
-    if (!max || max.realCount === 0) return 'No streams recorded yet';
-    
-    const fullDayName = FULL_DAYS[max.displayDay] || max.displayDay;
-    return `${max.realCount} ${max.realCount === 1 ? 'stream' : 'streams'} were done on ${fullDayName}`;
-  }, [processedData]);
+  }, [orderedDowData]);
 
   return (
-    <div className="slide-container flex flex-col justify-center bg-black/40 p-4 h-full outline-none">
-      <style dangerouslySetInnerHTML={{ __html: `
-        .recharts-wrapper, .recharts-surface, .recharts-responsive-container, svg { overflow: visible !important; outline: none !important; }
-        .recharts-wrapper * { outline: none !important; }
-        *:focus { outline: none !important; }
-      `}} />
-      <div className="w-full flex-1 min-h-0 outline-none overflow-visible relative">
-        <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <AreaChart data={processedData} margin={{ top: 50, right: 10, left: -20, bottom: 0 }} style={{ overflow: 'visible' }}>
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
+      <div className="w-full h-full flex-1 outline-none relative">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={processedData} margin={{ top: 25, right: 20, left: 15, bottom: 15 }}>
             <defs>
               <linearGradient id="colorDow" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#fa6ca0" stopOpacity={0.6}/>
@@ -114,30 +108,38 @@ export default function Card2Slide2({ data }) {
               </linearGradient>
             </defs>
 
-            <text x="50%" y="20" textAnchor="middle" fill="#8a88a8" fontSize={11} fontWeight="bold" letterSpacing={1} className="uppercase">
-              {dynamicTitle}
-            </text>
-
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+            
             <XAxis 
               dataKey="displayDay" 
               stroke="#8a88a8" 
               tickLine={false} 
               axisLine={false} 
               tick={{ fontSize: 10, fill: '#8a88a8' }}
-            />
+              tickMargin={10}
+              height={35}
+            >
+              <Label value="Day of Week" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
+            </XAxis>
+
             <YAxis 
               stroke="#8a88a8" 
               tickLine={false} 
               axisLine={false} 
-              tick={{ fontSize: 10, fill: '#8a88a8' }}
-              allowDecimals={false}
-              width={40}
-              domain={yAxisConfig.domain}
-              ticks={yAxisConfig.ticks}
-              tickFormatter={yAxisConfig.formatTick}
-            />
-            <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} isAnimationActive={false} />
+              tick={{ fontSize: 10, fill: '#8a88a8', angle: -90, textAnchor: 'middle', dx: -10 }}
+              allowDecimals={false} 
+              width={45}
+              domain={[0, domainMax]} 
+              ticks={validTicks}
+              tickFormatter={(v) => {
+                const real = tickMap[v];
+                return real !== undefined ? real : ''; 
+              }}
+            >
+              <Label value="Stream Count" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
+            </YAxis>
+
+            <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} />
             
             <Area 
               type="monotone" 
@@ -146,9 +148,8 @@ export default function Card2Slide2({ data }) {
               strokeWidth={3} 
               fillOpacity={1} 
               fill="url(#colorDow)" 
-              dot={{ r: 2, fill: '#fa6ca0', strokeWidth: 0 }} 
+              dot={{ r: 3, fill: '#fa6ca0', strokeWidth: 0 }} 
               activeDot={{ r: 6, fill: '#fff', stroke: '#fa6ca0', strokeWidth: 2 }} 
-              isAnimationActive={false} 
             />
           </AreaChart>
         </ResponsiveContainer>

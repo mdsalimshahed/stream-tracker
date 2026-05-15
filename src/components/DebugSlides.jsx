@@ -9,7 +9,7 @@ import { getCard2Slide } from './stats/slides/Card2Slides';
 import { getCard3Slide } from './stats/slides/Card3Slides';
 
 export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
-  // ─── Base game list (Mirrored from Stats.jsx) ─────────────────────────────
+  // ─── Base game list ────────────────────────────────────────────────────────
   const games = useMemo(() =>
     Object.entries(streamData).map(([id, data]) => {
       const cycles = data.cycles || {};
@@ -117,7 +117,6 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
 
     allStreamsExact.sort((a, b) => a.startMs - b.startMs);
 
-    // Merge overlapping/continuous streams for exact break calculation
     const mergedStreams = [];
     allStreamsExact.forEach(s => {
       if (mergedStreams.length === 0) {
@@ -132,11 +131,10 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
       }
     });
 
-    // Calculate Breaks (in exact seconds)
     let maxBreakSecs = 0;
     let maxBreakStartMs = null;
     let maxBreakEndMs = null;
-    let isActiveBreak = false; // FLAG FOR LIVE TICKING
+    let isActiveBreak = false;
 
     for (let i = 1; i < mergedStreams.length; i++) {
       const brkStart = mergedStreams[i-1].endMs;
@@ -150,7 +148,6 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
       }
     }
 
-    // Evaluate active break up to current moment
     const nowMs = Date.now();
     if (mergedStreams.length > 0) {
       const lastEndMs = mergedStreams[mergedStreams.length - 1].endMs;
@@ -160,12 +157,11 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
           maxBreakSecs = activeBreakSecs;
           maxBreakStartMs = lastEndMs;
           maxBreakEndMs = nowMs;
-          isActiveBreak = true; // The longest break is right now!
+          isActiveBreak = true;
         }
       }
     }
 
-    // Build timeline for Daily Hours Graph & Calendar Streaks
     const dailyMap = new Map();
     const getMidnight = (ms) => {
       const d = new Date(ms);
@@ -194,7 +190,6 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
 
     const sortedDays = Array.from(dailyMap.keys()).sort((a, b) => a - b);
     
-    // Fill gaps to today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayMs = today.getTime();
@@ -222,7 +217,6 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
       }
     }
 
-    // Calculate Streaks (Consecutive Days -> Exact Seconds mapped)
     const streaks = [];
     let currentStreakDaysList = [];
 
@@ -271,9 +265,59 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
         longestBreakSecs: maxBreakSecs,
         maxBreakStartMs,
         maxBreakEndMs,
-        isActiveBreak // Exposing the flag
+        isActiveBreak
       }
     };
+  }, [games]);
+
+  // ─── Individual Streams Chronological & Extremes ────────
+  const { allStreamsChronological, longestStream, shortestStream } = useMemo(() => {
+    let streams = [];
+    games.forEach(g => {
+      Object.values(g.cycles || {}).forEach(c => {
+        // Evaluate the run name (e.g., 'NG+', 'First Playthrough')
+        let runName = c.displayName || (c.id === 'main' ? 'First Playthrough' : (c.id || '').replace(/_/g, ' '));
+
+        (c.timestamps || []).forEach((ts, idx) => {
+          const startMs = parseCustomTimestamp(ts).getTime();
+          if (startMs > 0 && ts.duration > 0) {
+            
+            // Generate the base title
+            let baseTitle = ts.title || `${g.game_name} - Stream #${idx + 1}`;
+            
+            // Conditionally append the run name if it's NOT First Playthrough
+            let finalTitle = (runName && runName !== 'First Playthrough') 
+              ? `${baseTitle} (${runName})` 
+              : baseTitle;
+
+            streams.push({
+              startMs,
+              duration: ts.duration,
+              gameName: g.game_name,
+              status: g.latestRunLabel, 
+              cycleName: runName,
+              streamTitle: finalTitle, // <-- Slides 13, 14, and 15 will now receive this perfectly updated title!
+              thumbnails: g.thumbnail_urls || [],
+              displayDate: getTsDateStr(ts),
+              hours: parseFloat((ts.duration / 3600).toFixed(2))
+            });
+          }
+        });
+      });
+    });
+
+    streams.sort((a, b) => a.startMs - b.startMs);
+    const chrono = streams.map((s, i) => ({ ...s, index: i + 1 }));
+
+    let longest = null;
+    let shortest = null;
+    
+    if (chrono.length > 0) {
+      longest = chrono.reduce((prev, curr) => curr.duration > prev.duration ? curr : prev, chrono[0]);
+      shortest = chrono.reduce((prev, curr) => curr.duration < prev.duration ? curr : prev, chrono[0]);
+    }
+
+    return { allStreamsChronological: chrono, longestStream: longest, shortestStream: shortest };
   }, [games]);
 
   const statusData = useMemo(() => {
@@ -377,7 +421,8 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     hourlyStreamData,
     longestStreakSecs: streakBreakStats.longestStreakSecs,
     maxStreakStartMs: streakBreakStats.maxStreakStartMs,
-    maxStreakEndMs: streakBreakStats.maxStreakEndMs
+    maxStreakEndMs: streakBreakStats.maxStreakEndMs,
+    latestBgImage
   };
   
   const data2 = { 
@@ -388,7 +433,8 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     longestBreakSecs: streakBreakStats.longestBreakSecs,
     maxBreakStartMs: streakBreakStats.maxBreakStartMs,
     maxBreakEndMs: streakBreakStats.maxBreakEndMs,
-    isActiveBreak: streakBreakStats.isActiveBreak // Pass it to Slide 11
+    isActiveBreak: streakBreakStats.isActiveBreak,
+    latestBgImage
   };
   
   const data3 = { 
@@ -399,6 +445,13 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     streamProgressionLines, 
     progressionDates,
     dailyStreamHours
+  };
+
+  const data4 = {
+    longestStream,
+    shortestStream,
+    allStreamsChronological,
+    highResImages: layoutPrefs?.highResImages
   };
 
   return (
@@ -421,7 +474,7 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
       <div className="stats-scroll custom-scrollbar" style={{ overflowY: 'auto', display: 'block' }}>
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 text-white tracking-tight">Slide Debug Panel</h1>
-          <p className="text-white/60">Previewing Slide 3, Slide 6, Slide 9, and Slide 12 with synced data logic.</p>
+          <p className="text-white/60">Previewing Slide 3, Slide 6, Slide 9, Slide 12, and Slide 15.</p>
         </div>
 
         {[0, 1, 2, 3, 4, 5].map(i => (
@@ -429,11 +482,23 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
             <h2 className="text-xl font-bold text-[#e8c87a] mb-4">Slide Trio {i + 1}</h2>
             <div className="stats-top-row shadow-2xl" style={{ height: '350px', flex: 'none' }}>
               <div className="stats-left-col">
-                <div className="card-wrapper-left relative"><div className="stat-card">{getCard1Slide(i, data1)}</div></div>
+                <div className="card-wrapper-left relative">
+                  <div className="stat-card">
+                    {i === 4 ? getCard1Slide(4, data4) : getCard1Slide(i, data1)}
+                  </div>
+                </div>
                 <div className="stats-progress-track"><div className="stats-progress-fill" style={{ width: '100%', opacity: 0.5 }} /></div>
-                <div className="card-wrapper-left relative"><div className="stat-card">{getCard2Slide(i, data2)}</div></div>
+                <div className="card-wrapper-left relative">
+                  <div className="stat-card">
+                    {i === 4 ? getCard2Slide(4, data4) : getCard2Slide(i, data2)}
+                  </div>
+                </div>
               </div>
-              <div className="card-wrapper-right relative group"><div className="stats-right-col">{getCard3Slide(i, data3)}</div></div>
+              <div className="card-wrapper-right relative group">
+                <div className="stats-right-col">
+                  {i === 4 ? getCard3Slide(4, data4) : getCard3Slide(i, data3)}
+                </div>
+              </div>
             </div>
           </div>
         ))}

@@ -4,26 +4,24 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGri
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
-    const hours = data.hours;
-    let color = '#ff5c5c'; 
-    if (hours > 0 && hours <= data.midThreshold) color = '#f5a623'; 
-    if (hours > data.midThreshold) color = '#3ddc84'; 
+    
+    let color = '#3ddc84'; 
+    if (data.status === 'Completed') color = '#f5a623'; 
+    if (data.status === 'Abandoned') color = '#ff5c5c'; 
 
-    const h = Math.floor(data.rawSeconds / 3600);
-    const m = Math.floor((data.rawSeconds % 3600) / 60);
-    const s = Math.floor(data.rawSeconds % 60);
+    const h = Math.floor(data.duration / 3600);
+    const m = Math.floor((data.duration % 3600) / 60);
+    const s = Math.floor(data.duration % 60);
     
     let timeStr = [];
     if (h > 0) timeStr.push(`${h} hour${h !== 1 ? 's' : ''}`);
     if (m > 0 || h > 0) timeStr.push(`${m} minute${m !== 1 ? 's' : ''}`);
     timeStr.push(`${s} second${s !== 1 ? 's' : ''}`);
 
-    const d = new Date(data.dateMs);
-    const fullDate = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-
     return (
       <div className="bg-[#0a0a0a] border border-white/20 p-3 rounded-lg text-xs font-mono text-white shadow-2xl z-50 pointer-events-none">
-        <div className="font-bold text-white/50 mb-1">{fullDate}</div>
+        <div className="font-bold text-white/50 mb-1">{data.streamTitle}</div>
+        <div className="text-white/40 mb-2" style={{ fontSize: '10px' }}>{data.displayDate}</div>
         <div className="flex items-center gap-2 font-bold" style={{ color }}>
           {timeStr.join(' ')}
         </div>
@@ -34,29 +32,26 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 // Permanent tooltip structurally identical to the hover tooltip, zero-gap snapped to cx/cy
-const PermanentMaxTooltip = (props) => {
+const PermanentMaxTooltipChronological = (props) => {
   const { cx, cy, maxData } = props;
   if (cx === undefined || cy === undefined || !maxData) return null;
 
-  const h = Math.floor(maxData.rawSeconds / 3600);
-  const m = Math.floor((maxData.rawSeconds % 3600) / 60);
-  const s = Math.floor(maxData.rawSeconds % 60);
+  let color = '#3ddc84'; 
+  if (maxData.status === 'Completed') color = '#f5a623'; 
+  if (maxData.status === 'Abandoned') color = '#ff5c5c'; 
+
+  const h = Math.floor(maxData.duration / 3600);
+  const m = Math.floor((maxData.duration % 3600) / 60);
+  const s = Math.floor(maxData.duration % 60);
   
   let timeStr = [];
   if (h > 0) timeStr.push(`${h} hour${h !== 1 ? 's' : ''}`);
   if (m > 0 || h > 0) timeStr.push(`${m} minute${m !== 1 ? 's' : ''}`);
   timeStr.push(`${s} second${s !== 1 ? 's' : ''}`);
 
-  const d = new Date(maxData.dateMs);
-  const fullDate = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-
-  let color = '#ff5c5c'; 
-  if (maxData.hours > 0 && maxData.hours <= maxData.midThreshold) color = '#f5a623'; 
-  if (maxData.hours > maxData.midThreshold) color = '#3ddc84';
-
   return (
     <g transform={`translate(${cx}, ${cy})`}>
-      <foreignObject x="-150" y="-100" width="300" height="100" className="overflow-visible pointer-events-none">
+      <foreignObject x="-150" y="-120" width="300" height="120" className="overflow-visible pointer-events-none">
         <div className="w-full h-full flex flex-col justify-end items-center pb-[6px]">
           <div className="relative bg-[#0a0a0a] border border-white/20 p-3 rounded-lg text-xs font-mono text-white shadow-2xl text-center w-max max-w-[280px]">
             
@@ -65,7 +60,8 @@ const PermanentMaxTooltip = (props) => {
             
             {/* Wrapper z-10 ensures the text layer sits above the triangle */}
             <div className="relative z-10 flex flex-col items-center">
-              <div className="font-bold text-white/50 mb-1">{fullDate}</div>
+              <div className="font-bold text-white mb-1 truncate w-full max-w-[250px]" style={{ fontSize: '11px' }}>{maxData.streamTitle}</div>
+              <div className="text-white/40 mb-2" style={{ fontSize: '10px' }}>{maxData.displayDate}</div>
               <div className="flex items-center gap-2 font-bold" style={{ color }}>
                 {timeStr.join(' ')}
               </div>
@@ -80,20 +76,12 @@ const PermanentMaxTooltip = (props) => {
   );
 };
 
-export default function Card3Slide3({ data }) {
-  const { dailyStreamHours } = data;
-
-  const processedData = useMemo(() => {
-    if (!dailyStreamHours || dailyStreamHours.length === 0) return [];
-    const maxHours = Math.max(...dailyStreamHours.map(d => d.hours), 0);
-    const midThreshold = maxHours / 2;
-
-    return dailyStreamHours.map(d => ({ ...d, midThreshold }));
-  }, [dailyStreamHours]);
+export default function Card3Slide4({ data }) {
+  const { allStreamsChronological } = data;
 
   const yAxisConfig = useMemo(() => {
-    if (!dailyStreamHours || dailyStreamHours.length === 0) return { ticks: [0, 5], domain: [0, 5] };
-    const maxHours = Math.max(...dailyStreamHours.map(d => d.hours), 0);
+    if (!allStreamsChronological || allStreamsChronological.length === 0) return { ticks: [0, 5], domain: [0, 5] };
+    const maxHours = Math.max(...allStreamsChronological.map(d => d.hours), 0);
     
     let step = 1;
     if (maxHours > 10) step = 5;
@@ -103,12 +91,12 @@ export default function Card3Slide3({ data }) {
     const ticks = [];
     for (let i = 0; i <= yMax; i += step) { ticks.push(i); }
     return { ticks, domain: [0, yMax] };
-  }, [dailyStreamHours]);
+  }, [allStreamsChronological]);
 
   const maxPointData = useMemo(() => {
-    if (!processedData || processedData.length === 0) return null;
-    return processedData.reduce((prev, curr) => (prev.rawSeconds > curr.rawSeconds) ? prev : curr, processedData[0]);
-  }, [processedData]);
+    if (!allStreamsChronological || allStreamsChronological.length === 0) return null;
+    return allStreamsChronological.reduce((prev, curr) => (prev.duration > curr.duration) ? prev : curr, allStreamsChronological[0]);
+  }, [allStreamsChronological]);
 
   return (
     <div className="slide-container flex flex-col justify-center bg-black/40 p-4 h-full outline-none">
@@ -119,15 +107,13 @@ export default function Card3Slide3({ data }) {
       `}} />
       <div className="w-full flex-1 min-h-0 outline-none overflow-visible relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <BarChart data={processedData} margin={{ top: 80, right: 10, left: -20, bottom: 0 }} style={{ overflow: 'visible' }}>
+          <BarChart data={allStreamsChronological} margin={{ top: 85, right: 10, left: -20, bottom: 0 }} style={{ overflow: 'visible' }}>
+            
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             
             <XAxis 
-              dataKey="dateMs" stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 9, fill: '#8a88a8' }}
-              minTickGap={40} tickFormatter={(val) => {
-                const d = new Date(val);
-                return `${d.toLocaleString('en-US', { month: 'short' })} '${d.toLocaleString('en-US', { year: '2-digit' })}`;
-              }}
+              dataKey="index" stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 9, fill: '#8a88a8' }}
+              minTickGap={40} tickFormatter={(val) => `#${val}`}
             />
             <YAxis 
               stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8' }}
@@ -137,17 +123,17 @@ export default function Card3Slide3({ data }) {
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} isAnimationActive={false} />
             
             <Bar dataKey="hours" radius={[2, 2, 0, 0]} isAnimationActive={false} minPointSize={2}>
-              {processedData?.map((entry, index) => {
-                let fill = '#ff5c5c'; 
-                if (entry.hours > 0 && entry.hours <= entry.midThreshold) fill = '#f5a623'; 
-                if (entry.hours > entry.midThreshold) fill = '#3ddc84'; 
+              {allStreamsChronological?.map((entry, index) => {
+                let fill = '#3ddc84'; 
+                if (entry.status === 'Completed') fill = '#f5a623'; 
+                if (entry.status === 'Abandoned') fill = '#ff5c5c'; 
                 return <Cell key={`cell-${index}`} fill={fill} />;
               })}
             </Bar>
 
             {/* Permanent Tooltip anchored exactly to the top of the maximum bar */}
-            {maxPointData && maxPointData.rawSeconds > 0 && (
-              <ReferenceDot x={maxPointData.dateMs} y={maxPointData.hours} isFront={true} r={0} shape={<PermanentMaxTooltip maxData={maxPointData} />} />
+            {maxPointData && maxPointData.duration > 0 && (
+              <ReferenceDot x={maxPointData.index} y={maxPointData.hours} isFront={true} r={0} shape={<PermanentMaxTooltipChronological maxData={maxPointData} />} />
             )}
           </BarChart>
         </ResponsiveContainer>

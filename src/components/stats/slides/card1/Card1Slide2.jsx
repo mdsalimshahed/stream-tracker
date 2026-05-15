@@ -7,7 +7,7 @@ const CustomTooltip = ({ active, payload }) => {
       <div className="bg-black/95 border border-white/20 p-3 rounded-lg text-xs font-mono text-white shadow-2xl z-50 pointer-events-none">
         <div className="font-bold text-white/50 mb-1">{payload[0].payload.displayHour}</div>
         <div className="flex items-center gap-2 text-[#e8c87a] font-bold">
-          {payload[0].payload.count} {payload[0].payload.count === 1 ? 'stream' : 'streams'} started
+          {payload[0].payload.count} {payload[0].payload.count === 1 ? 'stream' : 'streams'}
         </div>
       </div>
     );

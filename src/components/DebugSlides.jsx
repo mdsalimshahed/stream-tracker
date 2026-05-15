@@ -57,12 +57,13 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     const sums = { Completed: 0, Ongoing: 0, Abandoned: 0 };
     games.forEach(g => {
       const label = g.latestRunLabel || 'Ongoing';
-      sums[label] = (sums[label] || 0) + g.totalDuration / 3600;
+      // Keep it in raw seconds here instead of dividing by 3600
+      sums[label] = (sums[label] || 0) + g.totalDuration;
     });
     return [
-      { name: 'Ongoing',   hours: parseFloat((sums.Ongoing   || 0).toFixed(1)), color: '#3ddc84' },
-      { name: 'Completed', hours: parseFloat((sums.Completed || 0).toFixed(1)), color: '#f5a623' },
-      { name: 'Abandoned', hours: parseFloat((sums.Abandoned || 0).toFixed(1)), color: '#ff5c5c' },
+      { name: 'Ongoing',   rawSeconds: sums.Ongoing,   hours: parseFloat((sums.Ongoing / 3600).toFixed(1)), color: '#3ddc84' },
+      { name: 'Completed', rawSeconds: sums.Completed, hours: parseFloat((sums.Completed / 3600).toFixed(1)), color: '#f5a623' },
+      { name: 'Abandoned', rawSeconds: sums.Abandoned, hours: parseFloat((sums.Abandoned / 3600).toFixed(1)), color: '#ff5c5c' },
     ];
   }, [games]);
 

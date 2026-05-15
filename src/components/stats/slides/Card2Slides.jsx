@@ -2,11 +2,13 @@ import React from 'react';
 import { renderPlaceholder } from './SlideHelpers';
 import Card2Slide0 from './card2/Card2Slide0';
 import Card2Slide1 from './card2/Card2Slide1';
+import Card2Slide2 from './card2/Card2Slide2';
 
 export const getCard2Slide = (index, data) => {
   switch (index) {
     case 0: return <Card2Slide0 data={data} />;
     case 1: return <Card2Slide1 data={data} />;
+    case 2: return <Card2Slide2 data={data} />;
     default: return renderPlaceholder(index * 3 + 2);
   }
 };

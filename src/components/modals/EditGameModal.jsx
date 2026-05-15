@@ -1,4 +1,3 @@
-// src/components/modals/EditGameModal.jsx
 import React, { useState } from 'react';
 import { X, Save } from 'lucide-react';
 
@@ -15,14 +14,25 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
 
   const handleSubmit = () => {
     if (!name.trim()) return;
+
+    // Helper to convert line-by-line pasted text into a comma-separated string
+    const formatList = (val) => {
+      if (!val) return '';
+      return val
+        .split(/\r?\n/)          // Split by any newlines
+        .map(s => s.trim())      // Remove extra spaces from each line
+        .filter(Boolean)         // Remove empty lines
+        .join(', ');             // Join back with commas
+    };
+
     onSave(
       game.id, 
       name.trim(), 
       year.trim(), 
       developer.trim(), 
       publisher.trim(), 
-      genres.trim(), 
-      tags.trim(), 
+      formatList(genres), 
+      formatList(tags), 
       steamIdInput.trim(),
       steamUrl.trim(),
       notOnSteam
@@ -98,11 +108,11 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
 
             <div className="sm:col-span-2">
               <label className="text-sm font-semibold text-white/50 uppercase tracking-wider block mb-1.5 ml-1">Genres</label>
-              <input
-                type="text"
+              <textarea
                 value={genres}
+                rows={2}
                 onChange={e => setGenres(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 text-white transition-colors"
+                className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 text-white transition-colors custom-scrollbar"
                 placeholder="e.g., Action, RPG"
               />
             </div>
@@ -111,7 +121,7 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
               <label className="text-sm font-semibold text-white/50 uppercase tracking-wider block mb-1.5 ml-1">Tags</label>
               <textarea
                 value={tags}
-                rows={2}
+                rows={3}
                 onChange={e => setTags(e.target.value)}
                 className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 text-white transition-colors custom-scrollbar"
                 placeholder="e.g., Singleplayer, Dark Fantasy, Souls-like"

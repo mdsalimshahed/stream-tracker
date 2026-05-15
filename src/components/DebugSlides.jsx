@@ -1,4 +1,3 @@
-// src/components/DebugSlides.jsx
 import React, { useMemo } from 'react';
 import { getLatestRunWithTimestamp } from './stats/utils';
 import { getLowResUrl, getTsDateStr, parseCustomTimestamp } from '../utils/helpers';
@@ -53,6 +52,54 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
   const totalGames = games.length;
   const totalDurationOverall = useMemo(() => games.reduce((acc, g) => acc + g.totalDuration, 0), [games]);
 
+  // Count the total number of streams started at each hour (0-23)
+  const hourlyStreamData = useMemo(() => {
+    const hours = Array.from({length: 24}, (_, i) => ({ 
+      hour: i, 
+      displayHour: i === 0 ? '12AM' : i < 12 ? `${i}AM` : i === 12 ? '12PM' : `${i-12}PM`,
+      count: 0 
+    }));
+    
+    games.forEach(g => {
+      Object.values(g.cycles || {}).forEach(c => {
+        (c.timestamps || []).forEach(ts => {
+          const d = parseCustomTimestamp(ts);
+          if (d.getTime() > 0) {
+            const hr = d.getHours();
+            hours[hr].count += 1;
+          }
+        });
+      });
+    });
+    return hours;
+  }, [games]);
+
+  // Count streams by Day of the Week (Mon - Sun)
+  const dowStreamData = useMemo(() => {
+    const displayDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    // JavaScript getDay() returns 0 for Sunday, 1 for Monday. Shift it to make Mon=0, Sun=6
+    const mapDay = (d) => d === 0 ? 6 : d - 1; 
+
+    const dow = Array.from({length: 7}, (_, i) => ({
+      dayIndex: i,
+      displayDay: displayDays[i],
+      count: 0
+    }));
+
+    games.forEach(g => {
+      Object.values(g.cycles || {}).forEach(c => {
+        (c.timestamps || []).forEach(ts => {
+          const d = parseCustomTimestamp(ts);
+          if (d.getTime() > 0) {
+            const day = mapDay(d.getDay());
+            dow[day].count += 1;
+          }
+        });
+      });
+    });
+    return dow;
+  }, [games]);
+
   const statusData = useMemo(() => {
     const sums = { Completed: 0, Ongoing: 0, Abandoned: 0 };
     games.forEach(g => {
@@ -83,7 +130,7 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     return games
       .filter(g => g.totalDuration > 0)
       .map(g => {
-        let cumSecs = 0; // Tracking raw seconds to prevent precision loss
+        let cumSecs = 0; 
         const allStreams = [];
         
         Object.values(g.cycles || {}).forEach(c => {
@@ -100,7 +147,7 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
           return {
             xIndex: dateToIndex.get(ts.date),
             cumulativeHours: parseFloat((cumSecs / 3600).toFixed(2)),
-            rawSeconds: cumSecs, // Passed for accurate tooltip formatting
+            rawSeconds: cumSecs,
             date: ts.date,
             gameName: g.game_name
           };
@@ -151,8 +198,21 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
   const heroThumb = mostRecentGame?.thumbnail_urls?.[0] || '';
   const latestBgImage = getLowResUrl(heroThumb, layoutPrefs?.highResImages);
 
-  const data1 = { totalStreamsCount: totalStreams, totalStreams, totalDuration: totalDurationOverall };
-  const data2 = { totalGamesCount: totalGames, totalGames, statusData };
+  const data1 = { 
+    totalStreamsCount: totalStreams, 
+    totalStreams, 
+    totalDuration: totalDurationOverall,
+    hourlyStreamData
+  };
+  
+  // Passed dowStreamData to data2!
+  const data2 = { 
+    totalGamesCount: totalGames, 
+    totalGames, 
+    statusData,
+    dowStreamData
+  };
+  
   const data3 = { latestBgImage, mostRecentGame, timeSinceLastStream, gamesTimeline, streamProgressionLines, progressionDates };
 
   return (

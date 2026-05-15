@@ -109,6 +109,25 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   const totalGames  = games.length;
   const totalDurationOverall = useMemo(() => games.reduce((acc, g) => acc + g.totalDuration, 0), [games]);
 
+  const longestSpanningGame = useMemo(() => {
+    let maxSpan = 0;
+    let longest = null;
+    games.forEach(g => {
+      if (g.firstStreamTimestampMs && g.lastStreamTimestampMs) {
+        const span = g.lastStreamTimestampMs - g.firstStreamTimestampMs;
+        if (span >= maxSpan) {
+          maxSpan = span;
+          longest = g;
+        }
+      }
+    });
+    if (longest) {
+      const days = Math.max(1, Math.round(maxSpan / 86400000));
+      return { ...longest, spanDays: days };
+    }
+    return null;
+  }, [games]);
+
   // ─── Card 2 data ───────────────────────────────────────────────────────────
   const statusData = useMemo(() => {
     const sums = { Completed: 0, Ongoing: 0, Abandoned: 0 };
@@ -124,7 +143,6 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   }, [games]);
 
   // ─── Card 3: timeline ──────────────────────────────────────────────────────
-  // Full gamesTimeline with status, image, fullDate, rawSeconds for Slide 6
   const gamesTimeline = useMemo(() => {
     return [...games]
       .filter(g => g.totalDuration > 0 && g.firstStreamTimestampMs)
@@ -211,6 +229,7 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   const timeSinceLastStream = useDynamicTime(mostRecentGame?.lastStreamTimestampMs);
   const totalStreamsCount   = useCountUp(totalStreams);
   const totalGamesCount     = useCountUp(totalGames);
+  const longestSpanningDaysCount = useCountUp(longestSpanningGame?.spanDays || 0);
   const latestGameImages    = mostRecentGame?.thumbnail_urls || [];
 
   useEffect(() => {
@@ -232,7 +251,13 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
   const latestBgImage = getLowResUrl(rawLatestBgImage, layoutPrefs?.highResImages);
 
   // ─── Slide data bundles ────────────────────────────────────────────────────
-  const slideData1 = { totalStreamsCount, totalStreams, totalDuration: totalDurationOverall };
+  const slideData1 = { 
+    totalStreamsCount, 
+    totalStreams, 
+    totalDuration: totalDurationOverall,
+    longestSpanningGame,
+    longestSpanningDaysCount
+  };
   const slideData2 = { totalGamesCount, totalGames, statusData };
   const slideData3 = { latestBgImage, mostRecentGame, timeSinceLastStream, gamesTimeline, streamProgressionLines, progressionDates };
 

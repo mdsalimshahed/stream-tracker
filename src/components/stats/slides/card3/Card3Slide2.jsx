@@ -4,13 +4,9 @@ import { formatFullTime } from '../SlideHelpers';
 
 const Slide9Tooltip = ({ active, payload, selectedGame }) => {
   if (!active || !payload || !payload.length) return null;
-  const originalData = payload[0].payload;
+  const data = payload[0].payload;
 
-  if (selectedGame && originalData.gameName !== selectedGame) return null;
-
-  // If no game is selected, we want the tooltip to snap/persist the data for the END dot 
-  // of whatever line the user is currently hovering closest to.
-  const data = (!selectedGame && originalData.endDotData) ? originalData.endDotData : originalData;
+  if (selectedGame && data.gameName !== selectedGame) return null;
 
   const getOrdinal = (n) => {
     const s = ["th", "st", "nd", "rd"];
@@ -55,7 +51,6 @@ const Slide9TrailEndDot = (props) => {
       <circle cx={cx} cy={cy} r={ringRadius} fill={ringColor} style={{ transition: 'r 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)', outline: 'none' }} />
       <clipPath id={clipId}><circle cx={cx} cy={cy} r={imgRadius} style={{ transition: 'r 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }} /></clipPath>
       <image x={cx - imgRadius} y={cy - imgRadius} width={imgSize} height={imgSize} href={imgSrc} clipPath={`url(#${clipId})`} preserveAspectRatio="xMidYMid slice" style={{ outline: 'none', transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }} />
-      {isSelected && <circle cx={cx} cy={cy} r={37} fill="none" stroke="#ffffff" strokeWidth={0} />}
     </g>
   );
 };
@@ -93,25 +88,26 @@ export default function Card3Slide2({ data }) {
       }
 
       const endDot = continuousData[continuousData.length - 1];
-
-      // Attach the endDot to every data point so the Tooltip can snap to it when unselected
-      const fullyPopulatedData = continuousData.map(d => ({
-        ...d,
-        endDotData: endDot
-      }));
-
-      return { ...line, data: fullyPopulatedData, endDot, minX, maxX };
+      return { ...line, data: continuousData, endDot, minX, maxX };
     });
   }, [streamProgressionLines, progressionDates]);
 
+  // FIX: Force Layer 1 and Layer 2 to use the exact same X-Axis domain
   const xDomain = useMemo(() => {
-    if (selectedGame && processedLines.length > 0) {
+    if (processedLines.length === 0) return ['dataMin', 'dataMax'];
+    
+    if (selectedGame) {
       const gameLine = processedLines.find(l => l.gameName === selectedGame);
       if (gameLine) {
         return [Math.max(0, gameLine.minX - 2), gameLine.maxX + 2];
       }
     }
-    return ['dataMin', 'dataMax'];
+
+    // By calculating the global min and max across all lines, we ensure the 1-point lines 
+    // in Layer 2 align perfectly with the full lines in Layer 1!
+    const globalMin = Math.min(...processedLines.map(l => l.minX));
+    const globalMax = Math.max(...processedLines.map(l => l.maxX));
+    return [globalMin, globalMax];
   }, [selectedGame, processedLines]);
 
   const yMax = useMemo(() => {
@@ -225,18 +221,13 @@ export default function Card3Slide2({ data }) {
                 if (!selectedGame) {
                   return (
                     <Line 
-                      key={`fg-line-${idx}`} 
-                      data={line.data} 
+                      key={`fg-dot-${idx}`}
+                      data={[line.endDot]} // Providing ONLY the end dot enforces the snap!
                       type="monotone" 
                       dataKey="cumulativeHours" 
                       stroke="transparent" 
                       activeDot={false}
-                      dot={(props) => {
-                        if (props.index === line.data.length - 1) {
-                          return <Slide9TrailEndDot {...props} image={line.image || gameInfo?.image} status={line.status || gameInfo?.status} isSelected={false} onSelect={() => setSelectedGame(line.gameName)} />
-                        }
-                        return null;
-                      }}
+                      dot={(props) => <Slide9TrailEndDot {...props} image={line.image || gameInfo?.image} status={line.status || gameInfo?.status} isSelected={false} onSelect={() => setSelectedGame(line.gameName)} />}
                       isAnimationActive={false}
                     />
                   );

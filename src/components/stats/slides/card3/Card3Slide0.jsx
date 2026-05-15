@@ -12,7 +12,7 @@ export default function Card3Slide0({ data }) {
       <div className="latest-content">
         <div className="stat-number drop-shadow-xl latest-title">{mostRecentGame?.game_name || '—'}</div>
         <div className="stat-sub latest-sub-3">{mostRecentGame?.latestRunName || ''}</div>
-        <div className="stat-sub latest-sub-1">Last: <span className="latest-sub-time">{timeSinceLastStream}</span></div>
+        <div className="stat-sub latest-sub-1">Last steamed: <span className="latest-sub-time">{timeSinceLastStream}</span></div>
         <div className="stat-sub latest-sub-2">{mostRecentGame?.lastStreamTimestampRaw ? `On ${mostRecentGame.lastStreamTimestampRaw}` : 'Unknown'}</div>
       </div>
     </div>

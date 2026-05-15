@@ -52,7 +52,6 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
   const totalGames = games.length;
   const totalDurationOverall = useMemo(() => games.reduce((acc, g) => acc + g.totalDuration, 0), [games]);
 
-  // Count the total number of streams started at each hour (0-23)
   const hourlyStreamData = useMemo(() => {
     const hours = Array.from({length: 24}, (_, i) => ({ 
       hour: i, 
@@ -74,10 +73,8 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     return hours;
   }, [games]);
 
-  // Count streams by Day of the Week (Mon - Sun)
   const dowStreamData = useMemo(() => {
     const displayDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    // JavaScript getDay() returns 0 for Sunday, 1 for Monday. Shift it to make Mon=0, Sun=6
     const mapDay = (d) => d === 0 ? 6 : d - 1; 
 
     const dow = Array.from({length: 7}, (_, i) => ({
@@ -100,11 +97,189 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     return dow;
   }, [games]);
 
+  // ─── Daily Splitting & EXACT Seconds Streak/Break Calculations ────────
+  const { dailyStreamHours, streakBreakStats } = useMemo(() => {
+    const allStreamsExact = [];
+    games.forEach(g => {
+      Object.values(g.cycles || {}).forEach(c => {
+        (c.timestamps || []).forEach(ts => {
+          const startMs = parseCustomTimestamp(ts).getTime();
+          if (startMs > 0) {
+            allStreamsExact.push({ 
+              startMs, 
+              duration: ts.duration || 0, 
+              endMs: startMs + (ts.duration || 0) * 1000 
+            });
+          }
+        });
+      });
+    });
+
+    allStreamsExact.sort((a, b) => a.startMs - b.startMs);
+
+    // Merge overlapping/continuous streams for exact break calculation
+    const mergedStreams = [];
+    allStreamsExact.forEach(s => {
+      if (mergedStreams.length === 0) {
+        mergedStreams.push({ ...s });
+      } else {
+        const last = mergedStreams[mergedStreams.length - 1];
+        if (s.startMs <= last.endMs) {
+          last.endMs = Math.max(last.endMs, s.endMs);
+        } else {
+          mergedStreams.push({ ...s });
+        }
+      }
+    });
+
+    // Calculate Breaks (in exact seconds)
+    let maxBreakSecs = 0;
+    let maxBreakStartMs = null;
+    let maxBreakEndMs = null;
+    let isActiveBreak = false; // FLAG FOR LIVE TICKING
+
+    for (let i = 1; i < mergedStreams.length; i++) {
+      const brkStart = mergedStreams[i-1].endMs;
+      const brkEnd = mergedStreams[i].startMs;
+      const brkSecs = (brkEnd - brkStart) / 1000;
+      if (brkSecs > maxBreakSecs) {
+        maxBreakSecs = brkSecs;
+        maxBreakStartMs = brkStart;
+        maxBreakEndMs = brkEnd;
+        isActiveBreak = false;
+      }
+    }
+
+    // Evaluate active break up to current moment
+    const nowMs = Date.now();
+    if (mergedStreams.length > 0) {
+      const lastEndMs = mergedStreams[mergedStreams.length - 1].endMs;
+      if (nowMs > lastEndMs) {
+        const activeBreakSecs = (nowMs - lastEndMs) / 1000;
+        if (activeBreakSecs > maxBreakSecs) {
+          maxBreakSecs = activeBreakSecs;
+          maxBreakStartMs = lastEndMs;
+          maxBreakEndMs = nowMs;
+          isActiveBreak = true; // The longest break is right now!
+        }
+      }
+    }
+
+    // Build timeline for Daily Hours Graph & Calendar Streaks
+    const dailyMap = new Map();
+    const getMidnight = (ms) => {
+      const d = new Date(ms);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
+    };
+
+    allStreamsExact.forEach(stream => {
+      let currentStart = stream.startMs;
+      let remainingSeconds = stream.duration;
+      let loopLimit = 48; 
+      
+      while (remainingSeconds > 0 && loopLimit > 0) {
+        const currentMidnight = getMidnight(currentStart);
+        const nextMidnight = currentMidnight + 86400000;
+        const timeUntilNextMidnight = (nextMidnight - currentStart) / 1000;
+
+        const secondsInCurrentDay = Math.min(remainingSeconds, timeUntilNextMidnight);
+        dailyMap.set(currentMidnight, (dailyMap.get(currentMidnight) || 0) + secondsInCurrentDay);
+
+        remainingSeconds -= secondsInCurrentDay;
+        currentStart = nextMidnight;
+        loopLimit--;
+      }
+    });
+
+    const sortedDays = Array.from(dailyMap.keys()).sort((a, b) => a - b);
+    
+    // Fill gaps to today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayMs = today.getTime();
+    
+    const continuousDailyStreamHours = [];
+    if (sortedDays.length > 0) {
+      let currentDate = new Date(sortedDays[0]);
+      const lastStreamMs = sortedDays[sortedDays.length - 1];
+      const endDateMs = Math.max(lastStreamMs, todayMs);
+      const endDate = new Date(endDateMs);
+
+      while (currentDate <= endDate) {
+        const t = currentDate.getTime();
+        const rawSecs = dailyMap.has(t) ? dailyMap.get(t) : 0;
+        const hrs = parseFloat((rawSecs / 3600).toFixed(2));
+        
+        continuousDailyStreamHours.push({
+          dateMs: t,
+          displayDate: `${currentDate.getDate()} ${currentDate.toLocaleString('en-US', { month: 'short' })}`,
+          rawSeconds: rawSecs,
+          hours: hrs
+        });
+        
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    }
+
+    // Calculate Streaks (Consecutive Days -> Exact Seconds mapped)
+    const streaks = [];
+    let currentStreakDaysList = [];
+
+    for (let i = 0; i < sortedDays.length; i++) {
+       const day = sortedDays[i];
+       if (i === 0) {
+          currentStreakDaysList = [day];
+       } else {
+          const prevDay = sortedDays[i-1];
+          if (Math.round((day - prevDay) / 86400000) === 1) {
+             currentStreakDaysList.push(day);
+          } else {
+             streaks.push([...currentStreakDaysList]);
+             currentStreakDaysList = [day];
+          }
+       }
+    }
+    if (currentStreakDaysList.length > 0) {
+       streaks.push([...currentStreakDaysList]);
+    }
+
+    let maxStreakSecs = 0;
+    let maxStreakStartMs = null;
+    let maxStreakEndMs = null;
+
+    streaks.forEach(streakDays => {
+       const streamsInStreak = allStreamsExact.filter(s => streakDays.includes(getMidnight(s.startMs)));
+       if (streamsInStreak.length > 0) {
+           const st = Math.min(...streamsInStreak.map(s => s.startMs));
+           const en = Math.max(...streamsInStreak.map(s => s.endMs));
+           const secs = (en - st) / 1000;
+           if (secs > maxStreakSecs) {
+               maxStreakSecs = secs;
+               maxStreakStartMs = st;
+               maxStreakEndMs = en;
+           }
+       }
+    });
+
+    return {
+      dailyStreamHours: continuousDailyStreamHours,
+      streakBreakStats: {
+        longestStreakSecs: maxStreakSecs,
+        maxStreakStartMs,
+        maxStreakEndMs,
+        longestBreakSecs: maxBreakSecs,
+        maxBreakStartMs,
+        maxBreakEndMs,
+        isActiveBreak // Exposing the flag
+      }
+    };
+  }, [games]);
+
   const statusData = useMemo(() => {
     const sums = { Completed: 0, Ongoing: 0, Abandoned: 0 };
     games.forEach(g => {
       const label = g.latestRunLabel || 'Ongoing';
-      // Keep it in raw seconds here instead of dividing by 3600
       sums[label] = (sums[label] || 0) + g.totalDuration;
     });
     return [
@@ -123,7 +298,6 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     return Array.from(s).sort((a,b) => a-b);
   }, [games]);
 
-  // ─── Cumulative Session Lines (Slide 9) ───────────────────────────────────
   const streamProgressionLines = useMemo(() => {
     const dateToIndex = new Map(progressionDates.map((d, i) => [d, i]));
 
@@ -166,7 +340,6 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
       });
   }, [games, progressionDates, layoutPrefs?.highResImages]);
 
-  // ─── Timeline (Slide 6) ──────────────────────────────────────────────────
   const gamesTimeline = useMemo(() => {
     return [...games]
       .filter(g => g.totalDuration > 0 && g.firstStreamTimestampMs)
@@ -186,7 +359,6 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
       });
   }, [games, layoutPrefs?.highResImages]);
 
-  // ─── Hero Data ────────────────────────────────────────────────────────────
   const mostRecentGame = useMemo(() =>
     games.reduce((latest, g) => {
       if (!latest || (g.lastStreamTimestampMs && g.lastStreamTimestampMs > (latest.lastStreamTimestampMs || 0))) return g;
@@ -202,18 +374,32 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     totalStreamsCount: totalStreams, 
     totalStreams, 
     totalDuration: totalDurationOverall,
-    hourlyStreamData
+    hourlyStreamData,
+    longestStreakSecs: streakBreakStats.longestStreakSecs,
+    maxStreakStartMs: streakBreakStats.maxStreakStartMs,
+    maxStreakEndMs: streakBreakStats.maxStreakEndMs
   };
   
-  // Passed dowStreamData to data2!
   const data2 = { 
     totalGamesCount: totalGames, 
     totalGames, 
     statusData,
-    dowStreamData
+    dowStreamData,
+    longestBreakSecs: streakBreakStats.longestBreakSecs,
+    maxBreakStartMs: streakBreakStats.maxBreakStartMs,
+    maxBreakEndMs: streakBreakStats.maxBreakEndMs,
+    isActiveBreak: streakBreakStats.isActiveBreak // Pass it to Slide 11
   };
   
-  const data3 = { latestBgImage, mostRecentGame, timeSinceLastStream, gamesTimeline, streamProgressionLines, progressionDates };
+  const data3 = { 
+    latestBgImage, 
+    mostRecentGame, 
+    timeSinceLastStream, 
+    gamesTimeline, 
+    streamProgressionLines, 
+    progressionDates,
+    dailyStreamHours
+  };
 
   return (
     <div className="stats-root"
@@ -235,7 +421,7 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
       <div className="stats-scroll custom-scrollbar" style={{ overflowY: 'auto', display: 'block' }}>
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 text-white tracking-tight">Slide Debug Panel</h1>
-          <p className="text-white/60">Previewing Slide 3, Slide 6, and Slide 9 with synced data logic.</p>
+          <p className="text-white/60">Previewing Slide 3, Slide 6, Slide 9, and Slide 12 with synced data logic.</p>
         </div>
 
         {[0, 1, 2, 3, 4, 5].map(i => (

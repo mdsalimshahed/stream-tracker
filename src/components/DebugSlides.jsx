@@ -41,9 +41,11 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
   const slideData3 = { ...card3Data, latestBgImage };
 
   return (
-    <div className="stats-root"
+    <div className="stats-root w-full h-full relative"
       style={{
-        position: 'relative', height: '100%', width: '100%', overflow: 'hidden',
+        position: 'relative', 
+        height: '100%', 
+        width: '100%',
         '--sz-main': systemFonts?.statsMainCount ?? 4.5,
         '--sz-main-label': systemFonts?.statsMainLabel ?? 1.1,
         '--sz-title': systemFonts?.statsTitle ?? 2.2,
@@ -57,34 +59,52 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
     >
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       
-      <div className="stats-scroll custom-scrollbar" style={{ overflowY: 'auto', display: 'block' }}>
+      {/* CRITICAL FIX: Forced absolute scroll tracking parameters via an inline style layout rule override.
+        This forces the browser viewport container to scroll natively regardless of parental height limitations.
+      */}
+      <div 
+        className="custom-scrollbar w-full" 
+        style={{ 
+          position: 'absolute',
+          inset: 0,
+          overflowY: 'auto', 
+          overflowX: 'hidden',
+          display: 'block', 
+          paddingLeft: 'max(1rem, calc((100vw - 1400px) / 2 + 1.5rem))',
+          paddingRight: 'max(1rem, calc((100vw - 1400px) / 2 + 1.5rem))',
+          paddingTop: '2rem',
+          paddingBottom: '4rem'
+        }}
+      >
         {[0, 1, 2, 3, 4, 5].map(i => (
-          <div key={i} className="mb-14">
-            <div className="stats-top-row shadow-2xl lg:h-[350px] flex-none">
-              <div className="stats-left-col">
-                <div className="card-wrapper-left relative">
-                  <div className="stat-card">
+          <div key={i} className="mb-16 w-full flex flex-col items-center justify-center">
+            {/* Structural bounds container with clean matching layout matrices */}
+            <div className="flex flex-col gap-0 w-full max-w-[1400px]">
+              
+              {/* Tier 1: Card 1 and Card 2 flush side by side */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-0 h-[260px] w-full">
+                <div className="relative w-full h-full overflow-hidden shadow-xl">
+                  <div className="stat-card" style={{ borderBottom: 'none', borderRight: 'none', borderRadius: '0px' }}>
                     {i === 4 ? getCard1Slide(4, slideData1) : getCard1Slide(i, slideData1)}
                   </div>
                 </div>
-                <div className="stats-progress-track">
-                  <div className="stats-progress-fill" style={{ width: '100%', opacity: 0.5, animation: 'none' }} />
-                </div>
-                <div className="card-wrapper-left relative">
-                  <div className="stat-card">
+                <div className="relative w-full h-full overflow-hidden shadow-xl">
+                  <div className="stat-card" style={{ borderBottom: 'none', borderRadius: '0px' }}>
                     {i === 4 ? getCard2Slide(4, slideData2) : getCard2Slide(i, slideData2)}
                   </div>
                 </div>
               </div>
-              <div className="card-wrapper-right relative group">
-                <div className="stats-right-col" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+
+              {/* Tier 2: Card 3 full width locked flush against the top rows */}
+              <div className="relative w-full h-[340px] overflow-hidden shadow-xl group">
+                <div className="stats-right-col" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', borderRadius: '0px' }}>
                   {i === 4 ? getCard3Slide(4, slideData3) : getCard3Slide(i, slideData3)}
                 </div>
               </div>
+
             </div>
           </div>
         ))}
-        <div className="h-12 w-full"></div>
       </div>
     </div>
   );

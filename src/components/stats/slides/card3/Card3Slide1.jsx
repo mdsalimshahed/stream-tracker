@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Label } from 'recharts';
 import { formatFullTime } from '../SlideHelpers';
 
 const Slide6Tooltip = ({ active, payload, selectedNode }) => {
@@ -86,7 +86,7 @@ export default function Card3Slide1({ data }) {
   }, [gamesTimeline]);
 
   return (
-    <div className="slide-container flex flex-col justify-start bg-black/40 pt-4 pb-2 px-4 h-full outline-none" onClick={(e) => {
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden" onClick={(e) => {
       if (e.target.tagName?.toLowerCase() === 'circle' || e.target.tagName?.toLowerCase() === 'image') return;
       setSelectedNode(null);
     }}>
@@ -96,23 +96,10 @@ export default function Card3Slide1({ data }) {
         .recharts-line-dots, .recharts-area-dots { clip-path: none !important; }
         *:focus { outline: none !important; }
       `}} />
-      <div className="w-full flex-1 min-h-0 outline-none overflow-visible">
+      <div className="w-full h-full flex-1 outline-none relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <AreaChart data={gamesTimeline} margin={{ top: 60, right: 35, left: 10, bottom: 10 }} style={{ overflow: 'visible' }}>
+          <AreaChart data={gamesTimeline} margin={{ top: 25, right: 20, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
             
-            <text 
-              x="35%" 
-              y={40} 
-              textAnchor="middle" 
-              fill="rgba(255,255,255,0.5)" 
-              fontSize={20} 
-              fontWeight="regular" 
-              letterSpacing={2} 
-              className="uppercase pointer-events-none"
-            >
-            Timeline
-            </text>
-
             <defs>
               <linearGradient id="slide6GradientFill" x1="0" y1="0" x2="1" y2="0">
                 {gamesTimeline?.map((g, i) => {
@@ -129,20 +116,57 @@ export default function Card3Slide1({ data }) {
                 })}
               </linearGradient>
             </defs>
+            
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+            
             <XAxis 
-              dataKey="index" ticks={xTicks} stroke="#8a88a8" tickLine={false} axisLine={true} tickMargin={8} dy={0} 
-              minTickGap={5} tick={{ fill: '#8a88a8', fontSize: 11 }}
+              dataKey="index" 
+              ticks={xTicks} 
+              stroke="#8a88a8" 
+              tickLine={false} 
+              axisLine={false} 
+              tickMargin={10} 
+              height={35} 
+              minTickGap={5} 
+              tick={{ fill: '#8a88a8', fontSize: 10 }}
               tickFormatter={(val) => { const g = gamesTimeline[val]; const p = g?.month.split(' '); return p?.length === 2 ? `${p[0]} '${p[1].slice(-2)}` : g?.month; }} 
-            />
+            >
+              <Label 
+                value="Timeline" 
+                position="insideBottom" 
+                offset={-5} 
+                style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} 
+              />
+            </XAxis>
+            
             <YAxis 
-            stroke="#8a88a8" tickLine={false} axisLine={true} tickCount={4} tickFormatter={(v) => v === 0 ? '' : `${Math.round(v)}h`} tickCount={3}
-            width={30} tickMargin={5} domain={[0, yMax]} tick={{ angle: -90, textAnchor: 'middle', fill: '#8a88a8', fontSize: 11}}
-            />
+              stroke="#8a88a8" 
+              tickLine={false} 
+              axisLine={false} 
+              tickFormatter={(v) => v === 0 ? '' : `${Math.round(v)}h`} 
+              tickCount={5}
+              width={45} 
+              domain={[0, yMax]} 
+              tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10}}
+            >
+              <Label 
+                value="Playtime (Hours)" 
+                angle={-90} 
+                position="insideLeft" 
+                style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} 
+              />
+            </YAxis>
+
             <Tooltip content={<Slide6Tooltip selectedNode={selectedNode} />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} isAnimationActive={false} />
+            
             <Area 
-              type="monotone" dataKey="hours" stroke="url(#slide6GradientStroke)" strokeWidth={3} fill="url(#slide6GradientFill)" 
-              isAnimationActive={false} activeDot={false} 
+              type="monotone" 
+              dataKey="hours" 
+              stroke="url(#slide6GradientStroke)" 
+              strokeWidth={3} 
+              fill="url(#slide6GradientFill)" 
+              isAnimationActive={false} 
+              activeDot={false} 
               dot={(props) => <Slide6StaticDot {...props} selectedNode={selectedNode} onSelect={setSelectedNode} />} 
             />
           </AreaChart>

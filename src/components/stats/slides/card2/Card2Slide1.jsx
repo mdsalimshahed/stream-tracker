@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Label } from 'recharts';
 import { formatFullTime } from '../SlideHelpers';
 
 const CustomTooltip = ({ active, payload }) => {
@@ -22,39 +22,42 @@ const CustomTooltip = ({ active, payload }) => {
 
 export default function Card2Slide1({ data }) {
   const { statusData } = data;
-  const yMax = useMemo(() => {
+  
+  const { yMax, yTicks } = useMemo(() => {
     let max = 0;
     statusData?.forEach(d => {
       if (d.hours > max) max = d.hours;
     });
     
-    if (max === 0) return 50; 
-    return Math.ceil(max / 50) * 50; 
+    // Fallback if no data
+    if (max === 0) return { yMax: 50, yTicks: [25, 50] }; 
+    
+    // Determine a clean maximum to ensure a perfect midpoint
+    let calculatedMax = Math.ceil(max / 10) * 10;
+    
+    // Force the max to be an even number so dividing by 2 yields a clean integer
+    if (calculatedMax % 2 !== 0) {
+      calculatedMax += 10;
+    }
+
+    // Return exactly the midpoint and the max
+    return { 
+      yMax: calculatedMax, 
+      yTicks: [calculatedMax / 2, calculatedMax] 
+    };
   }, [statusData]);
+
   return (
-    <div className="slide-container justify-center bg-black/40 pt-8 pb-4 outline-none">
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
       <style dangerouslySetInnerHTML={{ __html: `
         .recharts-wrapper, .recharts-surface, .recharts-responsive-container, svg { overflow: visible !important; outline: none !important; }
         .recharts-wrapper * { outline: none !important; }
         *:focus { outline: none !important; }
       `}} />
-      <div className="w-full h-48 sm:h-56 outline-none overflow-visible">
+      <div className="w-full h-full flex-1 outline-none relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <AreaChart data={statusData} margin={{ top: 50, right: 20, left: -10, bottom: 5 }} style={{ overflow: 'visible' }}>
+          <AreaChart data={statusData} margin={{ top: 25, right: 20, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
             
-            <text 
-              x="35%" 
-              y={30} 
-              textAnchor="middle" 
-              fill="rgba(255,255,255,0.5)" 
-              fontSize={16} 
-              fontWeight="regular" 
-              letterSpacing={2} 
-              className="uppercase pointer-events-none"
-            >
-              Playtime by Status
-            </text>
-
             <defs>
               <linearGradient id="areaStatusGradient" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stopColor="#3ddc84" stopOpacity={0.6}/>
@@ -67,12 +70,60 @@ export default function Card2Slide1({ data }) {
                 <stop offset="100%" stopColor="#ff5c5c" />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-            <XAxis dataKey="name" tick={false} axisLine={true} stroke="#8a88a8" tickLine={false} height={10} dy={0} />
-            <YAxis stroke="#8a88a8" fontSize={11} tickLine={false} axisLine={true} tickFormatter={(v) => v === 0 ? '' : `${v}h`} interval={3} width={45} tick={{ angle: -90, textAnchor: 'middle', fill: '#8a88a8'}} domain={[0,yMax]}/>
-            <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} isAnimationActive={false} />
             
-            <Area type="monotone" dataKey="hours" stroke="url(#strokeStatusGradient)" strokeWidth={3} fill="url(#areaStatusGradient)" activeDot={{ r: 6, fill: '#fff', stroke: 'none' }} isAnimationActive={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+            
+            <XAxis 
+              dataKey="name" 
+              tick={false} 
+              axisLine={true} 
+              stroke="#8a88a8" 
+              tickLine={false} 
+              height={35} 
+              tickMargin={10}
+            >
+              <Label 
+                value="Status" 
+                position="insideBottom" 
+                offset={-5} 
+                style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} 
+              />
+            </XAxis>
+            
+            <YAxis 
+              stroke="#8a88a8" 
+              fontSize={11} 
+              tickLine={false} 
+              axisLine={true} 
+              tickFormatter={(v) => `${v}h`} 
+              width={45} 
+              tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8'}} 
+              domain={[0, yMax]}
+              ticks={yTicks}
+            >
+              <Label 
+                value="Playtime (Hours)" 
+                angle={-90} 
+                position="insideLeft" 
+                style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} 
+              />
+            </YAxis>
+
+            <Tooltip 
+              content={<CustomTooltip />} 
+              cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} 
+              isAnimationActive={false} 
+            />
+            
+            <Area 
+              type="monotone" 
+              dataKey="hours" 
+              stroke="url(#strokeStatusGradient)" 
+              strokeWidth={3} 
+              fill="url(#areaStatusGradient)" 
+              activeDot={{ r: 6, fill: '#fff', stroke: 'none' }} 
+              isAnimationActive={false} 
+            />
           </AreaChart>
         </ResponsiveContainer>
       </div>

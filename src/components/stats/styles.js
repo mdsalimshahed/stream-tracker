@@ -73,7 +73,7 @@ export const STYLES = `
     z-index: 2;
   }
   @media (min-width: 1024px) {
-    .stats-left-col { height: 100%; }
+    .stats-left-col { height: 100%; min-height: 0; }
   }
 
   /* PROGRESS DIVIDER */
@@ -102,7 +102,7 @@ export const STYLES = `
     z-index: 1;
   }
   @media (min-width: 1024px) {
-    .card-wrapper-right { height: 100%; margin-left: -1px; }
+    .card-wrapper-right { height: 100%; margin-left: -1px; min-height: 0; }
   }
 
   /* LEFT CARDS WRAPPERS */
@@ -110,6 +110,9 @@ export const STYLES = `
     flex: 1; /* Divides the left column exactly 50/50 */
     position: relative;
     min-height: 160px; /* Mobile fallback */
+  }
+  @media (min-width: 1024px) {
+    .card-wrapper-left { min-height: 0; }
   }
 
 

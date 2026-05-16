@@ -126,6 +126,7 @@ export default function DataManager({
           <RangeControl label="Modal Panel Opacity" description="Transparency of Runs & Logs panels" value={modalPanelOpacity} min={0} max={1} step={0.01} onChange={setModalPanelOpacity} />
           <RangeControl label="Modal Background Blur" description="0 = clear, 1 = maximum blur" value={modalBgIntensity} min={0} max={1} step={0.01} onChange={setModalBgIntensity} />
           <RangeControl label="Hover Image Cycle Speed" description="Card thumbnail slideshow interval (ms)" value={layoutPrefs.hoverCycleInterval ?? 1500} min={500} max={10000} step={100} onChange={v => updateLayout('hoverCycleInterval', v)} />
+          <RangeControl label="Stats Card Cycle Speed" description="Speed of the yellow gradient line and card flipping (seconds)" value={layoutPrefs.bgCycleInterval ?? 5} min={1} max={30} step={0.5} onChange={v => updateLayout('bgCycleInterval', v)} />
         </div>
 
         <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2"><RefreshCw size={24} /> Data Synchronization</h2>

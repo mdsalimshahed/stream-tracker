@@ -1,0 +1,530 @@
+// src/hooks/useDebugData.js
+import { useMemo } from 'react';
+import { getLatestRunWithTimestamp } from '../components/stats/utils';
+import { getLowResUrl, getTsDateStr, parseCustomTimestamp } from '../utils/helpers';
+import { useDynamicTime } from '../components/stats/hooks';
+
+export function useDebugData(streamData, layoutPrefs) {
+  // ─── Base game list ────────────────────────────────────────────────────────
+  const games = useMemo(() =>
+    Object.entries(streamData).map(([id, data]) => {
+      const cycles = data.cycles || {};
+      const totalStreams = Object.values(cycles).reduce((acc, c) => acc + Number(c.stream_count || 0), 0);
+      
+      let totalDuration = 0;
+      let firstStreamTimestampMs = null;
+
+      Object.values(cycles).forEach(c => {
+        (c.timestamps || []).forEach(ts => {
+          totalDuration += (ts.duration || 0);
+          const d = parseCustomTimestamp(ts).getTime();
+          if (d > 0 && (!firstStreamTimestampMs || d < firstStreamTimestampMs)) {
+            firstStreamTimestampMs = d;
+          }
+        });
+      });
+
+      const latestRunInfo = getLatestRunWithTimestamp(cycles);
+      const latestRunLabel = latestRunInfo.run ? (latestRunInfo.run.label || 'Ongoing') : 'Ongoing';
+      const lastStreamTimestampMs = latestRunInfo.date ? latestRunInfo.date.getTime() : null;
+      const lastStreamTimestampRaw = getTsDateStr(latestRunInfo.timestamp);
+      
+      let latestRunName = '';
+      if (latestRunInfo.run) {
+        latestRunName = latestRunInfo.run.displayName || 
+          (latestRunInfo.cycleId === 'main' ? 'First Playthrough' : (latestRunInfo.cycleId || '').replace(/_/g, ' '));
+      }
+
+      return {
+        id, ...data, totalStreams, totalDuration, firstStreamTimestampMs, 
+        latestRunLabel, lastStreamTimestampMs, lastStreamTimestampRaw, latestRunName, 
+        thumbnail_urls: data.thumbnail_urls || []
+      };
+    }),
+  [streamData]);
+
+  // ─── Shared Calculations ──────────────────────────────────────────────────
+  const totalStreams = useMemo(() => games.reduce((s, g) => s + g.totalStreams, 0), [games]);
+  const totalGames = games.length;
+  const totalDurationOverall = useMemo(() => games.reduce((acc, g) => acc + g.totalDuration, 0), [games]);
+
+  const hourlyStreamData = useMemo(() => {
+    const hours = Array.from({length: 24}, (_, i) => ({ 
+      hour: i, 
+      displayHour: i === 0 ? '12AM' : i < 12 ? `${i}AM` : i === 12 ? '12PM' : `${i-12}PM`,
+      count: 0 
+    }));
+    
+    games.forEach(g => {
+      Object.values(g.cycles || {}).forEach(c => {
+        (c.timestamps || []).forEach(ts => {
+          const d = parseCustomTimestamp(ts);
+          if (d.getTime() > 0) {
+            const hr = d.getHours();
+            hours[hr].count += 1;
+          }
+        });
+      });
+    });
+    return hours;
+  }, [games]);
+
+  const dowStreamData = useMemo(() => {
+    const displayDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const mapDay = (d) => d === 0 ? 6 : d - 1; 
+
+    const dow = Array.from({length: 7}, (_, i) => ({
+      dayIndex: i,
+      displayDay: displayDays[i],
+      count: 0
+    }));
+
+    games.forEach(g => {
+      Object.values(g.cycles || {}).forEach(c => {
+        (c.timestamps || []).forEach(ts => {
+          const d = parseCustomTimestamp(ts);
+          if (d.getTime() > 0) {
+            const day = mapDay(d.getDay());
+            dow[day].count += 1;
+          }
+        });
+      });
+    });
+    return dow;
+  }, [games]);
+
+  // ─── Daily Splitting & EXACT Seconds Streak/Break Calculations ────────
+  const { dailyStreamHours, streakBreakStats } = useMemo(() => {
+    const allStreamsExact = [];
+    games.forEach(g => {
+      Object.values(g.cycles || {}).forEach(c => {
+        (c.timestamps || []).forEach(ts => {
+          const startMs = parseCustomTimestamp(ts).getTime();
+          if (startMs > 0) {
+            allStreamsExact.push({ 
+              startMs, 
+              duration: ts.duration || 0, 
+              endMs: startMs + (ts.duration || 0) * 1000 
+            });
+          }
+        });
+      });
+    });
+
+    allStreamsExact.sort((a, b) => a.startMs - b.startMs);
+
+    const mergedStreams = [];
+    allStreamsExact.forEach(s => {
+      if (mergedStreams.length === 0) {
+        mergedStreams.push({ ...s });
+      } else {
+        const last = mergedStreams[mergedStreams.length - 1];
+        if (s.startMs <= last.endMs) {
+          last.endMs = Math.max(last.endMs, s.endMs);
+        } else {
+          mergedStreams.push({ ...s });
+        }
+      }
+    });
+
+    let maxBreakSecs = 0;
+    let maxBreakStartMs = null;
+    let maxBreakEndMs = null;
+    let isActiveBreak = false;
+
+    for (let i = 1; i < mergedStreams.length; i++) {
+      const brkStart = mergedStreams[i-1].endMs;
+      const brkEnd = mergedStreams[i].startMs;
+      const brkSecs = (brkEnd - brkStart) / 1000;
+      if (brkSecs > maxBreakSecs) {
+        maxBreakSecs = brkSecs;
+        maxBreakStartMs = brkStart;
+        maxBreakEndMs = brkEnd;
+        isActiveBreak = false;
+      }
+    }
+
+    const nowMs = Date.now();
+    if (mergedStreams.length > 0) {
+      const lastEndMs = mergedStreams[mergedStreams.length - 1].endMs;
+      if (nowMs > lastEndMs) {
+        const activeBreakSecs = (nowMs - lastEndMs) / 1000;
+        if (activeBreakSecs > maxBreakSecs) {
+          maxBreakSecs = activeBreakSecs;
+          maxBreakStartMs = lastEndMs;
+          maxBreakEndMs = nowMs;
+          isActiveBreak = true;
+        }
+      }
+    }
+
+    const dailyMap = new Map();
+    const getMidnight = (ms) => {
+      const d = new Date(ms);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
+    };
+
+    allStreamsExact.forEach(stream => {
+      let currentStart = stream.startMs;
+      let remainingSeconds = stream.duration;
+      let loopLimit = 48; 
+      
+      while (remainingSeconds > 0 && loopLimit > 0) {
+        const currentMidnight = getMidnight(currentStart);
+        const nextMidnight = currentMidnight + 86400000;
+        const timeUntilNextMidnight = (nextMidnight - currentStart) / 1000;
+
+        const secondsInCurrentDay = Math.min(remainingSeconds, timeUntilNextMidnight);
+        dailyMap.set(currentMidnight, (dailyMap.get(currentMidnight) || 0) + secondsInCurrentDay);
+
+        remainingSeconds -= secondsInCurrentDay;
+        currentStart = nextMidnight;
+        loopLimit--;
+      }
+    });
+
+    const sortedDays = Array.from(dailyMap.keys()).sort((a, b) => a - b);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayMs = today.getTime();
+    
+    const continuousDailyStreamHours = [];
+    if (sortedDays.length > 0) {
+      let currentDate = new Date(sortedDays[0]);
+      const lastStreamMs = sortedDays[sortedDays.length - 1];
+      const endDateMs = Math.max(lastStreamMs, todayMs);
+      const endDate = new Date(endDateMs);
+
+      while (currentDate <= endDate) {
+        const t = currentDate.getTime();
+        const rawSecs = dailyMap.has(t) ? dailyMap.get(t) : 0;
+        const hrs = parseFloat((rawSecs / 3600).toFixed(2));
+        
+        continuousDailyStreamHours.push({
+          dateMs: t,
+          displayDate: `${currentDate.getDate()} ${currentDate.toLocaleString('en-US', { month: 'short' })}`,
+          rawSeconds: rawSecs,
+          hours: hrs
+        });
+        
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    }
+
+    const streaks = [];
+    let currentStreakDaysList = [];
+
+    for (let i = 0; i < sortedDays.length; i++) {
+       const day = sortedDays[i];
+       if (i === 0) {
+          currentStreakDaysList = [day];
+       } else {
+          const prevDay = sortedDays[i-1];
+          if (Math.round((day - prevDay) / 86400000) === 1) {
+             currentStreakDaysList.push(day);
+          } else {
+             streaks.push([...currentStreakDaysList]);
+             currentStreakDaysList = [day];
+          }
+       }
+    }
+    if (currentStreakDaysList.length > 0) {
+       streaks.push([...currentStreakDaysList]);
+    }
+
+    let maxStreakSecs = 0;
+    let maxStreakStartMs = null;
+    let maxStreakEndMs = null;
+
+    streaks.forEach(streakDays => {
+       const streamsInStreak = allStreamsExact.filter(s => streakDays.includes(getMidnight(s.startMs)));
+       if (streamsInStreak.length > 0) {
+           const st = Math.min(...streamsInStreak.map(s => s.startMs));
+           const en = Math.max(...streamsInStreak.map(s => s.endMs));
+           const secs = (en - st) / 1000;
+           if (secs > maxStreakSecs) {
+               maxStreakSecs = secs;
+               maxStreakStartMs = st;
+               maxStreakEndMs = en;
+           }
+       }
+    });
+
+    return {
+      dailyStreamHours: continuousDailyStreamHours,
+      streakBreakStats: {
+        longestStreakSecs: maxStreakSecs,
+        maxStreakStartMs,
+        maxStreakEndMs,
+        longestBreakSecs: maxBreakSecs,
+        maxBreakStartMs,
+        maxBreakEndMs,
+        isActiveBreak
+      }
+    };
+  }, [games]);
+
+  // ─── Individual Streams Chronological & Extremes ────────
+  const { allStreamsChronological, longestStream, shortestStream } = useMemo(() => {
+    let streams = [];
+    games.forEach(g => {
+      Object.values(g.cycles || {}).forEach(c => {
+        let runName = c.displayName || (c.id === 'main' ? 'First Playthrough' : (c.id || '').replace(/_/g, ' '));
+
+        (c.timestamps || []).forEach((ts, idx) => {
+          const startMs = parseCustomTimestamp(ts).getTime();
+          if (startMs > 0 && ts.duration > 0) {
+            
+            let baseTitle = ts.title || `${g.game_name} - Stream #${idx + 1}`;
+            let finalTitle = (runName && runName !== 'First Playthrough') 
+              ? `${baseTitle} (${runName})` 
+              : baseTitle;
+
+            streams.push({
+              startMs,
+              duration: ts.duration,
+              gameName: g.game_name,
+              status: g.latestRunLabel, 
+              cycleName: runName,
+              streamTitle: finalTitle,
+              thumbnails: g.thumbnail_urls || [],
+              displayDate: getTsDateStr(ts),
+              hours: parseFloat((ts.duration / 3600).toFixed(2))
+            });
+          }
+        });
+      });
+    });
+
+    streams.sort((a, b) => a.startMs - b.startMs);
+    const chrono = streams.map((s, i) => ({ ...s, index: i + 1 }));
+
+    let longest = null;
+    let shortest = null;
+    
+    if (chrono.length > 0) {
+      longest = chrono.reduce((prev, curr) => curr.duration > prev.duration ? curr : prev, chrono[0]);
+      shortest = chrono.reduce((prev, curr) => curr.duration < prev.duration ? curr : prev, chrono[0]);
+    }
+
+    return { allStreamsChronological: chrono, longestStream: longest, shortestStream: shortest };
+  }, [games]);
+
+  // ─── Deficit and Session Calculations ────────
+  const deficitStats = useMemo(() => {
+    let actualSessionSecs = 0;
+    let discardedSecs = 0;
+    let gainedSecs = 0;
+    const deficitData = [];
+    
+    let index = 1;
+    
+    const streams = [];
+    games.forEach(g => {
+      Object.values(g.cycles || {}).forEach(c => {
+        let runName = c.displayName || (c.id === 'main' ? 'First Playthrough' : (c.id || '').replace(/_/g, ' '));
+        (c.timestamps || []).forEach((ts, idx) => {
+          const vidDur = ts.duration || 0;
+          let actualDur = vidDur;
+          if (ts.startTime && ts.endTime) {
+            actualDur = Math.floor((ts.endTime - ts.startTime) / 1000);
+          }
+          
+          if (actualDur > 0 || vidDur > 0) {
+            const diff = actualDur - vidDur;
+            
+            let baseTitle = ts.title || `${g.game_name} - Stream #${idx + 1}`;
+            let finalTitle = (runName && runName !== 'First Playthrough') 
+              ? `${baseTitle} (${runName})` 
+              : baseTitle;
+            
+            streams.push({
+              gameName: g.game_name,
+              streamTitle: finalTitle,
+              actualDur,
+              vidDur,
+              diff,
+              date: ts.startTime || ts.date || 0
+            });
+          }
+        });
+      });
+    });
+
+    streams.sort((a,b) => a.date - b.date).forEach(s => {
+      actualSessionSecs += s.actualDur;
+      if (s.diff > 0) discardedSecs += s.diff;
+      if (s.diff < 0) gainedSecs += Math.abs(s.diff);
+      
+      deficitData.push({
+        index: index++,
+        gameName: s.gameName,
+        streamTitle: s.streamTitle,
+        diff: s.diff,
+        dateMs: s.date
+      });
+    });
+
+    return { actualSessionSecs, discardedSecs, gainedSecs, deficitData };
+  }, [games]);
+
+  const statusData = useMemo(() => {
+    const sums = { Completed: 0, Ongoing: 0, Abandoned: 0 };
+    games.forEach(g => {
+      const label = g.latestRunLabel || 'Ongoing';
+      sums[label] = (sums[label] || 0) + g.totalDuration / 3600;
+    });
+    return [
+      { name: 'Ongoing',   hours: parseFloat((sums.Ongoing   || 0).toFixed(1)), color: '#3ddc84' },
+      { name: 'Completed', hours: parseFloat((sums.Completed || 0).toFixed(1)), color: '#f5a623' },
+      { name: 'Abandoned', hours: parseFloat((sums.Abandoned || 0).toFixed(1)), color: '#ff5c5c' },
+    ];
+  }, [games]);
+
+  const progressionDates = useMemo(() => {
+    const s = new Set();
+    games.forEach(g => Object.values(g.cycles||{}).forEach(c => (c.timestamps||[]).forEach(ts => {
+      const d = parseCustomTimestamp(ts).getTime();
+      if (d > 0) s.add(d);
+    })));
+    return Array.from(s).sort((a,b) => a-b);
+  }, [games]);
+
+  const streamProgressionLines = useMemo(() => {
+    const dateToIndex = new Map(progressionDates.map((d, i) => [d, i]));
+
+    return games
+      .filter(g => g.totalDuration > 0)
+      .map(g => {
+        let cumSecs = 0; 
+        const allStreams = [];
+        
+        Object.values(g.cycles || {}).forEach(c => {
+          (c.timestamps || []).forEach(ts => {
+            const d = parseCustomTimestamp(ts).getTime();
+            if (d > 0) allStreams.push({ date: d, duration: ts.duration || 0 });
+          });
+        });
+
+        allStreams.sort((a, b) => a.date - b.date);
+
+        const dataPoints = allStreams.map(ts => {
+          cumSecs += ts.duration;
+          return {
+            xIndex: dateToIndex.get(ts.date),
+            cumulativeHours: parseFloat((cumSecs / 3600).toFixed(2)),
+            rawSeconds: cumSecs,
+            date: ts.date,
+            gameName: g.game_name
+          };
+        });
+
+        const color = g.latestRunLabel === 'Completed' ? '#f5a623' : 
+                      g.latestRunLabel === 'Ongoing'   ? '#3ddc84' : '#ff5c5c';
+
+        return { 
+          gameName: g.game_name, 
+          color, 
+          status: g.latestRunLabel,
+          image: getLowResUrl(g.thumbnail_urls?.[0] || '', layoutPrefs?.highResImages),
+          data: dataPoints 
+        };
+      });
+  }, [games, progressionDates, layoutPrefs?.highResImages]);
+
+  const gamesTimeline = useMemo(() => {
+    return [...games]
+      .filter(g => g.totalDuration > 0 && g.firstStreamTimestampMs)
+      .sort((a, b) => a.firstStreamTimestampMs - b.firstStreamTimestampMs)
+      .map((g, index) => {
+        const d = new Date(g.firstStreamTimestampMs);
+        return {
+          index,
+          name: g.game_name,
+          hours: parseFloat((g.totalDuration / 3600).toFixed(1)),
+          rawSeconds: g.totalDuration,
+          fullDate: d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+          month: d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+          status: g.latestRunLabel,
+          image: getLowResUrl(g.thumbnail_urls?.[0] || '', layoutPrefs?.highResImages),
+        };
+      });
+  }, [games, layoutPrefs?.highResImages]);
+
+  const mostRecentGame = useMemo(() =>
+    games.reduce((latest, g) => {
+      if (!latest || (g.lastStreamTimestampMs && g.lastStreamTimestampMs > (latest.lastStreamTimestampMs || 0))) return g;
+      return latest;
+    }, null),
+  [games]);
+
+  const tagFrequencies = useMemo(() => {
+    const counts = {};
+    const excludedMetaTags = new Set([
+      'steam achievements', 'family sharing', 'captions available', 'in-app purchases', 'stats', 'includes level editor', 'vr support', 'steam cloud', 'steam leaderboards', 'cross-platform multiplayer', 'mmo', 'partial controller support', 'hdr available', 'stereo sound', 'custom volume controls', 'surround sound', 'playable without timed input', 'camera comfort', 'save anytime', 'full controller support', 'controller', 'co-op', 'online co-op', 'multiplayer', 'singleplayer', 'qte', 'accessibility', 'remote play', 'cloud saves', 'achievements', 'trading cards', 'windows', 'mac', 'linux'
+    ]);
+
+    games.forEach(g => {
+      if (g.details && g.details.tags) {
+        const tags = g.details.tags.split(',').map(t => t.trim());
+        tags.forEach(t => {
+          const lowerT = t.toLowerCase();
+          if (t && lowerT !== 'unknown' && t.split(' ').length <= 3 && /^[a-zA-Z\s\-]+$/.test(t)) {
+            if (!excludedMetaTags.has(lowerT) && !lowerT.includes('controller') && !lowerT.includes('steam ') && !lowerT.includes('sound')) {
+              counts[t] = (counts[t] || 0) + 1;
+            }
+          }
+        });
+      }
+    });
+
+    return Object.entries(counts)
+      .map(([text, count]) => ({ text, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 100); 
+  }, [games]);
+
+  const timeSinceLastStream = useDynamicTime(mostRecentGame?.lastStreamTimestampMs);
+
+  const card1Data = {
+    totalStreams,
+    totalDuration: totalDurationOverall,
+    hourlyStreamData,
+    longestStreakSecs: streakBreakStats.longestStreakSecs,
+    maxStreakStartMs: streakBreakStats.maxStreakStartMs,
+    maxStreakEndMs: streakBreakStats.maxStreakEndMs,
+    longestStream,
+    highResImages: layoutPrefs?.highResImages,
+    actualSessionSecs: deficitStats.actualSessionSecs,
+    discardedSecs: deficitStats.discardedSecs,
+    gainedSecs: deficitStats.gainedSecs
+  };
+
+  const card2Data = {
+    totalGames,
+    statusData,
+    dowStreamData,
+    longestBreakSecs: streakBreakStats.longestBreakSecs,
+    maxBreakStartMs: streakBreakStats.maxBreakStartMs,
+    maxBreakEndMs: streakBreakStats.maxBreakEndMs,
+    isActiveBreak: streakBreakStats.isActiveBreak,
+    shortestStream,
+    highResImages: layoutPrefs?.highResImages,
+    deficitData: deficitStats.deficitData
+  };
+
+  const card3Data = {
+    mostRecentGame,
+    timeSinceLastStream,
+    gamesTimeline,
+    streamProgressionLines,
+    progressionDates,
+    dailyStreamHours,
+    allStreamsChronological,
+    tagFrequencies
+  };
+
+  return { card1Data, card2Data, card3Data, games };
+}

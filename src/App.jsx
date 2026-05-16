@@ -189,7 +189,7 @@ export default function App() {
           <MosaicBackground 
             mosaicImages={mosaicImages} 
             isPaused={mosaicPaused} 
-            isSlowMode={currentView !== 'stats' && currentView !== 'graphs'} 
+            isSlowMode={currentView !== 'stats'} 
             shouldFlip={isImageReady} 
             highResImages={settings.layoutPrefs.highResImages} 
           />

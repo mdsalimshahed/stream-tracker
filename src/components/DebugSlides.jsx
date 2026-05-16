@@ -1,8 +1,7 @@
 // src/components/DebugSlides.jsx
-import React, { useMemo } from 'react';
-import { getLatestRunWithTimestamp } from './stats/utils';
-import { getLowResUrl, getTsDateStr, parseCustomTimestamp } from '../utils/helpers';
-import { useDynamicTime } from './stats/hooks';
+import React, { useState, useEffect } from 'react';
+import { useDebugData } from '../hooks/useDebugData';
+import { getLowResUrl } from '../utils/helpers';
 import { STYLES } from './stats/styles';
 
 import { getCard1Slide } from './stats/slides/Card1Slides';
@@ -10,534 +9,36 @@ import { getCard2Slide } from './stats/slides/Card2Slides';
 import { getCard3Slide } from './stats/slides/Card3Slides';
 
 export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
-  // ─── Base game list ────────────────────────────────────────────────────────
-  const games = useMemo(() =>
-    Object.entries(streamData).map(([id, data]) => {
-      const cycles = data.cycles || {};
-      const totalStreams = Object.values(cycles).reduce((acc, c) => acc + Number(c.stream_count || 0), 0);
-      
-      let totalDuration = 0;
-      let firstStreamTimestampMs = null;
+  const { card1Data, card2Data, card3Data } = useDebugData(streamData, layoutPrefs);
 
-      Object.values(cycles).forEach(c => {
-        (c.timestamps || []).forEach(ts => {
-          totalDuration += (ts.duration || 0);
-          const d = parseCustomTimestamp(ts).getTime();
-          if (d > 0 && (!firstStreamTimestampMs || d < firstStreamTimestampMs)) {
-            firstStreamTimestampMs = d;
-          }
-        });
-      });
+  const [latestBgIndex, setLatestBgIndex] = useState(0);
+  const latestGameImages = card3Data.mostRecentGame?.thumbnail_urls || [];
 
-      const latestRunInfo = getLatestRunWithTimestamp(cycles);
-      const latestRunLabel = latestRunInfo.run ? (latestRunInfo.run.label || 'Ongoing') : 'Ongoing';
-      const lastStreamTimestampMs = latestRunInfo.date ? latestRunInfo.date.getTime() : null;
-      const lastStreamTimestampRaw = getTsDateStr(latestRunInfo.timestamp);
-      
-      let latestRunName = '';
-      if (latestRunInfo.run) {
-        latestRunName = latestRunInfo.run.displayName || 
-          (latestRunInfo.cycleId === 'main' ? 'First Playthrough' : (latestRunInfo.cycleId || '').replace(/_/g, ' '));
-      }
+  // Cycle through the images of the latest game just like on the main Stats page
+  useEffect(() => {
+    if (latestGameImages.length < 2) return;
+    const initialDelay = Math.random() * 2000;
+    const cycleInterval = 3500 + Math.random() * 1000;
+    let interval;
+    const timeout = setTimeout(() => {
+      setLatestBgIndex(prev => (prev + 1) % latestGameImages.length);
+      interval = setInterval(() => {
+        setLatestBgIndex(prev => (prev + 1) % latestGameImages.length);
+      }, cycleInterval);
+    }, initialDelay);
+    return () => { clearTimeout(timeout); clearInterval(interval); };
+  }, [latestGameImages]);
 
-      return {
-        id, ...data, totalStreams, totalDuration, firstStreamTimestampMs, 
-        latestRunLabel, lastStreamTimestampMs, lastStreamTimestampRaw, latestRunName, 
-        thumbnail_urls: data.thumbnail_urls || []
-      };
-    }),
-  [streamData]);
+  const heroThumb = latestGameImages[0] || '';
+  const rawLatestBgImage = latestGameImages[latestBgIndex] || heroThumb;
+  const latestBgImage = getLowResUrl(rawLatestBgImage, layoutPrefs?.highResImages);
 
-  // ─── Shared Calculations ──────────────────────────────────────────────────
-  const totalStreams = useMemo(() => games.reduce((s, g) => s + g.totalStreams, 0), [games]);
-  const totalGames = games.length;
-  const totalDurationOverall = useMemo(() => games.reduce((acc, g) => acc + g.totalDuration, 0), [games]);
-
-  const hourlyStreamData = useMemo(() => {
-    const hours = Array.from({length: 24}, (_, i) => ({ 
-      hour: i, 
-      displayHour: i === 0 ? '12AM' : i < 12 ? `${i}AM` : i === 12 ? '12PM' : `${i-12}PM`,
-      count: 0 
-    }));
-    
-    games.forEach(g => {
-      Object.values(g.cycles || {}).forEach(c => {
-        (c.timestamps || []).forEach(ts => {
-          const d = parseCustomTimestamp(ts);
-          if (d.getTime() > 0) {
-            const hr = d.getHours();
-            hours[hr].count += 1;
-          }
-        });
-      });
-    });
-    return hours;
-  }, [games]);
-
-  const dowStreamData = useMemo(() => {
-    const displayDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const mapDay = (d) => d === 0 ? 6 : d - 1; 
-
-    const dow = Array.from({length: 7}, (_, i) => ({
-      dayIndex: i,
-      displayDay: displayDays[i],
-      count: 0
-    }));
-
-    games.forEach(g => {
-      Object.values(g.cycles || {}).forEach(c => {
-        (c.timestamps || []).forEach(ts => {
-          const d = parseCustomTimestamp(ts);
-          if (d.getTime() > 0) {
-            const day = mapDay(d.getDay());
-            dow[day].count += 1;
-          }
-        });
-      });
-    });
-    return dow;
-  }, [games]);
-
-  // ─── Daily Splitting & EXACT Seconds Streak/Break Calculations ────────
-  const { dailyStreamHours, streakBreakStats } = useMemo(() => {
-    const allStreamsExact = [];
-    games.forEach(g => {
-      Object.values(g.cycles || {}).forEach(c => {
-        (c.timestamps || []).forEach(ts => {
-          const startMs = parseCustomTimestamp(ts).getTime();
-          if (startMs > 0) {
-            allStreamsExact.push({ 
-              startMs, 
-              duration: ts.duration || 0, 
-              endMs: startMs + (ts.duration || 0) * 1000 
-            });
-          }
-        });
-      });
-    });
-
-    allStreamsExact.sort((a, b) => a.startMs - b.startMs);
-
-    const mergedStreams = [];
-    allStreamsExact.forEach(s => {
-      if (mergedStreams.length === 0) {
-        mergedStreams.push({ ...s });
-      } else {
-        const last = mergedStreams[mergedStreams.length - 1];
-        if (s.startMs <= last.endMs) {
-          last.endMs = Math.max(last.endMs, s.endMs);
-        } else {
-          mergedStreams.push({ ...s });
-        }
-      }
-    });
-
-    let maxBreakSecs = 0;
-    let maxBreakStartMs = null;
-    let maxBreakEndMs = null;
-    let isActiveBreak = false;
-
-    for (let i = 1; i < mergedStreams.length; i++) {
-      const brkStart = mergedStreams[i-1].endMs;
-      const brkEnd = mergedStreams[i].startMs;
-      const brkSecs = (brkEnd - brkStart) / 1000;
-      if (brkSecs > maxBreakSecs) {
-        maxBreakSecs = brkSecs;
-        maxBreakStartMs = brkStart;
-        maxBreakEndMs = brkEnd;
-        isActiveBreak = false;
-      }
-    }
-
-    const nowMs = Date.now();
-    if (mergedStreams.length > 0) {
-      const lastEndMs = mergedStreams[mergedStreams.length - 1].endMs;
-      if (nowMs > lastEndMs) {
-        const activeBreakSecs = (nowMs - lastEndMs) / 1000;
-        if (activeBreakSecs > maxBreakSecs) {
-          maxBreakSecs = activeBreakSecs;
-          maxBreakStartMs = lastEndMs;
-          maxBreakEndMs = nowMs;
-          isActiveBreak = true;
-        }
-      }
-    }
-
-    const dailyMap = new Map();
-    const getMidnight = (ms) => {
-      const d = new Date(ms);
-      d.setHours(0, 0, 0, 0);
-      return d.getTime();
-    };
-
-    allStreamsExact.forEach(stream => {
-      let currentStart = stream.startMs;
-      let remainingSeconds = stream.duration;
-      let loopLimit = 48; 
-      
-      while (remainingSeconds > 0 && loopLimit > 0) {
-        const currentMidnight = getMidnight(currentStart);
-        const nextMidnight = currentMidnight + 86400000;
-        const timeUntilNextMidnight = (nextMidnight - currentStart) / 1000;
-
-        const secondsInCurrentDay = Math.min(remainingSeconds, timeUntilNextMidnight);
-        dailyMap.set(currentMidnight, (dailyMap.get(currentMidnight) || 0) + secondsInCurrentDay);
-
-        remainingSeconds -= secondsInCurrentDay;
-        currentStart = nextMidnight;
-        loopLimit--;
-      }
-    });
-
-    const sortedDays = Array.from(dailyMap.keys()).sort((a, b) => a - b);
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayMs = today.getTime();
-    
-    const continuousDailyStreamHours = [];
-    if (sortedDays.length > 0) {
-      let currentDate = new Date(sortedDays[0]);
-      const lastStreamMs = sortedDays[sortedDays.length - 1];
-      const endDateMs = Math.max(lastStreamMs, todayMs);
-      const endDate = new Date(endDateMs);
-
-      while (currentDate <= endDate) {
-        const t = currentDate.getTime();
-        const rawSecs = dailyMap.has(t) ? dailyMap.get(t) : 0;
-        const hrs = parseFloat((rawSecs / 3600).toFixed(2));
-        
-        continuousDailyStreamHours.push({
-          dateMs: t,
-          displayDate: `${currentDate.getDate()} ${currentDate.toLocaleString('en-US', { month: 'short' })}`,
-          rawSeconds: rawSecs,
-          hours: hrs
-        });
-        
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-    }
-
-    const streaks = [];
-    let currentStreakDaysList = [];
-
-    for (let i = 0; i < sortedDays.length; i++) {
-       const day = sortedDays[i];
-       if (i === 0) {
-          currentStreakDaysList = [day];
-       } else {
-          const prevDay = sortedDays[i-1];
-          if (Math.round((day - prevDay) / 86400000) === 1) {
-             currentStreakDaysList.push(day);
-          } else {
-             streaks.push([...currentStreakDaysList]);
-             currentStreakDaysList = [day];
-          }
-       }
-    }
-    if (currentStreakDaysList.length > 0) {
-       streaks.push([...currentStreakDaysList]);
-    }
-
-    let maxStreakSecs = 0;
-    let maxStreakStartMs = null;
-    let maxStreakEndMs = null;
-
-    streaks.forEach(streakDays => {
-       const streamsInStreak = allStreamsExact.filter(s => streakDays.includes(getMidnight(s.startMs)));
-       if (streamsInStreak.length > 0) {
-           const st = Math.min(...streamsInStreak.map(s => s.startMs));
-           const en = Math.max(...streamsInStreak.map(s => s.endMs));
-           const secs = (en - st) / 1000;
-           if (secs > maxStreakSecs) {
-               maxStreakSecs = secs;
-               maxStreakStartMs = st;
-               maxStreakEndMs = en;
-           }
-       }
-    });
-
-    return {
-      dailyStreamHours: continuousDailyStreamHours,
-      streakBreakStats: {
-        longestStreakSecs: maxStreakSecs,
-        maxStreakStartMs,
-        maxStreakEndMs,
-        longestBreakSecs: maxBreakSecs,
-        maxBreakStartMs,
-        maxBreakEndMs,
-        isActiveBreak
-      }
-    };
-  }, [games]);
-
-  // ─── Individual Streams Chronological & Extremes ────────
-  const { allStreamsChronological, longestStream, shortestStream } = useMemo(() => {
-    let streams = [];
-    games.forEach(g => {
-      Object.values(g.cycles || {}).forEach(c => {
-        let runName = c.displayName || (c.id === 'main' ? 'First Playthrough' : (c.id || '').replace(/_/g, ' '));
-
-        (c.timestamps || []).forEach((ts, idx) => {
-          const startMs = parseCustomTimestamp(ts).getTime();
-          if (startMs > 0 && ts.duration > 0) {
-            
-            let baseTitle = ts.title || `${g.game_name} - Stream #${idx + 1}`;
-            let finalTitle = (runName && runName !== 'First Playthrough') 
-              ? `${baseTitle} (${runName})` 
-              : baseTitle;
-
-            streams.push({
-              startMs,
-              duration: ts.duration,
-              gameName: g.game_name,
-              status: g.latestRunLabel, 
-              cycleName: runName,
-              streamTitle: finalTitle,
-              thumbnails: g.thumbnail_urls || [],
-              displayDate: getTsDateStr(ts),
-              hours: parseFloat((ts.duration / 3600).toFixed(2))
-            });
-          }
-        });
-      });
-    });
-
-    streams.sort((a, b) => a.startMs - b.startMs);
-    const chrono = streams.map((s, i) => ({ ...s, index: i + 1 }));
-
-    let longest = null;
-    let shortest = null;
-    
-    if (chrono.length > 0) {
-      longest = chrono.reduce((prev, curr) => curr.duration > prev.duration ? curr : prev, chrono[0]);
-      shortest = chrono.reduce((prev, curr) => curr.duration < prev.duration ? curr : prev, chrono[0]);
-    }
-
-    return { allStreamsChronological: chrono, longestStream: longest, shortestStream: shortest };
-  }, [games]);
-
-  // ─── Deficit and Session Calculations ────────
-  const deficitStats = useMemo(() => {
-    let actualSessionSecs = 0;
-    let discardedSecs = 0;
-    let gainedSecs = 0;
-    const deficitData = [];
-    
-    let index = 1;
-    
-    const streams = [];
-    games.forEach(g => {
-      Object.values(g.cycles || {}).forEach(c => {
-        let runName = c.displayName || (c.id === 'main' ? 'First Playthrough' : (c.id || '').replace(/_/g, ' '));
-        (c.timestamps || []).forEach((ts, idx) => {
-          const vidDur = ts.duration || 0;
-          let actualDur = vidDur;
-          if (ts.startTime && ts.endTime) {
-            actualDur = Math.floor((ts.endTime - ts.startTime) / 1000);
-          }
-          
-          if (actualDur > 0 || vidDur > 0) {
-            const diff = actualDur - vidDur;
-            
-            let baseTitle = ts.title || `${g.game_name} - Stream #${idx + 1}`;
-            let finalTitle = (runName && runName !== 'First Playthrough') 
-              ? `${baseTitle} (${runName})` 
-              : baseTitle;
-            
-            streams.push({
-              gameName: g.game_name,
-              streamTitle: finalTitle,
-              actualDur,
-              vidDur,
-              diff,
-              date: ts.startTime || ts.date || 0
-            });
-          }
-        });
-      });
-    });
-
-    streams.sort((a,b) => a.date - b.date).forEach(s => {
-      actualSessionSecs += s.actualDur;
-      if (s.diff > 0) discardedSecs += s.diff;
-      if (s.diff < 0) gainedSecs += Math.abs(s.diff);
-      
-      deficitData.push({
-        index: index++,
-        gameName: s.gameName,
-        streamTitle: s.streamTitle,
-        diff: s.diff,
-        dateMs: s.date
-      });
-    });
-
-    return { actualSessionSecs, discardedSecs, gainedSecs, deficitData };
-  }, [games]);
-
-  const statusData = useMemo(() => {
-    const sums = { Completed: 0, Ongoing: 0, Abandoned: 0 };
-    games.forEach(g => {
-      const label = g.latestRunLabel || 'Ongoing';
-      sums[label] = (sums[label] || 0) + g.totalDuration;
-    });
-    return [
-      { name: 'Ongoing',   rawSeconds: sums.Ongoing,   hours: parseFloat((sums.Ongoing / 3600).toFixed(1)), color: '#3ddc84' },
-      { name: 'Completed', rawSeconds: sums.Completed, hours: parseFloat((sums.Completed / 3600).toFixed(1)), color: '#f5a623' },
-      { name: 'Abandoned', rawSeconds: sums.Abandoned, hours: parseFloat((sums.Abandoned / 3600).toFixed(1)), color: '#ff5c5c' },
-    ];
-  }, [games]);
-
-  const progressionDates = useMemo(() => {
-    const s = new Set();
-    games.forEach(g => Object.values(g.cycles||{}).forEach(c => (c.timestamps||[]).forEach(ts => {
-      const d = parseCustomTimestamp(ts).getTime();
-      if (d > 0) s.add(d);
-    })));
-    return Array.from(s).sort((a,b) => a-b);
-  }, [games]);
-
-  const streamProgressionLines = useMemo(() => {
-    const dateToIndex = new Map(progressionDates.map((d, i) => [d, i]));
-
-    return games
-      .filter(g => g.totalDuration > 0)
-      .map(g => {
-        let cumSecs = 0; 
-        const allStreams = [];
-        
-        Object.values(g.cycles || {}).forEach(c => {
-          (c.timestamps || []).forEach(ts => {
-            const d = parseCustomTimestamp(ts).getTime();
-            if (d > 0) allStreams.push({ date: d, duration: ts.duration || 0 });
-          });
-        });
-
-        allStreams.sort((a, b) => a.date - b.date);
-
-        const dataPoints = allStreams.map(ts => {
-          cumSecs += ts.duration;
-          return {
-            xIndex: dateToIndex.get(ts.date),
-            cumulativeHours: parseFloat((cumSecs / 3600).toFixed(2)),
-            rawSeconds: cumSecs,
-            date: ts.date,
-            gameName: g.game_name
-          };
-        });
-
-        const color = g.latestRunLabel === 'Completed' ? '#f5a623' : 
-                      g.latestRunLabel === 'Ongoing'   ? '#3ddc84' : '#ff5c5c';
-
-        return { 
-          gameName: g.game_name, 
-          color, 
-          status: g.latestRunLabel,
-          image: getLowResUrl(g.thumbnail_urls?.[0] || '', layoutPrefs?.highResImages),
-          data: dataPoints 
-        };
-      });
-  }, [games, progressionDates, layoutPrefs?.highResImages]);
-
-  const gamesTimeline = useMemo(() => {
-    return [...games]
-      .filter(g => g.totalDuration > 0 && g.firstStreamTimestampMs)
-      .sort((a, b) => a.firstStreamTimestampMs - b.firstStreamTimestampMs)
-      .map((g, index) => {
-        const d = new Date(g.firstStreamTimestampMs);
-        return {
-          index,
-          name: g.game_name,
-          hours: parseFloat((g.totalDuration / 3600).toFixed(1)),
-          rawSeconds: g.totalDuration,
-          fullDate: d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-          month: d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-          status: g.latestRunLabel,
-          image: getLowResUrl(g.thumbnail_urls?.[0] || '', layoutPrefs?.highResImages),
-        };
-      });
-  }, [games, layoutPrefs?.highResImages]);
-
-  const mostRecentGame = useMemo(() =>
-    games.reduce((latest, g) => {
-      if (!latest || (g.lastStreamTimestampMs && g.lastStreamTimestampMs > (latest.lastStreamTimestampMs || 0))) return g;
-      return latest;
-    }, null),
-  [games]);
-
-  const tagFrequencies = useMemo(() => {
-    const counts = {};
-    const excludedMetaTags = new Set([
-      'steam achievements', 'family sharing', 'captions available', 'in-app purchases', 'stats', 'includes level editor', 'vr support', 'steam cloud', 'steam leaderboards', 'cross-platform multiplayer', 'mmo', 'partial controller support', 'hdr available', 'stereo sound', 'custom volume controls', 'surround sound', 'playable without timed input', 'camera comfort', 'save anytime', 'full controller support', 'controller', 'co-op', 'online co-op', 'multiplayer', 'singleplayer', 'qte', 'accessibility', 'remote play', 'cloud saves', 'achievements', 'trading cards', 'windows', 'mac', 'linux'
-    ]);
-
-    games.forEach(g => {
-      if (g.details && g.details.tags) {
-        const tags = g.details.tags.split(',').map(t => t.trim());
-        tags.forEach(t => {
-          const lowerT = t.toLowerCase();
-          if (t && lowerT !== 'unknown' && t.split(' ').length <= 3 && /^[a-zA-Z\s\-]+$/.test(t)) {
-            if (!excludedMetaTags.has(lowerT) && !lowerT.includes('controller') && !lowerT.includes('steam ') && !lowerT.includes('sound')) {
-              counts[t] = (counts[t] || 0) + 1;
-            }
-          }
-        });
-      }
-    });
-
-    return Object.entries(counts)
-      .map(([text, count]) => ({ text, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 100); 
-  }, [games]);
-
-  const timeSinceLastStream = useDynamicTime(mostRecentGame?.lastStreamTimestampMs);
-  const heroThumb = mostRecentGame?.thumbnail_urls?.[0] || '';
-  const latestBgImage = getLowResUrl(heroThumb, layoutPrefs?.highResImages);
-
-  const data1 = { 
-    totalStreamsCount: totalStreams, 
-    totalStreams, 
-    totalDuration: totalDurationOverall,
-    hourlyStreamData,
-    longestStreakSecs: streakBreakStats.longestStreakSecs,
-    maxStreakStartMs: streakBreakStats.maxStreakStartMs,
-    maxStreakEndMs: streakBreakStats.maxStreakEndMs,
-    latestBgImage,
-    actualSessionSecs: deficitStats.actualSessionSecs,
-    discardedSecs: deficitStats.discardedSecs,
-    gainedSecs: deficitStats.gainedSecs
-  };
-  
-  const data2 = { 
-    totalGamesCount: totalGames, 
-    totalGames, 
-    statusData,
-    dowStreamData,
-    longestBreakSecs: streakBreakStats.longestBreakSecs,
-    maxBreakStartMs: streakBreakStats.maxBreakStartMs,
-    maxBreakEndMs: streakBreakStats.maxBreakEndMs,
-    isActiveBreak: streakBreakStats.isActiveBreak,
-    latestBgImage,
-    deficitData: deficitStats.deficitData
-  };
-  
-  const data3 = { 
-    latestBgImage, 
-    mostRecentGame, 
-    timeSinceLastStream, 
-    gamesTimeline, 
-    streamProgressionLines, 
-    progressionDates,
-    dailyStreamHours,
-    tagFrequencies
-  };
-
-  const data4 = {
-    longestStream,
-    shortestStream,
-    allStreamsChronological,
-    highResImages: layoutPrefs?.highResImages
+  // Supplying static "Count Up" variants to maintain immediate static display
+  const slideData1 = { ...card1Data, totalStreamsCount: card1Data.totalStreams };
+  const slideData2 = { ...card2Data, totalGamesCount: card2Data.totalGames };
+  const slideData3 = { 
+    ...card3Data, 
+    latestBgImage 
   };
 
   return (
@@ -564,19 +65,22 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
               <div className="stats-left-col">
                 <div className="card-wrapper-left relative">
                   <div className="stat-card">
-                    {i === 4 ? getCard1Slide(4, data4) : getCard1Slide(i, data1)}
+                    {i === 4 ? getCard1Slide(4, slideData1) : getCard1Slide(i, slideData1)}
                   </div>
                 </div>
-                <div className="stats-progress-track"><div className="stats-progress-fill" style={{ width: '100%', opacity: 0.5 }} /></div>
+                {/* Disabled the gradient fill animation using animation: 'none' */}
+                <div className="stats-progress-track">
+                  <div className="stats-progress-fill" style={{ width: '100%', opacity: 0.5, animation: 'none' }} />
+                </div>
                 <div className="card-wrapper-left relative">
                   <div className="stat-card">
-                    {i === 4 ? getCard2Slide(4, data4) : getCard2Slide(i, data2)}
+                    {i === 4 ? getCard2Slide(4, slideData2) : getCard2Slide(i, slideData2)}
                   </div>
                 </div>
               </div>
               <div className="card-wrapper-right relative group">
-                <div className="stats-right-col">
-                  {i === 4 ? getCard3Slide(4, data4) : getCard3Slide(i, data3)}
+                <div className="stats-right-col" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                  {i === 4 ? getCard3Slide(4, slideData3) : getCard3Slide(i, slideData3)}
                 </div>
               </div>
             </div>

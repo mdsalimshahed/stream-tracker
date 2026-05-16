@@ -39,7 +39,8 @@ export const DEFAULT_LAYOUT_PREFS = {
   statsInnerGap: 14,
   highResImages: false,
   enableHoverEffects: true,
-  enableViewTransitions: true
+  enableViewTransitions: true,
+  bgCycleInterval: 5
 };
 
 export const DEFAULT_THUMBNAIL_CONFIG = {

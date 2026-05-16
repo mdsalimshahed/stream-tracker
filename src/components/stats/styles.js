@@ -90,7 +90,7 @@ export const STYLES = `
     position: absolute;
     top: 0; left: 0; height: 100%; width: 0%;
     background: linear-gradient(to right, rgba(232, 200, 122, 0.2), var(--c-accent));
-    animation: fillLine 5s linear infinite;
+    animation: fillLine var(--cycle-speed, 5s) linear infinite;
   }
 
   /* RIGHT COLUMN (CELL 2) */
@@ -182,6 +182,9 @@ export const STYLES = `
     display: flex;
     flex-direction: column;
     justify-content: center;
+    padding: 0 24px; /* <-- This pulls your text away from the edges */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
 

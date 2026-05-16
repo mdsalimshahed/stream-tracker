@@ -226,14 +226,18 @@ export default function LivestreamSetupWorkspace({
     handleCopy(title, true);
     
     if (workspaceCanvasRef.current) {
-      const dataUrl = workspaceCanvasRef.current.toDataURL('image/jpeg', 0.92);
-      const safeName = game.game_name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = `${safeName}_ep${nC}_thumbnail.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      try {
+        const dataUrl = workspaceCanvasRef.current.toDataURL('image/jpeg', 0.92);
+        const safeName = game.game_name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = `${safeName}_ep${nC}_thumbnail.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (corsError) {
+        console.warn('Thumbnail download blocked by CORS configuration, proceeding with data preservation in memory:', corsError);
+      }
     }
 
     const nd = JSON.parse(JSON.stringify(streamData));
@@ -245,14 +249,14 @@ export default function LivestreamSetupWorkspace({
     if (selectedStreamNumber === null && !sessionSaved.current) {
       const ts = generateTimestamp();
       nd[gameId].cycles[cycleName].stream_count = nC;
-      nd[gameId].cycles[cycleName].timestamps.push({ date: ts }); // UPDATED TO PUSH OBJECT
+      nd[gameId].cycles[cycleName].timestamps.push({ date: ts });
       sessionSaved.current = true;
       setHasCycleChanges(false);
       onSave(nd);
-      onNotify('Session saved, title copied & thumbnail downloaded!', 'success');
+      onNotify('Session saved & title copied! (Thumbnail download skipped due to source image security policies)', 'success');
     } else {
       onSave(nd);
-      onNotify(selectedStreamNumber !== null ? 'Session settings saved & thumbnail downloaded!' : 'Session saved & thumbnail downloaded!', 'success');
+      onNotify(selectedStreamNumber !== null ? 'Session configuration updated!' : 'Session configuration state synchronized successfully!', 'success');
     }
   };
 

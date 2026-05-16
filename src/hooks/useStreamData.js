@@ -57,7 +57,6 @@ export function useStreamData(notify) {
                 const steamDataObj = detailsRaw[steamId]?.data;
                 
                 if (steamDataObj) {
-                  game.cover_image = steamDataObj.header_image;
                   let newUrls = steamDataObj.screenshots ? steamDataObj.screenshots.map(s => s.path_full) : [];
                   newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
                   game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
@@ -73,13 +72,32 @@ export function useStreamData(notify) {
             await new Promise(r => setTimeout(r, 400));
           } catch (e) {}
         }
-        if (!game.thumbnail_urls || game.thumbnail_urls.length < 2) {
+        if (!game.thumbnail_urls || game.thumbnail_urls.length < 2 || !game.details.tags || game.details.tags === 'Unknown') {
           try {
             const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
             const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
             const rawgSearchData = await rawgSearchRes.json();
             if (rawgSearchData.results?.[0]) {
-              const rawgId = rawgSearchData.results[0].id;
+              const rawgGame = rawgSearchData.results[0];
+              const rawgId = rawgGame.id;
+              
+              if (rawgGame.background_image) {
+                game.cover_image = rawgGame.background_image;
+                changed = true;
+              }
+
+              if (rawgGame.tags) {
+                const engTags = rawgGame.tags
+                  .filter(t => t.language === 'eng')
+                  .map(t => t.name)
+                  .filter(name => name.trim().split(/\s+/).length <= 2);
+                
+                if (engTags.length > 0) {
+                  game.details.tags = engTags.join(', ');
+                  changed = true;
+                }
+              }
+
               const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
               const sData = await sRes.json();
               if (sData.results) {
@@ -126,7 +144,6 @@ export function useStreamData(notify) {
                   const detailsRaw = await detailRes.json();
                   const steamDataObj = detailsRaw[steamId]?.data;
                   if (steamDataObj) {
-                    game.cover_image = steamDataObj.header_image;
                     let newUrls = steamDataObj.screenshots ? steamDataObj.screenshots.map(s => s.path_full) : [];
                     newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
                     game.thumbnail_urls = [...new Set(newUrls)].filter(Boolean);
@@ -145,19 +162,40 @@ export function useStreamData(notify) {
             await new Promise(r => setTimeout(r, 400));
           } catch (e) {}
         }
-        if (!game.thumbnail_urls || game.thumbnail_urls.length < 2) {
-          try {
-            const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-            const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-            const rawgSearchData = await rawgSearchRes.json();
-            if (rawgSearchData.results?.[0]) {
-              const rawgId = rawgSearchData.results[0].id;
-              const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-              const sData = await sRes.json();
-              if (sData.results) { game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...sData.results.map(x=>x.image)])].filter(Boolean); changed = true; }
+        
+        try {
+          const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+          const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+          const rawgSearchData = await rawgSearchRes.json();
+          if (rawgSearchData.results?.[0]) {
+            const rawgGame = rawgSearchData.results[0];
+            const rawgId = rawgGame.id;
+            
+            if (rawgGame.background_image) {
+              game.cover_image = rawgGame.background_image;
+              changed = true;
             }
-          } catch (e) {}
-        }
+
+            if (rawgGame.tags) {
+              const engTags = rawgGame.tags
+                .filter(t => t.language === 'eng')
+                .map(t => t.name)
+                .filter(name => name.trim().split(/\s+/).length <= 2);
+              
+              if (engTags.length > 0) {
+                game.details.tags = engTags.join(', ');
+                changed = true;
+              }
+            }
+
+            const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+            const sData = await sRes.json();
+            if (sData.results) { 
+              game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...sData.results.map(x=>x.image)])].filter(Boolean); 
+              changed = true; 
+            }
+          }
+        } catch (e) {}
       }
       
       // YouTube Data syncing
@@ -240,7 +278,15 @@ export function useStreamData(notify) {
         details.publisher = detailData.publishers?.map(p => p.name).join(', ') || details.publisher;
         details.releaseDate = detailData.released || details.releaseDate;
         details.genres = detailData.genres?.map(gn => gn.name).join(', ') || details.genres;
-        details.tags = detailData.tags?.filter(t => t.language === 'eng').map(t => t.name).join(', ') || details.tags;
+        
+        if (detailData.tags) {
+          const engTags = detailData.tags
+            .filter(t => t.language === 'eng')
+            .map(t => t.name)
+            .filter(name => name.trim().split(/\s+/).length <= 2);
+          if (engTags.length > 0) details.tags = engTags.join(', ');
+        }
+        
         if (detailData.background_image) cover_image = detailData.background_image;
         const sRes = await fetch(`https://api.rawg.io/api/games/${rid}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
         const sData = await sRes.json();
@@ -259,7 +305,6 @@ export function useStreamData(notify) {
              details.publisher = gameDetails.publishers?.join(', ') || 'Unknown';
              details.releaseDate = rDate || finalYear;
              details.genres = gameDetails.genres?.map(gn => gn.description).join(', ') || 'Unknown';
-             if (gameDetails.header_image) cover_image = gameDetails.header_image;
              if (gameDetails.screenshots) thumbnails = gameDetails.screenshots.map(s => s.path_full);
            }
         }
@@ -267,11 +312,21 @@ export function useStreamData(notify) {
           const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(finalName.replace(/[:™®©]/g, '').trim())}&page_size=1`);
           const rawgSearchData = await rawgSearchRes.json();
           if (rawgSearchData.results?.[0]) {
-            const rawgId = rawgSearchData.results[0].id;
-            if (rawgSearchData.results[0].tags) {
-              const engTags = rawgSearchData.results[0].tags.filter(t => t.language === 'eng').map(t => t.name);
+            const rawgGame = rawgSearchData.results[0];
+            const rawgId = rawgGame.id;
+            
+            if (rawgGame.background_image) {
+              cover_image = rawgGame.background_image;
+            }
+
+            if (rawgGame.tags) {
+              const engTags = rawgGame.tags
+                .filter(t => t.language === 'eng')
+                .map(t => t.name)
+                .filter(name => name.trim().split(/\s+/).length <= 2);
               if (engTags.length > 0) details.tags = engTags.join(', ');
             }
+            
             const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
             const sData = await sRes.json();
             if (sData.results) thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);
@@ -309,7 +364,19 @@ export function useStreamData(notify) {
         const rawgSearchData = await rawgSearchRes.json();
         if (rawgSearchData.results?.[0]) {
           const rawgGame = rawgSearchData.results[0];
-          if (rawgGame.tags) { const engTags = rawgGame.tags.filter(t => t.language === 'eng').map(t => t.name); if (engTags.length > 0) tagsString = engTags.join(', '); }
+          
+          if (rawgGame.background_image) {
+            cover_image = rawgGame.background_image;
+          }
+
+          if (rawgGame.tags) { 
+            const engTags = rawgGame.tags
+              .filter(t => t.language === 'eng')
+              .map(t => t.name)
+              .filter(name => name.trim().split(/\s+/).length <= 2); 
+            if (engTags.length > 0) tagsString = engTags.join(', '); 
+          }
+          
           const sRes = await fetch(`https://api.rawg.io/api/games/${rawgGame.id}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
           const sData = await sRes.json();
           if (sData.results) thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);

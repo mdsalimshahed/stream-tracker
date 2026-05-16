@@ -30,7 +30,7 @@ export function useSearch() {
         console.warn("Steam search failed, falling back to RAWG.", e);
       }
 
-      // STEP 2: Fetch Steam Details
+      // STEP 2: Fetch Steam Details & RAWG High-Res Backgrounds
       if (usedSteam && steamItems.length > 0) {
         const appIds = steamItems.map(i => i.id).join(',');
         
@@ -43,26 +43,56 @@ export function useSearch() {
               detailData = await detailRes.json();
           }
 
-          setSearchResults(steamItems.map(item => {
+          const detailedSteamItems = await Promise.all(steamItems.map(async item => {
             const d = detailData?.[item.id]?.data;
+            let cover_image = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`;
+            
+            // Fetch from RAWG to get the high-res background image
+            try {
+              const cleanName = item.name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+              const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+              const rawgData = await rawgRes.json();
+              if (rawgData.results && rawgData.results.length > 0 && rawgData.results[0].background_image) {
+                  cover_image = rawgData.results[0].background_image;
+              }
+            } catch(e) {}
+
             return { 
               id: item.id.toString(), 
               name: item.name, 
-              cover_image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`, 
+              cover_image, 
               developers: d?.developers ? d.developers.map(dev => ({ name: dev })) : [], 
               released: d?.release_date?.date || '', 
               isRawgOnly: false,
               source: 'STEAM'
             };
           }));
+
+          setSearchResults(detailedSteamItems);
         } catch (err) {
-          setSearchResults(steamItems.map(item => ({ 
+          // Fallback if appdetails fails but we have steamItems
+          const fallbackItems = await Promise.all(steamItems.map(async item => {
+            let cover_image = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`;
+            
+            try {
+              const cleanName = item.name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+              const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+              const rawgData = await rawgRes.json();
+              if (rawgData.results && rawgData.results.length > 0 && rawgData.results[0].background_image) {
+                  cover_image = rawgData.results[0].background_image;
+              }
+            } catch(e) {}
+            
+            return { 
               id: item.id.toString(), 
               name: item.name, 
-              cover_image: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`, 
+              cover_image, 
               isRawgOnly: false,
               source: 'STEAM'
-          })));
+            };
+          }));
+          
+          setSearchResults(fallbackItems);
         }
       } else {
         // STEP 3: RAWG Fallback

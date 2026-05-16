@@ -1,3 +1,4 @@
+// src/components/stats/slides/card3/Card3Slide2.jsx
 import React, { useState, useMemo } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceDot, Label } from 'recharts';
 import { formatFullTime } from '../SlideHelpers';
@@ -92,19 +93,30 @@ export default function Card3Slide2({ data }) {
     });
   }, [streamProgressionLines, progressionDates]);
 
+  // Adjusts the X-axis dynamically to protect data dots from left and right edge clipping
   const xDomain = useMemo(() => {
     if (processedLines.length === 0) return ['dataMin', 'dataMax'];
     
     if (selectedGame) {
       const gameLine = processedLines.find(l => l.gameName === selectedGame);
       if (gameLine) {
-        return [Math.max(0, gameLine.minX - 2), gameLine.maxX + 2];
+        const totalSpan = gameLine.maxX - gameLine.minX;
+        const dynamicPadding = Math.max(4, Math.ceil(totalSpan * 0.18));
+        
+        // Balanced padding applied symmetrically to left and right scale limits
+        return [
+          Math.max(0, gameLine.minX - dynamicPadding), 
+          gameLine.maxX + dynamicPadding
+        ];
       }
     }
 
     const globalMin = Math.min(...processedLines.map(l => l.minX));
     const globalMax = Math.max(...processedLines.map(l => l.maxX));
-    return [globalMin, globalMax];
+    
+    const globalSpan = globalMax - globalMin;
+    const globalPadding = Math.max(3, Math.ceil(globalSpan * 0.05));
+    return [Math.max(0, globalMin - globalPadding), globalMax + globalPadding];
   }, [selectedGame, processedLines]);
 
   const { yMax, yTicks } = useMemo(() => {
@@ -114,7 +126,6 @@ export default function Card3Slide2({ data }) {
     });
     if (maxHours === 0) return { yMax: 15, yTicks: [5, 10, 15] }; 
     
-    // Divisible by 5 or 10, exactly 3 ticks
     const step = Math.max(5, Math.ceil(maxHours / 3 / 5) * 5);
     const yM = step * 3;
     const ticks = [step, step * 2, step * 3];

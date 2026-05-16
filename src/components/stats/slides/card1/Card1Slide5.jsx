@@ -49,7 +49,7 @@ export default function Card1Slide5({ data }) {
       </div>
       
       <div className="stat-label mt-2 drop-shadow-lg text-white/70">
-        Actual Session Duration
+        Total Session Duration
         <div 
           className="normal-case tracking-normal font-medium mt-1 w-full pr-4 drop-shadow-md space-y-1" 
           style={{ fontSize: 'calc(var(--sz-main-label) * 0.85rem)' }}

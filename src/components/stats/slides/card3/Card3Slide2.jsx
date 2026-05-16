@@ -157,10 +157,10 @@ export default function Card3Slide2({ data }) {
               
               <XAxis 
                 type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} height={35} 
-                tick={false} axisLine={true} tickLine={false} 
+                tick={false} axisLine={false} tickLine={false} 
               />
               <YAxis 
-                domain={[0, yMax]} ticks={yTicks} width={45} tick={false} axisLine={true} tickLine={false} 
+                domain={[0, yMax]} ticks={yTicks} width={45} tick={false} axisLine={false} tickLine={false} 
                 padding={{ top: 35, bottom: 10 }} 
               />
               
@@ -193,7 +193,7 @@ export default function Card3Slide2({ data }) {
               
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               <XAxis 
-                type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} stroke="#8a88a8" axisLine={true} 
+                type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} stroke="#8a88a8" axisLine={false} 
                 tickLine={false} tickMargin={10} height={35} minTickGap={5}
                 tick={{ fill: '#8a88a8', fontSize: 10 }}
                 tickFormatter={(val) => {
@@ -211,7 +211,7 @@ export default function Card3Slide2({ data }) {
               </XAxis>
               
               <YAxis 
-                domain={[0, yMax]} ticks={yTicks} stroke="#8a88a8" axisLine={true} tickLine={false} tickFormatter={(v) => `${Math.round(v)}h`}  
+                domain={[0, yMax]} ticks={yTicks} stroke="#8a88a8" axisLine={false} tickLine={false} tickFormatter={(v) => `${Math.round(v)}h`}  
                 width={45} padding={{ top: 35, bottom: 10 }} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }}
               >
                 <Label value="Playtime (Hours)" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />

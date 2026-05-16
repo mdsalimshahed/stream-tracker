@@ -76,7 +76,7 @@ export default function Card2Slide1({ data }) {
             <XAxis 
               dataKey="name" 
               tick={false} 
-              axisLine={true} 
+              axisLine={false} 
               stroke="#8a88a8" 
               tickLine={false} 
               height={15} 
@@ -94,7 +94,7 @@ export default function Card2Slide1({ data }) {
               stroke="#8a88a8" 
               fontSize={11} 
               tickLine={false} 
-              axisLine={true} 
+              axisLine={false} 
               tickFormatter={(v) => `${v}h`} 
               width={45} 
               tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8'}} 

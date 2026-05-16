@@ -107,14 +107,14 @@ export default function Card3Slide4({ data }) {
           <BarChart data={allStreamsChronological} margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis 
-              dataKey="index" stroke="#8a88a8" tickLine={false} axisLine={true} tick={{ fontSize: 10, fill: '#8a88a8' }}
+              dataKey="index" stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8' }}
               minTickGap={40} tickMargin={10} height={35}
               tickFormatter={(val) => `#${val}`}
             >
               <Label value="Stream Sequence" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
             </XAxis>
             <YAxis 
-              stroke="#8a88a8" tickLine={false} axisLine={true} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }}
+              stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }}
               allowDecimals={false} width={45} domain={[0, yMax]} ticks={yTicks}
               tickFormatter={(v) => `${Math.round(v)}h`}
             >

@@ -1,3 +1,4 @@
+// src/components/DebugSlides.jsx
 import React, { useMemo } from 'react';
 import { getLatestRunWithTimestamp } from './stats/utils';
 import { getLowResUrl, getTsDateStr, parseCustomTimestamp } from '../utils/helpers';
@@ -410,6 +411,24 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     }, null),
   [games]);
 
+  const tagFrequencies = useMemo(() => {
+    const counts = {};
+    games.forEach(g => {
+      if (g.details && g.details.tags) {
+        const tags = g.details.tags.split(',').map(t => t.trim());
+        tags.forEach(t => {
+          if (t && t.toLowerCase() !== 'unknown' && t.split(' ').length <= 2 && /^[a-zA-Z\s\-]+$/.test(t)) {
+            counts[t] = (counts[t] || 0) + 1;
+          }
+        });
+      }
+    });
+    return Object.entries(counts)
+      .map(([text, count]) => ({ text, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 100); 
+  }, [games]);
+
   const timeSinceLastStream = useDynamicTime(mostRecentGame?.lastStreamTimestampMs);
   const heroThumb = mostRecentGame?.thumbnail_urls?.[0] || '';
   const latestBgImage = getLowResUrl(heroThumb, layoutPrefs?.highResImages);
@@ -444,7 +463,8 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     gamesTimeline, 
     streamProgressionLines, 
     progressionDates,
-    dailyStreamHours
+    dailyStreamHours,
+    tagFrequencies
   };
 
   const data4 = {
@@ -474,7 +494,7 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
       <div className="stats-scroll custom-scrollbar" style={{ overflowY: 'auto', display: 'block' }}>
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 text-white tracking-tight">Slide Debug Panel</h1>
-          <p className="text-white/60">Previewing Slide 3, Slide 6, Slide 9, Slide 12, and Slide 15.</p>
+          <p className="text-white/60">Previewing Slide 3, Slide 6, Slide 9, Slide 12, Slide 15, and Slide 18.</p>
         </div>
 
         {[0, 1, 2, 3, 4, 5].map(i => (

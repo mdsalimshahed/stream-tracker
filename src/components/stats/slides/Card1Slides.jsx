@@ -1,3 +1,4 @@
+// src/components/stats/slides/Card1Slides.jsx
 import React from 'react';
 import { renderPlaceholder } from './SlideHelpers';
 import Card1Slide0 from './card1/Card1Slide0';

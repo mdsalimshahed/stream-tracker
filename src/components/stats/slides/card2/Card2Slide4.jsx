@@ -81,7 +81,7 @@ export default function Card2Slide4({ data }) {
         </div>
         
         <div className="stat-label mt-2 drop-shadow-lg text-white/70">
-          Shortest Individual Stream
+          Shortest Stream
           <div 
             className="text-[var(--c-accent2)] normal-case tracking-normal font-medium mt-1 truncate w-full pr-4 drop-shadow-md" 
             style={{ fontSize: 'calc(var(--sz-main-label) * 0.85rem)' }}

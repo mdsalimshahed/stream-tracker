@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceDot } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceDot, Label } from 'recharts';
 import { formatFullTime } from '../SlideHelpers';
 
 const Slide9Tooltip = ({ active, payload, selectedGame }) => {
@@ -92,7 +92,6 @@ export default function Card3Slide2({ data }) {
     });
   }, [streamProgressionLines, progressionDates]);
 
-  // FIX: Force Layer 1 and Layer 2 to use the exact same X-Axis domain
   const xDomain = useMemo(() => {
     if (processedLines.length === 0) return ['dataMin', 'dataMax'];
     
@@ -103,20 +102,22 @@ export default function Card3Slide2({ data }) {
       }
     }
 
-    // By calculating the global min and max across all lines, we ensure the 1-point lines 
-    // in Layer 2 align perfectly with the full lines in Layer 1!
     const globalMin = Math.min(...processedLines.map(l => l.minX));
     const globalMax = Math.max(...processedLines.map(l => l.maxX));
     return [globalMin, globalMax];
   }, [selectedGame, processedLines]);
 
-  const yMax = useMemo(() => {
-    let max = 0;
+  const { yMax, yTicks } = useMemo(() => {
+    let maxHours = 0;
     processedLines.forEach(l => {
-      if (l.endDot && l.endDot.cumulativeHours > max) max = l.endDot.cumulativeHours;
+      if (l.endDot && l.endDot.cumulativeHours > maxHours) maxHours = l.endDot.cumulativeHours;
     });
-    if (max === 0) return 50; 
-    return Math.ceil(max / 50) * 50; 
+    if (maxHours === 0) return { yMax: 3, yTicks: [1, 2, 3] }; 
+    
+    const niceSteps = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 100, 200, 250, 500];
+    let step = niceSteps.find(s => s * 3 >= maxHours) || Math.ceil(maxHours / 300) * 100;
+
+    return { yMax: step * 3, yTicks: [step, step * 2, step * 3] };
   }, [processedLines]);
 
   const handleBackgroundClick = (e) => {
@@ -126,7 +127,7 @@ export default function Card3Slide2({ data }) {
   };
 
   return (
-    <div className="slide-container flex flex-col justify-start bg-black/40 pt-4 pb-2 px-4 h-full outline-none" onClick={handleBackgroundClick}>
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden" onClick={handleBackgroundClick}>
       <style dangerouslySetInnerHTML={{ __html: `
         .recharts-wrapper, .recharts-surface, .recharts-responsive-container, svg { overflow: visible !important; outline: none !important; }
         .recharts-wrapper * { outline: none !important; }
@@ -138,11 +139,11 @@ export default function Card3Slide2({ data }) {
         {/* LAYER 1: BACKGROUND LINES */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-            <LineChart margin={{ top: 60, right: 35, left: 10, bottom: 10 }} style={{ overflow: 'visible' }}>
+            <LineChart margin={{ top: 20, right: 20, left: 10, bottom: 15 }} style={{ overflow: 'visible' }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               
-              <XAxis type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} height={30} tick={false} axisLine={true} tickLine={false} />
-              <YAxis domain={[0, yMax]} width={45} tick={false} axisLine={true} tickLine={false} />
+              <XAxis type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} height={35} tick={false} axisLine={true} tickLine={false} padding={{ left: 35, right: 35 }} />
+              <YAxis domain={[0, yMax]} ticks={yTicks} width={45} tick={false} axisLine={true} tickLine={false} padding={{ top: 35, bottom: 10 }} />
               
               {processedLines?.map((line, idx) => {
                 const isSelected = selectedGame === line.gameName;
@@ -169,26 +170,14 @@ export default function Card3Slide2({ data }) {
         {/* LAYER 2: FOREGROUND TOOLTIPS AND DOTS */}
         <div className="absolute inset-0 z-10">
           <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-            <LineChart margin={{ top: 60, right: 35, left: 10, bottom: 10 }} style={{ overflow: 'visible' }}>
-              
-              <text 
-                x="35%" 
-                y={40} 
-                textAnchor="middle" 
-                fill="rgba(255,255,255,0.5)" 
-                fontSize={20} 
-                fontWeight="regular" 
-                letterSpacing={2} 
-                className="uppercase pointer-events-none"
-              >
-                Progression
-              </text>
+            <LineChart margin={{ top: 20, right: 20, left: 10, bottom: 15 }} style={{ overflow: 'visible' }}>
               
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               <XAxis 
                 type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} stroke="#8a88a8" axisLine={false} 
-                tickLine={false} tickMargin={8} height={30} tickCount={8} minTickGap={5}
-                tick={{ fill: '#8a88a8', fontSize: 11 }}
+                tickLine={false} tickMargin={10} height={35} minTickGap={5}
+                padding={{ left: 35, right: 35 }}
+                tick={{ fill: '#8a88a8', fontSize: 10 }}
                 tickFormatter={(val) => {
                   if (!Number.isInteger(val)) return ''; 
                   if (val >= 0 && val < progressionDates.length) {
@@ -200,11 +189,16 @@ export default function Card3Slide2({ data }) {
                   }
                   return '';
                 }} 
-              />
+              >
+                <Label value="Timeline" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
+              </XAxis>
+              
               <YAxis 
-                domain={[0, yMax]} stroke="#8a88a8" axisLine={false} tickLine={false} tickFormatter={(v) => v === 0 ? '' : `${Math.round(v)}h`}  
-                width={45} tickMargin={5} tick={{ angle: -90, textAnchor: 'middle', fill: '#8a88a8', fontSize: 11 }}
-              />
+                domain={[0, yMax]} ticks={yTicks} stroke="#8a88a8" axisLine={false} tickLine={false} tickFormatter={(v) => `${Math.round(v)}h`}  
+                width={45} padding={{ top: 35, bottom: 10 }} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }}
+              >
+                <Label value="Playtime (Hours)" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
+              </YAxis>
               
               <Tooltip 
                 content={<Slide9Tooltip selectedGame={selectedGame} />} 
@@ -222,7 +216,7 @@ export default function Card3Slide2({ data }) {
                   return (
                     <Line 
                       key={`fg-dot-${idx}`}
-                      data={[line.endDot]} // Providing ONLY the end dot enforces the snap!
+                      data={[line.endDot]} 
                       type="monotone" 
                       dataKey="cumulativeHours" 
                       stroke="transparent" 

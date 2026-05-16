@@ -74,15 +74,16 @@ export default function Card3Slide1({ data }) {
     return ticks;
   }, [gamesTimeline]);
 
-  // Calculate dynamic Y-Max rounding up to nearest 50
-  const yMax = useMemo(() => {
-    let max = 0;
-    gamesTimeline?.forEach(g => {
-      if (g.hours > max) max = g.hours;
-    });
+  const { yMax, yTicks } = useMemo(() => {
+    if (!gamesTimeline || gamesTimeline.length === 0) return { yMax: 3, yTicks: [1, 2, 3] };
+    const maxHours = Math.max(...gamesTimeline.map(g => g.hours), 0);
+    if (maxHours === 0) return { yMax: 3, yTicks: [1, 2, 3] };
     
-    if (max === 0) return 50; 
-    return Math.ceil(max / 50) * 50; 
+    // Clean mathematical steps to guarantee exactly 3 ticks excluding 0
+    const niceSteps = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 100, 200, 250, 500];
+    let step = niceSteps.find(s => s * 3 >= maxHours) || Math.ceil(maxHours / 300) * 100;
+
+    return { yMax: step * 3, yTicks: [step, step * 2, step * 3] };
   }, [gamesTimeline]);
 
   return (
@@ -98,7 +99,7 @@ export default function Card3Slide1({ data }) {
       `}} />
       <div className="w-full h-full flex-1 outline-none relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <AreaChart data={gamesTimeline} margin={{ top: 25, right: 20, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
+          <AreaChart data={gamesTimeline} margin={{ top: 20, right: 20, left: 10, bottom: 15 }} style={{ overflow: 'visible' }}>
             
             <defs>
               <linearGradient id="slide6GradientFill" x1="0" y1="0" x2="1" y2="0">
@@ -128,6 +129,7 @@ export default function Card3Slide1({ data }) {
               tickMargin={10} 
               height={35} 
               minTickGap={5} 
+              padding={{ left: 35, right: 35 }}
               tick={{ fill: '#8a88a8', fontSize: 10 }}
               tickFormatter={(val) => { const g = gamesTimeline[val]; const p = g?.month.split(' '); return p?.length === 2 ? `${p[0]} '${p[1].slice(-2)}` : g?.month; }} 
             >
@@ -143,10 +145,11 @@ export default function Card3Slide1({ data }) {
               stroke="#8a88a8" 
               tickLine={false} 
               axisLine={false} 
-              tickFormatter={(v) => v === 0 ? '' : `${Math.round(v)}h`} 
-              tickCount={5}
+              tickFormatter={(v) => `${v}h`} 
               width={45} 
-              domain={[0, yMax]} 
+              domain={[0, yMax]}
+              ticks={yTicks}
+              padding={{ top: 35, bottom: 10 }}
               tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10}}
             >
               <Label 

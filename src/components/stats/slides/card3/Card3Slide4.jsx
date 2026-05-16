@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, ReferenceDot } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, ReferenceDot, Label } from 'recharts';
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -79,18 +79,21 @@ const PermanentMaxTooltipChronological = (props) => {
 export default function Card3Slide4({ data }) {
   const { allStreamsChronological } = data;
 
-  const yAxisConfig = useMemo(() => {
-    if (!allStreamsChronological || allStreamsChronological.length === 0) return { ticks: [0, 5], domain: [0, 5] };
+  const { yMax, yTicks } = useMemo(() => {
+    if (!allStreamsChronological || allStreamsChronological.length === 0) return { yMax: 3, yTicks: [1, 2, 3] };
     const maxHours = Math.max(...allStreamsChronological.map(d => d.hours), 0);
+    if (maxHours === 0) return { yMax: 3, yTicks: [1, 2, 3] };
     
-    let step = 1;
-    if (maxHours > 10) step = 5;
-    else if (maxHours > 5) step = 2;
-
-    const yMax = Math.max(step, Math.ceil(maxHours / step) * step);
-    const ticks = [];
-    for (let i = 0; i <= yMax; i += step) { ticks.push(i); }
-    return { ticks, domain: [0, yMax] };
+    let yM;
+    if (maxHours <= 24) {
+      yM = maxHours + 2;
+    } else {
+      yM = Math.ceil(maxHours / 5) * 5;
+      if (yM <= maxHours) yM += 5;
+    }
+    
+    const step = yM / 3;
+    return { yMax: yM, yTicks: [step, step * 2, yM] };
   }, [allStreamsChronological]);
 
   const maxPointData = useMemo(() => {
@@ -99,7 +102,7 @@ export default function Card3Slide4({ data }) {
   }, [allStreamsChronological]);
 
   return (
-    <div className="slide-container flex flex-col justify-center bg-black/40 p-4 h-full outline-none">
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
       <style dangerouslySetInnerHTML={{ __html: `
         .recharts-wrapper, .recharts-surface, .recharts-responsive-container, svg { overflow: visible !important; outline: none !important; }
         .recharts-wrapper * { outline: none !important; }
@@ -107,19 +110,26 @@ export default function Card3Slide4({ data }) {
       `}} />
       <div className="w-full flex-1 min-h-0 outline-none overflow-visible relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <BarChart data={allStreamsChronological} margin={{ top: 85, right: 10, left: -20, bottom: 0 }} style={{ overflow: 'visible' }}>
+          <BarChart data={allStreamsChronological} margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
             
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             
             <XAxis 
-              dataKey="index" stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 9, fill: '#8a88a8' }}
-              minTickGap={40} tickFormatter={(val) => `#${val}`}
-            />
+              dataKey="index" stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8' }}
+              minTickGap={40} tickMargin={10} height={35}
+              tickFormatter={(val) => `#${val}`}
+            >
+              <Label value="Stream Sequence" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
+            </XAxis>
+            
             <YAxis 
-              stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8' }}
-              allowDecimals={false} width={40} domain={yAxisConfig.domain} ticks={yAxisConfig.ticks}
-              tickFormatter={(v) => v === 0 ? '' : `${v}h`}
-            />
+              stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }}
+              allowDecimals={false} width={45} domain={[0, yMax]} ticks={yTicks}
+              tickFormatter={(v) => `${Number.isInteger(v) ? v : v.toFixed(1)}h`}
+            >
+              <Label value="Playtime (Hours)" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
+            </YAxis>
+            
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} isAnimationActive={false} />
             
             <Bar dataKey="hours" radius={[2, 2, 0, 0]} isAnimationActive={false} minPointSize={2}>

@@ -68,9 +68,12 @@ export const STYLES = `
   .stats-left-col { 
     display: flex; 
     flex-direction: column; 
-    height: 100%;
+    height: auto;
     width: 100%;
     z-index: 2;
+  }
+  @media (min-width: 1024px) {
+    .stats-left-col { height: 100%; }
   }
 
   /* PROGRESS DIVIDER */
@@ -93,13 +96,13 @@ export const STYLES = `
   /* RIGHT COLUMN (CELL 2) */
   .card-wrapper-right {
     position: relative;
-    height: 100%;
+    height: auto;
     width: 100%;
     min-height: 300px; /* Mobile fallback */
     z-index: 1;
   }
   @media (min-width: 1024px) {
-    .card-wrapper-right { margin-left: -1px; }
+    .card-wrapper-right { height: 100%; margin-left: -1px; }
   }
 
   /* LEFT CARDS WRAPPERS */

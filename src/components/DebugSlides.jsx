@@ -276,17 +276,13 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     let streams = [];
     games.forEach(g => {
       Object.values(g.cycles || {}).forEach(c => {
-        // Evaluate the run name (e.g., 'NG+', 'First Playthrough')
         let runName = c.displayName || (c.id === 'main' ? 'First Playthrough' : (c.id || '').replace(/_/g, ' '));
 
         (c.timestamps || []).forEach((ts, idx) => {
           const startMs = parseCustomTimestamp(ts).getTime();
           if (startMs > 0 && ts.duration > 0) {
             
-            // Generate the base title
             let baseTitle = ts.title || `${g.game_name} - Stream #${idx + 1}`;
-            
-            // Conditionally append the run name if it's NOT First Playthrough
             let finalTitle = (runName && runName !== 'First Playthrough') 
               ? `${baseTitle} (${runName})` 
               : baseTitle;
@@ -297,7 +293,7 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
               gameName: g.game_name,
               status: g.latestRunLabel, 
               cycleName: runName,
-              streamTitle: finalTitle, // <-- Slides 13, 14, and 15 will now receive this perfectly updated title!
+              streamTitle: finalTitle,
               thumbnails: g.thumbnail_urls || [],
               displayDate: getTsDateStr(ts),
               hours: parseFloat((ts.duration / 3600).toFixed(2))
@@ -492,15 +488,9 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       
       <div className="stats-scroll custom-scrollbar" style={{ overflowY: 'auto', display: 'block' }}>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 text-white tracking-tight">Slide Debug Panel</h1>
-          <p className="text-white/60">Previewing Slide 3, Slide 6, Slide 9, Slide 12, Slide 15, and Slide 18.</p>
-        </div>
-
         {[0, 1, 2, 3, 4, 5].map(i => (
           <div key={i} className="mb-14">
-            <h2 className="text-xl font-bold text-[#e8c87a] mb-4">Slide Trio {i + 1}</h2>
-            <div className="stats-top-row shadow-2xl" style={{ height: '350px', flex: 'none' }}>
+            <div className="stats-top-row shadow-2xl lg:h-[350px] flex-none">
               <div className="stats-left-col">
                 <div className="card-wrapper-left relative">
                   <div className="stat-card">

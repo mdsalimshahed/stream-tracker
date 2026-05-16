@@ -2,15 +2,12 @@
 import React, { useState, useMemo } from 'react';
 import { X } from 'lucide-react';
 
-
 // Hooks
 import { useSettings } from './hooks/useSettings';
 import { useStreamData } from './hooks/useStreamData';
 import { useHover } from './hooks/useHover';
 import { useScaling } from './hooks/useScaling';
 import { useSearch } from './hooks/useSearch';
-
-import Insights from './components/Insights';
 
 // Utilities
 import { migrateLabels } from './utils/dataUtils';
@@ -192,7 +189,7 @@ export default function App() {
           <MosaicBackground 
             mosaicImages={mosaicImages} 
             isPaused={mosaicPaused} 
-            isSlowMode={currentView !== 'stats' && currentView !== 'debug'} 
+            isSlowMode={currentView !== 'stats' && currentView !== 'graphs'} 
             shouldFlip={isImageReady} 
             highResImages={settings.layoutPrefs.highResImages} 
           />
@@ -226,13 +223,6 @@ export default function App() {
           {currentView === 'stats' && (
             <Stats streamData={streamData} systemFonts={scaledSystemFonts} layoutPrefs={scaledLayoutPrefs} />
           )}
-          {currentView === 'insights' && (
-            <Insights 
-              streamData={streamData} 
-              systemFonts={scaledSystemFonts} 
-              layoutPrefs={scaledLayoutPrefs} 
-            />
-          )}
           {currentView === 'search' && (
             <SearchView
               searchQuery={searchQuery} setSearchQuery={setSearchQuery}
@@ -241,7 +231,7 @@ export default function App() {
               scaledSystemFonts={scaledSystemFonts} scaledLayoutPrefs={scaledLayoutPrefs}
             />
           )}
-          {currentView === 'debug' && (
+          {currentView === 'graphs' && (
             <DebugSlides 
               streamData={streamData} 
               systemFonts={scaledSystemFonts} 

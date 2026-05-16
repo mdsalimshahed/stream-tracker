@@ -79,11 +79,11 @@ export default function Card2Slide1({ data }) {
               axisLine={true} 
               stroke="#8a88a8" 
               tickLine={false} 
-              height={35} 
+              height={15} 
               tickMargin={10}
             >
               <Label 
-                value="Status" 
+                value="Game Status" 
                 position="insideBottom" 
                 offset={-5} 
                 style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} 

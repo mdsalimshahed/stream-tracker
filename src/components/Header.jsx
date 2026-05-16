@@ -1,6 +1,7 @@
 // src/components/Header.jsx
 import React from 'react';
-import { Clock, BookOpen, Plus, Settings, Upload, Download, BarChart3, Lightbulb, Bug } from 'lucide-react';
+import { Clock, BookOpen, Plus, Settings, Upload, Download, BarChart3, Bug } from 'lucide-react';
+
 export default function Header({ currentView, onViewChange, onImport, onExport }) {
   const fileInputRef = React.useRef(null);
 
@@ -75,8 +76,7 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
               { id: 'search', label: 'Add', icon: Plus },
               { id: 'data', label: 'Styles', icon: Settings },
               { id: 'stats', label: 'Stats', icon: BarChart3 },
-              { id: 'insights', label: 'Insights', icon: Lightbulb },
-              { id: 'debug', label: 'Debug', icon: Bug }
+              { id: 'graphs', label: 'Graphs', icon: Bug }
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}

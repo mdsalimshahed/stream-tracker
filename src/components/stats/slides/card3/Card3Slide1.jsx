@@ -145,7 +145,7 @@ export default function Card3Slide1({ data }) {
               tickFormatter={(val) => { const g = gamesTimeline[val]; const p = g?.month.split(' '); return p?.length === 2 ? `${p[0]} '${p[1].slice(-2)}` : g?.month; }} 
             >
               <Label 
-                value="Timeline" 
+                value="Starting Date" 
                 position="insideBottom" 
                 offset={-5} 
                 style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} 
@@ -164,7 +164,7 @@ export default function Card3Slide1({ data }) {
               tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10}}
             >
               <Label 
-                value="Playtime (Hours)" 
+                value="Playtime" 
                 angle={-90} 
                 position="insideLeft" 
                 style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} 

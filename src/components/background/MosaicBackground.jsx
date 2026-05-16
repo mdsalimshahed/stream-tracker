@@ -3,8 +3,9 @@ import React, { useRef, useMemo, useEffect } from 'react';
 import { getLowResUrl } from '../../utils/helpers';
 
 const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip, highResImages }) => {  
-  const ROWS = 6; 
-  const IMGS_PER_ROW = 12; 
+  // 12x24 grid for smaller tiles 
+  const ROWS = 16; 
+  const IMGS_PER_ROW = 24; 
   
   const rowRefs = useRef([]);
   const requestRef = useRef(null);
@@ -19,7 +20,7 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
   const rowsConfig = useMemo(() => {
     const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
     
-    // Hardcode to low res for mosaic to prevent memory leaks and black flashes
+    // Using standard low-res url generation; object-cover will crop the images to fit grid
     const pool = mosaicImages?.length > 0 
       ? mosaicImages.map(img => ({ ...img, url: getLowResUrl(img.url, false) }))
       : [fallback];
@@ -164,9 +165,7 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
                     transformStyle: 'preserve-3d' 
                   }}
                 >
-                  {/* Removed bg-black to avoid harsh black artifacting when images load */}
                   <div className="absolute inset-0 bg-transparent" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
-                    {/* Removed loading="lazy" and decoding="async" so the browser doesn't try to unload the images when they loop off screen */}
                     <img src={item.url} alt="" className="w-full h-full object-cover block" />
                   </div>
                   <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: 'transparent' }} />

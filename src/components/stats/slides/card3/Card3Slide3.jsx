@@ -1,5 +1,12 @@
+// src/components/stats/slides/card3/Card3Slide3.jsx
 import React, { useMemo } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, ReferenceDot, Label } from 'recharts';
+
+const getOrdinal = (n) => {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -19,7 +26,7 @@ const CustomTooltip = ({ active, payload }) => {
     timeStr.push(`${s} second${s !== 1 ? 's' : ''}`);
 
     const d = new Date(data.dateMs);
-    const fullDate = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const fullDate = `${getOrdinal(d.getDate())} ${d.toLocaleDateString('en-US', { month: 'long' })}, ${d.getFullYear()}`;
 
     return (
       <div className="bg-[#0a0a0a] border border-white/20 p-3 rounded-lg text-xs font-mono text-white shadow-2xl z-50 pointer-events-none">
@@ -47,7 +54,7 @@ const PermanentMaxTooltip = (props) => {
   timeStr.push(`${s} second${s !== 1 ? 's' : ''}`);
 
   const d = new Date(maxData.dateMs);
-  const fullDate = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const fullDate = `${getOrdinal(d.getDate())} ${d.toLocaleDateString('en-US', { month: 'long' })}, ${d.getFullYear()}`;
 
   let color = '#ff5c5c'; 
   if (maxData.hours > 0 && maxData.hours <= maxData.midThreshold) color = '#f5a623'; 

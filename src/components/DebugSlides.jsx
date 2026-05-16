@@ -317,6 +317,64 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     return { allStreamsChronological: chrono, longestStream: longest, shortestStream: shortest };
   }, [games]);
 
+  // ─── Deficit and Session Calculations ────────
+  const deficitStats = useMemo(() => {
+    let actualSessionSecs = 0;
+    let discardedSecs = 0;
+    let gainedSecs = 0;
+    const deficitData = [];
+    
+    let index = 1;
+    
+    const streams = [];
+    games.forEach(g => {
+      Object.values(g.cycles || {}).forEach(c => {
+        let runName = c.displayName || (c.id === 'main' ? 'First Playthrough' : (c.id || '').replace(/_/g, ' '));
+        (c.timestamps || []).forEach((ts, idx) => {
+          const vidDur = ts.duration || 0;
+          let actualDur = vidDur;
+          if (ts.startTime && ts.endTime) {
+            actualDur = Math.floor((ts.endTime - ts.startTime) / 1000);
+          }
+          
+          if (actualDur > 0 || vidDur > 0) {
+            const diff = actualDur - vidDur;
+            
+            let baseTitle = ts.title || `${g.game_name} - Stream #${idx + 1}`;
+            let finalTitle = (runName && runName !== 'First Playthrough') 
+              ? `${baseTitle} (${runName})` 
+              : baseTitle;
+            
+            streams.push({
+              gameName: g.game_name,
+              streamTitle: finalTitle,
+              actualDur,
+              vidDur,
+              diff,
+              date: ts.startTime || ts.date || 0
+            });
+          }
+        });
+      });
+    });
+
+    streams.sort((a,b) => a.date - b.date).forEach(s => {
+      actualSessionSecs += s.actualDur;
+      if (s.diff > 0) discardedSecs += s.diff;
+      if (s.diff < 0) gainedSecs += Math.abs(s.diff);
+      
+      deficitData.push({
+        index: index++,
+        gameName: s.gameName,
+        streamTitle: s.streamTitle,
+        diff: s.diff,
+        dateMs: s.date
+      });
+    });
+
+    return { actualSessionSecs, discardedSecs, gainedSecs, deficitData };
+  }, [games]);
+
   const statusData = useMemo(() => {
     const sums = { Completed: 0, Ongoing: 0, Abandoned: 0 };
     games.forEach(g => {
@@ -409,16 +467,24 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
 
   const tagFrequencies = useMemo(() => {
     const counts = {};
+    const excludedMetaTags = new Set([
+      'steam achievements', 'family sharing', 'captions available', 'in-app purchases', 'stats', 'includes level editor', 'vr support', 'steam cloud', 'steam leaderboards', 'cross-platform multiplayer', 'mmo', 'partial controller support', 'hdr available', 'stereo sound', 'custom volume controls', 'surround sound', 'playable without timed input', 'camera comfort', 'save anytime', 'full controller support', 'controller', 'co-op', 'online co-op', 'multiplayer', 'singleplayer', 'qte', 'accessibility', 'remote play', 'cloud saves', 'achievements', 'trading cards', 'windows', 'mac', 'linux'
+    ]);
+
     games.forEach(g => {
       if (g.details && g.details.tags) {
         const tags = g.details.tags.split(',').map(t => t.trim());
         tags.forEach(t => {
-          if (t && t.toLowerCase() !== 'unknown' && t.split(' ').length <= 2 && /^[a-zA-Z\s\-]+$/.test(t)) {
-            counts[t] = (counts[t] || 0) + 1;
+          const lowerT = t.toLowerCase();
+          if (t && lowerT !== 'unknown' && t.split(' ').length <= 3 && /^[a-zA-Z\s\-]+$/.test(t)) {
+            if (!excludedMetaTags.has(lowerT) && !lowerT.includes('controller') && !lowerT.includes('steam ') && !lowerT.includes('sound')) {
+              counts[t] = (counts[t] || 0) + 1;
+            }
           }
         });
       }
     });
+
     return Object.entries(counts)
       .map(([text, count]) => ({ text, count }))
       .sort((a, b) => b.count - a.count)
@@ -437,7 +503,10 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     longestStreakSecs: streakBreakStats.longestStreakSecs,
     maxStreakStartMs: streakBreakStats.maxStreakStartMs,
     maxStreakEndMs: streakBreakStats.maxStreakEndMs,
-    latestBgImage
+    latestBgImage,
+    actualSessionSecs: deficitStats.actualSessionSecs,
+    discardedSecs: deficitStats.discardedSecs,
+    gainedSecs: deficitStats.gainedSecs
   };
   
   const data2 = { 
@@ -449,7 +518,8 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     maxBreakStartMs: streakBreakStats.maxBreakStartMs,
     maxBreakEndMs: streakBreakStats.maxBreakEndMs,
     isActiveBreak: streakBreakStats.isActiveBreak,
-    latestBgImage
+    latestBgImage,
+    deficitData: deficitStats.deficitData
   };
   
   const data3 = { 

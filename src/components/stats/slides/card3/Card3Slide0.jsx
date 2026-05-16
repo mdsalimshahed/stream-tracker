@@ -1,8 +1,12 @@
+// src/components/stats/slides/card3/Card3Slide0.jsx
 import React from 'react';
 import { CrossfadeImage } from '../../../common/UIComponents';
+import { useDynamicTime } from '../../hooks';
 
 export default function Card3Slide0({ data }) {
-  const { latestBgImage, mostRecentGame, timeSinceLastStream } = data;
+  const { latestBgImage, mostRecentGame } = data;
+  const timeSinceLastStream = useDynamicTime(mostRecentGame?.lastStreamTimestampMs);
+  
   return (
     <div className="slide-container justify-end outline-none">
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />

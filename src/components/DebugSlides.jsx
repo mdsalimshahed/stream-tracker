@@ -1,20 +1,19 @@
 // src/components/DebugSlides.jsx
 import React, { useState, useEffect } from 'react';
-import { useDebugData } from '../hooks/useDebugData';
 import { getLowResUrl } from '../utils/helpers';
 import { STYLES } from './stats/styles';
+import { Loader2 } from 'lucide-react';
 
 import { getCard1Slide } from './stats/slides/Card1Slides';
 import { getCard2Slide } from './stats/slides/Card2Slides';
 import { getCard3Slide } from './stats/slides/Card3Slides';
 
-export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
-  const { card1Data, card2Data, card3Data } = useDebugData(streamData, layoutPrefs);
+export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
+  const { card1Data, card2Data, card3Data, isReady } = cachedStats;
 
   const [latestBgIndex, setLatestBgIndex] = useState(0);
-  const latestGameImages = card3Data.mostRecentGame?.thumbnail_urls || [];
+  const latestGameImages = card3Data?.mostRecentGame?.thumbnail_urls || [];
 
-  // Cycle through the images of the latest game just like on the main Stats page
   useEffect(() => {
     if (latestGameImages.length < 2) return;
     const initialDelay = Math.random() * 2000;
@@ -29,17 +28,17 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
     return () => { clearTimeout(timeout); clearInterval(interval); };
   }, [latestGameImages]);
 
+  if (!isReady || !card1Data) {
+    return <div className="flex items-center justify-center h-full text-white/50"><Loader2 className="animate-spin mr-2"/> Compiling data blocks...</div>;
+  }
+
   const heroThumb = latestGameImages[0] || '';
   const rawLatestBgImage = latestGameImages[latestBgIndex] || heroThumb;
   const latestBgImage = getLowResUrl(rawLatestBgImage, layoutPrefs?.highResImages);
 
-  // Supplying static "Count Up" variants to maintain immediate static display
   const slideData1 = { ...card1Data, totalStreamsCount: card1Data.totalStreams };
   const slideData2 = { ...card2Data, totalGamesCount: card2Data.totalGames };
-  const slideData3 = { 
-    ...card3Data, 
-    latestBgImage 
-  };
+  const slideData3 = { ...card3Data, latestBgImage };
 
   return (
     <div className="stats-root"
@@ -68,7 +67,6 @@ export default function DebugSlides({ streamData, layoutPrefs, systemFonts }) {
                     {i === 4 ? getCard1Slide(4, slideData1) : getCard1Slide(i, slideData1)}
                   </div>
                 </div>
-                {/* Disabled the gradient fill animation using animation: 'none' */}
                 <div className="stats-progress-track">
                   <div className="stats-progress-fill" style={{ width: '100%', opacity: 0.5, animation: 'none' }} />
                 </div>

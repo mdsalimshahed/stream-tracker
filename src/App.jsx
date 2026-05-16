@@ -8,6 +8,7 @@ import { useStreamData } from './hooks/useStreamData';
 import { useHover } from './hooks/useHover';
 import { useScaling } from './hooks/useScaling';
 import { useSearch } from './hooks/useSearch';
+import { useDebugData } from './hooks/useDebugData';
 
 // Utilities
 import { migrateLabels } from './utils/dataUtils';
@@ -25,7 +26,7 @@ import SearchView from './components/SearchView';
 import MosaicBackground from './components/background/MosaicBackground.jsx';
 import { Notification } from './components/Notification';
 import { CrossfadeImage } from './components/common/UIComponents';
-import { parseCustomTimestamp, getLowResUrl } from './utils/helpers';
+import { getLowResUrl } from './utils/helpers';
 
 export default function App() {
   const [toast, setToast] = useState(null);
@@ -36,6 +37,9 @@ export default function App() {
   const { streamData, setStreamData, isSyncing, handleManualSync, handleAddGame, updateGameLink, editGameDetails, deleteGame, deleteCycle, deleteTimestamp, updateCycle, addCycle } = useStreamData(notify);
   const { scaledSystemFonts, scaledLayoutPrefs } = useScaling(settings.systemFonts, settings.layoutPrefs);
   const { searchQuery, setSearchQuery, searchResults, isSearching, handleSearch } = useSearch();
+
+  // PRE-CACHE HEAVY DATA 
+  const cachedStats = useDebugData(streamData, scaledLayoutPrefs);
 
   // --- Navigation ---
   const [currentView, setCurrentView] = useState(() => {
@@ -221,7 +225,7 @@ export default function App() {
             <Library {...cardProps} handleCardClick={(e, id, gid) => handleCardClick(e, id, gid, openGameProfile)} onDeleteGame={deleteGame} onUpdateGameLink={updateGameLink} onEditGame={editGameDetails} onImportDefault={handleImportDefault} hasCustomSettings={settings.hasCustomSettings} />
           )}
           {currentView === 'stats' && (
-            <Stats streamData={streamData} systemFonts={scaledSystemFonts} layoutPrefs={scaledLayoutPrefs} />
+            <Stats streamData={streamData} systemFonts={scaledSystemFonts} layoutPrefs={scaledLayoutPrefs} cachedStats={cachedStats} />
           )}
           {currentView === 'search' && (
             <SearchView
@@ -236,6 +240,7 @@ export default function App() {
               streamData={streamData} 
               systemFonts={scaledSystemFonts} 
               layoutPrefs={scaledLayoutPrefs} 
+              cachedStats={cachedStats}
             />
           )}
         </main>

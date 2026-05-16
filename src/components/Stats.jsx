@@ -4,7 +4,7 @@ import { getLowResUrl } from '../utils/helpers';
 import { useCountUp } from './stats/hooks';
 import { CategoryCard } from './stats/CategoryCard';
 import { STYLES } from './stats/styles';
-import { useDebugData } from '../hooks/useDebugData';
+import { Loader2 } from 'lucide-react';
 
 import { getCard1Slide } from './stats/slides/Card1Slides';
 import { getCard2Slide } from './stats/slides/Card2Slides';
@@ -62,8 +62,8 @@ const FlipperCard = ({ globalFlipCycle, getSlideContent, slideData, className, d
   );
 };
 
-export default function Stats({ streamData, systemFonts, layoutPrefs }) {
-  const { card1Data, card2Data, card3Data, games } = useDebugData(streamData, layoutPrefs);
+export default function Stats({ systemFonts, layoutPrefs, cachedStats }) {
+  const { card1Data, card2Data, card3Data, games, isReady } = cachedStats;
 
   const [latestBgIndex, setLatestBgIndex] = useState(0);
   const [flipCycle, setFlipCycle] = useState(0);
@@ -72,10 +72,10 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
     setFlipCycle(prev => prev + 1);
   };
 
-  const totalStreamsCount = useCountUp(card1Data.totalStreams);
-  const totalGamesCount = useCountUp(card2Data.totalGames);
+  const totalStreamsCount = useCountUp(card1Data?.totalStreams || 0);
+  const totalGamesCount = useCountUp(card2Data?.totalGames || 0);
 
-  const latestGameImages = card3Data.mostRecentGame?.thumbnail_urls || [];
+  const latestGameImages = card3Data?.mostRecentGame?.thumbnail_urls || [];
 
   useEffect(() => {
     if (latestGameImages.length < 2) return;
@@ -90,6 +90,10 @@ export default function Stats({ streamData, systemFonts, layoutPrefs }) {
     }, initialDelay);
     return () => { clearTimeout(timeout); clearInterval(interval); };
   }, [latestGameImages]);
+
+  if (!isReady || !card1Data) {
+    return <div className="flex items-center justify-center h-full text-white/50"><Loader2 className="animate-spin mr-2"/> Processing visual data...</div>;
+  }
 
   const heroThumb = latestGameImages[0] || '';
   const rawLatestBgImage = latestGameImages[latestBgIndex] || heroThumb;

@@ -31,7 +31,6 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-// Permanent tooltip structurally identical to the hover tooltip, zero-gap snapped to cx/cy
 const PermanentMaxTooltipChronological = (props) => {
   const { cx, cy, maxData } = props;
   if (cx === undefined || cy === undefined || !maxData) return null;
@@ -54,11 +53,7 @@ const PermanentMaxTooltipChronological = (props) => {
       <foreignObject x="-150" y="-120" width="300" height="120" className="overflow-visible pointer-events-none">
         <div className="w-full h-full flex flex-col justify-end items-center pb-[6px]">
           <div className="relative bg-[#0a0a0a] border border-white/20 p-3 rounded-lg text-xs font-mono text-white shadow-2xl text-center w-max max-w-[280px]">
-            
-            {/* Triangle pointer given z-0 to stay permanently behind the text wrapper */}
             <div className="absolute -bottom-[6px] left-1/2 -translate-x-1/2 w-[11px] h-[11px] bg-[#0a0a0a] border-b border-r border-white/20 rotate-45 z-0"></div>
-            
-            {/* Wrapper z-10 ensures the text layer sits above the triangle */}
             <div className="relative z-10 flex flex-col items-center">
               <div className="font-bold text-white mb-1 truncate w-full max-w-[250px]" style={{ fontSize: '11px' }}>{maxData.streamTitle}</div>
               <div className="text-white/40 mb-2" style={{ fontSize: '10px' }}>{maxData.displayDate}</div>
@@ -66,11 +61,9 @@ const PermanentMaxTooltipChronological = (props) => {
                 {timeStr.join(' ')}
               </div>
             </div>
-
           </div>
         </div>
       </foreignObject>
-      {/* Crisp white circle directly marking the highest point */}
       <circle cx="0" cy="0" r="3.5" fill="#ffffff" />
     </g>
   );
@@ -84,16 +77,17 @@ export default function Card3Slide4({ data }) {
     const maxHours = Math.max(...allStreamsChronological.map(d => d.hours), 0);
     if (maxHours === 0) return { yMax: 3, yTicks: [1, 2, 3] };
     
-    let yM;
-    if (maxHours <= 24) {
-      yM = maxHours + 2;
-    } else {
-      yM = Math.ceil(maxHours / 5) * 5;
-      if (yM <= maxHours) yM += 5;
+    // Y-axis limit adjusted to exactly highest data point + 2
+    const yM = Math.ceil(maxHours) + 2;
+    let step = Math.ceil(yM / 4);
+    if (step < 1) step = 1;
+    
+    let ticks = [];
+    for (let i = step; i < yM; i += step) {
+      ticks.push(i);
     }
     
-    const step = yM / 3;
-    return { yMax: yM, yTicks: [step, step * 2, yM] };
+    return { yMax: yM, yTicks: ticks };
   }, [allStreamsChronological]);
 
   const maxPointData = useMemo(() => {
@@ -111,27 +105,22 @@ export default function Card3Slide4({ data }) {
       <div className="w-full flex-1 min-h-0 outline-none overflow-visible relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
           <BarChart data={allStreamsChronological} margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
-            
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-            
             <XAxis 
-              dataKey="index" stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8' }}
+              dataKey="index" stroke="#8a88a8" tickLine={false} axisLine={true} tick={{ fontSize: 10, fill: '#8a88a8' }}
               minTickGap={40} tickMargin={10} height={35}
               tickFormatter={(val) => `#${val}`}
             >
               <Label value="Stream Sequence" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
             </XAxis>
-            
             <YAxis 
-              stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }}
+              stroke="#8a88a8" tickLine={false} axisLine={true} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }}
               allowDecimals={false} width={45} domain={[0, yMax]} ticks={yTicks}
-              tickFormatter={(v) => `${Number.isInteger(v) ? v : v.toFixed(1)}h`}
+              tickFormatter={(v) => `${Math.round(v)}h`}
             >
               <Label value="Playtime (Hours)" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
             </YAxis>
-            
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} isAnimationActive={false} />
-            
             <Bar dataKey="hours" radius={[2, 2, 0, 0]} isAnimationActive={false} minPointSize={2}>
               {allStreamsChronological?.map((entry, index) => {
                 let fill = '#3ddc84'; 
@@ -140,8 +129,6 @@ export default function Card3Slide4({ data }) {
                 return <Cell key={`cell-${index}`} fill={fill} />;
               })}
             </Bar>
-
-            {/* Permanent Tooltip anchored exactly to the top of the maximum bar */}
             {maxPointData && maxPointData.duration > 0 && (
               <ReferenceDot x={maxPointData.index} y={maxPointData.hours} isFront={true} r={0} shape={<PermanentMaxTooltipChronological maxData={maxPointData} />} />
             )}

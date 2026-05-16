@@ -112,12 +112,14 @@ export default function Card3Slide2({ data }) {
     processedLines.forEach(l => {
       if (l.endDot && l.endDot.cumulativeHours > maxHours) maxHours = l.endDot.cumulativeHours;
     });
-    if (maxHours === 0) return { yMax: 3, yTicks: [1, 2, 3] }; 
+    if (maxHours === 0) return { yMax: 15, yTicks: [5, 10, 15] }; 
     
-    const niceSteps = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 100, 200, 250, 500];
-    let step = niceSteps.find(s => s * 3 >= maxHours) || Math.ceil(maxHours / 300) * 100;
+    // Divisible by 5 or 10, exactly 3 ticks
+    const step = Math.max(5, Math.ceil(maxHours / 3 / 5) * 5);
+    const yM = step * 3;
+    const ticks = [step, step * 2, step * 3];
 
-    return { yMax: step * 3, yTicks: [step, step * 2, step * 3] };
+    return { yMax: yM, yTicks: ticks };
   }, [processedLines]);
 
   const handleBackgroundClick = (e) => {
@@ -127,11 +129,11 @@ export default function Card3Slide2({ data }) {
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden" onClick={handleBackgroundClick}>
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none" onClick={handleBackgroundClick}>
       <style dangerouslySetInnerHTML={{ __html: `
         .recharts-wrapper, .recharts-surface, .recharts-responsive-container, svg { overflow: visible !important; outline: none !important; }
         .recharts-wrapper * { outline: none !important; }
-        .recharts-line-dots, .recharts-area-dots { clip-path: none !important; }
+        .recharts-line-dots, .recharts-area-dots, .recharts-reference-dot, .recharts-layer { clip-path: none !important; }
         *:focus { outline: none !important; }
       `}} />
       <div className="w-full flex-1 min-h-0 relative outline-none overflow-visible">
@@ -142,8 +144,14 @@ export default function Card3Slide2({ data }) {
             <LineChart margin={{ top: 20, right: 20, left: 10, bottom: 15 }} style={{ overflow: 'visible' }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               
-              <XAxis type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} height={35} tick={false} axisLine={true} tickLine={false} padding={{ left: 35, right: 35 }} />
-              <YAxis domain={[0, yMax]} ticks={yTicks} width={45} tick={false} axisLine={true} tickLine={false} padding={{ top: 35, bottom: 10 }} />
+              <XAxis 
+                type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} height={35} 
+                tick={false} axisLine={true} tickLine={false} 
+              />
+              <YAxis 
+                domain={[0, yMax]} ticks={yTicks} width={45} tick={false} axisLine={true} tickLine={false} 
+                padding={{ top: 35, bottom: 10 }} 
+              />
               
               {processedLines?.map((line, idx) => {
                 const isSelected = selectedGame === line.gameName;
@@ -174,9 +182,8 @@ export default function Card3Slide2({ data }) {
               
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               <XAxis 
-                type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} stroke="#8a88a8" axisLine={false} 
+                type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} stroke="#8a88a8" axisLine={true} 
                 tickLine={false} tickMargin={10} height={35} minTickGap={5}
-                padding={{ left: 35, right: 35 }}
                 tick={{ fill: '#8a88a8', fontSize: 10 }}
                 tickFormatter={(val) => {
                   if (!Number.isInteger(val)) return ''; 
@@ -184,7 +191,6 @@ export default function Card3Slide2({ data }) {
                     const ts = progressionDates[val];
                     if (!ts) return '';
                     const d = new Date(ts);
-                    if (isNaN(d.getTime())) return '';
                     return `${d.toLocaleDateString('en-US', { month: 'short' })} '${d.toLocaleDateString('en-US', { year: '2-digit' })}`;
                   }
                   return '';
@@ -194,7 +200,7 @@ export default function Card3Slide2({ data }) {
               </XAxis>
               
               <YAxis 
-                domain={[0, yMax]} ticks={yTicks} stroke="#8a88a8" axisLine={false} tickLine={false} tickFormatter={(v) => `${Math.round(v)}h`}  
+                domain={[0, yMax]} ticks={yTicks} stroke="#8a88a8" axisLine={true} tickLine={false} tickFormatter={(v) => `${Math.round(v)}h`}  
                 width={45} padding={{ top: 35, bottom: 10 }} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }}
               >
                 <Label value="Playtime (Hours)" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />

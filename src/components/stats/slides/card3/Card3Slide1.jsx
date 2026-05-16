@@ -79,11 +79,22 @@ export default function Card3Slide1({ data }) {
     const maxHours = Math.max(...gamesTimeline.map(g => g.hours), 0);
     if (maxHours === 0) return { yMax: 3, yTicks: [1, 2, 3] };
     
-    // Clean mathematical steps to guarantee exactly 3 ticks excluding 0
-    const niceSteps = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 100, 200, 250, 500];
-    let step = niceSteps.find(s => s * 3 >= maxHours) || Math.ceil(maxHours / 300) * 100;
-
-    return { yMax: step * 3, yTicks: [step, step * 2, step * 3] };
+    let yM;
+    if (maxHours <= 10) {
+      yM = Math.ceil(maxHours);
+    } else if (maxHours <= 100) {
+      yM = Math.ceil(maxHours / 5) * 5;
+    } else {
+      yM = Math.ceil(maxHours / 10) * 10;
+    }
+    
+    let step = Math.ceil(yM / 4);
+    let ticks = [];
+    for (let i = step; i <= yM; i += step) {
+      ticks.push(i);
+    }
+    
+    return { yMax: yM, yTicks: ticks };
   }, [gamesTimeline]);
 
   return (

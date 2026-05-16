@@ -1,39 +1,22 @@
+// src/components/stats/slides/card1/Card1Slide3.jsx
 import React from 'react';
+import { parseSeconds, formatDtShort } from '../SlideHelpers';
 
 export default function Card1Slide3({ data }) {
   const { longestStreakSecs, maxStreakStartMs, maxStreakEndMs } = data;
-
-  const formatDt = (ms) => {
-    if (!ms) return '';
-    const d = new Date(ms);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
-  const S = longestStreakSecs || 0;
-  const d = Math.floor(S / 86400);
-  const h = Math.floor((S % 86400) / 3600);
-  const m = Math.floor((S % 3600) / 60);
-  const s = Math.floor(S % 60);
+  const { d, h, m, s } = parseSeconds(longestStreakSecs);
 
   const renderBig = (val, unit) => (
     <div className="flex items-baseline gap-2">
-      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * 1rem)' }}>
-        {val.toLocaleString()}
-      </span>
-      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * 0.35rem)' }}>
-        {val === 1 ? unit.slice(0, -1) : unit}
-      </span>
+      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * 1rem)' }}>{val.toLocaleString()}</span>
+      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * 0.35rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
     </div>
   );
 
   const renderSmall = (val, unit) => (
     <div className="flex items-baseline gap-1.5">
-      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * 0.55rem)' }}>
-        {val}
-      </span>
-      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * 0.25rem)' }}>
-        {val === 1 ? unit.slice(0, -1) : unit}
-      </span>
+      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * 0.55rem)' }}>{val}</span>
+      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * 0.25rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
     </div>
   );
 
@@ -53,11 +36,8 @@ export default function Card1Slide3({ data }) {
       </div>
       <div className="stat-label mt-2">
         Longest Streak
-        <div 
-          className="text-[var(--c-accent2)] normal-case tracking-normal font-medium mt-1 truncate w-full pr-4" 
-          style={{ fontSize: 'calc(var(--sz-main-label) * 0.85rem)' }}
-        >
-          {S > 0 ? `${formatDt(maxStreakStartMs)} — ${formatDt(maxStreakEndMs)}` : '—'}
+        <div className="text-[var(--c-accent2)] normal-case tracking-normal font-medium mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * 0.85rem)' }}>
+          {longestStreakSecs > 0 ? `${formatDtShort(maxStreakStartMs)} — ${formatDtShort(maxStreakEndMs)}` : '—'}
         </div>
       </div>
     </div>

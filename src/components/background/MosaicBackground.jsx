@@ -4,8 +4,8 @@ import { getLowResUrl } from '../../utils/helpers';
 
 const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip, highResImages }) => {  
   // 12x24 grid for smaller tiles 
-  const ROWS = 16; 
-  const IMGS_PER_ROW = 24; 
+  const ROWS = 7; 
+  const IMGS_PER_ROW = 11; 
   
   const rowRefs = useRef([]);
   const requestRef = useRef(null);

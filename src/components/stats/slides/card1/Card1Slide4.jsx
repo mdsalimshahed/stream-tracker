@@ -23,23 +23,33 @@ export default function Card1Slide4({ data }) {
 
   const renderBig = (val, unit) => (
     <div className="flex items-baseline gap-2">
-      <span className="text-white drop-shadow-lg" style={{ fontSize: 'calc(var(--sz-main) * 1rem)' }}>{val.toLocaleString()}</span>
-      <span className="text-white/80 font-normal lowercase drop-shadow-md" style={{ fontSize: 'calc(var(--sz-main) * 0.35rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+      <span className="text-white drop-shadow-2xl" style={{ fontSize: 'calc(var(--sz-main) * 1rem)' }}>{val.toLocaleString()}</span>
+      <span className="text-white/90 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * 0.35rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
     </div>
   );
 
   const renderSmall = (val, unit) => (
     <div className="flex items-baseline gap-1.5">
-      <span className="text-white drop-shadow-md" style={{ fontSize: 'calc(var(--sz-main) * 0.55rem)' }}>{val}</span>
-      <span className="text-white/80 font-normal lowercase drop-shadow-md" style={{ fontSize: 'calc(var(--sz-main) * 0.25rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+      <span className="text-white drop-shadow-xl" style={{ fontSize: 'calc(var(--sz-main) * 0.55rem)' }}>{val}</span>
+      <span className="text-white/90 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * 0.25rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
     </div>
   );
 
   return (
     <>
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-70" style={{ borderRadius: 'inherit' }}>
-        <CrossfadeImage src={bgImage} className="w-full h-full" imgClassName="w-full h-full object-cover transition-opacity duration-500" duration={700} />
+      {/* Background container is now solid black to facilitate "dimming" */}
+      <div className="absolute inset-0 z-0 bg-black pointer-events-none overflow-hidden" style={{ borderRadius: 'inherit' }}>
+        {/* Image is set to 35% opacity so it appears darkly against the black background */}
+        <div className="w-full h-full opacity-35">
+          <CrossfadeImage 
+            src={bgImage} 
+            className="w-full h-full" 
+            imgClassName="w-full h-full object-cover transition-opacity duration-500" 
+            duration={700} 
+          />
+        </div>
       </div>
+      
       <div className="slide-container relative z-10 w-full h-full flex flex-col justify-center">
         <div className="stat-number flex items-baseline flex-wrap leading-none gap-x-5 gap-y-2">
           {d > 0 && renderBig(d, 'days')}
@@ -52,9 +62,9 @@ export default function Card1Slide4({ data }) {
             {(d > 0 || h > 0 || m > 0) && renderSmall(s, 'seconds')}
           </div>
         </div>
-        <div className="stat-label mt-2 drop-shadow-lg text-white/70">
+        <div className="stat-label mt-2 text-white/80 font-bold uppercase tracking-widest">
           Longest Stream
-          <div className="text-[var(--c-accent2)] normal-case tracking-normal font-medium mt-1 truncate w-full pr-4 drop-shadow-md" style={{ fontSize: 'calc(var(--sz-main-label) * 0.85rem)' }}>
+          <div className="text-[var(--c-accent2)] normal-case tracking-normal font-bold mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * 0.85rem)' }}>
             {longestStream.streamTitle}
           </div>
         </div>

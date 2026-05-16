@@ -74,7 +74,7 @@ export default function Header({ currentView, onViewChange, onImport, onExport }
               { id: 'dashboard', label: 'History', icon: Clock },
               { id: 'library', label: 'Library', icon: BookOpen },
               { id: 'search', label: 'Add', icon: Plus },
-              { id: 'data', label: 'Styles', icon: Settings },
+              { id: 'data', label: 'Settings', icon: Settings },
               { id: 'stats', label: 'Stats', icon: BarChart3 },
               { id: 'graphs', label: 'Graphs', icon: Bug }
             ].map(({ id, label, icon: Icon }) => (

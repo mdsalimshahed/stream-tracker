@@ -184,7 +184,7 @@ export function useDebugData(streamData, layoutPrefs) {
           rawSeconds: rawSecs,
           hours: parseFloat((rawSecs / 3600).toFixed(2))
         });
-        currentMs += 86400000; // Increment +1 day
+        currentMs += 86400000; 
       }
     }
 
@@ -283,7 +283,6 @@ export function useDebugData(streamData, layoutPrefs) {
   const streamProgressionLines = useMemo(() => {
     const dateToIndex = new Map(progressionDates.map((d, i) => [d, i]));
     
-    // Group streams internally for fast lookup
     const groupedStreams = {};
     flatStreams.forEach(fs => {
       if (!groupedStreams[fs.gameId]) groupedStreams[fs.gameId] = [];
@@ -346,8 +345,9 @@ export function useDebugData(streamData, layoutPrefs) {
 
   const tagFrequencies = useMemo(() => {
     const counts = {};
+    const userExcluded = layoutPrefs?.excludedTags?.map(t => t.toLowerCase().trim()) || [];
     const excludedMetaTags = new Set([
-      'steam achievements', 'family sharing', 'captions available', 'in-app purchases', 'stats', 'includes level editor', 'vr support', 'steam cloud', 'steam leaderboards', 'cross-platform multiplayer', 'mmo', 'partial controller support', 'hdr available', 'stereo sound', 'custom volume controls', 'surround sound', 'playable without timed input', 'camera comfort', 'save anytime', 'full controller support', 'controller', 'co-op', 'online co-op', 'multiplayer', 'singleplayer', 'qte', 'accessibility', 'remote play', 'cloud saves', 'achievements', 'trading cards', 'windows', 'mac', 'linux'
+      'steam achievements', 'family sharing', 'captions available', 'in-app purchases', 'stats', 'includes level editor', 'vr support', 'steam cloud', 'steam leaderboards', 'cross-platform multiplayer', 'mmo', 'partial controller support', 'hdr available', 'stereo sound', 'custom volume controls', 'surround sound', 'playable without timed input', 'camera comfort', 'save anytime', 'full controller support', 'controller', 'co-op', 'online co-op', 'multiplayer', 'singleplayer', 'qte', 'accessibility', 'remote play', 'cloud saves', 'achievements', 'trading cards', 'windows', 'mac', 'linux', ...userExcluded
     ]);
 
     games.forEach(g => {
@@ -368,7 +368,7 @@ export function useDebugData(streamData, layoutPrefs) {
       .map(([text, count]) => ({ text, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 100); 
-  }, [games]);
+  }, [games, layoutPrefs?.excludedTags]);
 
   const timeSinceLastStream = useDynamicTime(mostRecentGame?.lastStreamTimestampMs);
 

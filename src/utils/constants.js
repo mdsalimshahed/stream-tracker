@@ -40,7 +40,8 @@ export const DEFAULT_LAYOUT_PREFS = {
   highResImages: false,
   enableHoverEffects: true,
   enableViewTransitions: true,
-  bgCycleInterval: 5
+  bgCycleInterval: 5,
+  excludedTags: []
 };
 
 export const DEFAULT_THUMBNAIL_CONFIG = {

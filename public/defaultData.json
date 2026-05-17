@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "5/17/2026, 9:54:28 PM",
+  "exportDate": "5/17/2026, 11:05:52 PM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -7287,7 +7287,7 @@
     "highResImages": true,
     "enableHoverEffects": true,
     "enableViewTransitions": true,
-    "bgCycleInterval": 2,
+    "bgCycleInterval": 10,
     "excludedTags": [],
     "statsLeftWidth": 5,
     "statsRightWidth": 5,

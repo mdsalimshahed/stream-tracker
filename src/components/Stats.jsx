@@ -127,13 +127,13 @@ export default function Stats({ systemFonts, layoutPrefs, cachedStats }) {
 
           <div className="stats-left-col">
             <div className="card-wrapper-left">
-              <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard1Slide} slideData={slideData1} className="stat-card" delay={0} slideCount={5} />
+              <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard1Slide} slideData={slideData1} className="stat-card" delay={0} slideCount={7} />
             </div>
             <div className="stats-progress-track">
               <div className="stats-progress-fill" onAnimationIteration={handleAnimationIteration} />
             </div>
             <div className="card-wrapper-left">
-              <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard2Slide} slideData={slideData2} className="stat-card" delay={200} slideCount={3} />
+              <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard2Slide} slideData={slideData2} className="stat-card" delay={200} slideCount={7} />
             </div>
           </div>
 

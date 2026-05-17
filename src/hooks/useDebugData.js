@@ -139,11 +139,25 @@ export function useDebugData(streamData, layoutPrefs) {
     const continuousDailyStreamHours = [];
     const todayMs = new Date().setHours(0,0,0,0);
 
+    let maxDailySecs = 0;
+    let maxDailyDateMs = null;
+    let zeroStreamDays = 0;
+
     if (sortedDays.length > 0) {
       let currentMs = sortedDays[0];
       const endDateMs = Math.max(sortedDays[sortedDays.length - 1], todayMs);
+      
+      const totalDaysSpan = Math.round((endDateMs - sortedDays[0]) / 86400000) + 1;
+      zeroStreamDays = totalDaysSpan - sortedDays.length;
+
       while (currentMs <= endDateMs) {
         const rawSecs = dailyMap.get(currentMs) || 0;
+        
+        if (rawSecs > maxDailySecs) {
+          maxDailySecs = rawSecs;
+          maxDailyDateMs = currentMs;
+        }
+
         const d = new Date(currentMs);
         continuousDailyStreamHours.push({
           dateMs: currentMs, displayDate: `${d.getDate()} ${d.toLocaleString('en-US', { month: 'short' })}`, rawSeconds: rawSecs, hours: parseFloat((rawSecs / 3600).toFixed(2))
@@ -174,6 +188,61 @@ export function useDebugData(streamData, layoutPrefs) {
            if (secs > maxStreakSecs) { maxStreakSecs = secs; maxStreakStartMs = st; maxStreakEndMs = en; }
        }
     });
+
+    // -----------------------------------------------------
+    // NEW METRIC: Quiet Hours (Card 1, Slide 7)
+    // -----------------------------------------------------
+    const zeroHours = [];
+    hourlyStreamData.forEach((d, i) => { if (d.count === 0) zeroHours.push(i); });
+    
+    let quietPrimary = "None";
+    let quietSecondary = "";
+    
+    const formatHrClean = (h) => {
+       const hr = h % 24;
+       return hr === 0 ? '12 AM' : hr < 12 ? `${hr} AM` : hr === 12 ? '12 PM' : `${hr-12} PM`;
+    };
+
+    if (zeroHours.length === 24) {
+      quietPrimary = "All Day";
+    } else if (zeroHours.length > 0) {
+      let longestSeq = [];
+      let currentSeq = [];
+      const doubled = [...zeroHours, ...zeroHours.map(h => h + 24)];
+      
+      for (let i = 0; i < doubled.length; i++) {
+        if (i === 0 || doubled[i] === doubled[i-1] + 1) {
+          currentSeq.push(doubled[i]);
+        } else {
+          if (currentSeq.length > longestSeq.length) longestSeq = [...currentSeq];
+          currentSeq = [doubled[i]];
+        }
+      }
+      if (currentSeq.length > longestSeq.length) longestSeq = [...currentSeq];
+      
+      const actualSeq = longestSeq.map(h => h % 24);
+      const uniqueSeq = [...new Set(actualSeq)];
+      
+      if (uniqueSeq.length > 1) {
+        const startRaw = longestSeq[0];
+        const endRaw = longestSeq[longestSeq.length - 1];
+        quietPrimary = `${formatHrClean(startRaw)} – ${formatHrClean(endRaw + 1)}`;
+      } else {
+        quietPrimary = `${formatHrClean(uniqueSeq[0])} – ${formatHrClean(uniqueSeq[0] + 1)}`;
+      }
+      
+      const otherZeroes = zeroHours.filter(h => !uniqueSeq.includes(h));
+      if (otherZeroes.length > 0) {
+        quietSecondary = `${otherZeroes.map(formatHrClean).join(', ')} also had 0 streams`;
+      }
+    }
+
+    // -----------------------------------------------------
+    // NEW METRIC: Peak Stream Time (Card 2, Slide 7)
+    // -----------------------------------------------------
+    const peakHourObj = hourlyStreamData.reduce((prev, current) => (prev.count > current.count) ? prev : current, {count: -1});
+    const peakHourStr = peakHourObj.count > 0 ? `${formatHrClean(peakHourObj.hour)} – ${formatHrClean(peakHourObj.hour + 1)}` : 'None';
+    const peakHourCount = peakHourObj.count;
 
     const chrono = allFlat.map((s, i) => ({ ...s, index: i + 1 }));
     let longestStream = chrono.length ? chrono[0] : null;
@@ -250,12 +319,7 @@ export function useDebugData(streamData, layoutPrefs) {
     });
     const tagFrequencies = Object.entries(counts).map(([text, count]) => ({ text, count })).sort((a, b) => b.count - a.count).slice(0, 100); 
 
-
-    // =========================================================================
-    // GRAPH LIMIT MATH ROUNDING (Max 5 ticks, gracefully handling small numbers)
-    // =========================================================================
-    
-    // Hourly
+    // Graphical Limits
     const maxHCount = Math.max(...hourlyStreamData.map(d => d.count), 0);
     const processedHourlyData = hourlyStreamData.map(d => ({ ...d, midThreshold: maxHCount / 2 }));
     let hStep = 1;
@@ -266,7 +330,6 @@ export function useDebugData(streamData, layoutPrefs) {
     let hourlyYTicks = [];
     for(let i = hStep; i <= hourlyYMax; i += hStep) hourlyYTicks.push(i);
 
-    // Status
     const maxStatusH = Math.max(...statusData.map(d => d.hours), 0);
     let sStep = 1;
     if (maxStatusH > 20) sStep = Math.ceil(maxStatusH / 4 / 5) * 5;
@@ -276,7 +339,6 @@ export function useDebugData(streamData, layoutPrefs) {
     let statusYTicks = [];
     for(let i = sStep; i <= statusYMax; i += sStep) statusYTicks.push(i);
 
-    // Day of Week (DOW)
     const orderedDowData = [...dowStreamData].sort((a, b) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(a.displayDay) - ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(b.displayDay));
     const dowCounts = orderedDowData.map(d => d.count);
     const nonZeroDow = dowCounts.filter(c => c > 0);
@@ -284,7 +346,6 @@ export function useDebugData(streamData, layoutPrefs) {
     const dowMinC = nonZeroDow.length > 0 ? Math.min(...nonZeroDow) : 0;
     
     let processedDowData = [], dowDomainMax = 1, dowValidTicks = [], dowTickMap = {};
-    
     let dStepDow = 1;
     if (dowMaxC > 20) dStepDow = Math.ceil(dowMaxC / 4 / 5) * 5;
     else if (dowMaxC > 10) dStepDow = 5;
@@ -338,7 +399,6 @@ export function useDebugData(streamData, layoutPrefs) {
       dowValidTicks = dowValidTicks.filter(t => t <= dowDomainMax);
     }
 
-    // Deficit
     let deficitYMax = 60 * 5, deficitYMin = -60 * 5;
     let deficitYTicks = [-300, 0, 300];
     if (deficitData.length > 0) {
@@ -368,7 +428,6 @@ export function useDebugData(streamData, layoutPrefs) {
       }
     }
 
-    // Timeline
     const timelineXTicks = []; let lastMo = '';
     gamesTimeline.forEach((g, i) => {
       const parts = g.month.split(' ');
@@ -384,7 +443,6 @@ export function useDebugData(streamData, layoutPrefs) {
     let timelineYTicks = [];
     for(let i = tStep; i <= timelineYMax; i += tStep) timelineYTicks.push(i);
 
-    // Progression
     const processedProgressionLines = streamProgressionLines.map(line => {
       const dataMap = new Map(line.data.map(d => [d.xIndex, d]));
       const minX = Math.min(...line.data.map(d => d.xIndex));
@@ -405,7 +463,6 @@ export function useDebugData(streamData, layoutPrefs) {
     let progressionYTicks = [];
     for(let i = pStep; i <= progressionYMax; i += pStep) progressionYTicks.push(i);
 
-    // Daily
     const maxDailyH = Math.max(...continuousDailyStreamHours.map(d => d.hours), 0);
     const processedDailyData = continuousDailyStreamHours.map(d => ({ ...d, midThreshold: maxDailyH / 2 }));
     let dStep = 1;
@@ -417,7 +474,6 @@ export function useDebugData(streamData, layoutPrefs) {
     for(let i = dStep; i <= dailyYMax; i += dStep) dailyYTicks.push(i);
     const maxDailyPoint = processedDailyData.length > 0 ? processedDailyData.reduce((p, c) => (p.rawSeconds > c.rawSeconds) ? p : c, processedDailyData[0]) : null;
 
-    // Chrono (Playtime per stream)
     const maxChronoH = Math.max(...chrono.map(d => d.hours), 0);
     let cStep = 1;
     if (maxChronoH > 20) cStep = Math.ceil(maxChronoH / 4 / 5) * 5;
@@ -428,16 +484,18 @@ export function useDebugData(streamData, layoutPrefs) {
     for(let i = cStep; i <= chronoYMax; i += cStep) chronoYTicks.push(i);
     const maxChronoPoint = chrono.length > 0 ? chrono.reduce((p, c) => (p.duration > c.duration) ? p : c, chrono[0]) : null;
 
-
+    // Export payload data
     const card1Data = { 
       totalStreams: totalStreamsCount, totalDuration: totalDurationOverall, longestStreakSecs: maxStreakSecs,
       maxStreakStartMs, maxStreakEndMs, actualSessionSecs, discardedSecs, gainedSecs,
-      longestStream, highResImages
+      longestStream, highResImages, maxDailySecs, maxDailyDateMs,
+      quietPrimary, quietSecondary
     };
     
     const card2Data = { 
       totalGames: totalGamesCount, longestBreakSecs: maxBreakSecs, maxBreakStartMs,
-      maxBreakEndMs, isActiveBreak, shortestStream, highResImages
+      maxBreakEndMs, isActiveBreak, shortestStream, highResImages, zeroStreamDays,
+      peakHourStr, peakHourCount
     };
     
     const card3Data = { 

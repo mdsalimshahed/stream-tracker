@@ -30,12 +30,17 @@ const Slide6StaticDot = ({ cx, cy, payload, selectedNode, onSelect }) => {
   const clipId = `clip-${payload.name.replace(/[^a-zA-Z0-9]/g, '')}-${cx}-${cy}`;
   let ringColor = payload.status === 'Completed' ? "#f5a623" : payload.status === 'Ongoing' ? "#3ddc84" : "#ff5c5c"; 
   const isSelected = selectedNode === payload.name;
+  
+  // Outer ring sizes
   const ringRadius = isSelected ? 31 : 12;
+  // Image clip sizes
   const imgRadius = isSelected ? 27 : 10;
+  // Transparent hit-box size
+  const hitRadius = isSelected ? 32 : 16;
   
   return (
     <g style={{ opacity: selectedNode !== null && !isSelected ? 0.2 : 1, transition: 'opacity 0.3s ease', cursor: 'pointer', outline: 'none' }} onClick={(e) => { if (e && e.stopPropagation) e.stopPropagation(); onSelect(isSelected ? null : payload.name); }}>
-      <circle cx={cx} cy={cy} r={isSelected ? 32 : 16} fill="transparent" /> 
+      <circle cx={cx} cy={cy} r={hitRadius} fill="transparent" /> 
       <circle cx={cx} cy={cy} r={ringRadius} fill={ringColor} style={{ transition: 'r 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }} />
       <clipPath id={clipId}><circle cx={cx} cy={cy} r={imgRadius} style={{ transition: 'r 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }} /></clipPath>
       <image x={cx - imgRadius} y={cy - imgRadius} width={imgRadius * 2} height={imgRadius * 2} href={payload.image} clipPath={`url(#${clipId})`} preserveAspectRatio="xMidYMid slice" style={{ transition: 'all 0.3s' }} />
@@ -51,7 +56,14 @@ export default function Card3Slide1({ data }) {
     <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden" onClick={(e) => { if (e.target.tagName?.toLowerCase() === 'circle' || e.target.tagName?.toLowerCase() === 'image') return; setSelectedNode(null); }}>
       <div className="w-full h-full flex-1 outline-none relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <AreaChart tabIndex={-1} data={gamesTimeline} margin={{ top: 20, right: 20, left: 10, bottom: 15 }} style={{ overflow: 'visible' }}>
+          <AreaChart 
+            tabIndex={-1} 
+            data={gamesTimeline} 
+            // We increase chart margin left/right slightly, so the expanded 32px dots have room 
+            // to bleed into the margin without getting clipped by the container bounds.
+            margin={{ top: 20, right: 28, left: 15, bottom: 15 }} 
+            style={{ overflow: 'visible' }}
+          >
             <defs>
               <linearGradient id="slide6GradientFill" x1="0" y1="0" x2="1" y2="0">
                 {gamesTimeline?.map((g, i) => <stop key={`fill-${i}`} offset={`${(i / Math.max(1, gamesTimeline.length - 1)) * 100}%`} stopColor={g.status === 'Completed' ? "#f5a623" : g.status === 'Ongoing' ? "#3ddc84" : "#ff5c5c"} stopOpacity={0.8} />)}
@@ -61,7 +73,20 @@ export default function Card3Slide1({ data }) {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-            <XAxis dataKey="index" ticks={timelineXTicks} stroke="#8a88a8" tickLine={false} axisLine={false} tickMargin={10} height={35} minTickGap={5} padding={{ left: 35, right: 35 }} tick={{ fill: '#8a88a8', fontSize: 10 }} tickFormatter={(val) => { const g = gamesTimeline[val]; const p = g?.month.split(' '); return p?.length === 2 ? `${p[0]} '${p[1].slice(-2)}` : g?.month; }}>
+            <XAxis 
+              dataKey="index" 
+              ticks={timelineXTicks} 
+              stroke="#8a88a8" 
+              tickLine={false} 
+              axisLine={false} 
+              tickMargin={10} 
+              height={35} 
+              minTickGap={5} 
+              // Reduced padding here to spread the data out closer to the edges
+              padding={{ left: 15, right: 15 }} 
+              tick={{ fill: '#8a88a8', fontSize: 10 }} 
+              tickFormatter={(val) => { const g = gamesTimeline[val]; const p = g?.month.split(' '); return p?.length === 2 ? `${p[0]} '${p[1].slice(-2)}` : g?.month; }}
+            >
               <Label value="Starting Date" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
             </XAxis>
             <YAxis stroke="#8a88a8" tickLine={false} axisLine={false} tickFormatter={(v) => `${v}h`} width={45} domain={[0, timelineYMax]} ticks={timelineYTicks} padding={{ top: 35, bottom: 10 }} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10}}>

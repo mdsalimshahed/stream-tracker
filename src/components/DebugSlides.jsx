@@ -48,9 +48,13 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
     { card: 1, idx: 2 }, // Longest Streak
     { card: 1, idx: 3 }, // Longest Stream
     { card: 1, idx: 4 }, // Total Session Duration
+    { card: 1, idx: 6 }, // Most time streamed in one day
+    { card: 1, idx: 7 }, // Quiet Hours
     { card: 2, idx: 0 }, // Games in Library
     { card: 2, idx: 1 }, // Longest Break
     { card: 2, idx: 2 }, // Shortest Stream
+    { card: 2, idx: 6 }, // Days without streams
+    { card: 2, idx: 7 }, // Peak Stream Time
     { card: 3, idx: 0 }, // Latest Game info
     
     // GRAPH SLIDES (All now inside Card 3 index references)

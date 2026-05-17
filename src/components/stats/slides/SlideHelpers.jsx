@@ -1,3 +1,4 @@
+// src/components/stats/slides/SlideHelpers.jsx
 import React from 'react';
 
 export const renderPlaceholder = (num) => (
@@ -35,5 +36,16 @@ export const parseSeconds = (totalSecs) => {
 export const formatDtShort = (ms) => {
   if (!ms) return '';
   const d = new Date(ms);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  
+  const getOrdinal = (n) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+  
+  const day = getOrdinal(d.getDate());
+  const month = d.toLocaleDateString('en-US', { month: 'long' });
+  const year = d.getFullYear();
+  
+  return `${day} ${month} ${year}`;
 };

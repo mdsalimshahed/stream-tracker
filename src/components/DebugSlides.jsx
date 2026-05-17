@@ -40,8 +40,8 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
   const slideData2 = { ...card2Data, totalGamesCount: card2Data.totalGames };
   const slideData3 = { ...card3Data, latestBgImage };
 
-  // Organize sequence: Text Slides first, Graph Slides at the bottom (Card 3 logic applies to all graphs)
-  const slideSequence = [
+  // Separate Card 1/2 slides from Card 3 slides
+  const card12Slides = [
     // TEXT SLIDES
     { card: 1, idx: 0 }, // Total Streams
     { card: 1, idx: 1 }, // Total Playtime
@@ -55,9 +55,10 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
     { card: 2, idx: 2 }, // Shortest Stream
     { card: 2, idx: 6 }, // Days without streams
     { card: 2, idx: 7 }, // Peak Stream Time
+  ];
+
+  const card3Slides = [
     { card: 3, idx: 0 }, // Latest Game info
-    
-    // GRAPH SLIDES (All now inside Card 3 index references)
     { card: 3, idx: 1 }, // Games Timeline
     { card: 3, idx: 2 }, // Progression Lines
     { card: 3, idx: 3 }, // Daily Playtime
@@ -69,16 +70,46 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
     { card: 3, idx: 9 }, // Deficit Data
   ];
 
-  const renderActiveCardContent = (index) => {
-    const { card, idx } = slideSequence[index];
-    
-    if (card === 1) return <div className="stat-card absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard1Slide(idx, slideData1)}</div>;
-    if (card === 2) return <div className="stat-card absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard2Slide(idx, slideData2)}</div>;
-    return <div className="stats-right-col absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard3Slide(idx, slideData3)}</div>;
+  const renderCard12Content = ({ card, idx }, animIndex) => {
+    const inner = card === 1
+      ? <div className="stat-card absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard1Slide(idx, slideData1)}</div>
+      : <div className="stat-card absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard2Slide(idx, slideData2)}</div>;
+
+    return (
+      <div
+        key={`c${card}-${idx}`}
+        className="w-full aspect-[16/9] relative shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
+        style={{ animationDelay: `${animIndex * 100}ms` }}
+      >
+        {inner}
+      </div>
+    );
   };
 
+  const renderCard3Content = ({ idx }, animIndex) => (
+    <div
+      key={`c3-${idx}`}
+      className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
+      style={{
+        // Cap width so it doesn't stretch edge-to-edge; keep 16/9 aspect ratio
+        maxWidth: '1200px',
+        height: '420px',
+        position: 'relative',
+        animationDelay: `${(card12Slides.length + animIndex) * 100}ms`,
+      }}
+    >
+      <div
+        className="stats-right-col absolute inset-0"
+        style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}
+      >
+        {getCard3Slide(idx, slideData3)}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="stats-root debug-slides w-full h-full relative flex flex-col overflow-hidden bg-black/40"
+    <div
+      className="stats-root debug-slides w-full h-full relative flex flex-col overflow-hidden bg-black/40"
       style={{
         '--sz-main': systemFonts?.statsMainCount ?? 4.5,
         '--sz-main-label': systemFonts?.statsMainLabel ?? 1.1,
@@ -90,16 +121,18 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
 
       <div className="flex-1 w-full h-full overflow-y-auto custom-scrollbar p-6 sm:p-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-[1800px] mx-auto pb-20">
-          {slideSequence.map((_, i) => (
-            <div 
-              key={i} 
-              className="w-full aspect-[16/9] relative shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
-              style={{ animationDelay: `${i * 100}ms` }}
-            >
-              {renderActiveCardContent(i)}
-            </div>
-          ))}
+        <div className="max-w-[1800px] mx-auto pb-20 flex flex-col gap-12">
+
+          {/* ── Card 1 & 2: original 3-column grid ── */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {card12Slides.map((slide, i) => renderCard12Content(slide, i))}
+          </div>
+
+          {/* ── Card 3: centered vertical stack ── */}
+          <div className="flex flex-col items-center gap-6 sm:gap-8 w-full">
+            {card3Slides.map((slide, i) => renderCard3Content(slide, i))}
+          </div>
+
         </div>
       </div>
     </div>

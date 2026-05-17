@@ -36,7 +36,7 @@ export default function Card1Slide6({ data }) {
       </div>
       
       <div className="stat-label mt-2 text-white/80 font uppercase tracking-widest">
-        Most Time Streamed in One Day
+        Most Time Streamed
         <div className="text-[var(--c-accent2)] normal-case tracking-normal font-medium mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
           {maxDailyDateMs ? formatDtShort(maxDailyDateMs) : '—'}
         </div>

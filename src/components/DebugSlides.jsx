@@ -10,7 +10,6 @@ import { getCard3Slide } from './stats/slides/Card3Slides';
 
 export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
   const { card1Data, card2Data, card3Data, isReady } = cachedStats;
-  const totalSlides = 18;
 
   const [latestBgIndex, setLatestBgIndex] = useState(0);
   const latestGameImages = card3Data?.mostRecentGame?.thumbnail_urls || [];
@@ -41,10 +40,37 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
   const slideData2 = { ...card2Data, totalGamesCount: card2Data.totalGames };
   const slideData3 = { ...card3Data, latestBgImage };
 
+  // Organize sequence: Text Slides first, Graph Slides at the bottom
+  const slideSequence = [
+    // TEXT SLIDES
+    { card: 1, idx: 0 }, // Total Streams
+    { card: 1, idx: 1 }, // Total Playtime
+    { card: 1, idx: 3 }, // Longest Streak
+    { card: 1, idx: 4 }, // Longest Stream
+    { card: 1, idx: 5 }, // Total Session Duration
+    { card: 2, idx: 0 }, // Games in Library
+    { card: 2, idx: 3 }, // Longest Break
+    { card: 2, idx: 4 }, // Shortest Stream
+    { card: 3, idx: 0 }, // Latest Game info
+    
+    // GRAPH SLIDES
+    { card: 1, idx: 2 }, // Hourly Stream Count (Bar Chart)
+    { card: 2, idx: 1 }, // Playtime by Status (Area Chart)
+    { card: 2, idx: 2 }, // Day of Week (Area Chart)
+    { card: 2, idx: 5 }, // Deficit Data (Bar Chart)
+    { card: 3, idx: 1 }, // Games Timeline (Area Chart)
+    { card: 3, idx: 2 }, // Progression Lines (Line Chart)
+    { card: 3, idx: 3 }, // Daily Playtime (Bar Chart)
+    { card: 3, idx: 4 }, // Chronological Streams (Bar Chart)
+    { card: 3, idx: 5 }, // Tag Frequencies (Word Cloud)
+  ];
+
   const renderActiveCardContent = (index) => {
-    if (index < 6) return <div className="stat-card absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard1Slide(index, slideData1)}</div>;
-    if (index < 12) return <div className="stat-card absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard2Slide(index - 6, slideData2)}</div>;
-    return <div className="stats-right-col absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard3Slide(index - 12, slideData3)}</div>;
+    const { card, idx } = slideSequence[index];
+    
+    if (card === 1) return <div className="stat-card absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard1Slide(idx, slideData1)}</div>;
+    if (card === 2) return <div className="stat-card absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard2Slide(idx, slideData2)}</div>;
+    return <div className="stats-right-col absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard3Slide(idx, slideData3)}</div>;
   };
 
   return (
@@ -61,7 +87,7 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
 
       <div className="flex-1 w-full h-full overflow-y-auto custom-scrollbar p-6 sm:p-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-[1800px] mx-auto pb-20">
-          {Array.from({ length: totalSlides }).map((_, i) => (
+          {slideSequence.map((_, i) => (
             <div 
               key={i} 
               className="w-full aspect-[16/9] relative shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"

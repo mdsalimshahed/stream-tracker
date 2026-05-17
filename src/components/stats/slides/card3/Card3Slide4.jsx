@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, ReferenceDot, Label } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, Label } from 'recharts';
 import { formatFullTime } from '../SlideHelpers';
 
 const CustomTooltip = ({ active, payload }) => {
@@ -19,32 +19,8 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const PermanentMaxTooltipChronological = ({ cx, cy, maxData }) => {
-  if (cx === undefined || cy === undefined || !maxData) return null;
-  let color = '#3ddc84'; 
-  if (maxData.status === 'Completed') color = '#f5a623'; 
-  if (maxData.status === 'Abandoned') color = '#ff5c5c'; 
-  return (
-    <g transform={`translate(${cx}, ${cy})`}>
-      <foreignObject x="-150" y="-120" width="300" height="120" className="overflow-visible pointer-events-none">
-        <div className="w-full h-full flex flex-col justify-end items-center pb-[6px]">
-          <div className="relative bg-[#0a0a0a] border border-white/20 p-3 rounded-lg text-xs font-mono text-white shadow-2xl text-center w-max max-w-[280px]">
-            <div className="absolute -bottom-[6px] left-1/2 -translate-x-1/2 w-[11px] h-[11px] bg-[#0a0a0a] border-b border-r border-white/20 rotate-45 z-0"></div>
-            <div className="relative z-10 flex flex-col items-center">
-              <div className="font-bold text-white mb-1 truncate w-full max-w-[250px]" style={{ fontSize: '11px' }}>{maxData.streamTitle}</div>
-              <div className="text-white/40 mb-2" style={{ fontSize: '10px' }}>{maxData.displayDate}</div>
-              <div className="flex items-center gap-2 font-bold" style={{ color }}>{formatFullTime(maxData.duration)}</div>
-            </div>
-          </div>
-        </div>
-      </foreignObject>
-      <circle cx="0" cy="0" r="3.5" fill="#ffffff" />
-    </g>
-  );
-};
-
 export default function Card3Slide4({ data }) {
-  const { allStreamsChronological, chronoYMax, chronoYTicks, maxChronoPoint } = data;
+  const { allStreamsChronological, chronoYMax, chronoYTicks } = data;
 
   return (
     <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
@@ -67,7 +43,6 @@ export default function Card3Slide4({ data }) {
                 return <Cell key={`cell-${index}`} fill={fill} style={{ transition: 'fill 0.2s' }} />;
               })}
             </Bar>
-            {maxChronoPoint && maxChronoPoint.duration > 0 && <ReferenceDot x={maxChronoPoint.index} y={maxChronoPoint.hours} isFront={true} r={0} shape={<PermanentMaxTooltipChronological maxData={maxChronoPoint} />} />}
           </BarChart>
         </ResponsiveContainer>
       </div>

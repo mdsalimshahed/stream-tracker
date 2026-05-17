@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, ReferenceDot, Label } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, Label } from 'recharts';
 import { formatFullTime } from '../SlideHelpers';
 
 const getOrdinal = (n) => { const s = ["th", "st", "nd", "rd"]; const v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
@@ -22,33 +22,8 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const PermanentMaxTooltip = ({ cx, cy, maxData }) => {
-  if (cx === undefined || cy === undefined || !maxData) return null;
-  const d = new Date(maxData.dateMs);
-  const fullDate = `${getOrdinal(d.getDate())} ${d.toLocaleDateString('en-US', { month: 'long' })}, ${d.getFullYear()}`;
-  let color = '#ff5c5c'; 
-  if (maxData.hours > 0 && maxData.hours <= maxData.midThreshold) color = '#f5a623'; 
-  if (maxData.hours > maxData.midThreshold) color = '#3ddc84';
-  return (
-    <g transform={`translate(${cx}, ${cy})`}>
-      <foreignObject x="-150" y="-100" width="300" height="100" className="overflow-visible pointer-events-none">
-        <div className="w-full h-full flex flex-col justify-end items-center pb-[6px]">
-          <div className="relative bg-[#0a0a0a] border border-white/20 p-3 rounded-lg text-xs font-mono text-white shadow-2xl text-center w-max max-w-[280px]">
-            <div className="absolute -bottom-[6px] left-1/2 -translate-x-1/2 w-[11px] h-[11px] bg-[#0a0a0a] border-b border-r border-white/20 rotate-45 z-0"></div>
-            <div className="relative z-10 flex flex-col items-center">
-              <div className="font-bold text-white/50 mb-1">{fullDate}</div>
-              <div className="flex items-center gap-2 font-bold" style={{ color }}>{formatFullTime(maxData.rawSeconds)}</div>
-            </div>
-          </div>
-        </div>
-      </foreignObject>
-      <circle cx="0" cy="0" r="3.5" fill="#ffffff" />
-    </g>
-  );
-};
-
 export default function Card3Slide3({ data }) {
-  const { processedDailyData, dailyYMax, dailyYTicks, maxDailyPoint } = data;
+  const { processedDailyData, dailyYMax, dailyYTicks } = data;
 
   return (
     <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
@@ -71,7 +46,6 @@ export default function Card3Slide3({ data }) {
                 return <Cell key={`cell-${index}`} fill={fill} style={{ transition: 'fill 0.2s' }} />;
               })}
             </Bar>
-            {maxDailyPoint && maxDailyPoint.rawSeconds > 0 && <ReferenceDot x={maxDailyPoint.dateMs} y={maxDailyPoint.hours} isFront={true} r={0} shape={<PermanentMaxTooltip maxData={maxDailyPoint} />} />}
           </BarChart>
         </ResponsiveContainer>
       </div>

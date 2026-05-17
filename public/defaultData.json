@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "5/17/2026, 11:05:52 PM",
+  "exportDate": "5/17/2026, 11:15:32 PM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -168,17 +168,12 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_47e14ed55ac7f1bf9266b2cd5b3e4d9eae0ca54c.1920x1080.jpg?t=1765831644",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_295de30c8ec9fc82b73f226e68dd8b7fa8b07a62.1920x1080.jpg?t=1765831644",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_93a2b3a39788031aac115b2edeebcefe585d6c8d.1920x1080.jpg?t=1765831644",
-        "https://media.rawg.io/media/games/8fd/8fd2e8317849fd265ad8781c324d4ec2.jpg",
         "https://media.rawg.io/media/screenshots/59e/59e9ba1215b11e43ad64f363bfb7f65b.jpg",
         "https://media.rawg.io/media/screenshots/e93/e93aa58a1bf6f628507121a206ef856d.jpg",
         "https://media.rawg.io/media/screenshots/f2a/f2ad5b935bec0757defcbd1245182971.jpg",
         "https://media.rawg.io/media/screenshots/12d/12d0e3888fde20cb974e2951fad3d4f6.jpg",
         "https://media.rawg.io/media/screenshots/971/971f056ee50927f331f880271b0ab414.jpg",
-        "https://media.rawg.io/media/screenshots/565/565801fac627e1d6828fe56ea172d5ff.jpg",
-        "https://media.rawg.io/media/screenshots/ae2/ae29e2353587c691e1e6fe3d8d771a30.jpg",
-        "https://media.rawg.io/media/screenshots/abb/abbb50a231a91c716865961d29e1e9e0.jpg",
-        "https://media.rawg.io/media/screenshots/bc4/bc44314fff637a6b81f1d264bc767a9e.jpg",
-        "https://media.rawg.io/media/screenshots/6d6/6d61e8ef67c0f27b29b4f16266dbd9bd.jpg"
+        "https://media.rawg.io/media/screenshots/565/565801fac627e1d6828fe56ea172d5ff.jpg"
       ],
       "cycles": {
         "main": {
@@ -287,9 +282,9 @@
         "publisher": "Supergiant Games",
         "releaseDate": "25 Sep, 2025",
         "genres": "Action, Indie, RPG",
-        "youtubePlaylist": "",
+        "tags": "Singleplayer, Steam Cloud, Atmospheric, RPG, Story Rich, Difficult, Female Protagonist, Action RPG, Early Access, Captions available, Roguelike, Isometric, Roguelite, Dungeon Crawler, Hand-drawn, Perma Death, Family Sharing, Протагонистка, Souls-like, Mythology, Action Roguelike",
         "steamUrl": "https://store.steampowered.com/app/1145350/",
-        "tags": "Singleplayer, Steam Cloud, Atmospheric, RPG, Story Rich, Difficult, Female Protagonist, Action RPG, Early Access, Captions available, Roguelike, Isometric, Roguelite, Dungeon Crawler, Hand-drawn, Perma Death, Family Sharing, Протагонистка, Souls-like, Mythology, Action Roguelike"
+        "notOnSteam": false
       },
       "cover_image": "https://media.rawg.io/media/games/8fd/8fd2e8317849fd265ad8781c324d4ec2.jpg"
     },
@@ -7288,7 +7283,11 @@
     "enableHoverEffects": true,
     "enableViewTransitions": true,
     "bgCycleInterval": 10,
-    "excludedTags": [],
+    "excludedTags": [
+      "Subtitle Options",
+      "Kickstarter",
+      "Local Co-Op"
+    ],
     "statsLeftWidth": 5,
     "statsRightWidth": 5,
     "statsCardPadding": 25,

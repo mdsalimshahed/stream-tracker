@@ -9,7 +9,7 @@ export default function Card3Slide0({ data }) {
   
   return (
     <div className="slide-container justify-end outline-none">
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
+      {/* <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-100 transition-opacity duration-300 z-30 pointer-events-none" /> */}
       <div className="latest-bg">
         <CrossfadeImage src={latestBgImage} className="w-full h-full" imgClassName="object-cover" duration={700} />
       </div>

@@ -65,6 +65,9 @@ export default function Card2Slide2({ data }) {
           <div className="text-[var(--c-accent2)] normal-case tracking-normal font-bold mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
             {shortestStream.streamTitle}
           </div>
+          <div className="text-white/60 normal-case tracking-normal font-medium mt-1 truncate w-full pr-4 drop-shadow-md" style={{ fontSize: 'calc(var(--sz-sub) * var(--unit-08, 0.8rem))' }}>
+            {shortestStream.displayDate}
+          </div>
         </div>
       </div>
     </>

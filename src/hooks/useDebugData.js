@@ -1,405 +1,382 @@
 // src/hooks/useDebugData.js
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { getLatestRunWithTimestamp } from '../components/stats/utils';
 import { getLowResUrl, getTsDateStr, parseCustomTimestamp } from '../utils/helpers';
 
 export function useDebugData(streamData, layoutPrefs) {
-  const [statsCache, setStatsCache] = useState({
-    card1Data: null,
-    card2Data: null,
-    card3Data: null,
-    games: [],
-    isReady: false
-  });
-
   const highResImages = layoutPrefs?.highResImages;
   const excludedTagsStr = (layoutPrefs?.excludedTags || []).join(',');
 
-  useEffect(() => {
-    let isMounted = true;
-    setStatsCache(prev => ({ ...prev, isReady: false }));
+  // Calculate everything on the fly synchronously during render
+  const stats = useMemo(() => {
+    const processedGames = [];
+    const allFlat = [];
 
-    // Defer execution by 50ms to yield the main thread. This allows the UI to 
-    // instantly close modals and show success toasts without freezing.
-    const timeoutId = setTimeout(() => {
+    Object.entries(streamData).forEach(([id, data]) => {
+      const cycles = data.cycles || {};
+      let totalStreams = 0;
+      let totalDuration = 0;
+      let firstStreamTimestampMs = null;
+
+      const latestRunInfo = getLatestRunWithTimestamp(cycles);
+      const latestRunLabel = latestRunInfo.run ? (latestRunInfo.run.label || 'Ongoing') : 'Ongoing';
+      const lastStreamTimestampMs = latestRunInfo.date ? latestRunInfo.date.getTime() : null;
+      const lastStreamTimestampRaw = getTsDateStr(latestRunInfo.timestamp);
       
-      const processedGames = [];
-      const allFlat = [];
+      let latestRunName = latestRunInfo.run?.displayName || 
+        (latestRunInfo.cycleId === 'main' ? 'First Playthrough' : (latestRunInfo.cycleId || '').replace(/_/g, ' '));
 
-      Object.entries(streamData).forEach(([id, data]) => {
-        const cycles = data.cycles || {};
-        let totalStreams = 0;
-        let totalDuration = 0;
-        let firstStreamTimestampMs = null;
+      Object.entries(cycles).forEach(([cycleId, c]) => {
+        totalStreams += Number(c.stream_count || 0);
+        let runName = c.displayName || (cycleId === 'main' ? 'First Playthrough' : (cycleId || '').replace(/_/g, ' '));
 
-        const latestRunInfo = getLatestRunWithTimestamp(cycles);
-        const latestRunLabel = latestRunInfo.run ? (latestRunInfo.run.label || 'Ongoing') : 'Ongoing';
-        const lastStreamTimestampMs = latestRunInfo.date ? latestRunInfo.date.getTime() : null;
-        const lastStreamTimestampRaw = getTsDateStr(latestRunInfo.timestamp);
-        
-        let latestRunName = latestRunInfo.run?.displayName || 
-          (latestRunInfo.cycleId === 'main' ? 'First Playthrough' : (latestRunInfo.cycleId || '').replace(/_/g, ' '));
+        (c.timestamps || []).forEach((ts, idx) => {
+          const duration = ts.duration || 0;
+          totalDuration += duration;
+          
+          const startMs = parseCustomTimestamp(ts).getTime();
+          if (startMs > 0) {
+            if (!firstStreamTimestampMs || startMs < firstStreamTimestampMs) {
+              firstStreamTimestampMs = startMs;
+            }
 
-        Object.entries(cycles).forEach(([cycleId, c]) => {
-          totalStreams += Number(c.stream_count || 0);
-          let runName = c.displayName || (cycleId === 'main' ? 'First Playthrough' : (cycleId || '').replace(/_/g, ' '));
-
-          (c.timestamps || []).forEach((ts, idx) => {
-            const duration = ts.duration || 0;
-            totalDuration += duration;
+            let actualDur = duration;
+            if (ts.startTime && ts.endTime) {
+              actualDur = Math.floor((ts.endTime - ts.startTime) / 1000);
+            }
             
-            const startMs = parseCustomTimestamp(ts).getTime();
-            if (startMs > 0) {
-              if (!firstStreamTimestampMs || startMs < firstStreamTimestampMs) {
-                firstStreamTimestampMs = startMs;
-              }
+            let baseTitle = ts.title || `${data.game_name} - Stream #${idx + 1}`;
+            let streamTitle = (runName && runName !== 'First Playthrough') ? `${baseTitle} (${runName})` : baseTitle;
 
-              let actualDur = duration;
-              if (ts.startTime && ts.endTime) {
-                actualDur = Math.floor((ts.endTime - ts.startTime) / 1000);
-              }
-              
-              let baseTitle = ts.title || `${data.game_name} - Stream #${idx + 1}`;
-              let streamTitle = (runName && runName !== 'First Playthrough') ? `${baseTitle} (${runName})` : baseTitle;
+            allFlat.push({
+              gameId: id,
+              gameName: data.game_name,
+              thumbnails: data.thumbnail_urls || [],
+              cycleName: runName,
+              status: latestRunLabel,
+              streamTitle,
+              startMs,
+              duration,
+              endMs: startMs + duration * 1000,
+              actualDur,
+              diff: (actualDur > 0 || duration > 0) ? actualDur - duration : 0,
+              displayDate: getTsDateStr(ts),
+              hours: parseFloat((duration / 3600).toFixed(2))
+            });
+          }
+        });
+      });
 
-              allFlat.push({
-                gameId: id,
-                gameName: data.game_name,
-                thumbnails: data.thumbnail_urls || [],
-                cycleName: runName,
-                status: latestRunLabel,
-                streamTitle,
-                startMs,
-                duration,
-                endMs: startMs + duration * 1000,
-                actualDur,
-                diff: (actualDur > 0 || duration > 0) ? actualDur - duration : 0,
-                displayDate: getTsDateStr(ts),
-                hours: parseFloat((duration / 3600).toFixed(2))
-              });
+      processedGames.push({
+        id, ...data, totalStreams, totalDuration, firstStreamTimestampMs, 
+        latestRunLabel, lastStreamTimestampMs, lastStreamTimestampRaw, latestRunName, 
+        thumbnail_urls: data.thumbnail_urls || []
+      });
+    });
+
+    allFlat.sort((a, b) => a.startMs - b.startMs);
+    
+    const totalStreamsCount = allFlat.length;
+    const totalGamesCount = processedGames.length;
+    const totalDurationOverall = allFlat.reduce((acc, s) => acc + s.duration, 0);
+
+    const hourlyStreamData = Array.from({length: 24}, (_, i) => ({ 
+      hour: i, displayHour: i === 0 ? '12AM' : i < 12 ? `${i}AM` : i === 12 ? '12PM' : `${i-12}PM`, count: 0 
+    }));
+    allFlat.forEach(s => { hourlyStreamData[new Date(s.startMs).getHours()].count += 1; });
+
+    const displayDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const mapDay = (d) => d === 0 ? 6 : d - 1; 
+    const dowStreamData = Array.from({length: 7}, (_, i) => ({ dayIndex: i, displayDay: displayDays[i], count: 0 }));
+    allFlat.forEach(s => { dowStreamData[mapDay(new Date(s.startMs).getDay())].count += 1; });
+
+    const mergedStreams = [];
+    allFlat.forEach(s => {
+      if (mergedStreams.length === 0) mergedStreams.push({ startMs: s.startMs, endMs: s.endMs });
+      else {
+        const last = mergedStreams[mergedStreams.length - 1];
+        if (s.startMs <= last.endMs) last.endMs = Math.max(last.endMs, s.endMs);
+        else mergedStreams.push({ startMs: s.startMs, endMs: s.endMs });
+      }
+    });
+
+    let maxBreakSecs = 0, maxBreakStartMs = null, maxBreakEndMs = null, isActiveBreak = false;
+    for (let i = 1; i < mergedStreams.length; i++) {
+      const brkStart = mergedStreams[i-1].endMs;
+      const brkEnd = mergedStreams[i].startMs;
+      const brkSecs = (brkEnd - brkStart) / 1000;
+      if (brkSecs > maxBreakSecs) { maxBreakSecs = brkSecs; maxBreakStartMs = brkStart; maxBreakEndMs = brkEnd; isActiveBreak = false; }
+    }
+
+    if (mergedStreams.length > 0) {
+      const nowMs = Date.now();
+      const lastEndMs = mergedStreams[mergedStreams.length - 1].endMs;
+      if (nowMs > lastEndMs) {
+        const activeBreakSecs = (nowMs - lastEndMs) / 1000;
+        if (activeBreakSecs > maxBreakSecs) { maxBreakSecs = activeBreakSecs; maxBreakStartMs = lastEndMs; maxBreakEndMs = nowMs; isActiveBreak = true; }
+      }
+    }
+
+    const dailyMap = new Map();
+    const getMidnight = (ms) => new Date(ms).setHours(0,0,0,0);
+
+    allFlat.forEach(stream => {
+      let currentStart = stream.startMs;
+      let remainingSeconds = stream.duration;
+      let loopLimit = 48; 
+      while (remainingSeconds > 0 && loopLimit > 0) {
+        const currentMidnight = getMidnight(currentStart);
+        const nextMidnight = currentMidnight + 86400000;
+        const timeUntilNextMidnight = (nextMidnight - currentStart) / 1000;
+        const secondsInCurrentDay = Math.min(remainingSeconds, timeUntilNextMidnight);
+        dailyMap.set(currentMidnight, (dailyMap.get(currentMidnight) || 0) + secondsInCurrentDay);
+        remainingSeconds -= secondsInCurrentDay;
+        currentStart = nextMidnight;
+        loopLimit--;
+      }
+    });
+
+    const sortedDays = Array.from(dailyMap.keys()).sort((a, b) => a - b);
+    const continuousDailyStreamHours = [];
+    const todayMs = new Date().setHours(0,0,0,0);
+
+    if (sortedDays.length > 0) {
+      let currentMs = sortedDays[0];
+      const endDateMs = Math.max(sortedDays[sortedDays.length - 1], todayMs);
+      while (currentMs <= endDateMs) {
+        const rawSecs = dailyMap.get(currentMs) || 0;
+        const d = new Date(currentMs);
+        continuousDailyStreamHours.push({
+          dateMs: currentMs, displayDate: `${d.getDate()} ${d.toLocaleString('en-US', { month: 'short' })}`, rawSeconds: rawSecs, hours: parseFloat((rawSecs / 3600).toFixed(2))
+        });
+        currentMs += 86400000; 
+      }
+    }
+
+    const streaks = [];
+    let currentStreakDaysList = [];
+    for (let i = 0; i < sortedDays.length; i++) {
+       const day = sortedDays[i];
+       if (i === 0) currentStreakDaysList = [day];
+       else {
+          if (Math.round((day - sortedDays[i-1]) / 86400000) === 1) currentStreakDaysList.push(day);
+          else { streaks.push([...currentStreakDaysList]); currentStreakDaysList = [day]; }
+       }
+    }
+    if (currentStreakDaysList.length > 0) streaks.push(currentStreakDaysList);
+
+    let maxStreakSecs = 0, maxStreakStartMs = null, maxStreakEndMs = null;
+    streaks.forEach(streakDays => {
+       const streamsInStreak = allFlat.filter(s => streakDays.includes(getMidnight(s.startMs)));
+       if (streamsInStreak.length > 0) {
+           const st = streamsInStreak[0].startMs;
+           const en = Math.max(...streamsInStreak.map(s => s.endMs));
+           const secs = (en - st) / 1000;
+           if (secs > maxStreakSecs) { maxStreakSecs = secs; maxStreakStartMs = st; maxStreakEndMs = en; }
+       }
+    });
+
+    const chrono = allFlat.map((s, i) => ({ ...s, index: i + 1 }));
+    let longestStream = chrono.length ? chrono[0] : null;
+    let shortestStream = chrono.length ? chrono[0] : null;
+    chrono.forEach(s => {
+      if (s.duration > longestStream.duration) longestStream = s;
+      if (s.duration < shortestStream.duration) shortestStream = s;
+    });
+
+    let actualSessionSecs = 0, discardedSecs = 0, gainedSecs = 0;
+    const deficitData = [];
+    allFlat.forEach((s, idx) => {
+      actualSessionSecs += s.actualDur;
+      if (s.diff > 0) discardedSecs += s.diff;
+      if (s.diff < 0) gainedSecs += Math.abs(s.diff);
+      deficitData.push({ index: idx + 1, gameName: s.gameName, streamTitle: s.streamTitle, diff: s.diff, dateMs: s.startMs });
+    });
+
+    const statusSums = { Completed: 0, Ongoing: 0, Abandoned: 0 };
+    processedGames.forEach(g => { statusSums[g.latestRunLabel || 'Ongoing'] += g.totalDuration / 3600; });
+    const statusData = [
+      { name: 'Ongoing',   hours: parseFloat((statusSums.Ongoing || 0).toFixed(1)), color: '#3ddc84' },
+      { name: 'Completed', hours: parseFloat((statusSums.Completed || 0).toFixed(1)), color: '#f5a623' },
+      { name: 'Abandoned', hours: parseFloat((statusSums.Abandoned || 0).toFixed(1)), color: '#ff5c5c' },
+    ];
+
+    const progressionDates = Array.from(new Set(allFlat.map(fs => fs.startMs))).sort((a,b) => a-b);
+    const dateToIndex = new Map(progressionDates.map((d, i) => [d, i]));
+    
+    const groupedStreams = {};
+    allFlat.forEach(fs => {
+      if (!groupedStreams[fs.gameId]) groupedStreams[fs.gameId] = [];
+      groupedStreams[fs.gameId].push(fs);
+    });
+
+    const streamProgressionLines = processedGames.filter(g => g.totalDuration > 0).map(g => {
+      let cumSecs = 0; 
+      const dataPoints = (groupedStreams[g.id] || []).map(fs => {
+        cumSecs += fs.duration;
+        return { xIndex: dateToIndex.get(fs.startMs), cumulativeHours: parseFloat((cumSecs / 3600).toFixed(2)), rawSeconds: cumSecs, date: fs.startMs, gameName: g.game_name };
+      });
+      const color = g.latestRunLabel === 'Completed' ? '#f5a623' : g.latestRunLabel === 'Ongoing' ? '#3ddc84' : '#ff5c5c';
+      return { gameName: g.game_name, color, status: g.latestRunLabel, image: getLowResUrl(g.thumbnail_urls?.[0] || '', highResImages), data: dataPoints };
+    });
+
+    const gamesTimeline = processedGames.filter(g => g.totalDuration > 0 && g.firstStreamTimestampMs)
+      .sort((a, b) => a.firstStreamTimestampMs - b.firstStreamTimestampMs)
+      .map((g, index) => {
+        const d = new Date(g.firstStreamTimestampMs);
+        return { index, name: g.game_name, hours: parseFloat((g.totalDuration / 3600).toFixed(1)), rawSeconds: g.totalDuration, fullDate: d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), month: d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }), status: g.latestRunLabel, image: getLowResUrl(g.thumbnail_urls?.[0] || '', highResImages) };
+      });
+
+    let mostRecentGame = null;
+    processedGames.forEach(g => {
+      if (!mostRecentGame || (g.lastStreamTimestampMs && g.lastStreamTimestampMs > (mostRecentGame.lastStreamTimestampMs || 0))) mostRecentGame = g;
+    });
+
+    const counts = {};
+    const userExcluded = excludedTagsStr ? excludedTagsStr.split(',') : [];
+    const excludedMetaTags = new Set(['steam achievements', 'family sharing', 'captions available', 'in-app purchases', 'stats', 'includes level editor', 'vr support', 'steam cloud', 'steam leaderboards', 'cross-platform multiplayer', 'mmo', 'partial controller support', 'hdr available', 'stereo sound', 'custom volume controls', 'surround sound', 'playable without timed input', 'camera comfort', 'save anytime', 'full controller support', 'controller', 'co-op', 'online co-op', 'multiplayer', 'singleplayer', 'qte', 'accessibility', 'remote play', 'cloud saves', 'achievements', 'trading cards', 'windows', 'mac', 'linux', ...userExcluded.map(t=>t.toLowerCase())]);
+
+    processedGames.forEach(g => {
+      if (g.details && g.details.tags) {
+        g.details.tags.split(',').forEach(t => {
+          const trimmed = t.trim();
+          const lowerT = trimmed.toLowerCase();
+          if (trimmed && lowerT !== 'unknown' && trimmed.split(' ').length <= 3 && /^[a-zA-Z\s\-]+$/.test(trimmed)) {
+            if (!excludedMetaTags.has(lowerT) && !lowerT.includes('controller') && !lowerT.includes('steam ') && !lowerT.includes('sound')) {
+              counts[trimmed] = (counts[trimmed] || 0) + 1;
             }
-          });
+          }
         });
-
-        processedGames.push({
-          id, ...data, totalStreams, totalDuration, firstStreamTimestampMs, 
-          latestRunLabel, lastStreamTimestampMs, lastStreamTimestampRaw, latestRunName, 
-          thumbnail_urls: data.thumbnail_urls || []
-        });
-      });
-
-      allFlat.sort((a, b) => a.startMs - b.startMs);
-      
-      const totalStreamsCount = allFlat.length;
-      const totalGamesCount = processedGames.length;
-      const totalDurationOverall = allFlat.reduce((acc, s) => acc + s.duration, 0);
-
-      const hourlyStreamData = Array.from({length: 24}, (_, i) => ({ 
-        hour: i, displayHour: i === 0 ? '12AM' : i < 12 ? `${i}AM` : i === 12 ? '12PM' : `${i-12}PM`, count: 0 
-      }));
-      allFlat.forEach(s => { hourlyStreamData[new Date(s.startMs).getHours()].count += 1; });
-
-      const displayDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const mapDay = (d) => d === 0 ? 6 : d - 1; 
-      const dowStreamData = Array.from({length: 7}, (_, i) => ({ dayIndex: i, displayDay: displayDays[i], count: 0 }));
-      allFlat.forEach(s => { dowStreamData[mapDay(new Date(s.startMs).getDay())].count += 1; });
-
-      const mergedStreams = [];
-      allFlat.forEach(s => {
-        if (mergedStreams.length === 0) mergedStreams.push({ startMs: s.startMs, endMs: s.endMs });
-        else {
-          const last = mergedStreams[mergedStreams.length - 1];
-          if (s.startMs <= last.endMs) last.endMs = Math.max(last.endMs, s.endMs);
-          else mergedStreams.push({ startMs: s.startMs, endMs: s.endMs });
-        }
-      });
-
-      let maxBreakSecs = 0, maxBreakStartMs = null, maxBreakEndMs = null, isActiveBreak = false;
-      for (let i = 1; i < mergedStreams.length; i++) {
-        const brkStart = mergedStreams[i-1].endMs;
-        const brkEnd = mergedStreams[i].startMs;
-        const brkSecs = (brkEnd - brkStart) / 1000;
-        if (brkSecs > maxBreakSecs) { maxBreakSecs = brkSecs; maxBreakStartMs = brkStart; maxBreakEndMs = brkEnd; isActiveBreak = false; }
       }
+    });
+    const tagFrequencies = Object.entries(counts).map(([text, count]) => ({ text, count })).sort((a, b) => b.count - a.count).slice(0, 100); 
 
-      if (mergedStreams.length > 0) {
-        const nowMs = Date.now();
-        const lastEndMs = mergedStreams[mergedStreams.length - 1].endMs;
-        if (nowMs > lastEndMs) {
-          const activeBreakSecs = (nowMs - lastEndMs) / 1000;
-          if (activeBreakSecs > maxBreakSecs) { maxBreakSecs = activeBreakSecs; maxBreakStartMs = lastEndMs; maxBreakEndMs = nowMs; isActiveBreak = true; }
-        }
-      }
+    // Render Math Limits
+    const maxHCount = Math.max(...hourlyStreamData.map(d => d.count), 0);
+    const processedHourlyData = hourlyStreamData.map(d => ({ ...d, midThreshold: maxHCount / 2 }));
+    let hourlyYTicks = [1, 2, 3];
+    if (maxHCount > 3) {
+      const midPoint = Math.round(maxHCount / 2);
+      const roundedMid = Math.ceil(midPoint / 5) * 5;
+      const roundedMax = Math.ceil(maxHCount / 10) * 10;
+      if (roundedMid * 2 >= roundedMax && roundedMid > 0) hourlyYTicks = [roundedMid, roundedMax];
+      else { const step = Math.ceil(maxHCount / 3 / 5) * 5 || 5; hourlyYTicks = [step, step * 2, step * 3]; }
+    } else { hourlyYTicks = hourlyYTicks.filter(v => v <= maxHCount); }
 
-      const dailyMap = new Map();
-      const getMidnight = (ms) => new Date(ms).setHours(0,0,0,0);
+    const maxStatusH = Math.max(...statusData.map(d => d.hours), 0);
+    let statusYMax = 50, statusYTicks = [25, 50];
+    if (maxStatusH > 0) {
+      let cMax = Math.ceil(maxStatusH / 10) * 10;
+      if (cMax % 2 !== 0) cMax += 10;
+      statusYMax = cMax; statusYTicks = [cMax / 2, cMax];
+    }
 
-      allFlat.forEach(stream => {
-        let currentStart = stream.startMs;
-        let remainingSeconds = stream.duration;
-        let loopLimit = 48; 
-        while (remainingSeconds > 0 && loopLimit > 0) {
-          const currentMidnight = getMidnight(currentStart);
-          const nextMidnight = currentMidnight + 86400000;
-          const timeUntilNextMidnight = (nextMidnight - currentStart) / 1000;
-          const secondsInCurrentDay = Math.min(remainingSeconds, timeUntilNextMidnight);
-          dailyMap.set(currentMidnight, (dailyMap.get(currentMidnight) || 0) + secondsInCurrentDay);
-          remainingSeconds -= secondsInCurrentDay;
-          currentStart = nextMidnight;
-          loopLimit--;
-        }
+    const orderedDowData = [...dowStreamData].sort((a, b) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(a.displayDay) - ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(b.displayDay));
+    const dowCounts = orderedDowData.map(d => d.count);
+    const nonZeroDow = dowCounts.filter(c => c > 0);
+    const dowMaxC = Math.max(...dowCounts, 0);
+    const dowStep = dowMaxC > 80 ? 20 : 10;
+    const dowRoundedMin = Math.floor((nonZeroDow.length > 0 ? Math.min(...nonZeroDow) : 0) / 10) * 10;
+    
+    let processedDowData = [], dowDomainMax = 10, dowValidTicks = [], dowTickMap = {};
+    if (dowRoundedMin === 0 || dowMaxC < 10 || dowMaxC - dowRoundedMin <= 5) {
+      for (let i = dowStep; i <= dowMaxC + dowStep; i += dowStep) dowValidTicks.push(i);
+      processedDowData = orderedDowData.map(d => ({ ...d, fakeCount: d.count, realCount: d.count }));
+      dowDomainMax = dowMaxC === 0 ? 10 : dowMaxC;
+    } else {
+      dowValidTicks = [dowStep]; dowTickMap = { [dowStep]: dowRoundedMin };
+      let cReal = dowRoundedMin + dowStep, cFake = dowStep + dowStep;
+      while (cReal <= dowMaxC + dowStep) { dowValidTicks.push(cFake); dowTickMap[cFake] = cReal; cReal += dowStep; cFake += dowStep; }
+      processedDowData = orderedDowData.map(d => {
+        let fVal = 0;
+        if (d.count >= dowRoundedMin) fVal = dowStep + (d.count - dowRoundedMin);
+        else if (d.count > 0) fVal = (d.count / dowRoundedMin) * dowStep;
+        return { ...d, fakeCount: fVal, realCount: d.count };
       });
+      const maxFake = Math.max(...processedDowData.map(d => d.fakeCount));
+      dowDomainMax = maxFake === 0 ? 10 : maxFake;
+      dowValidTicks = dowValidTicks.filter(t => t <= maxFake);
+    }
 
-      const sortedDays = Array.from(dailyMap.keys()).sort((a, b) => a - b);
-      const continuousDailyStreamHours = [];
-      const todayMs = new Date().setHours(0,0,0,0);
+    let deficitYMax = 60, deficitYMin = -60;
+    if (deficitData.length > 0) {
+      let maxDef = deficitData[0], minDef = deficitData[0];
+      deficitData.forEach(d => { if (d.diff > maxDef.diff) maxDef = d; if (d.diff < minDef.diff) minDef = d; });
+      const absMax = Math.max(Math.abs(Math.ceil(maxDef.diff / 60)), Math.abs(Math.floor(minDef.diff / 60)), 10);
+      const yM = Math.ceil(absMax / 10) * 10;
+      deficitYMax = yM * 60 * 1.15; deficitYMin = -yM * 60 * 1.15;
+    }
 
-      if (sortedDays.length > 0) {
-        let currentMs = sortedDays[0];
-        const endDateMs = Math.max(sortedDays[sortedDays.length - 1], todayMs);
-        while (currentMs <= endDateMs) {
-          const rawSecs = dailyMap.get(currentMs) || 0;
-          const d = new Date(currentMs);
-          continuousDailyStreamHours.push({
-            dateMs: currentMs, displayDate: `${d.getDate()} ${d.toLocaleString('en-US', { month: 'short' })}`, rawSeconds: rawSecs, hours: parseFloat((rawSecs / 3600).toFixed(2))
-          });
-          currentMs += 86400000; 
-        }
+    const timelineXTicks = []; let lastMo = '';
+    gamesTimeline.forEach((g, i) => {
+      const parts = g.month.split(' ');
+      const fmd = parts.length === 2 ? `${parts[0]} '${parts[1].slice(-2)}` : g.month;
+      if (fmd !== lastMo) { timelineXTicks.push(i); lastMo = fmd; }
+    });
+    const maxTimeH = Math.max(...gamesTimeline.map(g => g.hours), 0);
+    let timelineYMax = 3, timelineYTicks = [1, 2, 3];
+    if (maxTimeH > 0) {
+      if (maxTimeH <= 10) timelineYMax = Math.ceil(maxTimeH);
+      else if (maxTimeH <= 100) timelineYMax = Math.ceil(maxTimeH / 5) * 5;
+      else timelineYMax = Math.ceil(maxTimeH / 10) * 10;
+      const tStep = Math.ceil(timelineYMax / 4);
+      timelineYTicks = []; for (let i = tStep; i <= timelineYMax; i += tStep) timelineYTicks.push(i);
+    }
+
+    const processedProgressionLines = streamProgressionLines.map(line => {
+      const dataMap = new Map(line.data.map(d => [d.xIndex, d]));
+      const minX = Math.min(...line.data.map(d => d.xIndex));
+      const maxX = Math.max(...line.data.map(d => d.xIndex));
+      const contData = []; let lastH = 0, lastS = 0;
+      for (let idx = minX; idx <= maxX; idx++) {
+        if (dataMap.has(idx)) { const p = dataMap.get(idx); lastH = p.cumulativeHours; lastS = p.rawSeconds; contData.push({ ...p, lineColor: line.color }); } 
+        else { contData.push({ xIndex: idx, cumulativeHours: lastH, rawSeconds: lastS, date: progressionDates[idx], gameName: line.gameName, lineColor: line.color }); }
       }
+      return { ...line, data: contData, endDot: contData[contData.length - 1], minX, maxX };
+    });
+    let maxProgH = 0; processedProgressionLines.forEach(l => { if (l.endDot && l.endDot.cumulativeHours > maxProgH) maxProgH = l.endDot.cumulativeHours; });
+    let progressionYMax = 15, progressionYTicks = [5, 10, 15];
+    if (maxProgH > 0) { const step = Math.max(5, Math.ceil(maxProgH / 3 / 5) * 5); progressionYMax = step * 3; progressionYTicks = [step, step * 2, step * 3]; }
 
-      const streaks = [];
-      let currentStreakDaysList = [];
-      for (let i = 0; i < sortedDays.length; i++) {
-         const day = sortedDays[i];
-         if (i === 0) currentStreakDaysList = [day];
-         else {
-            if (Math.round((day - sortedDays[i-1]) / 86400000) === 1) currentStreakDaysList.push(day);
-            else { streaks.push([...currentStreakDaysList]); currentStreakDaysList = [day]; }
-         }
-      }
-      if (currentStreakDaysList.length > 0) streaks.push(currentStreakDaysList);
+    const maxDailyH = Math.max(...continuousDailyStreamHours.map(d => d.hours), 0);
+    const processedDailyData = continuousDailyStreamHours.map(d => ({ ...d, midThreshold: maxDailyH / 2 }));
+    let dailyYMax = 3, dailyYTicks = [1, 2, 3];
+    if (maxDailyH > 0) {
+      dailyYMax = Math.ceil(maxDailyH) + 3;
+      const step = Math.max(1, Math.ceil(dailyYMax / 4));
+      dailyYTicks = []; for (let i = step; i < dailyYMax; i += step) dailyYTicks.push(i);
+    }
+    const maxDailyPoint = processedDailyData.length > 0 ? processedDailyData.reduce((p, c) => (p.rawSeconds > c.rawSeconds) ? p : c, processedDailyData[0]) : null;
 
-      let maxStreakSecs = 0, maxStreakStartMs = null, maxStreakEndMs = null;
-      streaks.forEach(streakDays => {
-         const streamsInStreak = allFlat.filter(s => streakDays.includes(getMidnight(s.startMs)));
-         if (streamsInStreak.length > 0) {
-             const st = streamsInStreak[0].startMs;
-             const en = Math.max(...streamsInStreak.map(s => s.endMs));
-             const secs = (en - st) / 1000;
-             if (secs > maxStreakSecs) { maxStreakSecs = secs; maxStreakStartMs = st; maxStreakEndMs = en; }
-         }
-      });
+    const maxChronoH = Math.max(...chrono.map(d => d.hours), 0);
+    let chronoYMax = 3, chronoYTicks = [1, 2, 3];
+    if (maxChronoH > 0) {
+      chronoYMax = Math.ceil(maxChronoH) + 2;
+      const step = Math.max(1, Math.ceil(chronoYMax / 4));
+      chronoYTicks = []; for (let i = step; i < chronoYMax; i += step) chronoYTicks.push(i);
+    }
+    const maxChronoPoint = chrono.length > 0 ? chrono.reduce((p, c) => (p.duration > c.duration) ? p : c, chrono[0]) : null;
 
-      const chrono = allFlat.map((s, i) => ({ ...s, index: i + 1 }));
-      let longestStream = chrono.length ? chrono[0] : null;
-      let shortestStream = chrono.length ? chrono[0] : null;
-      chrono.forEach(s => {
-        if (s.duration > longestStream.duration) longestStream = s;
-        if (s.duration < shortestStream.duration) shortestStream = s;
-      });
-
-      let actualSessionSecs = 0, discardedSecs = 0, gainedSecs = 0;
-      const deficitData = [];
-      allFlat.forEach((s, idx) => {
-        actualSessionSecs += s.actualDur;
-        if (s.diff > 0) discardedSecs += s.diff;
-        if (s.diff < 0) gainedSecs += Math.abs(s.diff);
-        deficitData.push({ index: idx + 1, gameName: s.gameName, streamTitle: s.streamTitle, diff: s.diff, dateMs: s.startMs });
-      });
-
-      const statusSums = { Completed: 0, Ongoing: 0, Abandoned: 0 };
-      processedGames.forEach(g => { statusSums[g.latestRunLabel || 'Ongoing'] += g.totalDuration / 3600; });
-      const statusData = [
-        { name: 'Ongoing',   hours: parseFloat((statusSums.Ongoing || 0).toFixed(1)), color: '#3ddc84' },
-        { name: 'Completed', hours: parseFloat((statusSums.Completed || 0).toFixed(1)), color: '#f5a623' },
-        { name: 'Abandoned', hours: parseFloat((statusSums.Abandoned || 0).toFixed(1)), color: '#ff5c5c' },
-      ];
-
-      const progressionDates = Array.from(new Set(allFlat.map(fs => fs.startMs))).sort((a,b) => a-b);
-      const dateToIndex = new Map(progressionDates.map((d, i) => [d, i]));
-      
-      const groupedStreams = {};
-      allFlat.forEach(fs => {
-        if (!groupedStreams[fs.gameId]) groupedStreams[fs.gameId] = [];
-        groupedStreams[fs.gameId].push(fs);
-      });
-
-      const streamProgressionLines = processedGames.filter(g => g.totalDuration > 0).map(g => {
-        let cumSecs = 0; 
-        const dataPoints = (groupedStreams[g.id] || []).map(fs => {
-          cumSecs += fs.duration;
-          return { xIndex: dateToIndex.get(fs.startMs), cumulativeHours: parseFloat((cumSecs / 3600).toFixed(2)), rawSeconds: cumSecs, date: fs.startMs, gameName: g.game_name };
-        });
-        const color = g.latestRunLabel === 'Completed' ? '#f5a623' : g.latestRunLabel === 'Ongoing' ? '#3ddc84' : '#ff5c5c';
-        return { gameName: g.game_name, color, status: g.latestRunLabel, image: getLowResUrl(g.thumbnail_urls?.[0] || '', highResImages), data: dataPoints };
-      });
-
-      const gamesTimeline = processedGames.filter(g => g.totalDuration > 0 && g.firstStreamTimestampMs)
-        .sort((a, b) => a.firstStreamTimestampMs - b.firstStreamTimestampMs)
-        .map((g, index) => {
-          const d = new Date(g.firstStreamTimestampMs);
-          return { index, name: g.game_name, hours: parseFloat((g.totalDuration / 3600).toFixed(1)), rawSeconds: g.totalDuration, fullDate: d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), month: d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }), status: g.latestRunLabel, image: getLowResUrl(g.thumbnail_urls?.[0] || '', highResImages) };
-        });
-
-      let mostRecentGame = null;
-      processedGames.forEach(g => {
-        if (!mostRecentGame || (g.lastStreamTimestampMs && g.lastStreamTimestampMs > (mostRecentGame.lastStreamTimestampMs || 0))) mostRecentGame = g;
-      });
-
-      const counts = {};
-      const userExcluded = excludedTagsStr ? excludedTagsStr.split(',') : [];
-      const excludedMetaTags = new Set(['steam achievements', 'family sharing', 'captions available', 'in-app purchases', 'stats', 'includes level editor', 'vr support', 'steam cloud', 'steam leaderboards', 'cross-platform multiplayer', 'mmo', 'partial controller support', 'hdr available', 'stereo sound', 'custom volume controls', 'surround sound', 'playable without timed input', 'camera comfort', 'save anytime', 'full controller support', 'controller', 'co-op', 'online co-op', 'multiplayer', 'singleplayer', 'qte', 'accessibility', 'remote play', 'cloud saves', 'achievements', 'trading cards', 'windows', 'mac', 'linux', ...userExcluded.map(t=>t.toLowerCase())]);
-
-      processedGames.forEach(g => {
-        if (g.details && g.details.tags) {
-          g.details.tags.split(',').forEach(t => {
-            const trimmed = t.trim();
-            const lowerT = trimmed.toLowerCase();
-            if (trimmed && lowerT !== 'unknown' && trimmed.split(' ').length <= 3 && /^[a-zA-Z\s\-]+$/.test(trimmed)) {
-              if (!excludedMetaTags.has(lowerT) && !lowerT.includes('controller') && !lowerT.includes('steam ') && !lowerT.includes('sound')) {
-                counts[trimmed] = (counts[trimmed] || 0) + 1;
-              }
-            }
-          });
-        }
-      });
-      const tagFrequencies = Object.entries(counts).map(([text, count]) => ({ text, count })).sort((a, b) => b.count - a.count).slice(0, 100); 
-
-      // Render Math Limits
-      const maxHCount = Math.max(...hourlyStreamData.map(d => d.count), 0);
-      const processedHourlyData = hourlyStreamData.map(d => ({ ...d, midThreshold: maxHCount / 2 }));
-      let hourlyYTicks = [1, 2, 3];
-      if (maxHCount > 3) {
-        const midPoint = Math.round(maxHCount / 2);
-        const roundedMid = Math.ceil(midPoint / 5) * 5;
-        const roundedMax = Math.ceil(maxHCount / 10) * 10;
-        if (roundedMid * 2 >= roundedMax && roundedMid > 0) hourlyYTicks = [roundedMid, roundedMax];
-        else { const step = Math.ceil(maxHCount / 3 / 5) * 5 || 5; hourlyYTicks = [step, step * 2, step * 3]; }
-      } else { hourlyYTicks = hourlyYTicks.filter(v => v <= maxHCount); }
-
-      const maxStatusH = Math.max(...statusData.map(d => d.hours), 0);
-      let statusYMax = 50, statusYTicks = [25, 50];
-      if (maxStatusH > 0) {
-        let cMax = Math.ceil(maxStatusH / 10) * 10;
-        if (cMax % 2 !== 0) cMax += 10;
-        statusYMax = cMax; statusYTicks = [cMax / 2, cMax];
-      }
-
-      const orderedDowData = [...dowStreamData].sort((a, b) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(a.displayDay) - ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(b.displayDay));
-      const dowCounts = orderedDowData.map(d => d.count);
-      const nonZeroDow = dowCounts.filter(c => c > 0);
-      const dowMaxC = Math.max(...dowCounts, 0);
-      const dowStep = dowMaxC > 80 ? 20 : 10;
-      const dowRoundedMin = Math.floor((nonZeroDow.length > 0 ? Math.min(...nonZeroDow) : 0) / 10) * 10;
-      
-      let processedDowData = [], dowDomainMax = 10, dowValidTicks = [], dowTickMap = {};
-      if (dowRoundedMin === 0 || dowMaxC < 10 || dowMaxC - dowRoundedMin <= 5) {
-        for (let i = dowStep; i <= dowMaxC + dowStep; i += dowStep) dowValidTicks.push(i);
-        processedDowData = orderedDowData.map(d => ({ ...d, fakeCount: d.count, realCount: d.count }));
-        dowDomainMax = dowMaxC === 0 ? 10 : dowMaxC;
-      } else {
-        dowValidTicks = [dowStep]; dowTickMap = { [dowStep]: dowRoundedMin };
-        let cReal = dowRoundedMin + dowStep, cFake = dowStep + dowStep;
-        while (cReal <= dowMaxC + dowStep) { dowValidTicks.push(cFake); dowTickMap[cFake] = cReal; cReal += dowStep; cFake += dowStep; }
-        processedDowData = orderedDowData.map(d => {
-          let fVal = 0;
-          if (d.count >= dowRoundedMin) fVal = dowStep + (d.count - dowRoundedMin);
-          else if (d.count > 0) fVal = (d.count / dowRoundedMin) * dowStep;
-          return { ...d, fakeCount: fVal, realCount: d.count };
-        });
-        const maxFake = Math.max(...processedDowData.map(d => d.fakeCount));
-        dowDomainMax = maxFake === 0 ? 10 : maxFake;
-        dowValidTicks = dowValidTicks.filter(t => t <= maxFake);
-      }
-
-      let deficitYMax = 60, deficitYMin = -60;
-      if (deficitData.length > 0) {
-        let maxDef = deficitData[0], minDef = deficitData[0];
-        deficitData.forEach(d => { if (d.diff > maxDef.diff) maxDef = d; if (d.diff < minDef.diff) minDef = d; });
-        const absMax = Math.max(Math.abs(Math.ceil(maxDef.diff / 60)), Math.abs(Math.floor(minDef.diff / 60)), 10);
-        const yM = Math.ceil(absMax / 10) * 10;
-        deficitYMax = yM * 60 * 1.15; deficitYMin = -yM * 60 * 1.15;
-      }
-
-      const timelineXTicks = []; let lastMo = '';
-      gamesTimeline.forEach((g, i) => {
-        const parts = g.month.split(' ');
-        const fmd = parts.length === 2 ? `${parts[0]} '${parts[1].slice(-2)}` : g.month;
-        if (fmd !== lastMo) { timelineXTicks.push(i); lastMo = fmd; }
-      });
-      const maxTimeH = Math.max(...gamesTimeline.map(g => g.hours), 0);
-      let timelineYMax = 3, timelineYTicks = [1, 2, 3];
-      if (maxTimeH > 0) {
-        if (maxTimeH <= 10) timelineYMax = Math.ceil(maxTimeH);
-        else if (maxTimeH <= 100) timelineYMax = Math.ceil(maxTimeH / 5) * 5;
-        else timelineYMax = Math.ceil(maxTimeH / 10) * 10;
-        const tStep = Math.ceil(timelineYMax / 4);
-        timelineYTicks = []; for (let i = tStep; i <= timelineYMax; i += tStep) timelineYTicks.push(i);
-      }
-
-      const processedProgressionLines = streamProgressionLines.map(line => {
-        const dataMap = new Map(line.data.map(d => [d.xIndex, d]));
-        const minX = Math.min(...line.data.map(d => d.xIndex));
-        const maxX = Math.max(...line.data.map(d => d.xIndex));
-        const contData = []; let lastH = 0, lastS = 0;
-        for (let idx = minX; idx <= maxX; idx++) {
-          if (dataMap.has(idx)) { const p = dataMap.get(idx); lastH = p.cumulativeHours; lastS = p.rawSeconds; contData.push({ ...p, lineColor: line.color }); } 
-          else { contData.push({ xIndex: idx, cumulativeHours: lastH, rawSeconds: lastS, date: progressionDates[idx], gameName: line.gameName, lineColor: line.color }); }
-        }
-        return { ...line, data: contData, endDot: contData[contData.length - 1], minX, maxX };
-      });
-      let maxProgH = 0; processedProgressionLines.forEach(l => { if (l.endDot && l.endDot.cumulativeHours > maxProgH) maxProgH = l.endDot.cumulativeHours; });
-      let progressionYMax = 15, progressionYTicks = [5, 10, 15];
-      if (maxProgH > 0) { const step = Math.max(5, Math.ceil(maxProgH / 3 / 5) * 5); progressionYMax = step * 3; progressionYTicks = [step, step * 2, step * 3]; }
-
-      const maxDailyH = Math.max(...continuousDailyStreamHours.map(d => d.hours), 0);
-      const processedDailyData = continuousDailyStreamHours.map(d => ({ ...d, midThreshold: maxDailyH / 2 }));
-      let dailyYMax = 3, dailyYTicks = [1, 2, 3];
-      if (maxDailyH > 0) {
-        dailyYMax = Math.ceil(maxDailyH) + 3;
-        const step = Math.max(1, Math.ceil(dailyYMax / 4));
-        dailyYTicks = []; for (let i = step; i < dailyYMax; i += step) dailyYTicks.push(i);
-      }
-      const maxDailyPoint = processedDailyData.length > 0 ? processedDailyData.reduce((p, c) => (p.rawSeconds > c.rawSeconds) ? p : c, processedDailyData[0]) : null;
-
-      const maxChronoH = Math.max(...chrono.map(d => d.hours), 0);
-      let chronoYMax = 3, chronoYTicks = [1, 2, 3];
-      if (maxChronoH > 0) {
-        chronoYMax = Math.ceil(maxChronoH) + 2;
-        const step = Math.max(1, Math.ceil(chronoYMax / 4));
-        chronoYTicks = []; for (let i = step; i < chronoYMax; i += step) chronoYTicks.push(i);
-      }
-      const maxChronoPoint = chrono.length > 0 ? chrono.reduce((p, c) => (p.duration > c.duration) ? p : c, chrono[0]) : null;
-
-      const card1Data = { 
-        totalStreams: totalStreamsCount, totalDuration: totalDurationOverall, longestStreakSecs: maxStreakSecs,
-        maxStreakStartMs, maxStreakEndMs, actualSessionSecs, discardedSecs, gainedSecs,
-        longestStream, highResImages, processedHourlyData, hourlyYTicks
-      };
-      
-      const card2Data = { 
-        totalGames: totalGamesCount, statusData, longestBreakSecs: maxBreakSecs, maxBreakStartMs,
-        maxBreakEndMs, isActiveBreak, shortestStream, highResImages, deficitData,
-        statusYMax, statusYTicks, processedDowData, dowDomainMax, dowValidTicks, dowTickMap, deficitYMax, deficitYMin
-      };
-      
-      const card3Data = { 
-        mostRecentGame, gamesTimeline, progressionDates, allStreamsChronological: chrono, tagFrequencies,
-        timelineXTicks, timelineYMax, timelineYTicks, processedProgressionLines, progressionYMax, progressionYTicks,
-        processedDailyData, dailyYMax, dailyYTicks, maxDailyPoint, chronoYMax, chronoYTicks, maxChronoPoint
-      };
-
-      if (isMounted) {
-        setStatsCache({ card1Data, card2Data, card3Data, games: processedGames, isReady: true });
-      }
-
-    }, 50);
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
+    const card1Data = { 
+      totalStreams: totalStreamsCount, totalDuration: totalDurationOverall, longestStreakSecs: maxStreakSecs,
+      maxStreakStartMs, maxStreakEndMs, actualSessionSecs, discardedSecs, gainedSecs,
+      longestStream, highResImages, processedHourlyData, hourlyYTicks
     };
+    
+    const card2Data = { 
+      totalGames: totalGamesCount, statusData, longestBreakSecs: maxBreakSecs, maxBreakStartMs,
+      maxBreakEndMs, isActiveBreak, shortestStream, highResImages, deficitData,
+      statusYMax, statusYTicks, processedDowData, dowDomainMax, dowValidTicks, dowTickMap, deficitYMax, deficitYMin
+    };
+    
+    const card3Data = { 
+      mostRecentGame, gamesTimeline, progressionDates, allStreamsChronological: chrono, tagFrequencies,
+      timelineXTicks, timelineYMax, timelineYTicks, processedProgressionLines, progressionYMax, progressionYTicks,
+      processedDailyData, dailyYMax, dailyYTicks, maxDailyPoint, chronoYMax, chronoYTicks, maxChronoPoint
+    };
+
+    return { card1Data, card2Data, card3Data, games: processedGames };
   }, [streamData, highResImages, excludedTagsStr]);
 
-  return statsCache;
+  return { ...stats, isReady: true };
 }

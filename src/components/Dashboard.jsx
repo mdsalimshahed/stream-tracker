@@ -120,7 +120,7 @@ export default function Dashboard({ streamData, handleCardClick, systemFonts, la
                     </p>
                   </div>
 
-                  <p className="text-white/50 mt-3 font-mono drop-shadow-md" style={{ fontSize: `${systemFonts.dashboardTime || 10}px` }}>
+                  <p className="text-white/50 mt-3 drop-shadow-md" style={{ fontSize: `${systemFonts.dashboardTime || 10}px` }}>
                     {stream.lastTimeStr}
                   </p>
 

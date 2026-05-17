@@ -15,14 +15,16 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
   const handleSubmit = () => {
     if (!name.trim()) return;
 
-    // Helper to convert line-by-line pasted text into a comma-separated string
+    // Helper to split by newlines OR commas, trim spaces, remove empties, and remove duplicates
     const formatList = (val) => {
       if (!val) return '';
-      return val
-        .split(/\r?\n/)          // Split by any newlines
-        .map(s => s.trim())      // Remove extra spaces from each line
-        .filter(Boolean)         // Remove empty lines
-        .join(', ');             // Join back with commas
+      const items = val
+        .split(/[,\n]+/)         // Split by commas OR newlines
+        .map(s => s.trim())      // Remove extra spaces from each item
+        .filter(Boolean);        // Remove empty items
+      
+      // Use Set to automatically remove any duplicates, then join back with commas
+      return [...new Set(items)].join(', ');
     };
 
     onSave(

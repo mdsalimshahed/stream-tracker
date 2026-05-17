@@ -1,4 +1,3 @@
-// src/components/stats/slides/card2/Card2Slide2.jsx
 import React, { useState, useEffect } from 'react';
 import { CrossfadeImage } from '../../../common/UIComponents';
 import { getLowResUrl } from '../../../../utils/helpers';
@@ -39,12 +38,7 @@ export default function Card2Slide2({ data }) {
     <>
       <div className="absolute inset-0 z-0 bg-black pointer-events-none overflow-hidden" style={{ borderRadius: 'inherit' }}>
         <div className="w-full h-full opacity-35">
-          <CrossfadeImage 
-            src={bgImage} 
-            className="w-full h-full" 
-            imgClassName="w-full h-full object-cover transition-opacity duration-500" 
-            duration={700} 
-          />
+          <CrossfadeImage src={bgImage} className="w-full h-full" imgClassName="w-full h-full object-cover transition-opacity duration-500" duration={700} />
         </div>
       </div>
 
@@ -62,7 +56,7 @@ export default function Card2Slide2({ data }) {
         </div>
         <div className="stat-label mt-2 text-white/80 font uppercase tracking-widest">
           Shortest Stream
-          <div className="text-[var(--c-accent2)] normal-case tracking-normal font-bold mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
+          <div className="text-[var(--c-accent2)] normal-case tracking-normal mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
             {shortestStream.streamTitle}
           </div>
           <div className="text-white/60 normal-case tracking-normal font-medium mt-1 truncate w-full pr-4 drop-shadow-md" style={{ fontSize: 'calc(var(--sz-sub) * var(--unit-08, 0.8rem))' }}>

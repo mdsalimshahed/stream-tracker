@@ -40,34 +40,19 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
   const slideData2 = { ...card2Data, totalGamesCount: card2Data.totalGames };
   const slideData3 = { ...card3Data, latestBgImage };
 
-  // Separate Card 1/2 slides from Card 3 slides
   const card12Slides = [
-    // TEXT SLIDES
-    { card: 1, idx: 0 }, // Total Streams
-    { card: 1, idx: 1 }, // Total Playtime
-    { card: 1, idx: 2 }, // Longest Streak
-    { card: 1, idx: 3 }, // Longest Stream
-    { card: 1, idx: 4 }, // Total Session Duration
-    { card: 1, idx: 6 }, // Most time streamed in one day
-    { card: 1, idx: 7 }, // Quiet Hours
-    { card: 2, idx: 0 }, // Games in Library
-    { card: 2, idx: 1 }, // Longest Break
-    { card: 2, idx: 2 }, // Shortest Stream
-    { card: 2, idx: 6 }, // Days without streams
-    { card: 2, idx: 7 }, // Peak Stream Time
+    { card: 1, idx: 0 }, { card: 2, idx: 0 }, // Streams count | Games in library
+    { card: 1, idx: 1 }, { card: 2, idx: 1 }, // Total playtime | Total session duration
+    { card: 1, idx: 2 }, { card: 2, idx: 2 }, // Longest stream | Shortest stream
+    { card: 1, idx: 3 }, { card: 2, idx: 3 }, // Longest streak | Longest break
+    { card: 1, idx: 4 }, { card: 2, idx: 4 }, // Quiet hours | Busiest day
+    { card: 1, idx: 5 }, { card: 2, idx: 5 }, // Closest to release | Played before abandoning
   ];
 
   const card3Slides = [
-    { card: 3, idx: 0 }, // Latest Game info
-    { card: 3, idx: 1 }, // Games Timeline
-    { card: 3, idx: 2 }, // Progression Lines
-    { card: 3, idx: 3 }, // Daily Playtime
-    { card: 3, idx: 4 }, // Chronological Streams
-    { card: 3, idx: 5 }, // Tag Frequencies
-    { card: 3, idx: 6 }, // Hourly Stream Count
-    { card: 3, idx: 7 }, // Playtime by Status
-    { card: 3, idx: 8 }, // Day of Week
-    { card: 3, idx: 9 }, // Deficit Data
+    { card: 3, idx: 0 }, { card: 3, idx: 1 }, { card: 3, idx: 2 }, { card: 3, idx: 3 },
+    { card: 3, idx: 4 }, { card: 3, idx: 5 }, { card: 3, idx: 6 }, { card: 3, idx: 7 },
+    { card: 3, idx: 8 }, { card: 3, idx: 9 }
   ];
 
   const renderCard12Content = ({ card, idx }, animIndex) => {
@@ -91,7 +76,6 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
       key={`c3-${idx}`}
       className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
       style={{
-        // Cap width so it doesn't stretch edge-to-edge; keep 16/9 aspect ratio
         maxWidth: '1200px',
         height: '420px',
         position: 'relative',
@@ -120,12 +104,11 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
       <div className="flex-1 w-full h-full overflow-y-auto custom-scrollbar p-6 sm:p-10">
         <div className="max-w-[1800px] mx-auto pb-20 flex flex-col gap-12">
 
-          {/* ── Card 1 & 2: original 3-column grid ── */}
+          {/* REVERTED TO 3 COLUMNS HERE */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {card12Slides.map((slide, i) => renderCard12Content(slide, i))}
           </div>
 
-          {/* ── Card 3: centered vertical stack ── */}
           <div className="flex flex-col items-center gap-6 sm:gap-8 w-full">
             {card3Slides.map((slide, i) => renderCard3Content(slide, i))}
           </div>

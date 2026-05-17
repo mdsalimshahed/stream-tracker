@@ -116,19 +116,32 @@ export function useDebugData(streamData, layoutPrefs) {
       }
     }
 
-    const dailyMap = new Map();
     const getMidnight = (ms) => new Date(ms).setHours(0,0,0,0);
+    const dailyMap = new Map();
+    const dailyActiveStreams = new Map();
 
-    allFlat.forEach(stream => {
+    // ───────────────────────────────────────────────────────────────
+    // CALCULATE DAILY DURATIONS (Splitting exact video duration across midnight)
+    // ───────────────────────────────────────────────────────────────
+    allFlat.forEach((stream, idx) => {
       let currentStart = stream.startMs;
-      let remainingSeconds = stream.duration;
+      let remainingSeconds = stream.duration; // Strictly using video duration
       let loopLimit = 48; 
+      
       while (remainingSeconds > 0 && loopLimit > 0) {
         const currentMidnight = getMidnight(currentStart);
         const nextMidnight = currentMidnight + 86400000;
         const timeUntilNextMidnight = (nextMidnight - currentStart) / 1000;
         const secondsInCurrentDay = Math.min(remainingSeconds, timeUntilNextMidnight);
+        
         dailyMap.set(currentMidnight, (dailyMap.get(currentMidnight) || 0) + secondsInCurrentDay);
+        
+        if (!dailyActiveStreams.has(currentMidnight)) {
+            dailyActiveStreams.set(currentMidnight, new Set());
+        }
+        // Count how many unique streams touched this specific day
+        dailyActiveStreams.get(currentMidnight).add(idx);
+        
         remainingSeconds -= secondsInCurrentDay;
         currentStart = nextMidnight;
         loopLimit--;
@@ -160,11 +173,28 @@ export function useDebugData(streamData, layoutPrefs) {
 
         const d = new Date(currentMs);
         continuousDailyStreamHours.push({
-          dateMs: currentMs, displayDate: `${d.getDate()} ${d.toLocaleString('en-US', { month: 'short' })}`, rawSeconds: rawSecs, hours: parseFloat((rawSecs / 3600).toFixed(2))
+          dateMs: currentMs, 
+          displayDate: `${d.getDate()} ${d.toLocaleString('en-US', { month: 'short' })}`, 
+          rawSeconds: rawSecs, 
+          hours: parseFloat((rawSecs / 3600).toFixed(2))
         });
         currentMs += 86400000; 
       }
     }
+
+    // ───────────────────────────────────────────────────────────────
+    // SYNCHRONIZED BUSIEST DAY
+    // ───────────────────────────────────────────────────────────────
+    let busiestDayObj = { dateMs: null, secs: 0, count: 0 };
+    dailyMap.forEach((secs, dateMs) => {
+      if (secs > busiestDayObj.secs) {
+        busiestDayObj = {
+          dateMs,
+          secs,
+          count: dailyActiveStreams.get(dateMs)?.size || 0
+        };
+      }
+    });
 
     const streaks = [];
     let currentStreakDaysList = [];
@@ -244,6 +274,54 @@ export function useDebugData(streamData, layoutPrefs) {
     chrono.forEach(s => {
       if (s.duration > longestStream.duration) longestStream = s;
       if (s.duration < shortestStream.duration) shortestStream = s;
+    });
+
+    // ───────────────────────────────────────────────────────────────
+    // CLOSEST TO RELEASE DATE & LONGEST ABANDONED
+    // ───────────────────────────────────────────────────────────────
+    let closestReleaseGame = null;
+    let minReleaseDiff = Infinity;
+    let dayZeroGamesSet = new Set();
+
+    processedGames.forEach(g => {
+      if (g.firstStreamTimestampMs) {
+        let releaseMs;
+        if (g.details?.releaseDate && g.details.releaseDate !== 'Unknown') {
+          releaseMs = new Date(g.details.releaseDate).getTime();
+          if (isNaN(releaseMs)) releaseMs = new Date(`${g.release_year}-01-01`).getTime();
+        } else if (g.release_year) {
+          releaseMs = new Date(`${g.release_year}-01-01`).getTime();
+        }
+
+        if (!isNaN(releaseMs)) {
+          const diff = Math.abs(g.firstStreamTimestampMs - releaseMs);
+          if (diff < minReleaseDiff) {
+            minReleaseDiff = diff;
+            closestReleaseGame = {
+              gameName: g.game_name,
+              diffMs: diff,
+              thumbnails: g.thumbnail_urls || []
+            };
+          }
+          if (diff < 86400000) { // Streamed within 24hrs of release
+            dayZeroGamesSet.add(g.game_name);
+          }
+        }
+      }
+    });
+    const dayZeroGames = Array.from(dayZeroGamesSet);
+
+    let longestAbandonedGame = null;
+    processedGames.forEach(g => {
+      if (g.latestRunLabel === 'Abandoned') {
+        if (!longestAbandonedGame || g.totalDuration > longestAbandonedGame.duration) {
+          longestAbandonedGame = {
+            gameName: g.game_name,
+            duration: g.totalDuration,
+            thumbnails: g.thumbnail_urls || []
+          };
+        }
+      }
     });
 
     let actualSessionSecs = 0, discardedSecs = 0, gainedSecs = 0;
@@ -402,7 +480,6 @@ export function useDebugData(streamData, layoutPrefs) {
       const rangeMins = Math.max(10, maxDiffMins - minDiffMins);
       let stepMins = 10;
       
-      // Enforces roughly 3-5 ticks total
       if (rangeMins > 600) stepMins = Math.ceil(rangeMins / 4 / 60) * 60; 
       else if (rangeMins > 200) stepMins = Math.ceil(rangeMins / 4 / 30) * 30; 
       else if (rangeMins > 60) stepMins = Math.ceil(rangeMins / 4 / 15) * 15; 
@@ -412,7 +489,6 @@ export function useDebugData(streamData, layoutPrefs) {
       let topBoundMins = Math.ceil(maxDiffMins / stepMins) * stepMins;
       let bottomBoundMins = Math.floor(minDiffMins / stepMins) * stepMins;
 
-      // Force inclusion of 0 for aesthetic zero-line
       if (topBoundMins < 0) topBoundMins = 0;
       if (bottomBoundMins > 0) bottomBoundMins = 0;
 
@@ -488,16 +564,32 @@ export function useDebugData(streamData, layoutPrefs) {
 
     // Export payload data
     const card1Data = { 
-      totalStreams: totalStreamsCount, totalDuration: totalDurationOverall, longestStreakSecs: maxStreakSecs,
-      maxStreakStartMs, maxStreakEndMs, actualSessionSecs, discardedSecs, gainedSecs,
-      longestStream, highResImages, maxDailySecs, maxDailyDateMs,
-      quietPrimary, quietSecondary
+      totalStreams: totalStreamsCount, 
+      totalDuration: totalDurationOverall, 
+      longestStream, 
+      longestStreakSecs: maxStreakSecs,
+      maxStreakStartMs, 
+      maxStreakEndMs, 
+      quietPrimary, 
+      quietSecondary,
+      closestReleaseGame,
+      dayZeroGames,
+      highResImages
     };
     
     const card2Data = { 
-      totalGames: totalGamesCount, longestBreakSecs: maxBreakSecs, maxBreakStartMs,
-      maxBreakEndMs, isActiveBreak, shortestStream, highResImages, zeroStreamDays,
-      peakHourStr, peakHourCount
+      totalGames: totalGamesCount, 
+      actualSessionSecs, 
+      discardedSecs, 
+      gainedSecs,
+      shortestStream, 
+      longestBreakSecs: maxBreakSecs, 
+      maxBreakStartMs,
+      maxBreakEndMs, 
+      isActiveBreak, 
+      busiestDayObj, 
+      longestAbandonedGame,
+      highResImages
     };
     
     const card3Data = { 

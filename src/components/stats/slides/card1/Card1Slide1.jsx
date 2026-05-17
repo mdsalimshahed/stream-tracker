@@ -16,11 +16,11 @@ export default function Card1Slide1({ data }) {
         <div className="flex items-baseline gap-4">
           <div className="flex items-baseline gap-1.5">
             <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-055, 0.55rem))' }}>{m}</span>
-            <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-025, 0.25rem))' }}>{m === 1 ? 'min' : 'mins'}</span>
+            <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-025, 0.25rem))' }}>{m === 1 ? 'minute' : 'minutes'}</span>
           </div>
           <div className="flex items-baseline gap-1.5">
             <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-055, 0.55rem))' }}>{s}</span>
-            <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-025, 0.25rem))' }}>{s === 1 ? 'sec' : 'secs'}</span>
+            <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-025, 0.25rem))' }}>{s === 1 ? 'second' : 'seconds'}</span>
           </div>
         </div>
       </div>

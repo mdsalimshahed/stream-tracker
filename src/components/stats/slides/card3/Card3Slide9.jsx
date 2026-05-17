@@ -1,6 +1,6 @@
 // src/components/stats/slides/card3/Card3Slide9.jsx
 import React from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, Label } from 'recharts';
 import { formatFullTime } from '../SlideHelpers';
 
 const getOrdinal = (n) => {
@@ -30,20 +30,21 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 export default function Card3Slide9({ data }) {
-  const { deficitData, deficitYMax, deficitYMin } = data;
+  const { deficitData, deficitYMax, deficitYMin, deficitYTicks } = data;
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden" style={{ paddingLeft: '8px', paddingRight: '8px' }}>
-      <div className="absolute bottom-2 left-4 z-40 pointer-events-none font-sans text-[11px] tracking-wide text-white/40 leading-normal">
-        Time difference of <br /> session and play time per stream
-      </div>
-      <div className="w-full h-full flex-1 outline-none overflow-hidden relative">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart tabIndex={-1} data={deficitData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
+      <div className="w-full flex-1 min-h-0 outline-none overflow-visible relative">
+        <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
+          <BarChart tabIndex={-1} data={deficitData} margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-            <XAxis dataKey="index" hide={true} padding={{ left: 10, right: 10 }} />
-            <YAxis domain={[deficitYMin, deficitYMax]} hide={true} />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} isAnimationActive={false} />
+            <XAxis dataKey="index" stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8' }} minTickGap={40} tickMargin={10} height={35} tickFormatter={(val) => `#${val}`}>
+              <Label value="Stream Sequence" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
+            </XAxis>
+            <YAxis stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }} allowDecimals={false} width={45} domain={[deficitYMin, deficitYMax]} ticks={deficitYTicks} tickFormatter={(v) => `${Math.round(v / 60)}m`}>
+              <Label value="Time Diff" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
+            </YAxis>
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} isAnimationActive={false} />
             <Bar dataKey="diff" isAnimationActive={false} minPointSize={2}>
               {deficitData?.map((entry, index) => {
                 let fill = entry.diff > 0 ? '#ff5c5c' : '#3ddc84';

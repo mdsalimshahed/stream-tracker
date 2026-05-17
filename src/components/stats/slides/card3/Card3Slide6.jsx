@@ -20,7 +20,7 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 export default function Card3Slide6({ data }) {
-  const { processedHourlyData, hourlyYTicks } = data;
+  const { processedHourlyData, hourlyYTicks, hourlyYMax } = data;
 
   return (
     <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
@@ -31,7 +31,7 @@ export default function Card3Slide6({ data }) {
             <XAxis dataKey="displayHour" stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8' }} tickMargin={10} height={35}>
               <Label value="Hour of Day" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
             </XAxis>
-            <YAxis stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8', angle: -90, textAnchor: 'middle', dx: -10 }} allowDecimals={false} width={45} ticks={hourlyYTicks} domain={[0, 'dataMax']}>
+            <YAxis stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8', angle: -90, textAnchor: 'middle', dx: -10 }} allowDecimals={false} width={45} ticks={hourlyYTicks} domain={[0, hourlyYMax]}>
               <Label value="Stream Count" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
             </YAxis>
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />

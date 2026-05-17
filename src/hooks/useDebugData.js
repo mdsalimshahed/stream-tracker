@@ -250,62 +250,104 @@ export function useDebugData(streamData, layoutPrefs) {
     });
     const tagFrequencies = Object.entries(counts).map(([text, count]) => ({ text, count })).sort((a, b) => b.count - a.count).slice(0, 100); 
 
-    // Render Math Limits
+    // --- GRAPH LIMIT MATH ROUNDING (Max 5 ticks, steps of 5/10/etc.) ---
+    
+    // Hourly
     const maxHCount = Math.max(...hourlyStreamData.map(d => d.count), 0);
     const processedHourlyData = hourlyStreamData.map(d => ({ ...d, midThreshold: maxHCount / 2 }));
-    let hourlyYTicks = [1, 2, 3];
-    if (maxHCount > 3) {
-      const midPoint = Math.round(maxHCount / 2);
-      const roundedMid = Math.ceil(midPoint / 5) * 5;
-      const roundedMax = Math.ceil(maxHCount / 10) * 10;
-      if (roundedMid * 2 >= roundedMax && roundedMid > 0) hourlyYTicks = [roundedMid, roundedMax];
-      else { const step = Math.ceil(maxHCount / 3 / 5) * 5 || 5; hourlyYTicks = [step, step * 2, step * 3]; }
-    } else { hourlyYTicks = hourlyYTicks.filter(v => v <= maxHCount); }
+    let hStep = Math.max(5, Math.ceil(maxHCount / 4 / 5) * 5);
+    let hourlyYMax = Math.ceil(maxHCount / hStep) * hStep || 5;
+    let hourlyYTicks = [];
+    for(let i=hStep; i<=hourlyYMax; i+=hStep) hourlyYTicks.push(i);
 
+    // Status
     const maxStatusH = Math.max(...statusData.map(d => d.hours), 0);
-    let statusYMax = 50, statusYTicks = [25, 50];
-    if (maxStatusH > 0) {
-      let cMax = Math.ceil(maxStatusH / 10) * 10;
-      if (cMax % 2 !== 0) cMax += 10;
-      statusYMax = cMax; statusYTicks = [cMax / 2, cMax];
-    }
+    let sStep = Math.max(5, Math.ceil(maxStatusH / 4 / 5) * 5);
+    let statusYMax = Math.ceil(maxStatusH / sStep) * sStep || 5;
+    let statusYTicks = [];
+    for(let i=sStep; i<=statusYMax; i+=sStep) statusYTicks.push(i);
 
+    // Day of Week (DOW) - Zero base + second tick matches minimum data exactly
     const orderedDowData = [...dowStreamData].sort((a, b) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(a.displayDay) - ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(b.displayDay));
     const dowCounts = orderedDowData.map(d => d.count);
     const nonZeroDow = dowCounts.filter(c => c > 0);
     const dowMaxC = Math.max(...dowCounts, 0);
-    const dowStep = dowMaxC > 80 ? 20 : 10;
-    const dowRoundedMin = Math.floor((nonZeroDow.length > 0 ? Math.min(...nonZeroDow) : 0) / 10) * 10;
+    const dowMinC = nonZeroDow.length > 0 ? Math.min(...nonZeroDow) : 0;
     
-    let processedDowData = [], dowDomainMax = 10, dowValidTicks = [], dowTickMap = {};
-    if (dowRoundedMin === 0 || dowMaxC < 10 || dowMaxC - dowRoundedMin <= 5) {
-      for (let i = dowStep; i <= dowMaxC + dowStep; i += dowStep) dowValidTicks.push(i);
+    let processedDowData = [], dowDomainMax = 5, dowValidTicks = [], dowTickMap = {};
+    if (dowMinC === 0 || dowMaxC === dowMinC) {
+      let dowStep = Math.max(5, Math.ceil(dowMaxC / 4 / 5) * 5);
+      let maxFake = Math.ceil(dowMaxC / dowStep) * dowStep || 5;
+      dowValidTicks = [0];
+      dowTickMap[0] = 0;
+      for (let i = dowStep; i <= maxFake; i += dowStep) {
+        dowValidTicks.push(i);
+        dowTickMap[i] = i;
+      }
       processedDowData = orderedDowData.map(d => ({ ...d, fakeCount: d.count, realCount: d.count }));
-      dowDomainMax = dowMaxC === 0 ? 10 : dowMaxC;
+      dowDomainMax = maxFake;
     } else {
-      dowValidTicks = [dowStep]; dowTickMap = { [dowStep]: dowRoundedMin };
-      let cReal = dowRoundedMin + dowStep, cFake = dowStep + dowStep;
-      while (cReal <= dowMaxC + dowStep) { dowValidTicks.push(cFake); dowTickMap[cFake] = cReal; cReal += dowStep; cFake += dowStep; }
+      const range = dowMaxC - dowMinC;
+      let step = Math.max(5, Math.ceil(range / 3 / 5) * 5); 
+      
+      dowValidTicks = [0];
+      dowTickMap[0] = 0;
+      let cReal = dowMinC;
+      let cFake = step;
+      
+      while (cReal <= dowMaxC + step) {
+        dowValidTicks.push(cFake);
+        dowTickMap[cFake] = cReal;
+        cReal += step;
+        cFake += step;
+      }
+      
       processedDowData = orderedDowData.map(d => {
         let fVal = 0;
-        if (d.count >= dowRoundedMin) fVal = dowStep + (d.count - dowRoundedMin);
-        else if (d.count > 0) fVal = (d.count / dowRoundedMin) * dowStep;
+        if (d.count >= dowMinC) {
+          fVal = step + (d.count - dowMinC);
+        } else if (d.count > 0) {
+          fVal = (d.count / dowMinC) * step;
+        }
         return { ...d, fakeCount: fVal, realCount: d.count };
       });
+      
       const maxFake = Math.max(...processedDowData.map(d => d.fakeCount));
-      dowDomainMax = maxFake === 0 ? 10 : maxFake;
-      dowValidTicks = dowValidTicks.filter(t => t <= maxFake);
+      dowDomainMax = Math.ceil(maxFake / step) * step || step;
+      if (!dowValidTicks.includes(dowDomainMax) && dowDomainMax > 0) {
+        dowValidTicks.push(dowDomainMax);
+        dowTickMap[dowDomainMax] = dowMinC + (dowDomainMax - step);
+      }
+      dowValidTicks = dowValidTicks.filter(t => t <= dowDomainMax);
     }
 
-    let deficitYMax = 60, deficitYMin = -60;
+    // Deficit Data limits
+    let deficitYMax = 60 * 5, deficitYMin = -60 * 5;
+    let deficitYTicks = [-300, 0, 300];
     if (deficitData.length > 0) {
-      let maxDef = deficitData[0], minDef = deficitData[0];
-      deficitData.forEach(d => { if (d.diff > maxDef.diff) maxDef = d; if (d.diff < minDef.diff) minDef = d; });
-      const absMax = Math.max(Math.abs(Math.ceil(maxDef.diff / 60)), Math.abs(Math.floor(minDef.diff / 60)), 10);
-      const yM = Math.ceil(absMax / 10) * 10;
-      deficitYMax = yM * 60 * 1.15; deficitYMin = -yM * 60 * 1.15;
+      const maxDiffMins = Math.max(...deficitData.map(d => d.diff)) / 60;
+      const minDiffMins = Math.min(...deficitData.map(d => d.diff)) / 60;
+      
+      const rangeMins = maxDiffMins - minDiffMins;
+      let stepMins = Math.max(5, Math.ceil(rangeMins / 4 / 5) * 5);
+
+      let topBoundMins = Math.ceil(maxDiffMins / stepMins) * stepMins;
+      let bottomBoundMins = Math.floor(minDiffMins / stepMins) * stepMins;
+      
+      if (topBoundMins === 0 && maxDiffMins > 0) topBoundMins = stepMins;
+      if (bottomBoundMins === 0 && minDiffMins < 0) bottomBoundMins = -stepMins;
+      if (topBoundMins === bottomBoundMins) { topBoundMins += stepMins; bottomBoundMins -= stepMins; }
+
+      deficitYMax = topBoundMins * 60;
+      deficitYMin = bottomBoundMins * 60;
+      
+      deficitYTicks = [];
+      for (let m = bottomBoundMins; m <= topBoundMins; m += stepMins) {
+        deficitYTicks.push(m * 60);
+      }
     }
 
+    // Timeline
     const timelineXTicks = []; let lastMo = '';
     gamesTimeline.forEach((g, i) => {
       const parts = g.month.split(' ');
@@ -313,15 +355,12 @@ export function useDebugData(streamData, layoutPrefs) {
       if (fmd !== lastMo) { timelineXTicks.push(i); lastMo = fmd; }
     });
     const maxTimeH = Math.max(...gamesTimeline.map(g => g.hours), 0);
-    let timelineYMax = 3, timelineYTicks = [1, 2, 3];
-    if (maxTimeH > 0) {
-      if (maxTimeH <= 10) timelineYMax = Math.ceil(maxTimeH);
-      else if (maxTimeH <= 100) timelineYMax = Math.ceil(maxTimeH / 5) * 5;
-      else timelineYMax = Math.ceil(maxTimeH / 10) * 10;
-      const tStep = Math.ceil(timelineYMax / 4);
-      timelineYTicks = []; for (let i = tStep; i <= timelineYMax; i += tStep) timelineYTicks.push(i);
-    }
+    let tStep = Math.max(5, Math.ceil(maxTimeH / 4 / 5) * 5);
+    let timelineYMax = Math.ceil(maxTimeH / tStep) * tStep || 5;
+    let timelineYTicks = [];
+    for(let i=tStep; i<=timelineYMax; i+=tStep) timelineYTicks.push(i);
 
+    // Progression
     const processedProgressionLines = streamProgressionLines.map(line => {
       const dataMap = new Map(line.data.map(d => [d.xIndex, d]));
       const minX = Math.min(...line.data.map(d => d.xIndex));
@@ -334,29 +373,28 @@ export function useDebugData(streamData, layoutPrefs) {
       return { ...line, data: contData, endDot: contData[contData.length - 1], minX, maxX };
     });
     let maxProgH = 0; processedProgressionLines.forEach(l => { if (l.endDot && l.endDot.cumulativeHours > maxProgH) maxProgH = l.endDot.cumulativeHours; });
-    let progressionYMax = 15, progressionYTicks = [5, 10, 15];
-    if (maxProgH > 0) { const step = Math.max(5, Math.ceil(maxProgH / 3 / 5) * 5); progressionYMax = step * 3; progressionYTicks = [step, step * 2, step * 3]; }
+    let pStep = Math.max(5, Math.ceil(maxProgH / 4 / 5) * 5);
+    let progressionYMax = Math.ceil(maxProgH / pStep) * pStep || 5;
+    let progressionYTicks = [];
+    for(let i=pStep; i<=progressionYMax; i+=pStep) progressionYTicks.push(i);
 
+    // Daily
     const maxDailyH = Math.max(...continuousDailyStreamHours.map(d => d.hours), 0);
     const processedDailyData = continuousDailyStreamHours.map(d => ({ ...d, midThreshold: maxDailyH / 2 }));
-    let dailyYMax = 3, dailyYTicks = [1, 2, 3];
-    if (maxDailyH > 0) {
-      dailyYMax = Math.ceil(maxDailyH) + 3;
-      const step = Math.max(1, Math.ceil(dailyYMax / 4));
-      dailyYTicks = []; for (let i = step; i < dailyYMax; i += step) dailyYTicks.push(i);
-    }
+    let dStep = Math.max(1, Math.ceil(maxDailyH / 5)); // Hourly Steps explicitly maintained here for daily distribution
+    let dailyYMax = Math.ceil(maxDailyH / dStep) * dStep || 1;
+    let dailyYTicks = [];
+    for(let i=dStep; i<=dailyYMax; i+=dStep) dailyYTicks.push(i);
     const maxDailyPoint = processedDailyData.length > 0 ? processedDailyData.reduce((p, c) => (p.rawSeconds > c.rawSeconds) ? p : c, processedDailyData[0]) : null;
 
+    // Chrono (Playtime per stream)
     const maxChronoH = Math.max(...chrono.map(d => d.hours), 0);
-    let chronoYMax = 3, chronoYTicks = [1, 2, 3];
-    if (maxChronoH > 0) {
-      chronoYMax = Math.ceil(maxChronoH) + 2;
-      const step = Math.max(1, Math.ceil(chronoYMax / 4));
-      chronoYTicks = []; for (let i = step; i < chronoYMax; i += step) chronoYTicks.push(i);
-    }
+    let cStep = Math.max(1, Math.ceil(maxChronoH / 5)); // Hourly Steps explicitly maintained here for Playtime per Stream
+    let chronoYMax = Math.ceil(maxChronoH / cStep) * cStep || 1;
+    let chronoYTicks = [];
+    for(let i=cStep; i<=chronoYMax; i+=cStep) chronoYTicks.push(i);
     const maxChronoPoint = chrono.length > 0 ? chrono.reduce((p, c) => (p.duration > c.duration) ? p : c, chrono[0]) : null;
 
-    // ----- ORGANIZE BY TEXT VS GRAPHS -----
     const card1Data = { 
       totalStreams: totalStreamsCount, totalDuration: totalDurationOverall, longestStreakSecs: maxStreakSecs,
       maxStreakStartMs, maxStreakEndMs, actualSessionSecs, discardedSecs, gainedSecs,
@@ -372,11 +410,10 @@ export function useDebugData(streamData, layoutPrefs) {
       mostRecentGame, gamesTimeline, progressionDates, allStreamsChronological: chrono, tagFrequencies,
       timelineXTicks, timelineYMax, timelineYTicks, processedProgressionLines, progressionYMax, progressionYTicks,
       processedDailyData, dailyYMax, dailyYTicks, maxDailyPoint, chronoYMax, chronoYTicks, maxChronoPoint,
-      // Graphs moved to Card3
-      processedHourlyData, hourlyYTicks,
+      processedHourlyData, hourlyYTicks, hourlyYMax,
       statusData, statusYMax, statusYTicks, 
       processedDowData, dowDomainMax, dowValidTicks, dowTickMap, 
-      deficitData, deficitYMax, deficitYMin
+      deficitData, deficitYMax, deficitYMin, deficitYTicks
     };
 
     return { card1Data, card2Data, card3Data, games: processedGames };

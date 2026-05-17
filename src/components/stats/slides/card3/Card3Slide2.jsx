@@ -1,3 +1,4 @@
+// src/components/stats/slides/card3/Card3Slide2.jsx
 import React, { useState, useMemo } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceDot, Label } from 'recharts';
 import { formatFullTime } from '../SlideHelpers';
@@ -24,7 +25,10 @@ const Slide9TrailEndDot = ({ cx, cy, payload, image, status, isFaded, isSelected
   if (cx === undefined || cy === undefined) return null; 
   const clipId = `clip-end-${payload.gameName.replace(/[^a-zA-Z0-9]/g, '')}-${cx}-${cy}`;
   let ringColor = status === 'Completed' ? "#f5a623" : status === 'Ongoing' ? "#3ddc84" : "#ff5c5c";
-  const ringRadius = isSelected ? 31 : 12; const imgRadius = isSelected ? 27 : 10;
+  
+  const ringRadius = isSelected ? 31 : 12; 
+  const imgRadius = isSelected ? 27 : 10;
+
   return (
     <g style={{ opacity: isFaded ? 0.2 : 1, transition: 'opacity 0.3s ease', cursor: 'pointer', pointerEvents: 'auto', outline: 'none' }} tabIndex={-1} onClick={(e) => { if (e && e.stopPropagation) e.stopPropagation(); onSelect(); }}>
       <circle cx={cx} cy={cy} r={isSelected ? 32 : 16} fill="transparent" style={{ outline: 'none' }} /> 
@@ -44,15 +48,15 @@ export default function Card3Slide2({ data }) {
     if (selectedGame) {
       const gLine = processedProgressionLines.find(l => l.gameName === selectedGame);
       if (gLine) {
-        const pad = Math.max(2, Math.ceil((gLine.maxX - gLine.minX) * 0.08));
-        return [gLine.minX - pad, gLine.maxX + pad];
+        if (gLine.minX === gLine.maxX) return [gLine.minX - 1, gLine.maxX + 1];
+        return [gLine.minX, gLine.maxX];
       }
     }
-    const gMin = Math.min(...processedProgressionLines.map(l => l.minX));
-    const gMax = Math.max(...processedProgressionLines.map(l => l.maxX));
-    const gPad = Math.max(2, Math.ceil((gMax - gMin) * 0.03));
-    return [gMin - gPad, gMax + gPad];
+    return ['dataMin', 'dataMax'];
   }, [selectedGame, processedProgressionLines]);
+
+  // Dynamic padding based on whether a dot is selected (zoomed in) or not
+  const chartPadding = selectedGame ? { left: 32, right: 32 } : { left: 16, right: 16 };
 
   return (
     <div className="absolute inset-0 flex flex-col bg-black/40 outline-none" tabIndex={-1} onClick={(e) => { if (e.target?.tagName?.toLowerCase() !== 'circle' && e.target?.tagName?.toLowerCase() !== 'image') setSelectedGame(null); }}>
@@ -63,11 +67,12 @@ export default function Card3Slide2({ data }) {
         .recharts-wrapper:focus, .recharts-surface:focus { outline: none !important; }
       `}} />
       <div className="w-full flex-1 min-h-0 relative outline-none overflow-visible">
+        {/* Background Layer Chart */}
         <div className="absolute inset-0 z-0 pointer-events-none outline-none">
           <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-            <LineChart tabIndex={-1} margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible', outline: 'none' }}>
+            <LineChart tabIndex={-1} margin={{ top: 35, right: 40, left: 15, bottom: 15 }} style={{ overflow: 'visible', outline: 'none' }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-              <XAxis type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} height={35} tick={false} axisLine={false} tickLine={false} />
+              <XAxis type="number" dataKey="xIndex" domain={xDomain} padding={chartPadding} allowDataOverflow={true} allowDecimals={false} height={35} tick={false} axisLine={false} tickLine={false} />
               <YAxis domain={[0, progressionYMax]} ticks={progressionYTicks} width={45} tick={false} axisLine={false} tickLine={false} padding={{ top: 35, bottom: 10 }} />
               {processedProgressionLines?.map((line, idx) => {
                 const isSelected = selectedGame === line.gameName;
@@ -78,11 +83,12 @@ export default function Card3Slide2({ data }) {
           </ResponsiveContainer>
         </div>
 
+        {/* Interactive Foreground Layer Chart */}
         <div className="absolute inset-0 z-10 outline-none">
           <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-            <LineChart tabIndex={-1} margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible', outline: 'none' }}>
+            <LineChart tabIndex={-1} margin={{ top: 35, right: 40, left: 15, bottom: 15 }} style={{ overflow: 'visible', outline: 'none' }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-              <XAxis type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} stroke="#8a88a8" axisLine={false} tickLine={false} tickMargin={10} height={35} minTickGap={5} tick={{ fill: '#8a88a8', fontSize: 10 }} 
+              <XAxis type="number" dataKey="xIndex" domain={xDomain} padding={chartPadding} allowDataOverflow={true} allowDecimals={false} stroke="#8a88a8" axisLine={false} tickLine={false} tickMargin={10} height={35} minTickGap={5} tick={{ fill: '#8a88a8', fontSize: 10 }} 
                 tickFormatter={(val) => { 
                   if (Number.isInteger(val) && val >= 0 && val < progressionDates.length) { 
                     const d = new Date(progressionDates[val]); 
@@ -94,7 +100,7 @@ export default function Card3Slide2({ data }) {
                 <Label value="Timeline" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
               </XAxis>
               <YAxis domain={[0, progressionYMax]} ticks={progressionYTicks} stroke="#8a88a8" axisLine={false} tickLine={false} tickFormatter={(v) => `${Math.round(v)}h`} width={45} padding={{ top: 35, bottom: 10 }} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }}>
-                <Label value="Playtime (Hours)" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
+                <Label value="Playtime" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
               </YAxis>
               <Tooltip content={<Slide9Tooltip selectedGame={selectedGame} />} cursor={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 1 }} isAnimationActive={false} shared={false} wrapperStyle={{ zIndex: 1000 }} />
               

@@ -46,7 +46,7 @@ export default function Card3Slide7({ data }) {
               <Label value="Game Status" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
             </XAxis>
             <YAxis stroke="#8a88a8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}h`} width={45} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8'}} domain={[0, statusYMax]} ticks={statusYTicks}>
-              <Label value="Playtime (Hours)" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
+              <Label value="Playtime" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
             </YAxis>
             <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} isAnimationActive={false} />
             <Area type="monotone" dataKey="hours" stroke="url(#strokeStatusGradient)" strokeWidth={3} fill="url(#areaStatusGradient)" activeDot={{ r: 6, fill: '#fff', stroke: 'none' }} isAnimationActive={false} />

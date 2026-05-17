@@ -5,6 +5,75 @@ import { migrateLabels } from '../utils/dataUtils';
 import { formatRunName, extractPlaylistId } from '../utils/helpers';
 import { fetchPlaylistDetails } from '../utils/youtubeUtils';
 
+/**
+ * Advanced matching algorithm to find the absolute correct game on RAWG
+ * by comparing Release Date, Name, Developers, and Publishers.
+ */
+const findBestRawgMatch = async (gameName, releaseYear, developers = [], publishers = []) => {
+  try {
+    const cleanName = gameName.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+    const searchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=5`);
+    const searchData = await searchRes.json();
+    
+    if (!searchData.results || searchData.results.length === 0) return null;
+
+    // Fetch deep details for the top 5 candidates simultaneously to get dev/pub data
+    const detailedCandidates = await Promise.all(searchData.results.map(async (c) => {
+      try {
+        const res = await fetch(`https://api.rawg.io/api/games/${c.id}?key=${RAWG_API_KEY}`);
+        if (!res.ok) return c;
+        return await res.json();
+      } catch (e) { return c; }
+    }));
+
+    let bestMatch = null;
+    let highestScore = -1;
+
+    const targetNameLower = gameName.toLowerCase();
+    const devList = (typeof developers === 'string' ? developers.split(',') : developers).map(d => d.trim().toLowerCase()).filter(Boolean);
+    const pubList = (typeof publishers === 'string' ? publishers.split(',') : publishers).map(p => p.trim().toLowerCase()).filter(Boolean);
+    const targetYearNum = parseInt(releaseYear) || 0;
+
+    for (const detailData of detailedCandidates) {
+      let score = 0;
+      
+      // 1. Name Match (Weighted heavily)
+      const resNameLower = (detailData.name || '').toLowerCase();
+      if (resNameLower === targetNameLower) score += 20;
+      else if (resNameLower.includes(targetNameLower) || targetNameLower.includes(resNameLower)) score += 5;
+
+      // 2. Year Match (Weighted heavily)
+      if (detailData.released && targetYearNum > 0) {
+        const resYear = new Date(detailData.released).getFullYear();
+        if (resYear === targetYearNum) score += 15;
+        else if (Math.abs(resYear - targetYearNum) === 1) score += 5; 
+      }
+
+      // 3. Developer / Publisher Match
+      const resDevs = detailData.developers ? detailData.developers.map(d => d.name.toLowerCase()) : [];
+      const resPubs = detailData.publishers ? detailData.publishers.map(p => p.name.toLowerCase()) : [];
+
+      const devMatch = devList.some(d => resDevs.some(rd => rd.includes(d) || d.includes(rd)));
+      if (devMatch) score += 20;
+
+      const pubMatch = pubList.some(p => resPubs.some(rp => rp.includes(p) || p.includes(rp)));
+      if (pubMatch) score += 15;
+
+      // Keep track of the highest scoring candidate
+      if (score > highestScore) {
+        highestScore = score;
+        bestMatch = detailData;
+      }
+    }
+    
+    // If we scored points, return the match. Otherwise fallback to the top search result.
+    if (highestScore > 0) return bestMatch;
+    return detailedCandidates[0];
+  } catch (e) {
+    return null;
+  }
+};
+
 export function useStreamData(notify) {
   const [streamData, setStreamData] = useState(() => {
     try {
@@ -37,6 +106,9 @@ export function useStreamData(notify) {
           game.cover_image = game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
           changed = true;
         }
+
+        let steamDataObj = null;
+
         if (!game.details.steamUrl && !game.details.notOnSteam) {
           try {
             let steamId = /^\d+$/.test(id) ? id : null;
@@ -54,7 +126,7 @@ export function useStreamData(notify) {
               const contentType = detailRes.headers.get("content-type");
               if (detailRes.ok && contentType && contentType.includes("application/json")) {
                 const detailsRaw = await detailRes.json();
-                const steamDataObj = detailsRaw[steamId]?.data;
+                steamDataObj = detailsRaw[steamId]?.data;
                 
                 if (steamDataObj) {
                   let newUrls = steamDataObj.screenshots ? steamDataObj.screenshots.map(s => s.path_full) : [];
@@ -72,13 +144,19 @@ export function useStreamData(notify) {
             await new Promise(r => setTimeout(r, 400));
           } catch (e) {}
         }
+        
         if (!game.thumbnail_urls || game.thumbnail_urls.length < 2 || !game.details.tags || game.details.tags === 'Unknown') {
           try {
-            const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-            const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-            const rawgSearchData = await rawgSearchRes.json();
-            if (rawgSearchData.results?.[0]) {
-              const rawgGame = rawgSearchData.results[0];
+            let devList = game.details.developer !== 'Unknown' ? game.details.developer.split(', ') : [];
+            let pubList = game.details.publisher !== 'Unknown' ? game.details.publisher.split(', ') : [];
+            if (steamDataObj) {
+              devList = steamDataObj.developers || devList;
+              pubList = steamDataObj.publishers || pubList;
+            }
+
+            const rawgGame = await findBestRawgMatch(game.game_name, game.release_year, devList, pubList);
+
+            if (rawgGame) {
               const rawgId = rawgGame.id;
               
               if (rawgGame.background_image) {
@@ -126,6 +204,8 @@ export function useStreamData(notify) {
       // Steam and RAWG Data syncing
       for (const [id, game] of Object.entries(dataCopy)) {
         if (!game.details) game.details = { developer: 'Unknown', publisher: 'Unknown', releaseDate: game.release_year, genres: 'Unknown', tags: 'Unknown' };
+        let steamDataObj = null;
+
         if (!game.details.steamUrl && !game.details.notOnSteam) {
           try {
             let steamId = /^\d+$/.test(id) ? id : null;
@@ -142,7 +222,7 @@ export function useStreamData(notify) {
               const contentType = detailRes.headers.get("content-type");
               if (detailRes.ok && contentType && contentType.includes("application/json")) {
                   const detailsRaw = await detailRes.json();
-                  const steamDataObj = detailsRaw[steamId]?.data;
+                  steamDataObj = detailsRaw[steamId]?.data;
                   if (steamDataObj) {
                     let newUrls = steamDataObj.screenshots ? steamDataObj.screenshots.map(s => s.path_full) : [];
                     newUrls = [...newUrls, ...(game.thumbnail_urls || [])];
@@ -164,11 +244,16 @@ export function useStreamData(notify) {
         }
         
         try {
-          const cleanName = game.game_name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-          const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-          const rawgSearchData = await rawgSearchRes.json();
-          if (rawgSearchData.results?.[0]) {
-            const rawgGame = rawgSearchData.results[0];
+          let devList = game.details.developer !== 'Unknown' ? game.details.developer.split(', ') : [];
+          let pubList = game.details.publisher !== 'Unknown' ? game.details.publisher.split(', ') : [];
+          if (steamDataObj) {
+            devList = steamDataObj.developers || devList;
+            pubList = steamDataObj.publishers || pubList;
+          }
+
+          const rawgGame = await findBestRawgMatch(game.game_name, game.release_year, devList, pubList);
+
+          if (rawgGame) {
             const rawgId = rawgGame.id;
             
             if (rawgGame.background_image) {
@@ -234,7 +319,7 @@ export function useStreamData(notify) {
                       duration: matchingVideo.duration,
                       startTime: matchingVideo.startTime,
                       endTime: matchingVideo.endTime,
-                      date: matchingVideo.startTime // Align default date sorting cleanly
+                      date: matchingVideo.startTime
                     };
                   }
                   return tsObj;
@@ -270,6 +355,7 @@ export function useStreamData(notify) {
     notify(g.isRawgOnly ? 'Fetching data from RAWG...' : 'Fetching Steam metadata & RAWG images...', 'info');
     let details = { developer: g.developers?.map(d => d.name).join(', ') || 'Unknown', publisher: 'Unknown', releaseDate: g.released || new Date().getFullYear().toString(), genres: 'Unknown', tags: 'Unknown', steamUrl: g.isRawgOnly ? '' : `https://store.steampowered.com/app/${rid}/`, notOnSteam: g.isRawgOnly || false };
     let cover_image = g.cover_image, thumbnails = [], finalName = g.name, finalYear = g.released ? new Date(g.released).getFullYear().toString() : new Date().getFullYear().toString();
+    
     try {
       if (g.isRawgOnly) {
         const detailRes = await fetch(`https://api.rawg.io/api/games/${rid}?key=${RAWG_API_KEY}`);
@@ -294,9 +380,11 @@ export function useStreamData(notify) {
       } else {
         const detailRes = await fetch(`/steam-api/api/appdetails?appids=${rid}&l=english`);
         const contentType = detailRes.headers.get("content-type");
+        let gameDetails = null;
+
         if (detailRes.ok && contentType && contentType.includes("application/json")) {
            const steamDataObj = await detailRes.json();
-           const gameDetails = steamDataObj[rid]?.data;
+           gameDetails = steamDataObj[rid]?.data;
            if (gameDetails) {
              finalName = gameDetails.name || finalName;
              const rDate = gameDetails.release_date?.date;
@@ -308,11 +396,13 @@ export function useStreamData(notify) {
              if (gameDetails.screenshots) thumbnails = gameDetails.screenshots.map(s => s.path_full);
            }
         }
+        
         try {
-          const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(finalName.replace(/[:™®©]/g, '').trim())}&page_size=1`);
-          const rawgSearchData = await rawgSearchRes.json();
-          if (rawgSearchData.results?.[0]) {
-            const rawgGame = rawgSearchData.results[0];
+          let devList = gameDetails?.developers || [];
+          let pubList = gameDetails?.publishers || [];
+          const rawgGame = await findBestRawgMatch(finalName, finalYear, devList, pubList);
+
+          if (rawgGame) {
             const rawgId = rawgGame.id;
             
             if (rawgGame.background_image) {
@@ -335,6 +425,7 @@ export function useStreamData(notify) {
       }
       notify(`Successfully added ${finalName}!`, 'success');
     } catch (e) { notify(`Added ${finalName}, but some data failed to load`, 'error'); }
+    
     setStreamData(prev => ({
       ...prev,
       [rid]: { game_name: finalName, release_year: finalYear, cover_image, thumbnail_urls: [...new Set(thumbnails)], cycles: { main: { stream_count: 0, timestamps: [], isMain: true, youtubePlaylist: '', displayName: 'First Playthrough', label: 'Ongoing' } }, details }
@@ -359,12 +450,15 @@ export function useStreamData(notify) {
       let cover_image = gameDetails.header_image;
       let thumbnails = gameDetails.screenshots ? gameDetails.screenshots.map(s => s.path_full) : [];
       let tagsString = 'Unknown';
+      
       try {
-        const rawgSearchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(gameDetails.name)}&page_size=1`);
-        const rawgSearchData = await rawgSearchRes.json();
-        if (rawgSearchData.results?.[0]) {
-          const rawgGame = rawgSearchData.results[0];
-          
+        const devList = gameDetails.developers || [];
+        const pubList = gameDetails.publishers || [];
+        const year = gameDetails.release_date?.date ? new Date(gameDetails.release_date.date).getFullYear().toString() : '0';
+        
+        const rawgGame = await findBestRawgMatch(gameDetails.name, year, devList, pubList);
+
+        if (rawgGame) {
           if (rawgGame.background_image) {
             cover_image = rawgGame.background_image;
           }
@@ -382,6 +476,7 @@ export function useStreamData(notify) {
           if (sData.results) thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);
         }
       } catch (e) {}
+      
       const nd = JSON.parse(JSON.stringify(streamData));
       nd[gameId].game_name = gameDetails.name;
       nd[gameId].release_year = gameDetails.release_date?.date ? new Date(gameDetails.release_date.date).getFullYear().toString() : nd[gameId].release_year;

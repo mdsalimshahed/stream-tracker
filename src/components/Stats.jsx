@@ -133,7 +133,8 @@ export default function Stats({ systemFonts, layoutPrefs, cachedStats }) {
               <div className="stats-progress-fill" onAnimationIteration={handleAnimationIteration} />
             </div>
             <div className="card-wrapper-left">
-              <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard2Slide} slideData={slideData2} className="stat-card" delay={200} slideCount={7} />
+              {/* UPDATE SLIDE COUNT TO 5 HERE */}
+              <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard2Slide} slideData={slideData2} className="stat-card" delay={200} slideCount={5} />
             </div>
           </div>
 

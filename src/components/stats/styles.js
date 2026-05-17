@@ -167,13 +167,13 @@ export const STYLES = `
   }
 
   /* Hover borders */
-  .stat-card:hover { background: rgba(20,26,36,0.8); }
-  .stat-card::before {
+  .stat-card:hover, .stats-right-col:hover { background: rgba(20,26,36,0.8); }
+  .stat-card::before, .stats-right-col::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
     background: linear-gradient(to right, var(--c-accent), transparent); opacity: 0; transition: opacity 0.25s;
     z-index: 10;
   }
-  .stat-card:hover::before { opacity: 1; }
+  .stat-card:hover::before, .stats-right-col:hover::before { opacity: 1; }
 
   /* CONTAINER QUERIES IMPLEMENTED HERE */
   .slide-container {
@@ -212,8 +212,34 @@ export const STYLES = `
     transition: color 0.3s ease; 
     text-shadow: 0 4px 16px rgba(0,0,0,0.8); 
   }
-  .stat-card:hover .stat-number { color: var(--c-accent); }
+
+  /* Add transitions specifically for the nested spans resolving the values */
+  .stat-number .text-white {
+    transition: color 0.3s ease;
+  }
+
+  /* Target both standard Card 1/2 text and inner spans matching .text-white */
+  .stat-card:hover .stat-number,
+  .stat-card:hover .stat-number .text-white { 
+    color: var(--c-accent) !important; 
+  }
+  
   .stats-right-col:hover .latest-title { color: var(--c-accent) !important; }
+
+  /* Hover effects for Graph Cards (Card 3) */
+  .stats-right-col:hover .recharts-cartesian-axis-tick-value,
+  .stats-right-col:hover .recharts-cartesian-axis-tick-value tspan,
+  .stats-right-col:hover .recharts-label,
+  .stats-right-col:hover .recharts-label tspan {
+      fill: var(--c-accent) !important;
+  }
+
+  .recharts-cartesian-axis-tick-value,
+  .recharts-cartesian-axis-tick-value tspan,
+  .recharts-label,
+  .recharts-label tspan {
+      transition: fill 0.3s ease;
+  }
 
   /* DYNAMIC SIZING INJECTED */
   .top-number { font-size: calc(var(--sz-main) * var(--unit-1, 1rem)); }

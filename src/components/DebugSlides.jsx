@@ -72,8 +72,8 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
 
   const renderCard12Content = ({ card, idx }, animIndex) => {
     const inner = card === 1
-      ? <div className="stat-card absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard1Slide(idx, slideData1)}</div>
-      : <div className="stat-card absolute inset-0" style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>{getCard2Slide(idx, slideData2)}</div>;
+      ? <div className="stat-card absolute inset-0">{getCard1Slide(idx, slideData1)}</div>
+      : <div className="stat-card absolute inset-0">{getCard2Slide(idx, slideData2)}</div>;
 
     return (
       <div
@@ -98,10 +98,7 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
         animationDelay: `${(card12Slides.length + animIndex) * 100}ms`,
       }}
     >
-      <div
-        className="stats-right-col absolute inset-0"
-        style={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}
-      >
+      <div className="stats-right-col absolute inset-0">
         {getCard3Slide(idx, slideData3)}
       </div>
     </div>

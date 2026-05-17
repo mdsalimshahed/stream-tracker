@@ -10,7 +10,7 @@ export default function Card2Slide7({ data }) {
         {peakHourStr || '—'}
       </div>
       
-      <div className="stat-label mt-2 text-white/80 font-bold uppercase tracking-widest">
+      <div className="stat-label mt-2 text-white/80 font uppercase tracking-widest">
         Peak Stream Time
         {peakHourCount > 0 && (
           <div className="text-[var(--c-accent2)] normal-case tracking-normal font-medium mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>

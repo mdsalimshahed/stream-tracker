@@ -189,9 +189,6 @@ export function useDebugData(streamData, layoutPrefs) {
        }
     });
 
-    // -----------------------------------------------------
-    // NEW METRIC: Quiet Hours (Card 1, Slide 7)
-    // -----------------------------------------------------
     const zeroHours = [];
     hourlyStreamData.forEach((d, i) => { if (d.count === 0) zeroHours.push(i); });
     
@@ -237,9 +234,6 @@ export function useDebugData(streamData, layoutPrefs) {
       }
     }
 
-    // -----------------------------------------------------
-    // NEW METRIC: Peak Stream Time (Card 2, Slide 7)
-    // -----------------------------------------------------
     const peakHourObj = hourlyStreamData.reduce((prev, current) => (prev.count > current.count) ? prev : current, {count: -1});
     const peakHourStr = peakHourObj.count > 0 ? `${formatHrClean(peakHourObj.hour)} – ${formatHrClean(peakHourObj.hour + 1)}` : 'None';
     const peakHourCount = peakHourObj.count;
@@ -405,19 +399,27 @@ export function useDebugData(streamData, layoutPrefs) {
       const maxDiffMins = Math.max(...deficitData.map(d => d.diff)) / 60;
       const minDiffMins = Math.min(...deficitData.map(d => d.diff)) / 60;
       
-      const rangeMins = maxDiffMins - minDiffMins;
-      let stepMins = 5;
-      if (rangeMins > 200) stepMins = 60;
-      else if (rangeMins > 100) stepMins = 30;
-      else if (rangeMins > 50) stepMins = 20;
-      else if (rangeMins > 20) stepMins = 10;
+      const rangeMins = Math.max(10, maxDiffMins - minDiffMins);
+      let stepMins = 10;
+      
+      // Enforces roughly 3-5 ticks total
+      if (rangeMins > 600) stepMins = Math.ceil(rangeMins / 4 / 60) * 60; 
+      else if (rangeMins > 200) stepMins = Math.ceil(rangeMins / 4 / 30) * 30; 
+      else if (rangeMins > 60) stepMins = Math.ceil(rangeMins / 4 / 15) * 15; 
+      else if (rangeMins > 20) stepMins = Math.ceil(rangeMins / 4 / 10) * 10; 
+      else stepMins = 5;
 
       let topBoundMins = Math.ceil(maxDiffMins / stepMins) * stepMins;
       let bottomBoundMins = Math.floor(minDiffMins / stepMins) * stepMins;
-      
-      if (topBoundMins === 0 && maxDiffMins > 0) topBoundMins = stepMins;
-      if (bottomBoundMins === 0 && minDiffMins < 0) bottomBoundMins = -stepMins;
-      if (topBoundMins === bottomBoundMins) { topBoundMins += stepMins; bottomBoundMins -= stepMins; }
+
+      // Force inclusion of 0 for aesthetic zero-line
+      if (topBoundMins < 0) topBoundMins = 0;
+      if (bottomBoundMins > 0) bottomBoundMins = 0;
+
+      if (topBoundMins === bottomBoundMins) {
+        topBoundMins += stepMins;
+        bottomBoundMins -= stepMins;
+      }
 
       deficitYMax = topBoundMins * 60;
       deficitYMin = bottomBoundMins * 60;

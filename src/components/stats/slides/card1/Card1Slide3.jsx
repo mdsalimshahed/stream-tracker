@@ -60,7 +60,7 @@ export default function Card1Slide3({ data }) {
             {(d > 0 || h > 0 || m > 0) && renderSmall(s, 'seconds')}
           </div>
         </div>
-        <div className="stat-label mt-2 text-white/80 font-bold uppercase tracking-widest">
+        <div className="stat-label mt-2 text-white/80 font uppercase tracking-widest">
           Longest Stream
           <div className="text-[var(--c-accent2)] normal-case tracking-normal font-bold mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
             {longestStream.streamTitle}

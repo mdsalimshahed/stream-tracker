@@ -28,7 +28,7 @@ export default function Card2Slide2({ data }) {
     <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
       <div className="w-full h-full flex-1 outline-none relative">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={processedDowData} margin={{ top: 25, right: 20, left: 15, bottom: 15 }}>
+          <AreaChart tabIndex={-1} data={processedDowData} margin={{ top: 25, right: 20, left: 15, bottom: 15 }}>
             <defs>
               <linearGradient id="colorDow" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#fa6ca0" stopOpacity={0.6}/>

@@ -50,7 +50,7 @@ export default function Card3Slide4({ data }) {
     <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
       <div className="w-full flex-1 min-h-0 outline-none overflow-visible relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <BarChart data={allStreamsChronological} margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
+          <BarChart tabIndex={-1} data={allStreamsChronological} margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis dataKey="index" stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8' }} minTickGap={40} tickMargin={10} height={35} tickFormatter={(val) => `#${val}`}>
               <Label value="Stream Sequence" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />

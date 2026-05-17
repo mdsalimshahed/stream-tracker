@@ -51,7 +51,7 @@ export default function Card3Slide1({ data }) {
     <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden" onClick={(e) => { if (e.target.tagName?.toLowerCase() === 'circle' || e.target.tagName?.toLowerCase() === 'image') return; setSelectedNode(null); }}>
       <div className="w-full h-full flex-1 outline-none relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <AreaChart data={gamesTimeline} margin={{ top: 20, right: 20, left: 10, bottom: 15 }} style={{ overflow: 'visible' }}>
+          <AreaChart tabIndex={-1} data={gamesTimeline} margin={{ top: 20, right: 20, left: 10, bottom: 15 }} style={{ overflow: 'visible' }}>
             <defs>
               <linearGradient id="slide6GradientFill" x1="0" y1="0" x2="1" y2="0">
                 {gamesTimeline?.map((g, i) => <stop key={`fill-${i}`} offset={`${(i / Math.max(1, gamesTimeline.length - 1)) * 100}%`} stopColor={g.status === 'Completed' ? "#f5a623" : g.status === 'Ongoing' ? "#3ddc84" : "#ff5c5c"} stopOpacity={0.8} />)}

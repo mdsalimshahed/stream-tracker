@@ -23,23 +23,21 @@ export default function Card1Slide4({ data }) {
 
   const renderBig = (val, unit) => (
     <div className="flex items-baseline gap-2">
-      <span className="text-white drop-shadow-2xl" style={{ fontSize: 'calc(var(--sz-main) * 1rem)' }}>{val.toLocaleString()}</span>
-      <span className="text-white/90 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * 0.35rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+      <span className="text-white drop-shadow-2xl" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-1, 1rem))' }}>{val.toLocaleString()}</span>
+      <span className="text-white/90 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-035, 0.35rem))' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
     </div>
   );
 
   const renderSmall = (val, unit) => (
     <div className="flex items-baseline gap-1.5">
-      <span className="text-white drop-shadow-xl" style={{ fontSize: 'calc(var(--sz-main) * 0.55rem)' }}>{val}</span>
-      <span className="text-white/90 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * 0.25rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+      <span className="text-white drop-shadow-xl" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-055, 0.55rem))' }}>{val}</span>
+      <span className="text-white/90 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-025, 0.25rem))' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
     </div>
   );
 
   return (
     <>
-      {/* Background container is now solid black to facilitate "dimming" */}
       <div className="absolute inset-0 z-0 bg-black pointer-events-none overflow-hidden" style={{ borderRadius: 'inherit' }}>
-        {/* Image is set to 35% opacity so it appears darkly against the black background */}
         <div className="w-full h-full opacity-35">
           <CrossfadeImage 
             src={bgImage} 
@@ -64,7 +62,7 @@ export default function Card1Slide4({ data }) {
         </div>
         <div className="stat-label mt-2 text-white/80 font-bold uppercase tracking-widest">
           Longest Stream
-          <div className="text-[var(--c-accent2)] normal-case tracking-normal font-bold mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * 0.85rem)' }}>
+          <div className="text-[var(--c-accent2)] normal-case tracking-normal font-bold mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
             {longestStream.streamTitle}
           </div>
         </div>

@@ -28,7 +28,7 @@ export default function Card2Slide1({ data }) {
     <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
       <div className="w-full h-full flex-1 outline-none relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <AreaChart data={statusData} margin={{ top: 25, right: 20, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
+          <AreaChart tabIndex={-1} data={statusData} margin={{ top: 25, right: 20, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
             <defs>
               <linearGradient id="areaStatusGradient" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stopColor="#3ddc84" stopOpacity={0.6}/>

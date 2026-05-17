@@ -44,14 +44,12 @@ export default function Card3Slide2({ data }) {
     if (selectedGame) {
       const gLine = processedProgressionLines.find(l => l.gameName === selectedGame);
       if (gLine) {
-        // Reduced to a very subtle 8% padding
         const pad = Math.max(2, Math.ceil((gLine.maxX - gLine.minX) * 0.08));
         return [gLine.minX - pad, gLine.maxX + pad];
       }
     }
     const gMin = Math.min(...processedProgressionLines.map(l => l.minX));
     const gMax = Math.max(...processedProgressionLines.map(l => l.maxX));
-    // Super minimal 3% global padding so they almost touch the edges but don't clip
     const gPad = Math.max(2, Math.ceil((gMax - gMin) * 0.03));
     return [gMin - gPad, gMax + gPad];
   }, [selectedGame, processedProgressionLines]);
@@ -67,8 +65,7 @@ export default function Card3Slide2({ data }) {
       <div className="w-full flex-1 min-h-0 relative outline-none overflow-visible">
         <div className="absolute inset-0 z-0 pointer-events-none outline-none">
           <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-            {/* Reduced container margins to standard tighter bounds (35 top/right for the 32px max radius dots) */}
-            <LineChart margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible', outline: 'none' }}>
+            <LineChart tabIndex={-1} margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible', outline: 'none' }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               <XAxis type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} height={35} tick={false} axisLine={false} tickLine={false} />
               <YAxis domain={[0, progressionYMax]} ticks={progressionYTicks} width={45} tick={false} axisLine={false} tickLine={false} padding={{ top: 35, bottom: 10 }} />
@@ -83,7 +80,7 @@ export default function Card3Slide2({ data }) {
 
         <div className="absolute inset-0 z-10 outline-none">
           <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-            <LineChart margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible', outline: 'none' }}>
+            <LineChart tabIndex={-1} margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible', outline: 'none' }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               <XAxis type="number" dataKey="xIndex" domain={xDomain} allowDataOverflow={true} allowDecimals={false} stroke="#8a88a8" axisLine={false} tickLine={false} tickMargin={10} height={35} minTickGap={5} tick={{ fill: '#8a88a8', fontSize: 10 }} 
                 tickFormatter={(val) => { 

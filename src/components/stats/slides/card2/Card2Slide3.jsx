@@ -20,15 +20,15 @@ export default function Card2Slide3({ data }) {
 
   const renderBig = (val, unit) => (
     <div className="flex items-baseline gap-2">
-      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * 1rem)' }}>{val.toLocaleString()}</span>
-      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * 0.35rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-1, 1rem))' }}>{val.toLocaleString()}</span>
+      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-035, 0.35rem))' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
     </div>
   );
 
   const renderSmall = (val, unit) => (
     <div className="flex items-baseline gap-1.5">
-      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * 0.55rem)' }}>{val}</span>
-      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * 0.25rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-055, 0.55rem))' }}>{val}</span>
+      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-025, 0.25rem))' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
     </div>
   );
 
@@ -48,7 +48,7 @@ export default function Card2Slide3({ data }) {
       </div>
       <div className="stat-label mt-2">
         Longest Break
-        <div className="text-[var(--c-accent2)] normal-case tracking-normal font-medium mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * 0.85rem)' }}>
+        <div className="text-[var(--c-accent2)] normal-case tracking-normal font-medium mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
           {liveSecs > 0 ? `${formatDtShort(maxBreakStartMs)} — ${isActiveBreak ? 'Now' : formatDtShort(maxBreakEndMs)}` : '—'}
         </div>
       </div>

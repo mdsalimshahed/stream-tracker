@@ -38,7 +38,7 @@ export default function Card2Slide5({ data }) {
       </div>
       <div className="w-full h-full flex-1 outline-none overflow-hidden relative">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={deficitData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+          <BarChart tabIndex={-1} data={deficitData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis dataKey="index" hide={true} padding={{ left: 10, right: 10 }} />
             <YAxis domain={[deficitYMin, deficitYMax]} hide={true} />

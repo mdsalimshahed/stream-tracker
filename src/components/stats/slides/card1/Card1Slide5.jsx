@@ -8,15 +8,15 @@ export default function Card1Slide5({ data }) {
 
   const renderBig = (val, unit) => (
     <div className="flex items-baseline gap-2">
-      <span className="text-white drop-shadow-lg" style={{ fontSize: 'calc(var(--sz-main) * 1rem)' }}>{val.toLocaleString()}</span>
-      <span className="text-white/80 font-normal lowercase drop-shadow-md" style={{ fontSize: 'calc(var(--sz-main) * 0.35rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+      <span className="text-white drop-shadow-lg" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-1, 1rem))' }}>{val.toLocaleString()}</span>
+      <span className="text-white/80 font-normal lowercase drop-shadow-md" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-035, 0.35rem))' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
     </div>
   );
 
   const renderSmall = (val, unit) => (
     <div className="flex items-baseline gap-1.5">
-      <span className="text-white drop-shadow-md" style={{ fontSize: 'calc(var(--sz-main) * 0.55rem)' }}>{val}</span>
-      <span className="text-white/80 font-normal lowercase drop-shadow-md" style={{ fontSize: 'calc(var(--sz-main) * 0.25rem)' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+      <span className="text-white drop-shadow-md" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-055, 0.55rem))' }}>{val}</span>
+      <span className="text-white/80 font-normal lowercase drop-shadow-md" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-025, 0.25rem))' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
     </div>
   );
 
@@ -37,7 +37,7 @@ export default function Card1Slide5({ data }) {
       
       <div className="stat-label mt-2 drop-shadow-lg text-white/70">
         Total Session Duration
-        <div className="normal-case tracking-normal font-medium mt-1 w-full pr-4 drop-shadow-md space-y-1" style={{ fontSize: 'calc(var(--sz-main-label) * 0.85rem)' }}>
+        <div className="normal-case tracking-normal font-medium mt-1 w-full pr-4 drop-shadow-md space-y-1" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
           <div className="text-[#ff5c5c]">{formatFullTime(discardedSecs)} discarded</div>
           <div className="text-[#3ddc84]">{formatFullTime(gainedSecs)} gained</div>
         </div>

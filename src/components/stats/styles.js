@@ -175,7 +175,7 @@ export const STYLES = `
   }
   .stat-card:hover::before { opacity: 1; }
 
-  /* Slide specific constraints */
+  /* CONTAINER QUERIES IMPLEMENTED HERE */
   .slide-container {
     position: absolute;
     inset: 0;
@@ -185,26 +185,43 @@ export const STYLES = `
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 0 24px; /* <-- This pulls your text away from the edges */
+    padding: 0 6%; /* Percentage padding helps buffer tight corners */
     word-wrap: break-word;
     overflow-wrap: break-word;
+    
+    /* Dynamically resize text using container minimum dimensions */
+    container-type: inline-size;
+    --base-font: clamp(8px, 4cqi, 16px);
+    --unit-1: var(--base-font);
+    --unit-085: calc(var(--base-font) * 0.85);
+    --unit-08: calc(var(--base-font) * 0.8);
+    --unit-055: calc(var(--base-font) * 0.55);
+    --unit-035: calc(var(--base-font) * 0.35);
+    --unit-025: calc(var(--base-font) * 0.25);
   }
-
 
   /* =========================================================
      TYPOGRAPHY & CONTENT
      ========================================================= */
 
-  .stat-number { font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--c-text); transition: color 0.3s ease; text-shadow: 0 4px 16px rgba(0,0,0,0.8); }
+  .stat-number { 
+    font-weight: 600; 
+    line-height: 1.1; 
+    letter-spacing: -0.02em; 
+    color: var(--c-text); 
+    transition: color 0.3s ease; 
+    text-shadow: 0 4px 16px rgba(0,0,0,0.8); 
+  }
   .stat-card:hover .stat-number { color: var(--c-accent); }
   .stats-right-col:hover .latest-title { color: var(--c-accent) !important; }
 
-  .top-number { font-size: calc(var(--sz-main) * 1rem); }
-  .stat-label { font-size: calc(var(--sz-main-label) * 1rem); letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  /* DYNAMIC SIZING INJECTED */
+  .top-number { font-size: calc(var(--sz-main) * var(--unit-1, 1rem)); }
+  .stat-label { font-size: calc(var(--sz-main-label) * var(--unit-1, 1rem)); letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-muted); margin-top: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
   
-  .latest-title { font-size: calc(var(--sz-title) * 1rem); font-weight: 600; margin-bottom: 8px; transition: color 0.3s; line-height: 1.1; }
-  .latest-sub-3 { font-size: calc(var(--sz-sub) * 1rem); color: var(--c-accent2); margin-top: 4px; line-height: 1.3; }
-  .latest-sub-1, .latest-sub-2 { font-size: calc(var(--sz-sub) * 0.8rem); color: var(--c-muted); margin-top: 6px; }
+  .latest-title { font-size: calc(var(--sz-title) * var(--unit-1, 1rem)); font-weight: 600; margin-bottom: 8px; transition: color 0.3s; line-height: 1.1; }
+  .latest-sub-3 { font-size: calc(var(--sz-sub) * var(--unit-1, 1rem)); color: var(--c-accent2); margin-top: 4px; line-height: 1.3; }
+  .latest-sub-1, .latest-sub-2 { font-size: calc(var(--sz-sub) * var(--unit-08, 0.8rem)); color: var(--c-muted); margin-top: 6px; }
   .latest-sub-time { font-weight: bold; color: var(--c-text); font-size: 1.25em; }
 
   .latest-bg { position: absolute; inset: 0; z-index: 0; }
@@ -257,20 +274,26 @@ export const STYLES = `
   .delay-2  { animation-delay: 0.2s; }
 
   /* =========================================================
-     STRICT SLIDE CONTENT BOUNDARY (PREVENTS OVERFLOWS)
+     DEBUG SLIDES OVERRIDES & RECHARTS FIXES
      ========================================================= */
 
-  .slide-container {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+  /* Center only in Debug mode */
+  .debug-slides .slide-container {
+    align-items: center;
+    text-align: center;
+  }
+  
+  .debug-slides .stat-number, 
+  .debug-slides .slide-container .flex {
     justify-content: center;
-    padding: 0 24px; /* <-- This pulls your text away from the edges */
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+  }
+
+  /* Force graphs unfocusable globally */
+  .recharts-wrapper, 
+  .recharts-wrapper *, 
+  .recharts-surface, 
+  .recharts-responsive-container, 
+  svg.recharts-surface { 
+    outline: none !important; 
   }
 `;

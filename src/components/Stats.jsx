@@ -10,7 +10,7 @@ import { getCard1Slide } from './stats/slides/Card1Slides';
 import { getCard2Slide } from './stats/slides/Card2Slides';
 import { getCard3Slide } from './stats/slides/Card3Slides';
 
-const FlipperCard = ({ globalFlipCycle, getSlideContent, slideData, className, delay = 0 }) => {
+const FlipperCard = ({ globalFlipCycle, getSlideContent, slideData, className, delay = 0, slideCount }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [localFlipCycle, setLocalFlipCycle] = useState(0);
   const [frontFaceSlide, setFrontFaceSlide] = useState(0);
@@ -34,10 +34,10 @@ const FlipperCard = ({ globalFlipCycle, getSlideContent, slideData, className, d
   const handleTransitionEnd = (e) => {
     if (e.target !== e.currentTarget || e.propertyName !== 'transform') return;
     if (localFlipCycle % 2 !== 0) {
-      setFrontFaceSlide((localFlipCycle + 1) % 6);
+      setFrontFaceSlide((localFlipCycle + 1) % slideCount);
     } else {
       if (localFlipCycle > 0) {
-        setBackFaceSlide((localFlipCycle + 1) % 6);
+        setBackFaceSlide((localFlipCycle + 1) % slideCount);
       }
     }
   };
@@ -127,13 +127,13 @@ export default function Stats({ systemFonts, layoutPrefs, cachedStats }) {
 
           <div className="stats-left-col">
             <div className="card-wrapper-left">
-              <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard1Slide} slideData={slideData1} className="stat-card" delay={0} />
+              <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard1Slide} slideData={slideData1} className="stat-card" delay={0} slideCount={5} />
             </div>
             <div className="stats-progress-track">
               <div className="stats-progress-fill" onAnimationIteration={handleAnimationIteration} />
             </div>
             <div className="card-wrapper-left">
-              <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard2Slide} slideData={slideData2} className="stat-card" delay={200} />
+              <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard2Slide} slideData={slideData2} className="stat-card" delay={200} slideCount={3} />
             </div>
           </div>
 

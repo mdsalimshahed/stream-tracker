@@ -40,29 +40,29 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
   const slideData2 = { ...card2Data, totalGamesCount: card2Data.totalGames };
   const slideData3 = { ...card3Data, latestBgImage };
 
-  // Organize sequence: Text Slides first, Graph Slides at the bottom
+  // Organize sequence: Text Slides first, Graph Slides at the bottom (Card 3 logic applies to all graphs)
   const slideSequence = [
     // TEXT SLIDES
     { card: 1, idx: 0 }, // Total Streams
     { card: 1, idx: 1 }, // Total Playtime
-    { card: 1, idx: 3 }, // Longest Streak
-    { card: 1, idx: 4 }, // Longest Stream
-    { card: 1, idx: 5 }, // Total Session Duration
+    { card: 1, idx: 2 }, // Longest Streak
+    { card: 1, idx: 3 }, // Longest Stream
+    { card: 1, idx: 4 }, // Total Session Duration
     { card: 2, idx: 0 }, // Games in Library
-    { card: 2, idx: 3 }, // Longest Break
-    { card: 2, idx: 4 }, // Shortest Stream
+    { card: 2, idx: 1 }, // Longest Break
+    { card: 2, idx: 2 }, // Shortest Stream
     { card: 3, idx: 0 }, // Latest Game info
     
-    // GRAPH SLIDES
-    { card: 1, idx: 2 }, // Hourly Stream Count (Bar Chart)
-    { card: 2, idx: 1 }, // Playtime by Status (Area Chart)
-    { card: 2, idx: 2 }, // Day of Week (Area Chart)
-    { card: 2, idx: 5 }, // Deficit Data (Bar Chart)
-    { card: 3, idx: 1 }, // Games Timeline (Area Chart)
-    { card: 3, idx: 2 }, // Progression Lines (Line Chart)
-    { card: 3, idx: 3 }, // Daily Playtime (Bar Chart)
-    { card: 3, idx: 4 }, // Chronological Streams (Bar Chart)
-    { card: 3, idx: 5 }, // Tag Frequencies (Word Cloud)
+    // GRAPH SLIDES (All now inside Card 3 index references)
+    { card: 3, idx: 1 }, // Games Timeline
+    { card: 3, idx: 2 }, // Progression Lines
+    { card: 3, idx: 3 }, // Daily Playtime
+    { card: 3, idx: 4 }, // Chronological Streams
+    { card: 3, idx: 5 }, // Tag Frequencies
+    { card: 3, idx: 6 }, // Hourly Stream Count
+    { card: 3, idx: 7 }, // Playtime by Status
+    { card: 3, idx: 8 }, // Day of Week
+    { card: 3, idx: 9 }, // Deficit Data
   ];
 
   const renderActiveCardContent = (index) => {

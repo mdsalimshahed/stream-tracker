@@ -1,57 +1,56 @@
 // src/components/stats/slides/card2/Card2Slide1.jsx
-import React from 'react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Label } from 'recharts';
-import { formatFullTime } from '../SlideHelpers';
-
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="bg-black/95 border border-white/20 p-3 rounded-lg text-xs font-mono text-white shadow-2xl z-50 pointer-events-none whitespace-nowrap">
-        <div className="text-white font-bold mb-1 text-sm">{data.name}</div>
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: data.color }}></span>
-          <span className="font-bold text-[#e8c87a]">
-            {formatFullTime(data.rawSeconds ?? Math.round(data.hours * 3600))}
-          </span>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
+import React, { useState, useEffect } from 'react';
+import { parseSeconds, formatDtShort } from '../SlideHelpers';
 
 export default function Card2Slide1({ data }) {
-  const { statusData, statusYMax, statusYTicks } = data;
-  
+  const { longestBreakSecs, maxBreakStartMs, maxBreakEndMs, isActiveBreak } = data;
+  const [liveSecs, setLiveSecs] = useState(longestBreakSecs || 0);
+
+  useEffect(() => {
+    setLiveSecs(longestBreakSecs || 0);
+    if (isActiveBreak && longestBreakSecs) {
+      const startNow = Date.now();
+      const initialSecs = longestBreakSecs;
+      const interval = setInterval(() => setLiveSecs(initialSecs + (Date.now() - startNow) / 1000), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [longestBreakSecs, isActiveBreak]);
+
+  const { d, h, m, s } = parseSeconds(liveSecs);
+
+  const renderBig = (val, unit) => (
+    <div className="flex items-baseline gap-2">
+      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-1, 1rem))' }}>{val.toLocaleString()}</span>
+      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-035, 0.35rem))' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+    </div>
+  );
+
+  const renderSmall = (val, unit) => (
+    <div className="flex items-baseline gap-1.5">
+      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-055, 0.55rem))' }}>{val}</span>
+      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-025, 0.25rem))' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+    </div>
+  );
+
   return (
-    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
-      <div className="w-full h-full flex-1 outline-none relative">
-        <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <AreaChart tabIndex={-1} data={statusData} margin={{ top: 25, right: 20, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>
-            <defs>
-              <linearGradient id="areaStatusGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#3ddc84" stopOpacity={0.6}/>
-                <stop offset="50%" stopColor="#f5a623" stopOpacity={0.6}/>
-                <stop offset="100%" stopColor="#ff5c5c" stopOpacity={0.6}/>
-              </linearGradient>
-              <linearGradient id="strokeStatusGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#3ddc84" />
-                <stop offset="50%" stopColor="#f5a623" />
-                <stop offset="100%" stopColor="#ff5c5c" />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-            <XAxis dataKey="name" tick={false} axisLine={false} stroke="#8a88a8" tickLine={false} height={15} tickMargin={10}>
-              <Label value="Game Status" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
-            </XAxis>
-            <YAxis stroke="#8a88a8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}h`} width={45} tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8'}} domain={[0, statusYMax]} ticks={statusYTicks}>
-              <Label value="Playtime (Hours)" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
-            </YAxis>
-            <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} isAnimationActive={false} />
-            <Area type="monotone" dataKey="hours" stroke="url(#strokeStatusGradient)" strokeWidth={3} fill="url(#areaStatusGradient)" activeDot={{ r: 6, fill: '#fff', stroke: 'none' }} isAnimationActive={false} />
-          </AreaChart>
-        </ResponsiveContainer>
+    <div className="slide-container">
+      <div className="stat-number flex items-baseline flex-wrap leading-none gap-x-5 gap-y-2">
+        {d > 0 && renderBig(d, 'days')}
+        {d === 0 && h > 0 && renderBig(h, 'hours')}
+        {d === 0 && h === 0 && m > 0 && renderBig(m, 'minutes')}
+        {d === 0 && h === 0 && m === 0 && renderBig(s, 'seconds')}
+
+        <div className="flex items-baseline gap-4">
+          {d > 0 && renderSmall(h, 'hours')}
+          {(d > 0 || h > 0) && renderSmall(m, 'minutes')}
+          {(d > 0 || h > 0 || m > 0) && renderSmall(s, 'seconds')}
+        </div>
+      </div>
+      <div className="stat-label mt-2">
+        Longest Break
+        <div className="text-[var(--c-accent2)] normal-case tracking-normal font-medium mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
+          {liveSecs > 0 ? `${formatDtShort(maxBreakStartMs)} — ${isActiveBreak ? 'Now' : formatDtShort(maxBreakEndMs)}` : '—'}
+        </div>
       </div>
     </div>
   );

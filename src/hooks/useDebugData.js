@@ -7,7 +7,6 @@ export function useDebugData(streamData, layoutPrefs) {
   const highResImages = layoutPrefs?.highResImages;
   const excludedTagsStr = (layoutPrefs?.excludedTags || []).join(',');
 
-  // Calculate everything on the fly synchronously during render
   const stats = useMemo(() => {
     const processedGames = [];
     const allFlat = [];
@@ -357,22 +356,27 @@ export function useDebugData(streamData, layoutPrefs) {
     }
     const maxChronoPoint = chrono.length > 0 ? chrono.reduce((p, c) => (p.duration > c.duration) ? p : c, chrono[0]) : null;
 
+    // ----- ORGANIZE BY TEXT VS GRAPHS -----
     const card1Data = { 
       totalStreams: totalStreamsCount, totalDuration: totalDurationOverall, longestStreakSecs: maxStreakSecs,
       maxStreakStartMs, maxStreakEndMs, actualSessionSecs, discardedSecs, gainedSecs,
-      longestStream, highResImages, processedHourlyData, hourlyYTicks
+      longestStream, highResImages
     };
     
     const card2Data = { 
-      totalGames: totalGamesCount, statusData, longestBreakSecs: maxBreakSecs, maxBreakStartMs,
-      maxBreakEndMs, isActiveBreak, shortestStream, highResImages, deficitData,
-      statusYMax, statusYTicks, processedDowData, dowDomainMax, dowValidTicks, dowTickMap, deficitYMax, deficitYMin
+      totalGames: totalGamesCount, longestBreakSecs: maxBreakSecs, maxBreakStartMs,
+      maxBreakEndMs, isActiveBreak, shortestStream, highResImages
     };
     
     const card3Data = { 
       mostRecentGame, gamesTimeline, progressionDates, allStreamsChronological: chrono, tagFrequencies,
       timelineXTicks, timelineYMax, timelineYTicks, processedProgressionLines, progressionYMax, progressionYTicks,
-      processedDailyData, dailyYMax, dailyYTicks, maxDailyPoint, chronoYMax, chronoYTicks, maxChronoPoint
+      processedDailyData, dailyYMax, dailyYTicks, maxDailyPoint, chronoYMax, chronoYTicks, maxChronoPoint,
+      // Graphs moved to Card3
+      processedHourlyData, hourlyYTicks,
+      statusData, statusYMax, statusYTicks, 
+      processedDowData, dowDomainMax, dowValidTicks, dowTickMap, 
+      deficitData, deficitYMax, deficitYMin
     };
 
     return { card1Data, card2Data, card3Data, games: processedGames };

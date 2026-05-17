@@ -1,50 +1,44 @@
+// src/components/stats/slides/card1/Card1Slide2.jsx
 import React from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, Label } from 'recharts';
-
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const count = data.count;
-    let color = '#ff5c5c'; 
-    if (count > 0 && count <= data.midThreshold) color = '#f5a623'; 
-    if (count > data.midThreshold) color = '#3ddc84'; 
-    return (
-      <div className="bg-[#0a0a0a] border border-white/20 p-3 rounded-lg text-xs font-mono text-white shadow-2xl z-50">
-        <div className="font-bold text-white/50 mb-1">{data.displayHour}</div>
-        <div className="flex items-center gap-2 font-bold" style={{ color }}>{count} stream{count !== 1 ? 's' : ''}</div>
-      </div>
-    );
-  }
-  return null;
-};
+import { parseSeconds, formatDtShort } from '../SlideHelpers';
 
 export default function Card1Slide2({ data }) {
-  const { processedHourlyData, hourlyYTicks } = data;
+  const { longestStreakSecs, maxStreakStartMs, maxStreakEndMs } = data;
+  const { d, h, m, s } = parseSeconds(longestStreakSecs);
+
+  const renderBig = (val, unit) => (
+    <div className="flex items-baseline gap-2">
+      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-1, 1rem))' }}>{val.toLocaleString()}</span>
+      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-035, 0.35rem))' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+    </div>
+  );
+
+  const renderSmall = (val, unit) => (
+    <div className="flex items-baseline gap-1.5">
+      <span className="text-white" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-055, 0.55rem))' }}>{val}</span>
+      <span className="text-white/50 font-normal lowercase" style={{ fontSize: 'calc(var(--sz-main) * var(--unit-025, 0.25rem))' }}>{val === 1 ? unit.slice(0, -1) : unit}</span>
+    </div>
+  );
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
-      <div className="w-full h-full flex-1 outline-none relative">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart tabIndex={-1} data={processedHourlyData} margin={{ top: 25, right: 20, left: 15, bottom: 15 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-            <XAxis dataKey="displayHour" stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8' }} tickMargin={10} height={35}>
-              <Label value="Hour of Day" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
-            </XAxis>
-            <YAxis stroke="#8a88a8" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#8a88a8', angle: -90, textAnchor: 'middle', dx: -10 }} allowDecimals={false} width={45} ticks={hourlyYTicks} domain={[0, 'dataMax']}>
-              <Label value="Stream Count" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
-            </YAxis>
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
-            <Bar dataKey="count" radius={[2, 2, 0, 0]} minPointSize={4}>
-              {processedHourlyData?.map((entry, index) => {
-                let fill = '#ff5c5c';
-                if (entry.count > 0) { 
-                  fill = entry.count <= entry.midThreshold ? '#f5a623' : '#3ddc84'; 
-                }
-                return <Cell key={`cell-${index}`} fill={fill} style={{ transition: 'fill 0.2s' }} />;
-              })}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+    <div className="slide-container">
+      <div className="stat-number flex items-baseline flex-wrap leading-none gap-x-5 gap-y-2">
+        {d > 0 && renderBig(d, 'days')}
+        {d === 0 && h > 0 && renderBig(h, 'hours')}
+        {d === 0 && h === 0 && m > 0 && renderBig(m, 'minutes')}
+        {d === 0 && h === 0 && m === 0 && renderBig(s, 'seconds')}
+
+        <div className="flex items-baseline gap-4">
+          {d > 0 && renderSmall(h, 'hours')}
+          {(d > 0 || h > 0) && renderSmall(m, 'minutes')}
+          {(d > 0 || h > 0 || m > 0) && renderSmall(s, 'seconds')}
+        </div>
+      </div>
+      <div className="stat-label mt-2">
+        Longest Streak
+        <div className="text-[var(--c-accent2)] normal-case tracking-normal font-medium mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
+          {longestStreakSecs > 0 ? `${formatDtShort(maxStreakStartMs)} — ${formatDtShort(maxStreakEndMs)}` : '—'}
+        </div>
       </div>
     </div>
   );

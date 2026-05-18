@@ -58,7 +58,7 @@ export default function Card2Slide5({ data }) {
         </div>
         <div className="stat-label mt-2 text-white/80 font uppercase tracking-widest">
           Played before abandoning
-          <div className="text-[var(--c-accent2)] normal-case tracking-normal font-bold mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
+          <div className="text-[var(--c-accent2)] normal-case tracking-normal mt-1 truncate w-full pr-4" style={{ fontSize: 'calc(var(--sz-main-label) * var(--unit-085, 0.85rem))' }}>
             {longestAbandonedGame.gameName}
           </div>
         </div>

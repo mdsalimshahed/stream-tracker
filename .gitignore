@@ -22,7 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-*.TTF
 
 # wrangler files
 .wrangler

@@ -1,6 +1,6 @@
 // src/components/DataManager.jsx
 import React, { useState } from 'react';
-import { Type, Layout, Eye, AlertTriangle, Trash2, X, RefreshCw, Loader2, Tag, Plus, Check } from 'lucide-react';
+import { Type, Layout, Eye, AlertTriangle, Trash2, X, RefreshCw, Loader2, Tag, Plus, Check, Key } from 'lucide-react';
 import { RangeControl } from './common/UIComponents';
 
 const Toggle = ({ label, description, value, onChange, warning }) => (
@@ -31,6 +31,22 @@ export default function DataManager({
   const [showWipeModal, setShowWipeModal] = useState(false);
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
+
+  // Local Storage API Key States
+  const [ytApiKey, setYtApiKey] = useState(() => localStorage.getItem('youtubeApiKey') || '');
+  const [rawgApiKey, setRawgApiKey] = useState(() => localStorage.getItem('rawgApiKey') || '');
+
+  const handleYtApiKeyChange = (e) => {
+    const val = e.target.value;
+    setYtApiKey(val);
+    localStorage.setItem('youtubeApiKey', val);
+  };
+
+  const handleRawgApiKeyChange = (e) => {
+    const val = e.target.value;
+    setRawgApiKey(val);
+    localStorage.setItem('rawgApiKey', val);
+  };
 
   const updateFont = (key, val) => setSystemFonts(prev => ({ ...prev, [key]: val }));
   const updateLayout = (key, val) => setLayoutPrefs(prev => ({ ...prev, [key]: val }));
@@ -66,6 +82,32 @@ export default function DataManager({
           >
             {persistSettings ? 'ON (Saving Settings)' : 'OFF (Reset on Reload)'}
           </button>
+        </div>
+
+        <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2 mt-12"><Key size={24} /> API Keys</h2>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-12 shadow-lg flex flex-col gap-6">
+          <div>
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">YouTube Data API v3</h3>
+            <p className="text-sm text-white/60 mt-1">Provide your own API key to sync playlists automatically.</p>
+            <input 
+              type="password" 
+              value={ytApiKey}
+              onChange={handleYtApiKeyChange}
+              placeholder="AIzaSy..."
+              className="w-full bg-black/60 border border-white/20 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 text-white transition-colors shadow-inner mt-3"
+            />
+          </div>
+          <div className="border-t border-white/10 pt-6">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">RAWG Video Games Database API</h3>
+            <p className="text-sm text-white/60 mt-1">Provide your RAWG API key for high-quality game covers, tags, and syncing games not on Steam.</p>
+            <input 
+              type="password" 
+              value={rawgApiKey}
+              onChange={handleRawgApiKeyChange}
+              placeholder="Enter your RAWG API key..."
+              className="w-full bg-black/60 border border-white/20 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 text-white transition-colors shadow-inner mt-3"
+            />
+          </div>
         </div>
 
         <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2 pt-2"><Type size={24} /> Typography: Cards (History & Library)</h2>

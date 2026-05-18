@@ -1,8 +1,5 @@
 // src/utils/youtubeUtils.js
 
-// IMPORTANT: Replace this with your actual YouTube Data API v3 Key
-const YOUTUBE_API_KEY = 'AIzaSyBKJGyE5zlxBipRBx2Z88NYyuVjEEwWq_Q';
-
 const parseISODuration = (duration) => {
   const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
   const hours = parseInt(match?.[1]) || 0;
@@ -18,6 +15,12 @@ const parseISODuration = (duration) => {
  */
 export const fetchPlaylistDetails = async (playlistUrl, existingMetadata = {}) => {
   try {
+    const YOUTUBE_API_KEY = localStorage.getItem('youtubeApiKey');
+    if (!YOUTUBE_API_KEY) {
+      console.warn("YouTube API Key is missing. Please configure it in Settings.");
+      return null;
+    }
+
     const listMatch = playlistUrl.match(/[&?]list=([^&]+)/i);
     const playlistId = listMatch ? listMatch[1] : playlistUrl;
     if (!playlistId) throw new Error("Invalid Playlist URL or ID");

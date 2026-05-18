@@ -1,6 +1,5 @@
 // src/hooks/useSearch.js
 import { useState } from 'react';
-import { RAWG_API_KEY } from '../utils/constants';
 
 export function useSearch() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -10,6 +9,8 @@ export function useSearch() {
   const handleSearch = async () => {
     if (!searchQuery.trim()) { setSearchResults([]); return; }
     setIsSearching(true);
+    
+    const rawgApiKey = localStorage.getItem('rawgApiKey');
     
     try {
       let steamItems = [];
@@ -48,14 +49,16 @@ export function useSearch() {
             let cover_image = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`;
             
             // Fetch from RAWG to get the high-res background image
-            try {
-              const cleanName = item.name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-              const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-              const rawgData = await rawgRes.json();
-              if (rawgData.results && rawgData.results.length > 0 && rawgData.results[0].background_image) {
-                  cover_image = rawgData.results[0].background_image;
-              }
-            } catch(e) {}
+            if (rawgApiKey) {
+              try {
+                const cleanName = item.name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+                const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${rawgApiKey}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+                const rawgData = await rawgRes.json();
+                if (rawgData.results && rawgData.results.length > 0 && rawgData.results[0].background_image) {
+                    cover_image = rawgData.results[0].background_image;
+                }
+              } catch(e) {}
+            }
 
             return { 
               id: item.id.toString(), 
@@ -74,14 +77,16 @@ export function useSearch() {
           const fallbackItems = await Promise.all(steamItems.map(async item => {
             let cover_image = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.id}/header.jpg`;
             
-            try {
-              const cleanName = item.name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-              const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-              const rawgData = await rawgRes.json();
-              if (rawgData.results && rawgData.results.length > 0 && rawgData.results[0].background_image) {
-                  cover_image = rawgData.results[0].background_image;
-              }
-            } catch(e) {}
+            if (rawgApiKey) {
+              try {
+                const cleanName = item.name.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
+                const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${rawgApiKey}&search=${encodeURIComponent(cleanName)}&page_size=1`);
+                const rawgData = await rawgRes.json();
+                if (rawgData.results && rawgData.results.length > 0 && rawgData.results[0].background_image) {
+                    cover_image = rawgData.results[0].background_image;
+                }
+              } catch(e) {}
+            }
             
             return { 
               id: item.id.toString(), 
@@ -96,7 +101,13 @@ export function useSearch() {
         }
       } else {
         // STEP 3: RAWG Fallback
-        const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(searchQuery)}&page_size=8`);
+        if (!rawgApiKey) {
+          console.warn("RAWG API Key missing. Skipping RAWG fallback search.");
+          setSearchResults([]);
+          return;
+        }
+
+        const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${rawgApiKey}&search=${encodeURIComponent(searchQuery)}&page_size=8`);
         const rawgData = await rawgRes.json();
         
         if (rawgData.results) {
@@ -104,7 +115,7 @@ export function useSearch() {
             rawgData.results.map(async (g) => {
               try {
                 if (g.developers) return g;
-                const dRes = await fetch(`https://api.rawg.io/api/games/${g.id}?key=${RAWG_API_KEY}`);
+                const dRes = await fetch(`https://api.rawg.io/api/games/${g.id}?key=${rawgApiKey}`);
                 const dData = await dRes.json();
                 return { ...g, developers: dData.developers };
               } catch (e) { return g; }

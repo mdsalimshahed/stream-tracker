@@ -74,6 +74,10 @@ export function useSettings() {
     setLayoutPrefs(DEFAULT_LAYOUT_PREFS);
     setModalBgIntensity(DEFAULT_MODAL_BG_INTENSITY);
     setModalPanelOpacity(DEFAULT_MODAL_PANEL_OPACITY);
+    
+    // Clear the stored API keys
+    localStorage.removeItem('youtubeApiKey');
+    localStorage.removeItem('rawgApiKey');
   };
 
   const hasCustomSettings =

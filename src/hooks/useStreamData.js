@@ -1,6 +1,5 @@
 // src/hooks/useStreamData.js
 import { useState, useEffect } from 'react';
-import { RAWG_API_KEY } from '../utils/constants';
 import { migrateLabels } from '../utils/dataUtils';
 import { formatRunName, extractPlaylistId } from '../utils/helpers';
 import { fetchPlaylistDetails } from '../utils/youtubeUtils';
@@ -10,9 +9,12 @@ import { fetchPlaylistDetails } from '../utils/youtubeUtils';
  * by comparing Release Date, Name, Developers, and Publishers.
  */
 const findBestRawgMatch = async (gameName, releaseYear, developers = [], publishers = []) => {
+  const rawgApiKey = localStorage.getItem('rawgApiKey');
+  if (!rawgApiKey) return null;
+
   try {
     const cleanName = gameName.replace(/[:™®©]/g, '').replace(/\s+/g, ' ').trim();
-    const searchRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=5`);
+    const searchRes = await fetch(`https://api.rawg.io/api/games?key=${rawgApiKey}&search=${encodeURIComponent(cleanName)}&page_size=5`);
     const searchData = await searchRes.json();
     
     if (!searchData.results || searchData.results.length === 0) return null;
@@ -20,7 +22,7 @@ const findBestRawgMatch = async (gameName, releaseYear, developers = [], publish
     // Fetch deep details for the top 5 candidates simultaneously to get dev/pub data
     const detailedCandidates = await Promise.all(searchData.results.map(async (c) => {
       try {
-        const res = await fetch(`https://api.rawg.io/api/games/${c.id}?key=${RAWG_API_KEY}`);
+        const res = await fetch(`https://api.rawg.io/api/games/${c.id}?key=${rawgApiKey}`);
         if (!res.ok) return c;
         return await res.json();
       } catch (e) { return c; }
@@ -66,7 +68,6 @@ const findBestRawgMatch = async (gameName, releaseYear, developers = [], publish
       }
     }
     
-    // If we scored points, return the match. Otherwise fallback to the top search result.
     if (highestScore > 0) return bestMatch;
     return detailedCandidates[0];
   } catch (e) {
@@ -98,6 +99,7 @@ export function useStreamData(notify) {
   useEffect(() => {
     if (Object.keys(streamData).length === 0) return;
     const recovery = async () => {
+      const rawgApiKey = localStorage.getItem('rawgApiKey');
       const dataCopy = JSON.parse(JSON.stringify(streamData));
       let changed = false;
       for (const [id, game] of Object.entries(dataCopy)) {
@@ -176,11 +178,13 @@ export function useStreamData(notify) {
                 }
               }
 
-              const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-              const sData = await sRes.json();
-              if (sData.results) {
-                game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...sData.results.map(x => x.image)])].filter(Boolean);
-                changed = true;
+              if (rawgApiKey) {
+                const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${rawgApiKey}&page_size=100`);
+                const sData = await sRes.json();
+                if (sData.results) {
+                  game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...sData.results.map(x => x.image)])].filter(Boolean);
+                  changed = true;
+                }
               }
             }
           } catch (e) {}
@@ -196,6 +200,7 @@ export function useStreamData(notify) {
     if (isSyncing) return;
     setIsSyncing(true);
     notify('Starting manual library sync (Steam, RAWG, and YouTube)...', 'info');
+    const rawgApiKey = localStorage.getItem('rawgApiKey');
     
     try {
       const dataCopy = JSON.parse(JSON.stringify(streamData));
@@ -273,11 +278,13 @@ export function useStreamData(notify) {
               }
             }
 
-            const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-            const sData = await sRes.json();
-            if (sData.results) { 
-              game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...sData.results.map(x=>x.image)])].filter(Boolean); 
-              changed = true; 
+            if (rawgApiKey) {
+              const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${rawgApiKey}&page_size=100`);
+              const sData = await sRes.json();
+              if (sData.results) { 
+                game.thumbnail_urls = [...new Set([...(game.thumbnail_urls || []), ...sData.results.map(x=>x.image)])].filter(Boolean); 
+                changed = true; 
+              }
             }
           }
         } catch (e) {}
@@ -350,15 +357,22 @@ export function useStreamData(notify) {
 
   // --- Add Game ---
   const handleAddGame = async (g) => {
+    const rawgApiKey = localStorage.getItem('rawgApiKey');
     const rid = g.id.toString();
     if (streamData[rid]) return rid;
-    notify(g.isRawgOnly ? 'Fetching data from RAWG...' : 'Fetching Steam metadata & RAWG images...', 'info');
+
+    if (g.isRawgOnly && !rawgApiKey) {
+      notify('RAWG API key missing! Configure it in Settings to add non-Steam games.', 'error');
+      return null;
+    }
+
+    notify(g.isRawgOnly ? 'Fetching data from RAWG...' : 'Fetching Steam metadata & images...', 'info');
     let details = { developer: g.developers?.map(d => d.name).join(', ') || 'Unknown', publisher: 'Unknown', releaseDate: g.released || new Date().getFullYear().toString(), genres: 'Unknown', tags: 'Unknown', steamUrl: g.isRawgOnly ? '' : `https://store.steampowered.com/app/${rid}/`, notOnSteam: g.isRawgOnly || false };
     let cover_image = g.cover_image, thumbnails = [], finalName = g.name, finalYear = g.released ? new Date(g.released).getFullYear().toString() : new Date().getFullYear().toString();
     
     try {
       if (g.isRawgOnly) {
-        const detailRes = await fetch(`https://api.rawg.io/api/games/${rid}?key=${RAWG_API_KEY}`);
+        const detailRes = await fetch(`https://api.rawg.io/api/games/${rid}?key=${rawgApiKey}`);
         const detailData = await detailRes.json();
         details.developer = detailData.developers?.map(d => d.name).join(', ') || details.developer;
         details.publisher = detailData.publishers?.map(p => p.name).join(', ') || details.publisher;
@@ -374,7 +388,7 @@ export function useStreamData(notify) {
         }
         
         if (detailData.background_image) cover_image = detailData.background_image;
-        const sRes = await fetch(`https://api.rawg.io/api/games/${rid}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
+        const sRes = await fetch(`https://api.rawg.io/api/games/${rid}/screenshots?key=${rawgApiKey}&page_size=100`);
         const sData = await sRes.json();
         if (sData.results) thumbnails = sData.results.map(x => x.image).filter(Boolean);
       } else {
@@ -417,9 +431,11 @@ export function useStreamData(notify) {
               if (engTags.length > 0) details.tags = engTags.join(', ');
             }
             
-            const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-            const sData = await sRes.json();
-            if (sData.results) thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);
+            if (rawgApiKey) {
+              const sRes = await fetch(`https://api.rawg.io/api/games/${rawgId}/screenshots?key=${rawgApiKey}&page_size=100`);
+              const sData = await sRes.json();
+              if (sData.results) thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);
+            }
           }
         } catch (err) {}
       }
@@ -434,6 +450,7 @@ export function useStreamData(notify) {
   };
 
   const updateGameLink = async (gameId, steamLink) => {
+    const rawgApiKey = localStorage.getItem('rawgApiKey');
     let steamId = steamLink.includes('steampowered.com/app/') ? steamLink.split('steampowered.com/app/')[1].split('/')[0].split('?')[0] : steamLink;
     notify('Syncing with Steam & RAWG...', 'info');
     try {
@@ -471,9 +488,11 @@ export function useStreamData(notify) {
             if (engTags.length > 0) tagsString = engTags.join(', '); 
           }
           
-          const sRes = await fetch(`https://api.rawg.io/api/games/${rawgGame.id}/screenshots?key=${RAWG_API_KEY}&page_size=100`);
-          const sData = await sRes.json();
-          if (sData.results) thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);
+          if (rawgApiKey) {
+            const sRes = await fetch(`https://api.rawg.io/api/games/${rawgGame.id}/screenshots?key=${rawgApiKey}&page_size=100`);
+            const sData = await sRes.json();
+            if (sData.results) thumbnails = [...thumbnails, ...sData.results.map(x => x.image)].filter(Boolean);
+          }
         }
       } catch (e) {}
       

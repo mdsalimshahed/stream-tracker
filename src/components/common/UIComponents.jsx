@@ -123,14 +123,33 @@ export const ColorOverride = ({ title, element, config, toggle, onChange }) => {
 };
 
 export const CrossfadeImage = ({ src, alt, className, imgClassName, style, duration = 700 }) => {
-  const [images, setImages] = useState([{ id: Date.now(), src }]);
+  const [images, setImages] = useState(src ? [{ id: Date.now(), src }] : []);
 
   useEffect(() => {
     if (!src) return;
-    setImages(prev => {
-      if (prev.length > 0 && prev[prev.length - 1].src === src) return prev;
-      return [prev[prev.length - 1], { id: Date.now(), src }];
-    });
+    
+    let isMounted = true;
+    
+    // Preload the image in the background
+    const img = new Image();
+    img.src = src;
+    
+    img.onload = () => {
+      if (isMounted) {
+        setImages(prev => {
+          // If the target image is already on top, do nothing
+          if (prev.length > 0 && prev[prev.length - 1].src === src) return prev;
+          
+          // Keep the previous image for the crossfade base, and add the new one on top
+          if (prev.length === 0) return [{ id: Date.now(), src }];
+          return [prev[prev.length - 1], { id: Date.now(), src }];
+        });
+      }
+    };
+
+    return () => {
+      isMounted = false;
+    };
   }, [src]);
 
   return (
@@ -154,7 +173,7 @@ export const CrossfadeImage = ({ src, alt, className, imgClassName, style, durat
             }}
             className={`absolute inset-0 w-full h-full ${imgClassName || ''}`}
             decoding="async" 
-            loading={isTopLayer ? "eager" : "lazy"} 
+            loading="eager" // We can safely use eager now because the image is already downloaded and cached
           />
         );
       })}

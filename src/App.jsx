@@ -112,11 +112,27 @@ export default function App() {
     const seconds = String(now.getSeconds()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
     
+    // --- STRIP LOCAL DATA URIs FOR EXPORT ---
+    // We deep clone the stream data and filter out any Base64 data URLs
+    // so they are not included in the exported file, preventing massive file sizes.
+    const cleanStreamData = JSON.parse(JSON.stringify(streamData));
+    for (const gameId in cleanStreamData) {
+      const game = cleanStreamData[gameId];
+      if (game.thumbnail_urls) {
+        game.thumbnail_urls = game.thumbnail_urls.filter(url => typeof url === 'string' && !url.startsWith('data:image'));
+      }
+      // If the cover image itself was a local upload, swap it back to a web URL or placeholder
+      if (game.cover_image && typeof game.cover_image === 'string' && game.cover_image.startsWith('data:image')) {
+        game.cover_image = game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
+      }
+    }
+    // ----------------------------------------
+
     let exportData = { version: '2.0.0', exportDate: now.toLocaleString() };
     let fileName = '';
 
     if (type === 'stream') { 
-      exportData = streamData; 
+      exportData = cleanStreamData; 
       fileName = `streamtracker_stream_data_${dateStr}.json`; 
     }
     else if (type === 'settings') { 
@@ -135,7 +151,7 @@ export default function App() {
       exportData = { 
         ...exportData, 
         type: 'full_backup', 
-        streamData, 
+        streamData: cleanStreamData, 
         thumbnailConfig: settings.thumbnailConfig, 
         systemFonts: settings.systemFonts, 
         layoutPrefs: settings.layoutPrefs, 

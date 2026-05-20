@@ -1,0 +1,601 @@
+{
+  "version": "2.0.0",
+  "exportDate": "5/15/2026, 1:20:07 AM",
+  "type": "full_backup",
+  "streamData": {
+    "570940": {
+      "game_name": "DARK SOULS™: REMASTERED",
+      "release_year": "2018",
+      "cover_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/header.jpg?t=1778518110",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_3a71463e4ccaf28c5c27f6cf8d32a3a125f45404.1920x1080.jpg?t=1778518110",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_92b2ba470cbfdb8839b649b3f478e5531dd81a17.1920x1080.jpg?t=1778518110",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_626cc310dc9ac7fb146011582c864a35e5f3e381.1920x1080.jpg?t=1778518110",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_f1617a419eb3b0cd877ec71230c59aa2672b62dc.1920x1080.jpg?t=1778518110",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_f60f54e58b13d0744853672ccd35810397e3fa26.1920x1080.jpg?t=1778518110",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_b4a80bd6e828a81db09ecbef5694e5d0cddb2caf.1920x1080.jpg?t=1778518110",
+        "https://media.rawg.io/media/screenshots/2f6/2f651074458bc3603a5da1348e5a368b.jpg",
+        "https://media.rawg.io/media/screenshots/44f/44ff25a559b7ba6c4a4f969acfcee8fc.jpg",
+        "https://media.rawg.io/media/screenshots/396/39632124b68f3ed8795f4e7ee3c1e247.jpeg",
+        "https://media.rawg.io/media/screenshots/ac2/ac2d6a559a3a992ab7b169a68efd8dea.jpg",
+        "https://media.rawg.io/media/screenshots/88a/88a8ab57cdea653c5ed07f9971884c34.jpg"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 3,
+          "timestamps": [
+            {
+              "date": 1748174674000,
+              "videoId": "0tHzMi-WKkM",
+              "duration": 1475,
+              "startTime": 1748174674000,
+              "endTime": 1748176150000
+            },
+            {
+              "date": 1748242099000,
+              "videoId": "m4XfSGIlaUA",
+              "duration": 1872,
+              "startTime": 1748242099000,
+              "endTime": 1748245372000
+            },
+            {
+              "date": 1748262064000,
+              "videoId": "kTA45v3N600",
+              "duration": 3000,
+              "startTime": 1748262064000,
+              "endTime": 1748265536000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLLzuld5NPO9D6oeLFf1TmtKdvUii5f33H",
+          "displayName": "First Playthrough",
+          "label": "Abandoned"
+        }
+      },
+      "details": {
+        "developer": "QLOC, FromSoftware, Inc.",
+        "publisher": "FromSoftware, Inc., Bandai Namco Entertainment",
+        "releaseDate": "23 May, 2018",
+        "genres": "Action",
+        "tags": "Singleplayer, Steam Achievements, Multiplayer, Full controller support, Atmospheric, Great Soundtrack, RPG, Co-op, Story Rich, Open World, cooperative, Third Person, Exploration, Difficult, Action RPG, Dark, Character Customization, Replay Value, Dark Fantasy, Mature, Lore-Rich",
+        "steamUrl": "https://store.steampowered.com/app/570940/",
+        "notOnSteam": false
+      }
+    },
+    "1275550": {
+      "game_name": "Arctic Awakening",
+      "release_year": "2025",
+      "cover_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/4aa2d0f9266c952f4ab252b0dc9931c5c244e552/header.jpg?t=1769524913",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/26bb0ee6587d3a05634e17d5e9ce0c42228b8651/ss_26bb0ee6587d3a05634e17d5e9ce0c42228b8651.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/93895f56ef37a10844938d80de8e050b649cb89f/ss_93895f56ef37a10844938d80de8e050b649cb89f.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/f3e1b20f112ab0edf5e93515265d00a02c4afceb/ss_f3e1b20f112ab0edf5e93515265d00a02c4afceb.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/ab68a413bc8c758ab7160b59b6f0345ee46cf237/ss_ab68a413bc8c758ab7160b59b6f0345ee46cf237.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/e1844b97f83c58a0ba997d422c8ea9be533125eb/ss_e1844b97f83c58a0ba997d422c8ea9be533125eb.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/c73f15fc7fbdec2b6c4ae79a5e837cf564669623/ss_c73f15fc7fbdec2b6c4ae79a5e837cf564669623.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/48b884bba7d0ef3e8dd57a5cd59d92adb9f3ba43/ss_48b884bba7d0ef3e8dd57a5cd59d92adb9f3ba43.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/b7a075afa4a837f1c3379bbfb16187b294458f29/ss_b7a075afa4a837f1c3379bbfb16187b294458f29.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/7c1483cd501a96f4623923899ea9330429ed9cf2/ss_7c1483cd501a96f4623923899ea9330429ed9cf2.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/043f4d833f2fc04a47faa0234f0f1446f861eb62/ss_043f4d833f2fc04a47faa0234f0f1446f861eb62.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/2f3f26913c0e8505c13522206a45f3218fadb525/ss_2f3f26913c0e8505c13522206a45f3218fadb525.1920x1080.jpg?t=1769524913",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1275550/63378ce8498d4c5837d9b6826e792bb1f9461c44/ss_63378ce8498d4c5837d9b6826e792bb1f9461c44.1920x1080.jpg?t=1769524913",
+        "https://media.rawg.io/media/screenshots/469/46964813d9c5be4bfcab8f0501eaf100.jpg",
+        "https://media.rawg.io/media/screenshots/f08/f0802bd8665246e5b47340bd00c45028.jpg",
+        "https://media.rawg.io/media/screenshots/59f/59ff84b063a537de448a3bf11be11dd4.jpg",
+        "https://media.rawg.io/media/screenshots/9d6/9d666e38c6f373ffbf272d0dfc9da3dd.jpg",
+        "https://media.rawg.io/media/screenshots/755/7551607886b13a3d841b401cd40bd1c7.jpg",
+        "https://media.rawg.io/media/screenshots/66a/66a9296dce3a49b93f077290fc4e429d.jpg"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 2,
+          "timestamps": [
+            {
+              "date": 1758296962000,
+              "videoId": "QMbm1t1n3Wg",
+              "duration": 2946,
+              "startTime": 1758296962000,
+              "endTime": 1758299912000
+            },
+            {
+              "date": 1760275061000,
+              "videoId": "6fx1GDyewb8",
+              "duration": 6800,
+              "startTime": 1760275061000,
+              "endTime": 1760281862000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLLzuld5NPO9Bt1tmViT67kNVlbxaGaWHH",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "GoldFire Studios",
+        "publisher": "GoldFire Studios",
+        "releaseDate": "18 Sep, 2025",
+        "genres": "Adventure, Indie",
+        "tags": "Singleplayer, Steam Achievements, Full controller support, Steam Cloud, Atmospheric, Story Rich, Open World, First-Person, Sci-fi, Exploration, Survival, Point & Click, Mystery, Choices Matter, Walking Simulator, Story, Robots, Drama, character, Choose Your Own Adventure, Family Sharing, Thriller, secrets, Narrative, Conversation, environment, hell, relationship, dodge, elements, Stereo Sound, Custom Volume Controls, Surround Sound, Playable without Timed Input, characters, Camera Comfort, search, Save Anytime, town, choices, plane, man, drop",
+        "steamUrl": "https://store.steampowered.com/app/1275550/",
+        "notOnSteam": false
+      }
+    },
+    "1934570": {
+      "game_name": "South of Midnight",
+      "release_year": "2025",
+      "cover_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/56f64e713504dd2558077d038eb7470c8689a559/header.jpg?t=1776971609",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_40596f6708fcabef80fb7ef72c1b03e4134a3869.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_d00b68da2754c5003dc01f73a62365bc8de03c1a.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_103bb6df9ddfd8e93cbe28ad2066e4a2bfbce54e.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_49c8bb3ebf011820f9069e91eaf2d346d65bda19.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_592785179712f4f4a22dee03e68bd7204a6ecfa7.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_d55880395d165fae7086311c306dbc598160da84.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_176b21b4e07b7d2cadec6317c3cbcb13bea0a1d9.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_eb127afa9163c723bc51b2ac61175b468e3eed87.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_1c5e1b46354abdfcfd7bd660eff71a21c8692392.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_2124db7c5ee5495f8902b250af1f76c210cd51a2.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_cce0d8da20bf90e2ce2d50f3a31ee224a1833779.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_94b26f4edcf561ad7392be25fe4833e50cfa27f1.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_2dc9726e8f44c5f178858881bb045649997f4db9.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_303e701f221493903aa3574d5c53421096673b9f.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_6e00b62a0f0c6f3c6da3d3323625ad03c70d859a.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_6aa0f7e85860d10154513f09364aa46acdefb58f.1920x1080.jpg?t=1776971609",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1934570/ss_e4708af1f2f56baf18f19f7f7c37152a0b29e947.1920x1080.jpg?t=1776971609",
+        "https://media.rawg.io/media/screenshots/283/28326b57b7fbeb0da66d86a31772f022.jpg",
+        "https://media.rawg.io/media/screenshots/1d4/1d457fd29b2c6853f37d751bc89b250e.jpg",
+        "https://media.rawg.io/media/screenshots/c14/c147275e1b3b0666747da89702bb3e03.jpg"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 7,
+          "timestamps": [
+            {
+              "date": 1762181251000,
+              "videoId": "mRZvdvo3nTc",
+              "duration": 8981,
+              "startTime": 1762181251000,
+              "endTime": 1762190750000
+            },
+            {
+              "date": 1762228607000,
+              "videoId": "1vAHPGS2CnA",
+              "duration": 6729,
+              "startTime": 1762228607000,
+              "endTime": 1762235338000
+            },
+            {
+              "date": 1762235504000,
+              "videoId": "qslVSO990Qg",
+              "duration": 4171,
+              "startTime": 1762235504000,
+              "endTime": 1762239677000
+            },
+            {
+              "date": 1762316041000,
+              "videoId": "W7-eLEJkH-M",
+              "duration": 4325,
+              "startTime": 1762316041000,
+              "endTime": 1762320367000
+            },
+            {
+              "date": 1762320526000,
+              "videoId": "_hk2xveH2_o",
+              "duration": 5539,
+              "startTime": 1762320526000,
+              "endTime": 1762326066000
+            },
+            {
+              "date": 1762331826000,
+              "videoId": "DcbbqMGgcxM",
+              "duration": 7781,
+              "startTime": 1762331826000,
+              "endTime": 1762339612000
+            },
+            {
+              "date": 1762342545000,
+              "videoId": "ISIej4iA-Qo",
+              "duration": 4061,
+              "startTime": 1762342545000,
+              "endTime": 1762346603000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLLzuld5NPO9B49_5jVWTal79RFZfjiu5i",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "Compulsion Games",
+        "publisher": "Xbox Game Studios",
+        "releaseDate": "8 Apr, 2025",
+        "genres": "Action, Adventure",
+        "tags": "Singleplayer, Steam Achievements, Full controller support, Steam Cloud, Atmospheric, Great Soundtrack, Story Rich, Third Person, Horror, Fantasy, Funny, Female Protagonist, Action-Adventure, Controller, Dark, Captions available, Dark Fantasy, combat, Magic, Surreal, Stylized, 3D Platformer, Family Sharing, Протагонистка, HDR available",
+        "steamUrl": "https://store.steampowered.com/app/1934570/",
+        "notOnSteam": false
+      }
+    },
+    "2840770": {
+      "game_name": "Avatar: Frontiers of Pandora™",
+      "release_year": "2024",
+      "cover_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/27aa6d8f9c3f11dc93a557164d30a9ba08a7c46a/header.jpg?t=1778598692",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/5d96569712304414f21cddbedbe82d5d2b598bcb/ss_5d96569712304414f21cddbedbe82d5d2b598bcb.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/75b20da8e11285fb3f33f550dafb7d842b70e31f/ss_75b20da8e11285fb3f33f550dafb7d842b70e31f.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/b441eb8a77c901dae889a8605d2266b6defd7851/ss_b441eb8a77c901dae889a8605d2266b6defd7851.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/f75613a079f078740df1d898d55e0aebf8031fb9/ss_f75613a079f078740df1d898d55e0aebf8031fb9.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/3ea537adac955cda608c07dd428e2cd1388cbd70/ss_3ea537adac955cda608c07dd428e2cd1388cbd70.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/894849eb55a6870c0ad3cf6dfe1d8b772abe578c/ss_894849eb55a6870c0ad3cf6dfe1d8b772abe578c.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/36d908bb5f643c5b7e9c450b168bcc021fce9db0/ss_36d908bb5f643c5b7e9c450b168bcc021fce9db0.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/aae462048e7aefe5e05108b3202527dc2a417a1b/ss_aae462048e7aefe5e05108b3202527dc2a417a1b.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/570c150bd2e003e3b623820f1842525fb5abba4c/ss_570c150bd2e003e3b623820f1842525fb5abba4c.1920x1080.jpg?t=1778598692",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2840770/5337d86a544274c8798ba18dd54b901b02ce5d3a/ss_5337d86a544274c8798ba18dd54b901b02ce5d3a.1920x1080.jpg?t=1778598692",
+        "https://media.rawg.io/media/screenshots/e79/e79b32462dcd1efa695f55c044701433.jpg",
+        "https://media.rawg.io/media/screenshots/178/178a97b5bb8949c07bc1f9af83b38bf7.jpg",
+        "https://media.rawg.io/media/screenshots/2e0/2e038844d38e05ee5b6ccfe46da83a6b.jpg",
+        "https://media.rawg.io/media/screenshots/acd/acd86cd5db28ca8d09c4dc2fc8d587c6.jpg",
+        "https://media.rawg.io/media/screenshots/bc5/bc5c425bf90589619139a88f7a044678.jpg",
+        "https://media.rawg.io/media/screenshots/baf/baf9be70d6b3bc16733c1fbefdd71e8a.jpg"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 1,
+          "timestamps": [
+            {
+              "date": 1766392376000,
+              "videoId": "5R3X2zubdkQ",
+              "duration": 10279,
+              "startTime": 1766392376000,
+              "endTime": 1766403454000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLLzuld5NPO9CHDVKfyMM-0rIvIVqVygPx",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "Massive Entertainment – A Ubisoft Studio",
+        "publisher": "Ubisoft",
+        "releaseDate": "17 Jun, 2024",
+        "genres": "Action, Adventure",
+        "tags": "Singleplayer, Steam Achievements, Multiplayer, Atmospheric, Co-op, Story Rich, Open World, First-Person, Sci-fi, Partial Controller Support, Online Co-Op, Exploration, In-App Purchases, Character Customization, 3D, Family Sharing, Immersive Sim",
+        "steamUrl": "https://store.steampowered.com/app/2840770/",
+        "notOnSteam": false
+      }
+    },
+    "3357650": {
+      "game_name": "PRAGMATA",
+      "release_year": "2026",
+      "cover_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/e32e168b25ed68a0cf6264c220c07e96c2abfb56/header.jpg?t=1777351016",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/9699288b90d0aad320e998f107b59edd27e9ea61/ss_9699288b90d0aad320e998f107b59edd27e9ea61.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/62486c0475c7bf1a14889d61a51ad24f09e5f044/ss_62486c0475c7bf1a14889d61a51ad24f09e5f044.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/26773713a2435c8edc2eac5e7eb234324b3b002f/ss_26773713a2435c8edc2eac5e7eb234324b3b002f.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/8913ab7128c72ddd1b407c274e9615b2f6e658a2/ss_8913ab7128c72ddd1b407c274e9615b2f6e658a2.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/24bebf802a598b3d5d6838828cf074e4445ec939/ss_24bebf802a598b3d5d6838828cf074e4445ec939.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/47776629e71f7769f2482259258a1aeb9babe31c/ss_47776629e71f7769f2482259258a1aeb9babe31c.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/5b6a007e52e0b2d4a36b74736ea2fa416830bf6f/ss_5b6a007e52e0b2d4a36b74736ea2fa416830bf6f.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/c83fa1a03cf350ae0f049579daaa117414c9c745/ss_c83fa1a03cf350ae0f049579daaa117414c9c745.1920x1080.jpg?t=1777351016",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/e8f77d8e2ee8098847306490803433950e7c90fc/ss_e8f77d8e2ee8098847306490803433950e7c90fc.1920x1080.jpg?t=1777351016",
+        "https://media.rawg.io/media/screenshots/ca1/ca18d0aae36eb9111d699e5fc301792c.jpg",
+        "https://media.rawg.io/media/screenshots/bed/bed539410f44bb30d7ec90d5c3d3d79d.jpg",
+        "https://media.rawg.io/media/screenshots/4c7/4c78732f954103ddbc7919a7ea08042a.jpg",
+        "https://media.rawg.io/media/screenshots/70e/70e3a7485f7b31744c955213860f8a86.jpg",
+        "https://media.rawg.io/media/screenshots/075/075dcf7acab1045481d17b59c8b17192.jpg",
+        "https://media.rawg.io/media/screenshots/524/524ef9b98451f60200b5f6169577fe06_VxBdSyL.jpg"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 16,
+          "timestamps": [
+            {
+              "date": 1776603152000,
+              "videoId": "Nkmc8kkBZhk",
+              "duration": 5286,
+              "startTime": 1776603152000,
+              "endTime": 1776610802000
+            },
+            {
+              "date": 1776657023000,
+              "videoId": "hCH97Gn8zqY",
+              "duration": 4052,
+              "startTime": 1776657023000,
+              "endTime": 1776661078000
+            },
+            {
+              "date": 1776674031000,
+              "videoId": "yIn4B_aG4Ak",
+              "duration": 16061,
+              "startTime": 1776674031000,
+              "endTime": 1776690095000
+            },
+            {
+              "date": 1776702601000,
+              "videoId": "7L3u5hkAQnA",
+              "duration": 10503,
+              "startTime": 1776702601000,
+              "endTime": 1776713107000
+            },
+            {
+              "date": 1776752976000,
+              "videoId": "EVEovuLKIhw",
+              "duration": 6893,
+              "startTime": 1776752976000,
+              "endTime": 1776759867000
+            },
+            {
+              "date": 1776762830000,
+              "videoId": "8BTEcGXkj3w",
+              "duration": 12395,
+              "startTime": 1776762830000,
+              "endTime": 1776775226000
+            },
+            {
+              "date": 1776778341000,
+              "videoId": "rHMvia-XGrs",
+              "duration": 8436,
+              "startTime": 1776778341000,
+              "endTime": 1776786781000
+            },
+            {
+              "date": 1776835007000,
+              "videoId": "sNEAYwtslE0",
+              "duration": 9563,
+              "startTime": 1776835007000,
+              "endTime": 1776844569000
+            },
+            {
+              "date": 1776849101000,
+              "videoId": "g3n8pgj19fs",
+              "duration": 8762,
+              "startTime": 1776849101000,
+              "endTime": 1776857870000
+            },
+            {
+              "date": 1776862600000,
+              "videoId": "H0RQyKyuoYY",
+              "duration": 8975,
+              "startTime": 1776862600000,
+              "endTime": 1776871576000
+            },
+            {
+              "date": 1776879491000,
+              "videoId": "dpoNQw6NEnE",
+              "duration": 5784,
+              "startTime": 1776879491000,
+              "endTime": 1776885279000
+            },
+            {
+              "date": 1776916301000,
+              "videoId": "VPM65NPlqco",
+              "duration": 7498,
+              "startTime": 1776916301000,
+              "endTime": 1776923804000
+            },
+            {
+              "date": 1776951856000,
+              "videoId": "F5SJ4W7cz0Q",
+              "duration": 7677,
+              "startTime": 1776951856000,
+              "endTime": 1776959537000
+            },
+            {
+              "date": 1777001595000,
+              "videoId": "VzUOXsq4kRc",
+              "duration": 8855,
+              "startTime": 1777001595000,
+              "endTime": 1777010454000
+            },
+            {
+              "date": 1777083736000,
+              "videoId": "izRrsBk2TDo",
+              "duration": 3824,
+              "startTime": 1777083736000,
+              "endTime": 1777087567000
+            },
+            {
+              "date": 1777734086000,
+              "videoId": "h68FgPkhm_M",
+              "duration": 3215,
+              "startTime": 1777734086000,
+              "endTime": 1777737299000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLLzuld5NPO9B0UNZoWTD4D4MdXwEH_Xd2",
+          "displayName": "First Playthrough",
+          "label": "Completed"
+        }
+      },
+      "details": {
+        "developer": "CAPCOM Co., Ltd.",
+        "publisher": "CAPCOM Co., Ltd.",
+        "releaseDate": "16 Apr, 2026",
+        "genres": "Action, Adventure",
+        "tags": "Unknown",
+        "steamUrl": "https://store.steampowered.com/app/3357650/",
+        "notOnSteam": false
+      }
+    }
+  },
+  "thumbnailConfig": {
+    "customFont": "Book Antiqua",
+    "bgZoom": 100,
+    "titleSize": 93,
+    "subtitleSize": 66,
+    "titleAlign": "center",
+    "titleYOffset": 16,
+    "titleSpacing": 25,
+    "strokeWidth": 13,
+    "splitTitle": true,
+    "streamCountSize": 88,
+    "cycleSize": 55,
+    "bottomSpacing": 68,
+    "bottomAlign": "left",
+    "bottomPaddingX": 46,
+    "bottomPaddingY": 60,
+    "showBottomShadow": true,
+    "forceInvertTitle": false,
+    "manualColors": {
+      "title": false,
+      "cycle": false,
+      "streamCount": false,
+      "subtitle": false,
+      "stream": false
+    },
+    "colors": {
+      "titleFill": "rgba(255, 255, 255, 0.45)",
+      "titleStroke": "rgba(0, 0, 0, 0.74)",
+      "cycleFill": "rgba(255, 215, 0, 1)",
+      "cycleStroke": "rgba(0, 0, 0, 1)",
+      "streamFill": "rgba(0, 204, 255, 0.76)",
+      "streamStroke": "rgba(0, 0, 0, 1)",
+      "subtitleFill": "rgba(255, 255, 255, 0.59)",
+      "subtitleStroke": "rgba(0, 0, 0, 0.9)"
+    },
+    "title": {
+      "size": 89,
+      "letterSpacing": 2,
+      "dropShadow": true,
+      "outlineWidth": 20,
+      "xPadding": 60,
+      "yPadding": 100,
+      "align": "center",
+      "fillOpacity": 1,
+      "strokeOpacity": 0.31
+    },
+    "subtitle": {
+      "size": 71,
+      "letterSpacing": 2,
+      "dropShadow": true,
+      "outlineWidth": 20,
+      "xPadding": 60,
+      "yPadding": 40,
+      "align": "center"
+    },
+    "cycle": {
+      "size": 55,
+      "letterSpacing": 2,
+      "dropShadow": true,
+      "outlineWidth": 4,
+      "xPadding": 60,
+      "yPadding": 80,
+      "align": "left",
+      "fillOpacity": 1,
+      "strokeOpacity": 0.78
+    },
+    "stream": {
+      "size": 95,
+      "letterSpacing": 2,
+      "dropShadow": true,
+      "outlineWidth": 6,
+      "xPadding": 60,
+      "yPadding": 60,
+      "align": "left",
+      "fillOpacity": 1,
+      "strokeOpacity": 0.78
+    },
+    "titleLetterSpacing": 0,
+    "subtitleLetterSpacing": 2,
+    "titleDropShadow": false,
+    "subtitleDropShadow": true,
+    "titleYPadding": 88,
+    "subtitleYPadding": 24,
+    "subtitleAlign": "right",
+    "cycleLetterSpacing": 2,
+    "cycleDropShadow": true,
+    "cycleYPadding": 150,
+    "cycleAlign": "left",
+    "streamCountLetterSpacing": 2,
+    "streamCountDropShadow": true,
+    "streamCountYPadding": 10,
+    "streamCountAlign": "left",
+    "savedFonts": [
+      {
+        "family": "Google Sans",
+        "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      },
+      {
+        "family": "Intel One Mono",
+        "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      },
+      {
+        "family": "Montserrat",
+        "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      },
+      {
+        "family": "Roboto",
+        "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      },
+      {
+        "family": "Noto Serif Display",
+        "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      },
+      {
+        "family": "Playfair Display",
+        "url": "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      },
+      {
+        "family": "EB Garamond",
+        "url": "https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      }
+    ],
+    "titleBold": true,
+    "titleItalic": false,
+    "streamBold": true,
+    "cycleBold": true,
+    "streamItalic": false,
+    "cycleItalic": false
+  },
+  "systemFonts": {
+    "libTitle": 20,
+    "libYear": 16,
+    "libBadge": 18,
+    "dashboardTime": 13,
+    "modalHeader": 25,
+    "logTitle": 16,
+    "logSub": 12,
+    "searchBar": 20,
+    "statsMainCount": 3,
+    "statsMainLabel": 1.3,
+    "statsLabel": 0.9,
+    "statsTitle": 2.3,
+    "statsSub": 1,
+    "statsCountSpacing": -2,
+    "statsSubSpacing": 0,
+    "statsLabelSpacing": 2
+  },
+  "layoutPrefs": {
+    "cardPadding": 0,
+    "cardGap": 10,
+    "cardRadius": 32,
+    "cardMaxWidth": 276,
+    "cardsPerRow": 4,
+    "modalSplitRatio": 0.45,
+    "containerPaddingX": 121,
+    "containerPaddingY": 0,
+    "cardRounded": false,
+    "panelFillOpacity": 0.35,
+    "bgDimming": 0,
+    "cycleInterval": 5000,
+    "hoverCycleInterval": 1600,
+    "statsSplitRatio": 0.4,
+    "statsRowSplitRatio": 0.55,
+    "statsInnerGap": 14,
+    "highResImages": true,
+    "enableHoverEffects": true,
+    "enableViewTransitions": true,
+    "statsLeftWidth": 5,
+    "statsRightWidth": 5,
+    "statsCardPadding": 25,
+    "cardOpacity": 0.2,
+    "bgCycleInterval": 2,
+    "statsCardRadius": 10
+  },
+  "modalBgIntensity": 0.03,
+  "modalPanelOpacity": 0.6
+}

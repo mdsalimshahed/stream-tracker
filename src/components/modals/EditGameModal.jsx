@@ -1,5 +1,6 @@
+// src/components/modals/EditGameModal.jsx
 import React, { useState } from 'react';
-import { X, Save } from 'lucide-react';
+import { X, Save, Check } from 'lucide-react';
 
 export const EditGameModal = ({ game, onClose, onSave }) => {
   const [name, setName] = useState(game.game_name || '');
@@ -11,6 +12,9 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
   const [steamUrl, setSteamUrl] = useState(game.details?.steamUrl || '');
   const [steamIdInput, setSteamIdInput] = useState('');
   const [notOnSteam, setNotOnSteam] = useState(game.details?.notOnSteam || false);
+  
+  // NEW: State to track the selected cover image
+  const [coverImage, setCoverImage] = useState(game.cover_image || '');
 
   const handleSubmit = () => {
     if (!name.trim()) return;
@@ -37,7 +41,8 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
       formatList(tags), 
       steamIdInput.trim(),
       steamUrl.trim(),
-      notOnSteam
+      notOnSteam,
+      coverImage // Pass the new cover image to the save function
     );
     onClose();
   };
@@ -46,6 +51,9 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
     const searchUrl = `https://store.steampowered.com/search/?term=${encodeURIComponent(name)}`;
     window.open(searchUrl, '_blank');
   };
+
+  // Combine the current cover image and any thumbnails, removing duplicates
+  const allImages = Array.from(new Set([game.cover_image, ...(game.thumbnail_urls || [])])).filter(Boolean);
 
   return (
     <div 
@@ -140,6 +148,31 @@ export const EditGameModal = ({ game, onClose, onSave }) => {
                 placeholder="https://store.steampowered.com/app/..."
               />
             </div>
+
+            {/* NEW: Vertical Image Selector */}
+            {allImages.length > 0 && (
+              <div className="sm:col-span-2 pt-4 mt-2 border-t border-white/10">
+                <label className="text-sm font-semibold text-white/50 uppercase tracking-wider block mb-3 ml-1">Cover Image</label>
+                <div className="max-h-56 overflow-y-auto custom-scrollbar p-2 bg-black/40 border border-white/10 rounded-lg grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {allImages.map((url, i) => (
+                    <div 
+                      key={i} 
+                      onClick={() => setCoverImage(url)}
+                      className={`relative aspect-video rounded-lg cursor-pointer overflow-hidden border-2 transition-all ${coverImage === url ? 'border-blue-500 scale-95 shadow-lg' : 'border-transparent hover:border-white/30'}`}
+                    >
+                      <img src={url} className="w-full h-full object-cover" loading="lazy" />
+                      {coverImage === url && (
+                        <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
+                          <div className="bg-blue-600 text-white p-1 rounded-full shadow-lg">
+                            <Check size={16} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             
             <div className="sm:col-span-2 pt-4 mt-2 border-t border-white/10">
               <label className="flex items-center gap-2 mb-3 cursor-pointer w-fit">

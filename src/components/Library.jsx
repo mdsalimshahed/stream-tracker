@@ -105,8 +105,9 @@ export default function Library({ streamData, handleCardClick, onDeleteGame, onU
 
   const handleEditClick = (game) => setEditingGame(game);
   
-  const handleSaveEdit = (id, newName, newYear, developer, publisher, genres, tags, steamIdToSync, steamUrl, notOnSteam) => 
-    onEditGame(id, newName, newYear, developer, publisher, genres, tags, steamIdToSync, steamUrl, notOnSteam);
+  // Updated: Pass the new coverImage to the onEditGame function
+  const handleSaveEdit = (id, newName, newYear, developer, publisher, genres, tags, steamIdToSync, steamUrl, notOnSteam, newCoverImage) => 
+    onEditGame(id, newName, newYear, developer, publisher, genres, tags, steamIdToSync, steamUrl, notOnSteam, newCoverImage);
 
   const containerStyle = {
     paddingLeft: `clamp(16px, ${layoutPrefs.containerPaddingX}px, 5vw)`,

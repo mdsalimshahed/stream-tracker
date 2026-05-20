@@ -507,11 +507,12 @@ export function useStreamData(notify) {
     } catch (e) { notify('Update failed', 'error'); }
   };
 
-  const editGameDetails = (gameId, newName, newYear, developer, publisher, genres, tags, steamIdToSync, steamUrl, notOnSteam) => {
+  const editGameDetails = (gameId, newName, newYear, developer, publisher, genres, tags, steamIdToSync, steamUrl, notOnSteam, newCoverImage) => {
     const nd = JSON.parse(JSON.stringify(streamData));
     if (!nd[gameId]) return;
     nd[gameId].game_name = newName;
     if (newYear) nd[gameId].release_year = newYear;
+    if (newCoverImage) nd[gameId].cover_image = newCoverImage;
     if (!nd[gameId].details) nd[gameId].details = {};
     if (developer !== undefined) nd[gameId].details.developer = developer;
     if (publisher !== undefined) nd[gameId].details.publisher = publisher;

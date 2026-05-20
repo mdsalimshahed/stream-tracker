@@ -3,9 +3,6 @@ import React, { useState, useRef, useCallback } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Label } from 'recharts';
 import { formatFullTime } from '../SlideHelpers';
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 const getOrdinal = (n) => {
   const s = ["th", "st", "nd", "rd"];
   const v = n % 100;
@@ -15,19 +12,25 @@ const getOrdinal = (n) => {
 const statusColor = (status) =>
   status === 'Completed' ? "#f5a623" : status === 'Ongoing' ? "#3ddc84" : "#ff5c5c";
 
-// ---------------------------------------------------------------------------
-// Tooltip bubble — positioned manually, no Recharts involvement
-// ---------------------------------------------------------------------------
 const TooltipBubble = ({ tooltipData, pos }) => {
   if (!tooltipData || !pos) return null;
   const d = new Date(tooltipData.date);
+  
+  // Dynamically flip the tooltip so it doesn't clip past any boundaries
+  let xTrans = '-50%';
+  if (pos.x < 120) xTrans = '0%';
+  else if (pos.boundsWidth && pos.x > pos.boundsWidth - 120) xTrans = '-100%';
+  
+  const isNearTop = pos.y < 100;
+  const transform = `translate(${xTrans}, ${isNearTop ? '20px' : '-130%'})`;
+  
   return (
     <div
       style={{
         position: 'absolute',
         left: pos.x,
         top: pos.y,
-        transform: 'translate(-50%, -130%)',
+        transform,
         pointerEvents: 'none',
         zIndex: 1000,
       }}
@@ -48,9 +51,6 @@ const TooltipBubble = ({ tooltipData, pos }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// End-dot SVG element rendered as a Recharts dot prop
-// ---------------------------------------------------------------------------
 const TrailEndDot = ({ cx, cy, payload, image, status, isFaded, isSelected, onSelect }) => {
   if (cx == null || cy == null) return null;
   const clipId = `clip-${(payload?.gameName ?? 'x').replace(/[^a-zA-Z0-9]/g, '')}-${Math.round(cx)}-${Math.round(cy)}`;
@@ -76,17 +76,11 @@ const TrailEndDot = ({ cx, cy, payload, image, status, isFaded, isSelected, onSe
   );
 };
 
-// ---------------------------------------------------------------------------
-// Constants that must match LineChart margin + axis sizes exactly
-// ---------------------------------------------------------------------------
 const MARGIN      = { top: 35, right: 40, left: 15, bottom: 15 };
 const YAXIS_WIDTH = 45;
 const XAXIS_HEIGHT = 35;
 const YAXIS_PAD   = { top: 35, bottom: 10 };
 
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
 export default function Card3Slide2({ data }) {
   const {
     processedProgressionLines = [],
@@ -101,7 +95,6 @@ export default function Card3Slide2({ data }) {
   const [tooltipPos,   setTooltipPos]   = useState(null);
   const containerRef = useRef(null);
 
-  // Derived x-domain
   const xDomain = (() => {
     if (!processedProgressionLines.length) return ['dataMin', 'dataMax'];
     if (selectedGame) {
@@ -113,13 +106,9 @@ export default function Card3Slide2({ data }) {
 
   const chartPadding = selectedGame ? { left: 32, right: 32 } : { left: 16, right: 16 };
 
-  // ------------------------------------------------------------------
-  // Convert data coords to container-relative pixels.
-  // We derive the plot area purely from constants — no Recharts internals.
-  // ------------------------------------------------------------------
   const makeConverters = useCallback((rectW, rectH) => {
     const plotLeft   = MARGIN.left + YAXIS_WIDTH;
-    const plotTop    = MARGIN.top  + YAXIS_PAD.top;   // account for yAxis top padding
+    const plotTop    = MARGIN.top  + YAXIS_PAD.top; 
     const plotRight  = rectW - MARGIN.right;
     const plotBottom = rectH - MARGIN.bottom - XAXIS_HEIGHT - YAXIS_PAD.bottom;
     const plotW = plotRight  - plotLeft;
@@ -141,9 +130,6 @@ export default function Card3Slide2({ data }) {
     return { toPixelX, toPixelY };
   }, [processedProgressionLines, xDomain, chartPadding, progressionYMax]);
 
-  // ------------------------------------------------------------------
-  // Mouse move
-  // ------------------------------------------------------------------
   const handleMouseMove = useCallback((e) => {
     const container = containerRef.current;
     if (!container) return;
@@ -154,7 +140,6 @@ export default function Card3Slide2({ data }) {
     const my = e.clientY - rect.top;
 
     if (!selectedGame) {
-      // Snap tooltip to nearest end dot within a radius
       const SNAP_R = 22;
       let best = null;
       let bestDist = Infinity;
@@ -171,13 +156,12 @@ export default function Card3Slide2({ data }) {
       }
       if (best) {
         setTooltipData(best);
-        setTooltipPos({ x: toPixelX(best.xIndex), y: toPixelY(best.cumulativeHours) });
+        setTooltipPos({ x: toPixelX(best.xIndex), y: toPixelY(best.cumulativeHours), boundsWidth: rect.width });
       } else {
         setTooltipData(null);
         setTooltipPos(null);
       }
     } else {
-      // Follow cursor along the selected game's trail
       const line = processedProgressionLines.find(l => l.gameName === selectedGame);
       if (!line?.data?.length) { setTooltipData(null); return; }
 
@@ -189,7 +173,7 @@ export default function Card3Slide2({ data }) {
       }
       if (best) {
         setTooltipData({ ...best, gameName: line.gameName, color: line.color });
-        setTooltipPos({ x: toPixelX(best.xIndex), y: toPixelY(best.cumulativeHours) });
+        setTooltipPos({ x: toPixelX(best.xIndex), y: toPixelY(best.cumulativeHours), boundsWidth: rect.width });
       }
     }
   }, [selectedGame, processedProgressionLines, makeConverters]);
@@ -199,13 +183,10 @@ export default function Card3Slide2({ data }) {
     setTooltipPos(null);
   }, []);
 
-  // ------------------------------------------------------------------
-  // Render
-  // ------------------------------------------------------------------
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 flex flex-col bg-black/40 outline-none select-none"
+      className="absolute inset-0 flex flex-col bg-black/40 outline-none select-none overflow-visible"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={(e) => {
@@ -217,11 +198,6 @@ export default function Card3Slide2({ data }) {
         }
       }}
     >
-      <style dangerouslySetInnerHTML={{ __html: `
-        .recharts-wrapper, .recharts-surface, .recharts-responsive-container, svg { overflow: visible !important; outline: none !important; }
-        *:focus { outline: none !important; }
-      `}} />
-
       <div className="w-full flex-1 min-h-0 relative overflow-visible">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
           <LineChart margin={MARGIN} style={{ overflow: 'visible' }}>
@@ -266,7 +242,6 @@ export default function Card3Slide2({ data }) {
               <Label value="Playtime" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
             </YAxis>
 
-            {/* Trail lines + end dots — all in one chart, zero offset risk */}
             {processedProgressionLines.map((line, idx) => {
               const isSelected = selectedGame === line.gameName;
               const isDimmed   = selectedGame !== null && !isSelected;
@@ -304,7 +279,6 @@ export default function Card3Slide2({ data }) {
           </LineChart>
         </ResponsiveContainer>
 
-        {/* Manual cursor line when a game is selected */}
         {selectedGame && tooltipPos && (
           <div
             style={{
@@ -320,7 +294,6 @@ export default function Card3Slide2({ data }) {
           />
         )}
 
-        {/* Manually positioned tooltip bubble */}
         <TooltipBubble tooltipData={tooltipData} pos={tooltipPos} />
       </div>
     </div>

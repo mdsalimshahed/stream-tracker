@@ -53,14 +53,12 @@ export default function Card3Slide1({ data }) {
   const [selectedNode, setSelectedNode] = useState(null);
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden" onClick={(e) => { if (e.target.tagName?.toLowerCase() === 'circle' || e.target.tagName?.toLowerCase() === 'image') return; setSelectedNode(null); }}>
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-visible" onClick={(e) => { if (e.target.tagName?.toLowerCase() === 'circle' || e.target.tagName?.toLowerCase() === 'image') return; setSelectedNode(null); }}>
       <div className="w-full h-full flex-1 outline-none relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
           <AreaChart 
             tabIndex={-1} 
             data={gamesTimeline} 
-            // We increase chart margin left/right slightly, so the expanded 32px dots have room 
-            // to bleed into the margin without getting clipped by the container bounds.
             margin={{ top: 20, right: 28, left: 15, bottom: 15 }} 
             style={{ overflow: 'visible' }}
           >
@@ -82,7 +80,6 @@ export default function Card3Slide1({ data }) {
               tickMargin={10} 
               height={35} 
               minTickGap={5} 
-              // Reduced padding here to spread the data out closer to the edges
               padding={{ left: 15, right: 15 }} 
               tick={{ fill: '#8a88a8', fontSize: 10 }} 
               tickFormatter={(val) => { const g = gamesTimeline[val]; const p = g?.month.split(' '); return p?.length === 2 ? `${p[0]} '${p[1].slice(-2)}` : g?.month; }}

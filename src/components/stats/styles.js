@@ -158,11 +158,15 @@ export const STYLES = `
     border: 1px solid var(--c-border); 
     border-radius: 0;
     transition: background 0.25s; 
+  }
+  
+  .stat-card {
     overflow: hidden; /* Visually clips anything that might bleed out */
   }
   
   .stats-right-col {
     background: rgba(13,17,23,0.35);
+    overflow: visible; /* Allows chart tooltips to escape bounds smoothly */
   }
 
   /* Hover borders */
@@ -256,7 +260,6 @@ export const STYLES = `
     background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); 
     display: flex; flex-direction: column; justify-content: flex-end; 
   }
-
 
   /* =========================================================
      BOTTOM CATEGORIES ROW

@@ -23,7 +23,7 @@ export default function Card3Slide6({ data }) {
   const { processedHourlyData, hourlyYTicks, hourlyYMax } = data;
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-visible">
       <div className="w-full h-full flex-1 outline-none relative">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart tabIndex={-1} data={processedHourlyData} margin={{ top: 25, right: 20, left: 15, bottom: 15 }}>

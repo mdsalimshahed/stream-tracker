@@ -25,7 +25,7 @@ export default function Card3Slide8({ data }) {
   const { processedDowData, dowDomainMax, dowValidTicks, dowTickMap } = data;
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-visible">
       <div className="w-full h-full flex-1 outline-none relative">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart tabIndex={-1} data={processedDowData} margin={{ top: 25, right: 20, left: 15, bottom: 15 }}>

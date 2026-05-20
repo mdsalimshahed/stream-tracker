@@ -27,7 +27,7 @@ export default function Card3Slide3({ data }) {
   const { processedDailyData, dailyYMax, dailyYTicks } = data;
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-visible">
       <div className="w-full flex-1 min-h-0 outline-none overflow-visible relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
           <BarChart tabIndex={-1} data={processedDailyData} margin={{ top: 35, right: 35, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>

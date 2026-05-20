@@ -25,7 +25,7 @@ export default function Card3Slide7({ data }) {
   const { statusData, statusYMax, statusYTicks } = data;
   
   return (
-    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-hidden">
+    <div className="absolute inset-0 flex flex-col bg-black/40 outline-none overflow-visible">
       <div className="w-full h-full flex-1 outline-none relative">
         <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
           <AreaChart tabIndex={-1} data={statusData} margin={{ top: 25, right: 20, left: 15, bottom: 15 }} style={{ overflow: 'visible' }}>

@@ -171,17 +171,11 @@ export const formatReleaseDate = (dateString) => {
 };
 
 export const getOptimizedImage = (url, width) => {
-  if (!url) return url;
-  if (url.includes('steamstatic.com') || url.includes('steamcdn')) {
-    return url.replace(/\.1920x1080\.jpg/i, '.600x338.jpg');
-  }
-  if (url.includes('media.rawg.io/media/') && !url.includes('/resize/')) {
-    return url.replace('media.rawg.io/media/', `media.rawg.io/media/resize/${width || 420}/-/`);
-  }
+  // Overridden: Just return the exact unmodified original image
   return url;
 };
 
 export const getLowResUrl = (url, useHighRes = false) => {
-  if (!url || useHighRes) return url;
-  return getOptimizedImage(url, 420);
+  // Overridden: Bypass the sizing logic entirely 
+  return url;
 };

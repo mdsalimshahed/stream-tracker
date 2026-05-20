@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "5/17/2026, 11:22:39 PM",
+  "exportDate": "5/20/2026, 11:51:12 AM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -5209,14 +5209,13 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/b64711208534731f57e0a4595241cdbb43a0cbc2/ss_b64711208534731f57e0a4595241cdbb43a0cbc2.1920x1080.jpg?t=1777016399",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/65dce9f0199332d1dc43aa5dd3684e1967d7a551/ss_65dce9f0199332d1dc43aa5dd3684e1967d7a551.1920x1080.jpg?t=1777016399",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/54b5c0b89a83fd2383b67861c148144461d5a87c/ss_54b5c0b89a83fd2383b67861c148144461d5a87c.1920x1080.jpg?t=1777016399",
-        "https://media.rawg.io/media/games/dac/dacfcdeaef957a36416f4e6d5ec76229.jpg",
         "https://media.rawg.io/media/screenshots/db1/db13b535ce6539774459f4a5890d1da5.jpg",
         "https://media.rawg.io/media/screenshots/a6f/a6f876b7fe5f558f942920a33d75d432.jpg",
         "https://media.rawg.io/media/screenshots/bd5/bd52be2b0f166bd43501e3088144d771.jpg"
       ],
       "cycles": {
         "main": {
-          "stream_count": 73,
+          "stream_count": 74,
           "timestamps": [
             {
               "date": 1774375141000,
@@ -5728,6 +5727,13 @@
               "duration": 6878,
               "startTime": 1777900887000,
               "endTime": 1777907766000
+            },
+            {
+              "date": 1779122652000,
+              "videoId": "mZMDUD9Fx1M",
+              "duration": 7632,
+              "startTime": 1779122652000,
+              "endTime": 1779130284000
             }
           ],
           "isMain": false,
@@ -5761,7 +5767,6 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/5b6a007e52e0b2d4a36b74736ea2fa416830bf6f/ss_5b6a007e52e0b2d4a36b74736ea2fa416830bf6f.1920x1080.jpg?t=1777351016",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/c83fa1a03cf350ae0f049579daaa117414c9c745/ss_c83fa1a03cf350ae0f049579daaa117414c9c745.1920x1080.jpg?t=1777351016",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3357650/e8f77d8e2ee8098847306490803433950e7c90fc/ss_e8f77d8e2ee8098847306490803433950e7c90fc.1920x1080.jpg?t=1777351016",
-        "https://media.rawg.io/media/games/9b2/9b20adbf00491d56ad6793654067f2fd.jpg",
         "https://media.rawg.io/media/screenshots/ca1/ca18d0aae36eb9111d699e5fc301792c.jpg",
         "https://media.rawg.io/media/screenshots/bed/bed539410f44bb30d7ec90d5c3d3d79d.jpg",
         "https://media.rawg.io/media/screenshots/4c7/4c78732f954103ddbc7919a7ea08042a.jpg",
@@ -5772,7 +5777,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 16,
+          "stream_count": 17,
           "timestamps": [
             {
               "date": 1776603152000,
@@ -5885,6 +5890,13 @@
               "duration": 3215,
               "startTime": 1777734086000,
               "endTime": 1777737299000
+            },
+            {
+              "date": 1779192739000,
+              "videoId": "Vo_3IyHojMM",
+              "duration": 5014,
+              "startTime": 1779192739000,
+              "endTime": 1779197754000
             }
           ],
           "isMain": false,
@@ -7116,21 +7128,21 @@
     }
   },
   "thumbnailConfig": {
-    "customFont": null,
+    "customFont": "Book Antiqua",
     "bgZoom": 100,
-    "titleSize": 93,
+    "titleSize": 108,
     "subtitleSize": 66,
     "titleAlign": "center",
-    "titleYOffset": 16,
+    "titleYOffset": 33,
     "titleSpacing": 25,
-    "strokeWidth": 13,
+    "strokeWidth": 25,
     "splitTitle": true,
-    "streamCountSize": 88,
-    "cycleSize": 55,
-    "bottomSpacing": 68,
+    "streamCountSize": 93,
+    "cycleSize": 52,
+    "bottomSpacing": 70,
     "bottomAlign": "left",
-    "bottomPaddingX": 46,
-    "bottomPaddingY": 60,
+    "bottomPaddingX": 51,
+    "bottomPaddingY": 41,
     "showBottomShadow": true,
     "forceInvertTitle": false,
     "manualColors": {
@@ -7192,7 +7204,7 @@
       "fillOpacity": 1,
       "strokeOpacity": 0.78
     },
-    "titleLetterSpacing": 0,
+    "titleLetterSpacing": 3,
     "subtitleLetterSpacing": 2,
     "titleDropShadow": false,
     "subtitleDropShadow": true,

@@ -9,16 +9,16 @@ import { getCard2Slide } from './stats/slides/Card2Slides';
 import { getCard3Slide } from './stats/slides/Card3Slides';
 
 const SLIDE_TITLES = [
-  "Latest Stream Overview",
-  "Stream Timeline & Playtime",
-  "Cumulative Playtime Progression",
-  "Daily Playtime Distribution",
-  "Chronological Stream Sequence",
-  "Game Tags Word Cloud",
-  "Hourly Stream Frequency",
-  "Playtime by Game Status",
-  "Streams by Day of Week",
-  "Stream Deficit/Gain (Time Differences)"
+"Latest Stream",
+"Stream Starting Date Vs. Playtime",
+"Playtime Progression Over Time",
+"Daily Playtime",
+"Playtime Per Stream",
+"Word Cloud",
+"Hourly Stream Frequency",
+"Playtime by Game Status",
+"Streams by Day of Week",
+"Stream Deficit/Gain from Session Time"
 ];
 
 export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {

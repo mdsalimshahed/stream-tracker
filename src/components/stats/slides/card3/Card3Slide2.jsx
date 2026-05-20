@@ -105,7 +105,7 @@ export default function Card3Slide2({ data }) {
 
   const chartPadding = selectedGame ? { left: 32, right: 32 } : { left: 16, right: 16 };
 
-  // DYNAMIC Y-AXIS SHRINK LOGIC (Now with proper dynamic ticks)
+  // DYNAMIC Y-AXIS SHRINK LOGIC WITH TICK RECALCULATION (MAX 5 TICKS)
   const { dynamicYMax, dynamicYTicks } = (() => {
     if (selectedGame) {
       const g = processedProgressionLines.find(l => l.gameName === selectedGame);
@@ -113,15 +113,23 @@ export default function Card3Slide2({ data }) {
         const peakY = Math.max(...g.data.map(d => d.cumulativeHours));
         const rawTarget = peakY * 1.25;
         
-        let step = 1;
-        if (rawTarget > 100) step = 25;
-        else if (rawTarget > 50) step = 10;
-        else if (rawTarget > 20) step = 5;
-        else if (rawTarget > 10) step = 2;
+        const roughStep = rawTarget / 4;
+        const mag = Math.pow(10, Math.floor(Math.log10(roughStep || 1)));
+        const norm = roughStep / mag;
+        let clean = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10;
+        let step = Math.max(1, clean * mag);
         
-        const newMax = Math.max(step, Math.ceil(rawTarget / step) * step);
-        const newTicks = [];
+        let newMax = Math.ceil(rawTarget / step) * step;
+        let newTicks = [];
         for (let i = step; i <= newMax; i += step) newTicks.push(i);
+        
+        // Guarantee no more than 4 intervals (5 total lines including 0)
+        while (newTicks.length > 4) {
+           step *= 2;
+           newMax = Math.ceil(rawTarget / step) * step;
+           newTicks = [];
+           for (let i = step; i <= newMax; i += step) newTicks.push(i);
+        }
         
         return { dynamicYMax: newMax, dynamicYTicks: newTicks };
       }
@@ -254,7 +262,7 @@ export default function Card3Slide2({ data }) {
             <YAxis
               domain={[0, dynamicYMax]}
               ticks={dynamicYTicks}
-              allowDataOverflow={true} /* Critical fix: Forces Recharts to crop the unselected faded lines */
+              allowDataOverflow={true} 
               stroke="#8a88a8"
               axisLine={false}
               tickLine={false}

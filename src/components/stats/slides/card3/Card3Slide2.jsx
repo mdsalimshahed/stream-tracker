@@ -92,7 +92,10 @@ export default function Card3Slide2({ data }) {
   const [selectedGame, setSelectedGame] = useState(null);
   const [tooltipData,  setTooltipData]  = useState(null);
   const [tooltipPos,   setTooltipPos]   = useState(null);
+  
   const containerRef = useRef(null);
+  const activeHoverRef = useRef(null);
+  const lastComputedXIndexRef = useRef(null); // Performance cache
 
   const xDomain = (() => {
     if (!processedProgressionLines.length) return ['dataMin', 'dataMax'];
@@ -105,7 +108,7 @@ export default function Card3Slide2({ data }) {
 
   const chartPadding = selectedGame ? { left: 32, right: 32 } : { left: 16, right: 16 };
 
-  // DYNAMIC Y-AXIS SHRINK LOGIC WITH TICK RECALCULATION (MAX 5 TICKS)
+  // DYNAMIC Y-AXIS SHRINK LOGIC WITH CRASH PROTECTION
   const { dynamicYMax, dynamicYTicks } = (() => {
     if (selectedGame) {
       const g = processedProgressionLines.find(l => l.gameName === selectedGame);
@@ -113,17 +116,18 @@ export default function Card3Slide2({ data }) {
         const peakY = Math.max(...g.data.map(d => d.cumulativeHours));
         const rawTarget = peakY * 1.25;
         
-        const roughStep = rawTarget / 4;
-        const mag = Math.pow(10, Math.floor(Math.log10(roughStep || 1)));
+        if (rawTarget <= 0) return { dynamicYMax: 1, dynamicYTicks: [0, 1] };
+        
+        const roughStep = Math.max(0.1, rawTarget / 4);
+        const mag = Math.pow(10, Math.floor(Math.log10(roughStep)));
         const norm = roughStep / mag;
         let clean = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10;
-        let step = Math.max(1, clean * mag);
+        let step = Math.max(0.1, clean * mag);
         
         let newMax = Math.ceil(rawTarget / step) * step;
         let newTicks = [];
         for (let i = step; i <= newMax; i += step) newTicks.push(i);
         
-        // Guarantee no more than 4 intervals (5 total lines including 0)
         while (newTicks.length > 4) {
            step *= 2;
            newMax = Math.ceil(rawTarget / step) * step;
@@ -158,14 +162,14 @@ export default function Card3Slide2({ data }) {
     const toPixelX = (xVal) => plotLeft + padL + ((xVal - rawXMin) / (rawXMax - rawXMin || 1)) * innerW;
     const toPixelY = (yVal) => plotBottom - ((yVal - yMin) / (yMax - yMin || 1)) * plotH;
 
-    return { toPixelX, toPixelY };
+    return { toPixelX, toPixelY, plotLeft, innerW, padL, rawXMin, rawXMax };
   }, [processedProgressionLines, xDomain, chartPadding, dynamicYMax]);
 
   const handleMouseMove = useCallback((e) => {
     const container = containerRef.current;
     if (!container) return;
     const rect = container.getBoundingClientRect();
-    const { toPixelX, toPixelY } = makeConverters(rect.width, rect.height);
+    const { toPixelX, toPixelY, plotLeft, innerW, padL, rawXMin, rawXMax } = makeConverters(rect.width, rect.height);
 
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
@@ -186,30 +190,71 @@ export default function Card3Slide2({ data }) {
         }
       }
       if (best) {
-        setTooltipData(best);
-        setTooltipPos({ x: toPixelX(best.xIndex), y: toPixelY(best.cumulativeHours), boundsWidth: rect.width });
+        const pointId = `unselected-${best.gameName}`;
+        if (activeHoverRef.current !== pointId) {
+          activeHoverRef.current = pointId;
+          setTooltipData(best);
+          setTooltipPos({ x: toPixelX(best.xIndex), y: toPixelY(best.cumulativeHours), boundsWidth: rect.width });
+        }
       } else {
-        setTooltipData(null);
-        setTooltipPos(null);
+        if (activeHoverRef.current !== null) {
+          activeHoverRef.current = null;
+          setTooltipData(null);
+          setTooltipPos(null);
+        }
       }
     } else {
       const line = processedProgressionLines.find(l => l.gameName === selectedGame);
-      if (!line?.data?.length) { setTooltipData(null); return; }
-
-      let best = null;
-      let bestDist = Infinity;
-      for (const pt of line.data) {
-        const dist = Math.abs(mx - toPixelX(pt.xIndex));
-        if (dist < bestDist) { bestDist = dist; best = pt; }
+      if (!line?.data?.length) { 
+        if (activeHoverRef.current !== null) {
+          activeHoverRef.current = null;
+          setTooltipData(null); 
+          setTooltipPos(null);
+        }
+        return; 
       }
-      if (best) {
-        setTooltipData({ ...best, gameName: line.gameName, color: line.color });
-        setTooltipPos({ x: toPixelX(best.xIndex), y: toPixelY(best.cumulativeHours), boundsWidth: rect.width });
+
+      // EXTREME PERFORMANCE FIX: Calculate direct array index mathematically without loops
+      const rawX = rawXMin + ((mx - plotLeft - padL) / (innerW || 1)) * (rawXMax - rawXMin);
+      const hoveredXIndex = Math.round(rawX);
+
+      // Avoid recalculating if the mouse is moving inside the same X column
+      if (lastComputedXIndexRef.current === hoveredXIndex) return;
+      lastComputedXIndexRef.current = hoveredXIndex;
+
+      // Find the nearest actual stream point (skipping over empty flat days)
+      let nearestPoint = null;
+      let minXDist = Infinity;
+
+      for (let i = 0; i < line.data.length; i++) {
+        const pt = line.data[i];
+        
+        // A point is an "Actual Stream" if it's the first point, or its total seconds increased since yesterday
+        const isActualStream = i === 0 || pt.rawSeconds > line.data[i - 1].rawSeconds;
+        
+        if (isActualStream) {
+          const dist = Math.abs(pt.xIndex - hoveredXIndex);
+          if (dist < minXDist) {
+            minXDist = dist;
+            nearestPoint = pt;
+          }
+        }
+      }
+
+      if (nearestPoint) {
+        const pointId = `selected-${nearestPoint.xIndex}`;
+        if (activeHoverRef.current !== pointId) {
+          activeHoverRef.current = pointId;
+          setTooltipData({ ...nearestPoint, gameName: line.gameName, color: line.color });
+          setTooltipPos({ x: toPixelX(nearestPoint.xIndex), y: toPixelY(nearestPoint.cumulativeHours), boundsWidth: rect.width });
+        }
       }
     }
   }, [selectedGame, processedProgressionLines, makeConverters]);
 
   const handleMouseLeave = useCallback(() => {
+    activeHoverRef.current = null;
+    lastComputedXIndexRef.current = null;
     setTooltipData(null);
     setTooltipPos(null);
   }, []);
@@ -223,6 +268,8 @@ export default function Card3Slide2({ data }) {
       onClick={(e) => {
         const tag = e.target?.tagName?.toLowerCase();
         if (tag !== 'circle' && tag !== 'image') {
+          activeHoverRef.current = null;
+          lastComputedXIndexRef.current = null;
           setSelectedGame(null);
           setTooltipData(null);
           setTooltipPos(null);
@@ -301,7 +348,11 @@ export default function Card3Slide2({ data }) {
                         status={line.status || gameInfo?.status}
                         isFaded={selectedGame !== null && !isSelected}
                         isSelected={isSelected}
-                        onSelect={() => setSelectedGame(isSelected ? null : line.gameName)}
+                        onSelect={() => {
+                          activeHoverRef.current = null;
+                          lastComputedXIndexRef.current = null;
+                          setSelectedGame(isSelected ? null : line.gameName);
+                        }}
                       />
                     );
                   }}

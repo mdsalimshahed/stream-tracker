@@ -26,7 +26,7 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
 
   const [latestBgIndex, setLatestBgIndex] = useState(0);
   const [currentGraphIdx, setCurrentGraphIdx] = useState(0); 
-  const [slideDir, setSlideDir] = useState('right'); // Tracks whether to slide from left or right
+  const [slideDir, setSlideDir] = useState('right'); 
   
   const latestGameImages = card3Data?.mostRecentGame?.thumbnail_urls || [];
 
@@ -48,9 +48,10 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
   // Keyboard Navigation logic
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'ArrowLeft') {
+      // Added support for 'A' and 'D' keys
+      if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
         handlePrev();
-      } else if (e.key === 'ArrowRight') {
+      } else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') {
         handleNext();
       }
     };
@@ -112,15 +113,12 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
   };
 
   const renderCard3Content = (idx) => {
-    // Dynamic animation class depending on which direction we clicked
-    const slideAnimation = slideDir === 'right' 
-      ? 'animate-in fade-in slide-in-from-right-16 duration-500' 
-      : 'animate-in fade-in slide-in-from-left-16 duration-500';
+    const slideAnimation = slideDir === 'right' ? 'animate-slide-right' : 'animate-slide-left';
 
     return (
       <div
         key={`c3-${idx}`}
-        className={`w-full h-full fill-mode-both ${slideAnimation}`}
+        className={`w-full h-full ${slideAnimation}`}
       >
         <div className="stats-right-col absolute inset-0 rounded-2xl overflow-visible shadow-2xl border border-white/10">
           {getCard3Slide(idx, slideData3)}
@@ -129,10 +127,7 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
     );
   };
 
-  // Dynamic animation class for the title so it moves in sync with the graph
-  const titleAnimation = slideDir === 'right' 
-    ? 'animate-in fade-in slide-in-from-right-8 duration-500' 
-    : 'animate-in fade-in slide-in-from-left-8 duration-500';
+  const titleAnimation = slideDir === 'right' ? 'animate-slide-right' : 'animate-slide-left';
 
   return (
     <div
@@ -151,12 +146,11 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
         <div className="max-w-[1800px] mx-auto pb-20 flex flex-col gap-16">
 
           {/* GRAPHS CAROUSEL (Card 3) */}
-          <div className="w-full flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="w-full flex flex-col items-center">
             
-            {/* Dynamic Animated Title */}
             <h2 
               key={`title-${currentGraphIdx}`}
-              className={`text-xl sm:text-2xl font-bold text-white/90 mb-6 uppercase tracking-widest flex items-center gap-3 fill-mode-both ${titleAnimation}`}
+              className={`text-xl sm:text-2xl font-bold text-white/90 mt-24 mb-16 uppercase tracking-widest flex items-center gap-3 ${titleAnimation}`}
             >
               <span className="w-8 h-[2px] bg-[#e8c87a]"></span> 
               {SLIDE_TITLES[currentGraphIdx]} 
@@ -164,10 +158,8 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
             </h2>
             
             <div className="relative w-full max-w-[1200px] h-[420px] group">
-              {/* Active Graph Slide */}
               {renderCard3Content(currentGraphIdx)}
 
-              {/* Navigation Arrows */}
               <button
                 onClick={handlePrev}
                 className="absolute left-2 sm:-left-6 top-1/2 -translate-y-1/2 p-3 bg-black/60 hover:bg-black/90 border border-white/10 backdrop-blur-xl rounded-full text-white transition-all shadow-2xl z-50 hover:scale-110 opacity-0 group-hover:opacity-100"
@@ -182,7 +174,6 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
                 <ChevronRight size={28} />
               </button>
 
-              {/* Instagram-style Dots */}
               <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex gap-2">
                 {Array.from({ length: 10 }).map((_, i) => (
                   <button

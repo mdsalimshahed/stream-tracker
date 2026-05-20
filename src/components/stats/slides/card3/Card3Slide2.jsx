@@ -105,6 +105,30 @@ export default function Card3Slide2({ data }) {
 
   const chartPadding = selectedGame ? { left: 32, right: 32 } : { left: 16, right: 16 };
 
+  // DYNAMIC Y-AXIS SHRINK LOGIC (Now with proper dynamic ticks)
+  const { dynamicYMax, dynamicYTicks } = (() => {
+    if (selectedGame) {
+      const g = processedProgressionLines.find(l => l.gameName === selectedGame);
+      if (g && g.data && g.data.length > 0) {
+        const peakY = Math.max(...g.data.map(d => d.cumulativeHours));
+        const rawTarget = peakY * 1.25;
+        
+        let step = 1;
+        if (rawTarget > 100) step = 25;
+        else if (rawTarget > 50) step = 10;
+        else if (rawTarget > 20) step = 5;
+        else if (rawTarget > 10) step = 2;
+        
+        const newMax = Math.max(step, Math.ceil(rawTarget / step) * step);
+        const newTicks = [];
+        for (let i = step; i <= newMax; i += step) newTicks.push(i);
+        
+        return { dynamicYMax: newMax, dynamicYTicks: newTicks };
+      }
+    }
+    return { dynamicYMax: progressionYMax, dynamicYTicks: progressionYTicks };
+  })();
+
   const makeConverters = useCallback((rectW, rectH) => {
     const plotLeft   = MARGIN.left + YAXIS_WIDTH;
     const plotTop    = MARGIN.top  + YAXIS_PAD.top; 
@@ -117,7 +141,7 @@ export default function Card3Slide2({ data }) {
     const rawXMin = xDomain[0] === 'dataMin' ? (Math.min(...allX) || 0) : xDomain[0];
     const rawXMax = xDomain[1] === 'dataMax' ? (Math.max(...allX) || 1) : xDomain[1];
     const yMin = 0;
-    const yMax = progressionYMax || 1;
+    const yMax = dynamicYMax || 1;
 
     const padL = chartPadding?.left  ?? 0;
     const padR = chartPadding?.right ?? 0;
@@ -127,7 +151,7 @@ export default function Card3Slide2({ data }) {
     const toPixelY = (yVal) => plotBottom - ((yVal - yMin) / (yMax - yMin || 1)) * plotH;
 
     return { toPixelX, toPixelY };
-  }, [processedProgressionLines, xDomain, chartPadding, progressionYMax]);
+  }, [processedProgressionLines, xDomain, chartPadding, dynamicYMax]);
 
   const handleMouseMove = useCallback((e) => {
     const container = containerRef.current;
@@ -228,8 +252,9 @@ export default function Card3Slide2({ data }) {
             </XAxis>
 
             <YAxis
-              domain={[0, progressionYMax]}
-              ticks={progressionYTicks}
+              domain={[0, dynamicYMax]}
+              ticks={dynamicYTicks}
+              allowDataOverflow={true} /* Critical fix: Forces Recharts to crop the unselected faded lines */
               stroke="#8a88a8"
               axisLine={false}
               tickLine={false}

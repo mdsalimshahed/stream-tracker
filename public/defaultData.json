@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "5/20/2026, 11:51:12 AM",
+  "exportDate": "5/20/2026, 12:17:54 PM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -344,7 +344,7 @@
         "genres": "Adventure, Indie",
         "youtubePlaylist": "",
         "steamUrl": "https://store.steampowered.com/app/1275550/",
-        "tags": "Indie, Choices Matter, Narrative, Thriller, Drama, First-Person, Story Rich, Adventure, Walking Simulator, Sci-fi, Atmospheric, Survival, Mystery, Exploration, Choose Your Own Adventure, Singleplayer, Open World, Conversation, Robots, Point & Click",
+        "tags": "Singleplayer, Steam Achievements, Steam Cloud, Atmospheric, Story Rich, Open World, First-Person, Sci-fi, Exploration, Survival, Mystery, Choices Matter, Walking Simulator, Story, Robots, Drama, character, Family Sharing, Thriller, secrets, Narrative, Conversation, environment, hell, relationship, dodge, elements, Stereo Sound, Surround Sound, characters, Camera Comfort, search, Save Anytime, town, choices, plane, man, drop",
         "notOnSteam": false
       },
       "cover_image": "https://media.rawg.io/media/screenshots/eae/eaece5425428d494fd24ca529b0bdc57.jpg"
@@ -415,7 +415,7 @@
         "genres": "Action, Adventure, RPG",
         "youtubePlaylist": "",
         "steamUrl": "https://store.steampowered.com/app/1448440/",
-        "tags": "Action, Souls-like, RPG, Difficult, Action RPG, Dark Fantasy, Hack and Slash, Historical, Singleplayer, Fantasy, Character Customization, Gore, Violent, Martial Arts, JRPG, Co-op, Adventure, Third Person, Atmospheric, Female Protagonist",
+        "tags": "Singleplayer, Gore, Difficult, Violent, Dark Fantasy, JRPG, Souls-like",
         "notOnSteam": false
       },
       "cover_image": "https://media.rawg.io/media/games/1e1/1e1b965459d5cf69cf51e5d6fe7da959.jpg"
@@ -2357,7 +2357,12 @@
         "https://media.rawg.io/media/screenshots/80a/80a33bd239053cb51cfe561cdfa9d6f3.jpg",
         "https://media.rawg.io/media/screenshots/ebe/ebe32a076994124b7a47c7bf3d04a073.jpg",
         "https://media.rawg.io/media/screenshots/6bc/6bc8f80c246b0ba6d3fcc0d122fa8971.jpg",
-        "https://media.rawg.io/media/screenshots/2bd/2bdc231c87a69229444c2b02155edc45.jpg"
+        "https://media.rawg.io/media/screenshots/2bd/2bdc231c87a69229444c2b02155edc45.jpg",
+        "https://media.rawg.io/media/screenshots/4ac/4ac2e9c3a60b376e171be09a198f9aad.jpg",
+        "https://media.rawg.io/media/screenshots/046/046c809c42ee42453bacadb4697fa776.jpg",
+        "https://media.rawg.io/media/screenshots/fff/fffd4181b874750e553b6bebdb9c7be5.jpg",
+        "https://media.rawg.io/media/screenshots/0c1/0c1e1f1fb3eb61d254195f3421b9d46d.jpg",
+        "https://media.rawg.io/media/screenshots/a6a/a6a999f008d34cdafab896530adebad1.jpg"
       ],
       "cycles": {
         "main": {
@@ -2734,7 +2739,8 @@
         "genres": "Action, RPG",
         "youtubePlaylist": "",
         "steamUrl": "https://store.steampowered.com/app/2054970/",
-        "tags": "Singleplayer, Steam Achievements, Steam Cloud, RPG, Open World, Third Person, Fantasy, Exploration, Action-Adventure, Action RPG, Character Customization, 3D, Physics, Medieval, Magic, PvE, Lore-Rich, Family Sharing, Dragons, Swordplay, Artificial Intelligence, HDR available"
+        "tags": "Singleplayer, Steam Cloud, Character Customization, HDR available",
+        "notOnSteam": false
       },
       "cover_image": "https://media.rawg.io/media/games/679/679d7a18e220025bdd83dff484d6ea64.jpg"
     },
@@ -3322,7 +3328,7 @@
         "genres": "Action, Adventure, Indie, RPG",
         "youtubePlaylist": "",
         "steamUrl": "https://store.steampowered.com/app/2407270/",
-        "tags": "Souls-like, Female Protagonist, Anime, Action RPG, Combat, Post-apocalyptic, Action, RPG, Adventure, Action-Adventure, 3D, Dungeon Crawler, Singleplayer, Drama, Dystopian, Fantasy, Cute, Indie, Sexual Content, Hack and Slash",
+        "tags": "Dungeon Crawler, Souls-like",
         "notOnSteam": false
       },
       "cover_image": "https://media.rawg.io/media/games/f58/f5867ea18f8444660cd2892d4b282d30.jpg"
@@ -3406,7 +3412,7 @@
             {
               "date": 1761130712000,
               "videoId": "M9gN0Z_KvpY",
-              "duration": 2367,
+              "duration": 2368,
               "startTime": 1761130712000,
               "endTime": 1761133082000
             },
@@ -3638,7 +3644,7 @@
             {
               "date": 1751949631000,
               "videoId": "u5rmiraNcAk",
-              "duration": 3688,
+              "duration": 3689,
               "startTime": 1751949631000,
               "endTime": 1751953323000
             },
@@ -3890,7 +3896,7 @@
             {
               "date": 1764742098000,
               "videoId": "JkC74VI_HrU",
-              "duration": 3160,
+              "duration": 3161,
               "startTime": 1764742098000,
               "endTime": 1764745255000
             },
@@ -5133,13 +5139,13 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/99082fa59d440ef484fe832278e66058510dd54c/ss_99082fa59d440ef484fe832278e66058510dd54c.1920x1080.jpg?t=1774022345",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/309402f4d80bee724cf6fa3b2a85e2f45aa5960e/ss_309402f4d80bee724cf6fa3b2a85e2f45aa5960e.1920x1080.jpg?t=1774022345",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3280350/568eb6e38c33c752e7bf1b32be7c7563db8b74d9/ss_568eb6e38c33c752e7bf1b32be7c7563db8b74d9.1920x1080.jpg?t=1774022345",
-        "https://media.rawg.io/media/games/b85/b85bc300d42588af66fb516b7563f74f.jpg",
         "https://media.rawg.io/media/screenshots/7a9/7a97a649fde5f258651ae5e69abf0ed0.jpg",
         "https://media.rawg.io/media/screenshots/372/372b0916c1ce240a4406373c120abd8f.jpg",
         "https://media.rawg.io/media/screenshots/9c4/9c4d0e73de232433f8b977c39ca65d45.jpg",
         "https://media.rawg.io/media/screenshots/a25/a25a14bc153866bd1dc9f776426c7b5b.jpg",
         "https://media.rawg.io/media/screenshots/8a8/8a87fa3c9a671416715d9ba29789cd7f.jpg",
-        "https://media.rawg.io/media/screenshots/901/901efd17e514cede763eeb9837a80614.jpg"
+        "https://media.rawg.io/media/screenshots/901/901efd17e514cede763eeb9837a80614.jpg",
+        "https://images.hdqwalls.com/wallpapers/death-stranding-2-on-the-beach-4k-42.jpg"
       ],
       "cycles": {
         "main": {
@@ -5190,7 +5196,7 @@
         "tags": "Open World, Exploration, Sci-fi, Walking Simulator, Action, Atmospheric, Third-Person Shooter, Post-apocalyptic, Action-Adventure, Third Person, Adventure, Emotional, Singleplayer, Realistic, Asynchronous Multiplayer, Stealth, Dystopian, Horror, Violent, Great Soundtrack",
         "notOnSteam": false
       },
-      "cover_image": "https://media.rawg.io/media/games/b85/b85bc300d42588af66fb516b7563f74f.jpg"
+      "cover_image": "https://images.hdqwalls.com/wallpapers/death-stranding-2-on-the-beach-4k-42.jpg"
     },
     "3321460": {
       "game_name": "Crimson Desert",
@@ -5731,7 +5737,7 @@
             {
               "date": 1779122652000,
               "videoId": "mZMDUD9Fx1M",
-              "duration": 7632,
+              "duration": 7626,
               "startTime": 1779122652000,
               "endTime": 1779130284000
             }
@@ -5894,7 +5900,7 @@
             {
               "date": 1779192739000,
               "videoId": "Vo_3IyHojMM",
-              "duration": 5014,
+              "duration": 5009,
               "startTime": 1779192739000,
               "endTime": 1779197754000
             }

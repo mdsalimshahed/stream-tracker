@@ -31,11 +31,8 @@ const Slide6StaticDot = ({ cx, cy, payload, selectedNode, onSelect }) => {
   let ringColor = payload.status === 'Completed' ? "#f5a623" : payload.status === 'Ongoing' ? "#3ddc84" : "#ff5c5c"; 
   const isSelected = selectedNode === payload.name;
   
-  // Outer ring sizes
   const ringRadius = isSelected ? 31 : 12;
-  // Image clip sizes
   const imgRadius = isSelected ? 27 : 10;
-  // Transparent hit-box size
   const hitRadius = isSelected ? 32 : 16;
   
   return (

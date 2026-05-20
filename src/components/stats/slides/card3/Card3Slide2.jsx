@@ -16,7 +16,6 @@ const TooltipBubble = ({ tooltipData, pos }) => {
   if (!tooltipData || !pos) return null;
   const d = new Date(tooltipData.date);
   
-  // Dynamically flip the tooltip so it doesn't clip past any boundaries
   let xTrans = '-50%';
   if (pos.x < 120) xTrans = '0%';
   else if (pos.boundsWidth && pos.x > pos.boundsWidth - 120) xTrans = '-100%';

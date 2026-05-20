@@ -2,18 +2,35 @@
 import React, { useState, useEffect } from 'react';
 import { getLowResUrl } from '../utils/helpers';
 import { STYLES } from './stats/styles';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { getCard1Slide } from './stats/slides/Card1Slides';
 import { getCard2Slide } from './stats/slides/Card2Slides';
 import { getCard3Slide } from './stats/slides/Card3Slides';
 
+const SLIDE_TITLES = [
+  "Latest Stream Overview",
+  "Stream Timeline & Playtime",
+  "Cumulative Playtime Progression",
+  "Daily Playtime Distribution",
+  "Chronological Stream Sequence",
+  "Game Tags Word Cloud",
+  "Hourly Stream Frequency",
+  "Playtime by Game Status",
+  "Streams by Day of Week",
+  "Stream Deficit/Gain (Time Differences)"
+];
+
 export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
   const { card1Data, card2Data, card3Data, isReady } = cachedStats;
 
   const [latestBgIndex, setLatestBgIndex] = useState(0);
+  const [currentGraphIdx, setCurrentGraphIdx] = useState(0); 
+  const [slideDir, setSlideDir] = useState('right'); // Tracks whether to slide from left or right
+  
   const latestGameImages = card3Data?.mostRecentGame?.thumbnail_urls || [];
 
+  // Background slideshow logic
   useEffect(() => {
     if (latestGameImages.length < 2) return;
     const initialDelay = Math.random() * 2000;
@@ -28,6 +45,35 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
     return () => { clearTimeout(timeout); clearInterval(interval); };
   }, [latestGameImages]);
 
+  // Keyboard Navigation logic
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft') {
+        handlePrev();
+      } else if (e.key === 'ArrowRight') {
+        handleNext();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handlePrev = () => {
+    setSlideDir('left');
+    setCurrentGraphIdx(p => (p === 0 ? 9 : p - 1));
+  };
+
+  const handleNext = () => {
+    setSlideDir('right');
+    setCurrentGraphIdx(p => (p + 1) % 10);
+  };
+
+  const handleDotClick = (i) => {
+    if (i === currentGraphIdx) return;
+    setSlideDir(i > currentGraphIdx ? 'right' : 'left');
+    setCurrentGraphIdx(i);
+  };
+
   if (!isReady || !card1Data) {
     return <div className="flex items-center justify-center h-full text-white/50"><Loader2 className="animate-spin mr-2"/> Compiling data...</div>;
   }
@@ -41,18 +87,12 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
   const slideData3 = { ...card3Data, latestBgImage };
 
   const card12Slides = [
-    { card: 1, idx: 0 }, { card: 2, idx: 0 }, // Streams count | Games in library
-    { card: 1, idx: 1 }, { card: 2, idx: 1 }, // Total playtime | Total session duration
-    { card: 1, idx: 2 }, { card: 2, idx: 2 }, // Longest stream | Shortest stream
-    { card: 1, idx: 3 }, { card: 2, idx: 3 }, // Longest streak | Longest break
-    { card: 1, idx: 4 }, { card: 2, idx: 4 }, // Quiet hours | Busiest day
-    { card: 1, idx: 5 }, { card: 2, idx: 5 }, // Closest to release | Played before abandoning
-  ];
-
-  const card3Slides = [
-    { card: 3, idx: 0 }, { card: 3, idx: 1 }, { card: 3, idx: 2 }, { card: 3, idx: 3 },
-    { card: 3, idx: 4 }, { card: 3, idx: 5 }, { card: 3, idx: 6 }, { card: 3, idx: 7 },
-    { card: 3, idx: 8 }, { card: 3, idx: 9 }
+    { card: 1, idx: 0 }, { card: 2, idx: 0 },
+    { card: 1, idx: 1 }, { card: 2, idx: 1 },
+    { card: 1, idx: 2 }, { card: 2, idx: 2 },
+    { card: 1, idx: 3 }, { card: 2, idx: 3 },
+    { card: 1, idx: 4 }, { card: 2, idx: 4 },
+    { card: 1, idx: 5 }, { card: 2, idx: 5 },
   ];
 
   const renderCard12Content = ({ card, idx }, animIndex) => {
@@ -64,29 +104,35 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
       <div
         key={`c${card}-${idx}`}
         className="w-full aspect-[16/9] relative shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
-        style={{ animationDelay: `${animIndex * 100}ms` }}
+        style={{ animationDelay: `${animIndex * 50}ms` }}
       >
         {inner}
       </div>
     );
   };
 
-  const renderCard3Content = ({ idx }, animIndex) => (
-    <div
-      key={`c3-${idx}`}
-      className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
-      style={{
-        maxWidth: '1200px',
-        height: '420px',
-        position: 'relative',
-        animationDelay: `${(card12Slides.length + animIndex) * 100}ms`,
-      }}
-    >
-      <div className="stats-right-col absolute inset-0">
-        {getCard3Slide(idx, slideData3)}
+  const renderCard3Content = (idx) => {
+    // Dynamic animation class depending on which direction we clicked
+    const slideAnimation = slideDir === 'right' 
+      ? 'animate-in fade-in slide-in-from-right-16 duration-500' 
+      : 'animate-in fade-in slide-in-from-left-16 duration-500';
+
+    return (
+      <div
+        key={`c3-${idx}`}
+        className={`w-full h-full fill-mode-both ${slideAnimation}`}
+      >
+        <div className="stats-right-col absolute inset-0 rounded-2xl overflow-visible shadow-2xl border border-white/10">
+          {getCard3Slide(idx, slideData3)}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  // Dynamic animation class for the title so it moves in sync with the graph
+  const titleAnimation = slideDir === 'right' 
+    ? 'animate-in fade-in slide-in-from-right-8 duration-500' 
+    : 'animate-in fade-in slide-in-from-left-8 duration-500';
 
   return (
     <div
@@ -102,15 +148,58 @@ export default function DebugSlides({ layoutPrefs, systemFonts, cachedStats }) {
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
 
       <div className="flex-1 w-full h-full overflow-y-auto custom-scrollbar p-6 sm:p-10">
-        <div className="max-w-[1800px] mx-auto pb-20 flex flex-col gap-12">
+        <div className="max-w-[1800px] mx-auto pb-20 flex flex-col gap-16">
 
-          {/* REVERTED TO 3 COLUMNS HERE */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {card12Slides.map((slide, i) => renderCard12Content(slide, i))}
+          {/* GRAPHS CAROUSEL (Card 3) */}
+          <div className="w-full flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+            
+            {/* Dynamic Animated Title */}
+            <h2 
+              key={`title-${currentGraphIdx}`}
+              className={`text-xl sm:text-2xl font-bold text-white/90 mb-6 uppercase tracking-widest flex items-center gap-3 fill-mode-both ${titleAnimation}`}
+            >
+              <span className="w-8 h-[2px] bg-[#e8c87a]"></span> 
+              {SLIDE_TITLES[currentGraphIdx]} 
+              <span className="w-8 h-[2px] bg-[#e8c87a]"></span>
+            </h2>
+            
+            <div className="relative w-full max-w-[1200px] h-[420px] group">
+              {/* Active Graph Slide */}
+              {renderCard3Content(currentGraphIdx)}
+
+              {/* Navigation Arrows */}
+              <button
+                onClick={handlePrev}
+                className="absolute left-2 sm:-left-6 top-1/2 -translate-y-1/2 p-3 bg-black/60 hover:bg-black/90 border border-white/10 backdrop-blur-xl rounded-full text-white transition-all shadow-2xl z-50 hover:scale-110 opacity-0 group-hover:opacity-100"
+              >
+                <ChevronLeft size={28} />
+              </button>
+
+              <button
+                onClick={handleNext}
+                className="absolute right-2 sm:-right-6 top-1/2 -translate-y-1/2 p-3 bg-black/60 hover:bg-black/90 border border-white/10 backdrop-blur-xl rounded-full text-white transition-all shadow-2xl z-50 hover:scale-110 opacity-0 group-hover:opacity-100"
+              >
+                <ChevronRight size={28} />
+              </button>
+
+              {/* Instagram-style Dots */}
+              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex gap-2">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleDotClick(i)}
+                    className={`transition-all duration-300 rounded-full ${i === currentGraphIdx ? 'w-8 h-2.5 bg-[#e8c87a] shadow-[0_0_10px_rgba(232,200,122,0.5)]' : 'w-2.5 h-2.5 bg-white/20 hover:bg-white/40'}`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-col items-center gap-6 sm:gap-8 w-full">
-            {card3Slides.map((slide, i) => renderCard3Content(slide, i))}
+          <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent my-6"></div>
+
+          {/* STATS GRID (Cards 1 & 2) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {card12Slides.map((slide, i) => renderCard12Content(slide, i))}
           </div>
 
         </div>

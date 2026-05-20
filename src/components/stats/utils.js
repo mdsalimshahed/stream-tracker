@@ -37,7 +37,8 @@ export const shuffleArray = (array) => {
   return arr;
 };
 
-export const generatePlaylist = (games, lastGameName = null) => {
+// Now accepts an imageTracker object to remember which images have already been shown
+export const generatePlaylist = (games, lastGameName = null, imageTracker = {}) => {
   const validGames = games.filter(g => g.thumbnail_urls && g.thumbnail_urls.length > 0);
   if (validGames.length === 0) return [];
 
@@ -50,10 +51,34 @@ export const generatePlaylist = (games, lastGameName = null) => {
   }
 
   let playlist = [];
+  
   shuffledGames.forEach(game => {
     const uniqueThumbs = [...new Set((game.thumbnail_urls || []).filter(Boolean))];
-    const shuffledImages = shuffleArray(uniqueThumbs);
-    shuffledImages.forEach(url => {
+    if (uniqueThumbs.length === 0) return;
+
+    // We can use the game ID or name as the tracker key
+    const gameKey = game.id || game.game_name;
+
+    // Initialize the tracker pool for this game if it's empty
+    if (!imageTracker[gameKey] || imageTracker[gameKey].length === 0) {
+      imageTracker[gameKey] = shuffleArray(uniqueThumbs);
+    }
+
+    // Determine how many images to show in this block (3, 4, or 5)
+    // We cap it at the total unique images so a game with only 2 images doesn't immediately repeat
+    const numToShow = Math.min(Math.floor(Math.random() * 3) + 3, uniqueThumbs.length);
+    
+    let poppedImages = [];
+    for (let i = 0; i < numToShow; i++) {
+      // If we run out of images mid-pull, instantly refill and shuffle the pool again
+      if (imageTracker[gameKey].length === 0) {
+        imageTracker[gameKey] = shuffleArray(uniqueThumbs);
+      }
+      poppedImages.push(imageTracker[gameKey].pop());
+    }
+
+    // Add our selected fresh images to the playlist block for this game
+    poppedImages.forEach(url => {
       playlist.push({ url, gameName: game.game_name });
     });
   });

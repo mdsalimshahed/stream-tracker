@@ -9,10 +9,17 @@ export const CategoryCard = ({ title, games, cssClass, highResImages }) => {
 
   const playlistRef = useRef([]);
   const indexRef = useRef(0);
+  const imageTrackerRef = useRef({}); 
+  
   const [currentData, setCurrentData] = useState({ url: null, gameName: '' });
+  
+  // State and Ref for the typewriter effect
+  const [displayedName, setDisplayedName] = useState('');
+  const displayedNameRef = useRef('');
 
   useEffect(() => {
-    const newPlaylist = generatePlaylist(eligible, null);
+    imageTrackerRef.current = {}; 
+    const newPlaylist = generatePlaylist(eligible, null, imageTrackerRef.current);
     playlistRef.current = newPlaylist;
     indexRef.current = 0;
     setCurrentData(newPlaylist[0] || { url: null, gameName: '' });
@@ -33,7 +40,7 @@ export const CategoryCard = ({ title, games, cssClass, highResImages }) => {
         
         if (idx >= playlistRef.current.length) {
           const lastGame = playlistRef.current[playlistRef.current.length - 1]?.gameName;
-          playlistRef.current = generatePlaylist(eligible, lastGame);
+          playlistRef.current = generatePlaylist(eligible, lastGame, imageTrackerRef.current);
           idx = 0;
         }
         
@@ -48,9 +55,60 @@ export const CategoryCard = ({ title, games, cssClass, highResImages }) => {
     };
   }, [eligible]);
 
+  // Typewriter Effect
+  useEffect(() => {
+    let isCancelled = false;
+    const target = currentData.gameName || '';
+
+    const animateText = async () => {
+      // 1. Rapidly erase the old text character by character
+      let currentLen = displayedNameRef.current.length;
+      for (let i = 0; i < currentLen; i++) {
+        if (isCancelled) return;
+        displayedNameRef.current = displayedNameRef.current.slice(0, -1);
+        setDisplayedName(displayedNameRef.current);
+        await new Promise(r => setTimeout(r, 15)); // erase speed
+      }
+
+      if (isCancelled) return;
+      
+      // 2. Wait for the new image to crossfade in (~700ms total, so ~500ms delay here syncs perfectly)
+      await new Promise(r => setTimeout(r, 500));
+
+      if (isCancelled) return;
+      
+      // 3. Type the new text character by character
+      for (let i = 0; i <= target.length; i++) {
+        if (isCancelled) return;
+        displayedNameRef.current = target.slice(0, i);
+        setDisplayedName(displayedNameRef.current);
+        await new Promise(r => setTimeout(r, 35)); // type speed
+      }
+    };
+
+    if (target) {
+      animateText();
+    } else {
+      // Just erase if there's no target game
+      const eraseOnly = async () => {
+        let currentLen = displayedNameRef.current.length;
+        for (let i = 0; i < currentLen; i++) {
+          if (isCancelled) return;
+          displayedNameRef.current = displayedNameRef.current.slice(0, -1);
+          setDisplayedName(displayedNameRef.current);
+          await new Promise(r => setTimeout(r, 15));
+        }
+      };
+      eraseOnly();
+    }
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentData.gameName]); // Trigger ONLY when the game name actually changes
+
   const fallback = 'https://placehold.co/480x270/0d1117/1e2938?text=';
   const currentSrc = currentData.url ? getLowResUrl(currentData.url, highResImages) : fallback;
-  const gameName = currentData.gameName || '';
 
   return (
     <div className={`cat-card ${cssClass} group`}>
@@ -62,7 +120,15 @@ export const CategoryCard = ({ title, games, cssClass, highResImages }) => {
       />
       <div className="cat-overlay" />
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#e8c87a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 pointer-events-none" />
-      {gameName && <div className="game-name-overlay">{gameName}</div>}
+      
+      {/* Game Name Overlay with Typewriter Text and Blinking Underscore Cursor */}
+      {(displayedName || currentData.gameName) && (
+        <div className="game-name-overlay">
+          {displayedName}
+          <span className="inline-block ml-[2px] animate-pulse font-bold text-white/90 translate-y-[-1px]">_</span>
+        </div>
+      )}
+      
       <div className="cat-content">
         <div className="cat-count">{eligible.length}</div>
         <div className="cat-name">{title}</div>

@@ -9,9 +9,8 @@ const parseISODuration = (duration) => {
 };
 
 /**
- * Fetches playlist items and merges with existing metadata to minimize API calls.
- * @param {string} playlistUrl 
- * @param {Object} existingMetadata - Map of { videoId: { duration, startTime, endTime, title } }
+ * Fetches playlist items and merges with existing metadata.
+ * We now fetch details for ALL videos every time to ensure data is strictly up-to-date.
  */
 export const fetchPlaylistDetails = async (playlistUrl, existingMetadata = {}) => {
   try {
@@ -30,6 +29,7 @@ export const fetchPlaylistDetails = async (playlistUrl, existingMetadata = {}) =
 
     // Step 1: Get the raw list of video IDs & snippet titles
     do {
+      // FIXED PARSE ERROR HERE: Removed the rogue backslashes from the inner template literal
       const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails,snippet&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
       const res = await fetch(url);
       const data = await res.json();
@@ -47,12 +47,12 @@ export const fetchPlaylistDetails = async (playlistUrl, existingMetadata = {}) =
 
     if (playlistItemsList.length === 0) return null;
 
-    // Step 2: Filter for IDs that don't have duration OR startTime cached locally
-    const idsToFetch = playlistItemsList.filter(v => !existingMetadata[v.videoId]?.duration || !existingMetadata[v.videoId]?.startTime).map(v => v.videoId);
+    // Step 2: Fetch details for ALL videos (Removed the filter that skipped cached videos)
+    const idsToFetch = playlistItemsList.map(v => v.videoId);
 
     const freshDetails = {};
     if (idsToFetch.length > 0) {
-      // Step 3: Fetch details ONLY for the unknown videos
+      // Step 3: Fetch details for all the videos in chunks of 50
       for (let i = 0; i < idsToFetch.length; i += 50) {
         const chunk = idsToFetch.slice(i, i + 50).join(',');
         const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,liveStreamingDetails&id=${chunk}&key=${YOUTUBE_API_KEY}`;
@@ -75,7 +75,7 @@ export const fetchPlaylistDetails = async (playlistUrl, existingMetadata = {}) =
       }
     }
 
-    // Step 4: Construct the final list
+    // Step 4: Construct the final list. We use fresh data first, and only fall back to cached if the video was somehow missing from the fresh fetch (e.g. privated).
     return playlistItemsList.map(item => {
       const fresh = freshDetails[item.videoId];
       const cached = existingMetadata[item.videoId];

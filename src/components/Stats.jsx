@@ -77,6 +77,49 @@ export default function Stats({ systemFonts, layoutPrefs, cachedStats }) {
 
   const latestGameImages = card3Data?.mostRecentGame?.thumbnail_urls || [];
 
+  // DYNAMIC TEXT FIT LOGIC
+  // Measures each slide panel independently. If the text overflows the height of the container,
+  // it shrinks the font size just enough to make it fit securely inside.
+  useEffect(() => {
+    const checkFit = () => {
+      const slides = document.querySelectorAll('.slide-container');
+      const updates = [];
+      
+      // Step 1: Reset the scale to measure the text's natural height
+      slides.forEach(slide => {
+        slide.style.setProperty('--fit-scale', '1');
+      });
+
+      // Step 2: Measure text bounds vs container bounds
+      slides.forEach(slide => {
+        const clientH = slide.clientHeight;
+        const scrollH = slide.scrollHeight;
+        
+        // If the content is taller than the container, we calculate the shrink ratio
+        if (scrollH > clientH && clientH > 0) {
+          const scale = clientH / scrollH;
+          updates.push({ slide, scale });
+        }
+      });
+
+      // Step 3: Apply the shrink multiplier (with a 5% safety margin) to ONLY the overflowing slides
+      updates.forEach(({ slide, scale }) => {
+        slide.style.setProperty('--fit-scale', Math.max(0.3, scale * 0.95).toFixed(3));
+      });
+    };
+
+    checkFit();
+    window.addEventListener('resize', checkFit);
+    
+    // We run it on an interval to catch any newly flipped slides that were off-screen
+    const interval = setInterval(checkFit, 500);
+
+    return () => {
+      window.removeEventListener('resize', checkFit);
+      clearInterval(interval);
+    };
+  }, [cachedStats]);
+
   useEffect(() => {
     if (latestGameImages.length < 2) return;
     const initialDelay = Math.random() * 2000;
@@ -127,14 +170,12 @@ export default function Stats({ systemFonts, layoutPrefs, cachedStats }) {
 
           <div className="stats-left-col">
             <div className="card-wrapper-left">
-              {/* SLIDE COUNT ADJUSTED TO 6 */}
               <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard1Slide} slideData={slideData1} className="stat-card" delay={0} slideCount={6} />
             </div>
             <div className="stats-progress-track">
               <div className="stats-progress-fill" onAnimationIteration={handleAnimationIteration} />
             </div>
             <div className="card-wrapper-left">
-              {/* SLIDE COUNT ADJUSTED TO 6 */}
               <FlipperCard globalFlipCycle={flipCycle} getSlideContent={getCard2Slide} slideData={slideData2} className="stat-card" delay={200} slideCount={6} />
             </div>
           </div>

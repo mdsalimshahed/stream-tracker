@@ -1,9 +1,8 @@
 // src/components/background/MosaicBackground.jsx
-import React, { useRef, useMemo, useEffect } from 'react';
+import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { getLowResUrl } from '../../utils/helpers';
 
 const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shouldFlip, highResImages }) => {  
-  // 12x24 grid for smaller tiles 
   const ROWS = 7; 
   const IMGS_PER_ROW = 11; 
   
@@ -13,18 +12,51 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
   const globalStateRef = useRef({ currentSpeed: isSlowMode ? 0.05 : 2.8 });
   const modeRef = useRef({ isPaused, isSlowMode });
 
+  // State to track if our initial payload of images is ready
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
   useEffect(() => { 
     modeRef.current = { isPaused, isSlowMode }; 
   }, [isPaused, isSlowMode]);
 
-  const rowsConfig = useMemo(() => {
-    const fallback = { url: 'https://placehold.co/110x110/0d1117/1e2938?text=', gameId: 'fallback' };
+  // Derived array of raw URLs mapped to our grid requirements
+  const rawUrls = useMemo(() => {
+    const fallback = 'https://placehold.co/110x110/0d1117/1e2938?text=';
+    if (!mosaicImages || mosaicImages.length === 0) return [{ url: fallback, gameId: 'fallback' }];
+    return mosaicImages.map(img => ({ ...img, url: getLowResUrl(img.url, false) }));
+  }, [mosaicImages, highResImages]);
+
+  // Preload Logic
+  useEffect(() => {
+    let isMounted = true;
+    let loadedCount = 0;
     
-    // Using standard low-res url generation; object-cover will crop the images to fit grid
-    const pool = mosaicImages?.length > 0 
-      ? mosaicImages.map(img => ({ ...img, url: getLowResUrl(img.url, false) }))
-      : [fallback];
-      
+    // We only need to wait for a handful of images to load to make it feel smooth, not the whole library
+    const imagesToPreload = rawUrls.slice(0, Math.min(rawUrls.length, 25));
+
+    if (imagesToPreload.length === 0) {
+      setImagesLoaded(true);
+      return;
+    }
+
+    imagesToPreload.forEach(imgData => {
+      const img = new Image();
+      img.src = imgData.url;
+      img.onload = img.onerror = () => {
+        if (!isMounted) return;
+        loadedCount++;
+        if (loadedCount >= imagesToPreload.length) {
+          setImagesLoaded(true);
+        }
+      };
+    });
+
+    return () => { isMounted = false; };
+  }, [rawUrls]);
+
+  const rowsConfig = useMemo(() => {
+    if (!imagesLoaded) return [];
+
     const aspectRatios = ['16/9', '4/3', '1/1'];
     
     return Array.from({ length: ROWS }, (_, i) => {
@@ -32,7 +64,7 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
       let lastGameId = null;
       
       while (sequence.length < IMGS_PER_ROW) {
-        let shuffled = [...pool].sort(() => Math.random() - 0.5);
+        let shuffled = [...rawUrls].sort(() => Math.random() - 0.5);
         let batch = [];
         while (shuffled.length > 0) {
           let foundIdx = 0;
@@ -59,7 +91,6 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
       }
       
       const baseWithAspect = base.map(b => ({ url: b.url, aspect: aspectRatios[Math.floor(Math.random() * aspectRatios.length)] }));
-      
       const baseSpeed = 0.0004 + Math.random() * 0.0008;
       const direction = i % 2 === 0 ? 'left' : 'right';
       
@@ -70,9 +101,11 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
         state: { targetChaos: 1, currentChaos: 1, timer: 0, lerp: 0.001 } 
       };
     });
-  }, [mosaicImages, highResImages]);
+  }, [rawUrls, imagesLoaded]);
 
   useEffect(() => {
+    if (!imagesLoaded || rowsConfig.length === 0) return;
+
     let lastTime = performance.now();
     let positions = rowsConfig.map(c => c.direction === 'right' ? -50 : 0);
     
@@ -100,23 +133,10 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
         
         if (state.timer <= 0) {
           const rand = Math.random();
-          if (rand < 0.15) { 
-             state.targetChaos = Math.random() * 0.05; 
-             state.timer = 1000 + Math.random() * 3000; 
-          }
-          else if (rand < 0.40) { 
-             state.targetChaos = 0.3 + Math.random() * 0.4; 
-             state.timer = 2000 + Math.random() * 3000; 
-          }
-          else if (rand < 0.65) { 
-             state.targetChaos = 1.5 + Math.random() * 2.0; 
-             state.timer = 1500 + Math.random() * 2500; 
-          }
-          else { 
-             state.targetChaos = 0.8 + Math.random() * 0.6; 
-             state.timer = 2000 + Math.random() * 4000; 
-          }
-          
+          if (rand < 0.15) { state.targetChaos = Math.random() * 0.05; state.timer = 1000 + Math.random() * 3000; }
+          else if (rand < 0.40) { state.targetChaos = 0.3 + Math.random() * 0.4; state.timer = 2000 + Math.random() * 3000; }
+          else if (rand < 0.65) { state.targetChaos = 1.5 + Math.random() * 2.0; state.timer = 1500 + Math.random() * 2500; }
+          else { state.targetChaos = 0.8 + Math.random() * 0.6; state.timer = 2000 + Math.random() * 4000; }
           state.lerp = 0.0005 + Math.random() * 0.002;
         }
         
@@ -143,10 +163,13 @@ const MosaicBackground = React.memo(({ mosaicImages, isPaused, isSlowMode, shoul
     
     requestRef.current = requestAnimationFrame(animateLoop);
     return () => cancelAnimationFrame(requestRef.current);
-  }, [rowsConfig]);
+  }, [rowsConfig, imagesLoaded]);
+
+  // Don't render the grid until the images have been loaded into the browser cache
+  if (!imagesLoaded) return null;
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none fade-in duration-500">
       <div className="flex flex-col h-[100vh] w-full">
         {rowsConfig.map((row, ri) => (
           <div 

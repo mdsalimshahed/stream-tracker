@@ -29,16 +29,16 @@ export const STYLES = `
     height: 100%; 
     width: 100%; 
     overflow-y: auto; 
+    overflow-x: hidden;
     display: flex; 
     flex-direction: column; 
     padding: 24px; 
     gap: 24px;
   }
   
-  @media (min-width: 1024px) {
+  @media (orientation: landscape) {
     .stats-scroll { overflow: hidden; }
   }
-
 
   /* =========================================================
      NEW METHOD: STRICT CSS GRID LAYOUT
@@ -52,7 +52,7 @@ export const STYLES = `
     flex-shrink: 0; 
   }
   
-  @media (min-width: 1024px) {
+  @media (orientation: landscape) {
     .stats-top-row { 
       /* Switch to Grid: Unbreakable equal-height columns */
       display: grid;
@@ -72,7 +72,7 @@ export const STYLES = `
     width: 100%;
     z-index: 2;
   }
-  @media (min-width: 1024px) {
+  @media (orientation: landscape) {
     .stats-left-col { height: 100%; min-height: 0; }
   }
 
@@ -98,10 +98,10 @@ export const STYLES = `
     position: relative;
     height: auto;
     width: 100%;
-    min-height: 300px; /* Mobile fallback */
+    min-height: 300px; /* Portrait fallback */
     z-index: 1;
   }
-  @media (min-width: 1024px) {
+  @media (orientation: landscape) {
     .card-wrapper-right { height: 100%; margin-left: -1px; min-height: 0; }
   }
 
@@ -109,12 +109,11 @@ export const STYLES = `
   .card-wrapper-left {
     flex: 1; /* Divides the left column exactly 50/50 */
     position: relative;
-    min-height: 160px; /* Mobile fallback */
+    min-height: 160px; /* Portrait fallback */
   }
-  @media (min-width: 1024px) {
+  @media (orientation: landscape) {
     .card-wrapper-left { min-height: 0; }
   }
-
 
   /* =========================================================
      ABSOLUTE POSITIONING FOR CARDS (Stops content from breaking bounds)
@@ -138,7 +137,7 @@ export const STYLES = `
     height: 100%;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    overflow: hidden;
+    overflow: hidden; /* Protects from overflow on smaller screens */
   }
 
   .flip-back {
@@ -160,6 +159,7 @@ export const STYLES = `
     border: 1px solid var(--c-border); 
     border-radius: 0;
     transition: background 0.25s; 
+    overflow: hidden; /* Added to keep text inside absolute panels */
   }
   
   .stats-right-col {
@@ -188,6 +188,7 @@ export const STYLES = `
     padding: 0 6%; /* Percentage padding helps buffer tight corners */
     word-wrap: break-word;
     overflow-wrap: break-word;
+    overflow: hidden; /* Hide bounding-box spillage inside panels */
     
     /* Dynamically resize text using container minimum dimensions */
     container-type: inline-size;
@@ -195,6 +196,7 @@ export const STYLES = `
     --unit-1: var(--base-font);
     --unit-085: calc(var(--base-font) * 0.85);
     --unit-08: calc(var(--base-font) * 0.8);
+    --unit-07: calc(var(--base-font) * 0.7);
     --unit-055: calc(var(--base-font) * 0.55);
     --unit-035: calc(var(--base-font) * 0.35);
     --unit-025: calc(var(--base-font) * 0.25);
@@ -264,13 +266,13 @@ export const STYLES = `
 
   .cat-row { display: flex; flex-direction: column; gap: 24px; flex-shrink: 0; }
   
-  @media (min-width: 1024px) {
+  @media (orientation: landscape) {
     .cat-row { flex-direction: row; flex: var(--flex-bottom) 1 0%; min-height: 0; flex-shrink: 1; }
   }
   
   .cat-card { flex: 1; position: relative; overflow: hidden; border: 1px solid var(--c-border); border-radius: 0; min-height: 200px; display: flex; flex-direction: column; cursor: default; transition: all 0.3s ease; z-index: 1; }
   
-  @media (min-width: 1024px) {
+  @media (orientation: landscape) {
     .cat-card { min-height: 0; }
   }
 

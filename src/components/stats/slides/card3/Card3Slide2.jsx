@@ -1,5 +1,5 @@
 // src/components/stats/slides/card3/Card3Slide2.jsx
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, memo } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Label } from 'recharts';
 import { formatFullTime } from '../SlideHelpers';
 
@@ -80,6 +80,98 @@ const YAXIS_WIDTH = 45;
 const XAXIS_HEIGHT = 35;
 const YAXIS_PAD   = { top: 35, bottom: 10 };
 
+// PERFORMANCE OPTIMIZATION: Memoize the heavy Recharts layer so it NEVER re-renders 
+// on simple mouse movement / tooltip updates. It only re-renders when you click to select a new game.
+const StaticChartLayer = memo(({ 
+  processedProgressionLines, gamesTimeline, progressionDates, selectedGame, 
+  xDomain, chartPadding, dynamicYMax, dynamicYTicks, setSelectedGame 
+}) => {
+  return (
+    <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
+      <LineChart margin={MARGIN} style={{ overflow: 'visible' }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+
+        <XAxis
+          type="number"
+          dataKey="xIndex"
+          domain={xDomain}
+          padding={chartPadding}
+          allowDataOverflow
+          allowDecimals={false}
+          stroke="#8a88a8"
+          axisLine={false}
+          tickLine={false}
+          tickMargin={10}
+          height={XAXIS_HEIGHT}
+          minTickGap={5}
+          tick={{ fill: '#8a88a8', fontSize: 10 }}
+          tickFormatter={(val) => {
+            if (Number.isInteger(val) && val >= 0 && val < progressionDates.length) {
+              const d = new Date(progressionDates[val]);
+              return `${d.toLocaleDateString('en-US', { month: 'short' })} '${d.toLocaleDateString('en-US', { year: '2-digit' })}`;
+            }
+            return '';
+          }}
+        >
+          <Label value="Timeline" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
+        </XAxis>
+
+        <YAxis
+          domain={[0, dynamicYMax]}
+          ticks={dynamicYTicks}
+          allowDataOverflow={true} 
+          stroke="#8a88a8"
+          axisLine={false}
+          tickLine={false}
+          tickFormatter={(v) => `${Math.round(v)}h`}
+          width={YAXIS_WIDTH}
+          padding={YAXIS_PAD}
+          tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }}
+        >
+          <Label value="Playtime" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
+        </YAxis>
+
+        {processedProgressionLines.map((line, idx) => {
+          const isSelected = selectedGame === line.gameName;
+          const isDimmed   = selectedGame !== null && !isSelected;
+          const gameInfo   = gamesTimeline.find(g => g.name === line.gameName);
+          return (
+            <Line
+              key={`line-${idx}`}
+              data={line.data}
+              type="monotone"
+              dataKey="cumulativeHours"
+              stroke={line.color}
+              strokeWidth={isSelected ? 3 : 1.5}
+              strokeOpacity={isDimmed ? 0.1 : 1}
+              activeDot={false}
+              isAnimationActive={false}
+              dot={(props) => {
+                if (props.index !== line.data.length - 1) return null;
+                return (
+                  <TrailEndDot
+                    key={`dot-${idx}`}
+                    cx={props.cx}
+                    cy={props.cy}
+                    payload={{ gameName: line.gameName }}
+                    image={line.image || gameInfo?.image}
+                    status={line.status || gameInfo?.status}
+                    isFaded={selectedGame !== null && !isSelected}
+                    isSelected={isSelected}
+                    onSelect={() => {
+                      setSelectedGame(isSelected ? null : line.gameName);
+                    }}
+                  />
+                );
+              }}
+            />
+          );
+        })}
+      </LineChart>
+    </ResponsiveContainer>
+  );
+});
+
 export default function Card3Slide2({ data }) {
   const {
     processedProgressionLines = [],
@@ -95,7 +187,7 @@ export default function Card3Slide2({ data }) {
   
   const containerRef = useRef(null);
   const activeHoverRef = useRef(null);
-  const lastComputedXIndexRef = useRef(null); // Performance cache
+  const lastComputedXIndexRef = useRef(null);
 
   const xDomain = (() => {
     if (!processedProgressionLines.length) return ['dataMin', 'dataMax'];
@@ -108,7 +200,6 @@ export default function Card3Slide2({ data }) {
 
   const chartPadding = selectedGame ? { left: 32, right: 32 } : { left: 16, right: 16 };
 
-  // DYNAMIC Y-AXIS SHRINK LOGIC WITH CRASH PROTECTION
   const { dynamicYMax, dynamicYTicks } = (() => {
     if (selectedGame) {
       const g = processedProgressionLines.find(l => l.gameName === selectedGame);
@@ -214,22 +305,17 @@ export default function Card3Slide2({ data }) {
         return; 
       }
 
-      // EXTREME PERFORMANCE FIX: Calculate direct array index mathematically without loops
       const rawX = rawXMin + ((mx - plotLeft - padL) / (innerW || 1)) * (rawXMax - rawXMin);
       const hoveredXIndex = Math.round(rawX);
 
-      // Avoid recalculating if the mouse is moving inside the same X column
       if (lastComputedXIndexRef.current === hoveredXIndex) return;
       lastComputedXIndexRef.current = hoveredXIndex;
 
-      // Find the nearest actual stream point (skipping over empty flat days)
       let nearestPoint = null;
       let minXDist = Infinity;
 
       for (let i = 0; i < line.data.length; i++) {
         const pt = line.data[i];
-        
-        // A point is an "Actual Stream" if it's the first point, or its total seconds increased since yesterday
         const isActualStream = i === 0 || pt.rawSeconds > line.data[i - 1].rawSeconds;
         
         if (isActualStream) {
@@ -259,6 +345,13 @@ export default function Card3Slide2({ data }) {
     setTooltipPos(null);
   }, []);
 
+  // Update selected game logic specifically inside the static layer
+  const handleSelectGame = useCallback((gameName) => {
+    activeHoverRef.current = null;
+    lastComputedXIndexRef.current = null;
+    setSelectedGame(gameName);
+  }, []);
+
   return (
     <div
       ref={containerRef}
@@ -277,90 +370,18 @@ export default function Card3Slide2({ data }) {
       }}
     >
       <div className="w-full flex-1 min-h-0 relative overflow-visible">
-        <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
-          <LineChart margin={MARGIN} style={{ overflow: 'visible' }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-
-            <XAxis
-              type="number"
-              dataKey="xIndex"
-              domain={xDomain}
-              padding={chartPadding}
-              allowDataOverflow
-              allowDecimals={false}
-              stroke="#8a88a8"
-              axisLine={false}
-              tickLine={false}
-              tickMargin={10}
-              height={XAXIS_HEIGHT}
-              minTickGap={5}
-              tick={{ fill: '#8a88a8', fontSize: 10 }}
-              tickFormatter={(val) => {
-                if (Number.isInteger(val) && val >= 0 && val < progressionDates.length) {
-                  const d = new Date(progressionDates[val]);
-                  return `${d.toLocaleDateString('en-US', { month: 'short' })} '${d.toLocaleDateString('en-US', { year: '2-digit' })}`;
-                }
-                return '';
-              }}
-            >
-              <Label value="Timeline" position="insideBottom" offset={-5} style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold' }} />
-            </XAxis>
-
-            <YAxis
-              domain={[0, dynamicYMax]}
-              ticks={dynamicYTicks}
-              allowDataOverflow={true} 
-              stroke="#8a88a8"
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={(v) => `${Math.round(v)}h`}
-              width={YAXIS_WIDTH}
-              padding={YAXIS_PAD}
-              tick={{ angle: -90, textAnchor: 'middle', dx: -10, fill: '#8a88a8', fontSize: 10 }}
-            >
-              <Label value="Playtime" angle={-90} position="insideLeft" style={{ fill: '#8a88a8', fontSize: 11, fontWeight: 'bold', textAnchor: 'middle' }} />
-            </YAxis>
-
-            {processedProgressionLines.map((line, idx) => {
-              const isSelected = selectedGame === line.gameName;
-              const isDimmed   = selectedGame !== null && !isSelected;
-              const gameInfo   = gamesTimeline.find(g => g.name === line.gameName);
-              return (
-                <Line
-                  key={`line-${idx}`}
-                  data={line.data}
-                  type="monotone"
-                  dataKey="cumulativeHours"
-                  stroke={line.color}
-                  strokeWidth={isSelected ? 3 : 1.5}
-                  strokeOpacity={isDimmed ? 0.1 : 1}
-                  activeDot={false}
-                  isAnimationActive={false}
-                  dot={(props) => {
-                    if (props.index !== line.data.length - 1) return null;
-                    return (
-                      <TrailEndDot
-                        key={`dot-${idx}`}
-                        cx={props.cx}
-                        cy={props.cy}
-                        payload={{ gameName: line.gameName }}
-                        image={line.image || gameInfo?.image}
-                        status={line.status || gameInfo?.status}
-                        isFaded={selectedGame !== null && !isSelected}
-                        isSelected={isSelected}
-                        onSelect={() => {
-                          activeHoverRef.current = null;
-                          lastComputedXIndexRef.current = null;
-                          setSelectedGame(isSelected ? null : line.gameName);
-                        }}
-                      />
-                    );
-                  }}
-                />
-              );
-            })}
-          </LineChart>
-        </ResponsiveContainer>
+        
+        <StaticChartLayer 
+          processedProgressionLines={processedProgressionLines}
+          gamesTimeline={gamesTimeline}
+          progressionDates={progressionDates}
+          selectedGame={selectedGame}
+          xDomain={xDomain}
+          chartPadding={chartPadding}
+          dynamicYMax={dynamicYMax}
+          dynamicYTicks={dynamicYTicks}
+          setSelectedGame={handleSelectGame}
+        />
 
         {selectedGame && tooltipPos && (
           <div

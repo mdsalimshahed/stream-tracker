@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "5/20/2026, 6:10:53 PM",
+  "exportDate": "5/26/2026, 8:44:59 AM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -12,8 +12,6 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_626cc310dc9ac7fb146011582c864a35e5f3e381.1920x1080.jpg?t=1764975651",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_f1617a419eb3b0cd877ec71230c59aa2672b62dc.1920x1080.jpg?t=1764975651",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_f60f54e58b13d0744853672ccd35810397e3fa26.1920x1080.jpg?t=1764975651",
-        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/ss_b4a80bd6e828a81db09ecbef5694e5d0cddb2caf.1920x1080.jpg?t=1764975651",
-        "https://media.rawg.io/media/games/29c/29c6c21cc0c78cff6f45d23631cc82f4.jpg",
         "https://media.rawg.io/media/screenshots/2f6/2f651074458bc3603a5da1348e5a368b.jpg",
         "https://media.rawg.io/media/screenshots/44f/44ff25a559b7ba6c4a4f969acfcee8fc.jpg",
         "https://media.rawg.io/media/screenshots/396/39632124b68f3ed8795f4e7ee3c1e247.jpeg",
@@ -7136,10 +7134,10 @@
   "thumbnailConfig": {
     "customFont": "Book Antiqua",
     "bgZoom": 100,
-    "titleSize": 108,
+    "titleSize": 110,
     "subtitleSize": 66,
     "titleAlign": "center",
-    "titleYOffset": 33,
+    "titleYOffset": 30,
     "titleSpacing": 25,
     "strokeWidth": 25,
     "splitTitle": true,
@@ -7210,7 +7208,7 @@
       "fillOpacity": 1,
       "strokeOpacity": 0.78
     },
-    "titleLetterSpacing": 3,
+    "titleLetterSpacing": 2,
     "subtitleLetterSpacing": 2,
     "titleDropShadow": false,
     "subtitleDropShadow": true,

@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "5/26/2026, 8:44:59 AM",
+  "exportDate": "6/4/2026, 12:21:46 AM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -342,7 +342,7 @@
         "genres": "Adventure, Indie",
         "youtubePlaylist": "",
         "steamUrl": "https://store.steampowered.com/app/1275550/",
-        "tags": "Singleplayer, Steam Achievements, Steam Cloud, Atmospheric, Story Rich, Open World, First-Person, Sci-fi, Exploration, Survival, Mystery, Choices Matter, Walking Simulator, Story, Robots, Drama, character, Family Sharing, Thriller, secrets, Narrative, Conversation, environment, hell, relationship, dodge, elements, Stereo Sound, Surround Sound, characters, Camera Comfort, search, Save Anytime, town, choices, plane, man, drop",
+        "tags": "Singleplayer, Steam Achievements, Steam Cloud, Atmospheric, Story Rich, Open World, First-Person, Sci-fi, Exploration, Survival, Mystery, Choices Matter, Walking Simulator, Story, Robots, Drama, character, Family Sharing, Thriller, secrets, Narrative, Conversation, environment, hell, relationship, elements, dodge, Stereo Sound, Surround Sound, characters, Camera Comfort, search, Save Anytime, town, choices, plane, man, drop",
         "notOnSteam": false
       },
       "cover_image": "https://media.rawg.io/media/screenshots/eae/eaece5425428d494fd24ca529b0bdc57.jpg"
@@ -1803,7 +1803,7 @@
             {
               "date": 1753858450000,
               "videoId": "OL43gyP5Zgk",
-              "duration": 3494,
+              "duration": 3495,
               "startTime": 1753858450000,
               "endTime": 1753861950000
             },
@@ -3316,7 +3316,7 @@
           "displayName": "First Playthrough",
           "isMain": false,
           "youtubePlaylist": "PLLzuld5NPO9D9N0LGJh-Mdb3s1W5Qgv06",
-          "label": "Abandoned"
+          "label": "Completed"
         }
       },
       "details": {
@@ -5113,6 +5113,67 @@
       },
       "cover_image": "https://media.rawg.io/media/games/e7f/e7f2f571761abd7b3c0598c719ae8893.jpg"
     },
+    "3159330": {
+      "game_name": "Assassin’s Creed Shadows",
+      "release_year": "2025",
+      "cover_image": "https://media.rawg.io/media/screenshots/b14/b14e5c72bf261d7bb4fc4e8fde136b9d.jpg",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3159330/7257f31bb96b01f5b596ae5e0fa714319e43d64a/ss_7257f31bb96b01f5b596ae5e0fa714319e43d64a.1920x1080.jpg?t=1775589420",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3159330/86653e3e54574cb65155452fa6657b7214a8d877/ss_86653e3e54574cb65155452fa6657b7214a8d877.1920x1080.jpg?t=1775589420",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3159330/dbadf23ede7af4684012bab610ffb52f33fdb9e2/ss_dbadf23ede7af4684012bab610ffb52f33fdb9e2.1920x1080.jpg?t=1775589420",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3159330/3e587ce8e677f7381748fdc0a61e4938b76625ba/ss_3e587ce8e677f7381748fdc0a61e4938b76625ba.1920x1080.jpg?t=1775589420",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3159330/81bbd04dae05b0a52dc62818dc5219abeb849f8d/ss_81bbd04dae05b0a52dc62818dc5219abeb849f8d.1920x1080.jpg?t=1775589420",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3159330/e53dc9ec73e3de9b8e680472898de775f0dc1cae/ss_e53dc9ec73e3de9b8e680472898de775f0dc1cae.1920x1080.jpg?t=1775589420",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3159330/2e74c5442faa027ea699dcfa15be173b43a8d37a/ss_2e74c5442faa027ea699dcfa15be173b43a8d37a.1920x1080.jpg?t=1775589420",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3159330/e27b352af4e7c1fa74718671c52e865a41449182/ss_e27b352af4e7c1fa74718671c52e865a41449182.1920x1080.jpg?t=1775589420",
+        "https://media.rawg.io/media/screenshots/253/2534ff22f744b82ee2e28485b5125de7.jpg",
+        "https://media.rawg.io/media/screenshots/e4a/e4a95eb159abd9b551950577174e567b.jpg",
+        "https://media.rawg.io/media/screenshots/48f/48f45e38b3ecf553080576b94579c119.jpg",
+        "https://media.rawg.io/media/screenshots/318/318e859fc98ad167b81cb94a305f4e79.jpg",
+        "https://media.rawg.io/media/screenshots/0e3/0e3ccf7e0e06d50950eb759fd95a40df.jpg"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 3,
+          "timestamps": [
+            {
+              "date": 1780202925000,
+              "videoId": "Q3hEIvsLHb4",
+              "duration": 8011,
+              "startTime": 1780202925000,
+              "endTime": 1780210941000
+            },
+            {
+              "date": 1780217671000,
+              "videoId": "oDwE7oLGxso",
+              "duration": 8033,
+              "startTime": 1780217671000,
+              "endTime": 1780225758000
+            },
+            {
+              "date": 1780505366000,
+              "videoId": "JCr4qgYc-5Q",
+              "duration": 5378,
+              "startTime": 1780505366000,
+              "endTime": 1780510744000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLLzuld5NPO9Ah0050wQjboQliHFZhUKmY",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "Ubisoft",
+        "publisher": "Ubisoft",
+        "releaseDate": "19 Mar, 2025",
+        "genres": "Action, Adventure, RPG",
+        "tags": "Singleplayer, Steam Achievements, RPG, Story Rich, Open World, Third Person, Exploration, Female Protagonist, Violent, Stealth, Action-Adventure, Action RPG, In-App Purchases, Captions available, 3D, combat, Historical, Parkour, Assassin, Протагонистка, Ninja, Swordplay, HDR available",
+        "steamUrl": "https://store.steampowered.com/app/3159330/",
+        "notOnSteam": false
+      }
+    },
     "3280350": {
       "game_name": "DEATH STRANDING 2: ON THE BEACH",
       "release_year": "2026",
@@ -5194,7 +5255,7 @@
         "tags": "Open World, Exploration, Sci-fi, Walking Simulator, Action, Atmospheric, Third-Person Shooter, Post-apocalyptic, Action-Adventure, Third Person, Adventure, Emotional, Singleplayer, Realistic, Asynchronous Multiplayer, Stealth, Dystopian, Horror, Violent, Great Soundtrack",
         "notOnSteam": false
       },
-      "cover_image": "https://images.hdqwalls.com/wallpapers/death-stranding-2-on-the-beach-4k-42.jpg"
+      "cover_image": "https://media.rawg.io/media/games/b85/b85bc300d42588af66fb516b7563f74f.jpg"
     },
     "3321460": {
       "game_name": "Crimson Desert",
@@ -7139,7 +7200,7 @@
     "titleAlign": "center",
     "titleYOffset": 30,
     "titleSpacing": 25,
-    "strokeWidth": 25,
+    "strokeWidth": 16,
     "splitTitle": true,
     "streamCountSize": 93,
     "cycleSize": 52,
@@ -7281,7 +7342,7 @@
   "layoutPrefs": {
     "cardPadding": 0,
     "cardGap": 10,
-    "cardRadius": 32,
+    "cardRadius": 10,
     "cardMaxWidth": 276,
     "cardsPerRow": 4,
     "modalSplitRatio": 0.45,

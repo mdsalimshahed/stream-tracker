@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "6/4/2026, 12:21:46 AM",
+  "exportDate": "6/8/2026, 9:47:49 AM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -20,7 +20,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 3,
+          "stream_count": 4,
           "timestamps": [
             {
               "date": 1748174674000,
@@ -42,9 +42,16 @@
               "duration": 3000,
               "startTime": 1748262064000,
               "endTime": 1748265536000
+            },
+            {
+              "date": 1780677966000,
+              "videoId": "EUbiGERw-5g",
+              "duration": 3844,
+              "startTime": 1780677966000,
+              "endTime": 1780681811000
             }
           ],
-          "label": "Abandoned",
+          "label": "Ongoing",
           "displayName": "First Playthrough",
           "isMain": false,
           "youtubePlaylist": "PLLzuld5NPO9D6oeLFf1TmtKdvUii5f33H"
@@ -4289,6 +4296,62 @@
       },
       "cover_image": "https://media.rawg.io/media/games/9e8/9e8752c9e8ee0b5030b2851558506ecb.jpg"
     },
+    "2638890": {
+      "game_name": "Onimusha: Way of the Sword",
+      "release_year": "2026",
+      "cover_image": "https://media.rawg.io/media/screenshots/965/9653d36f42d6a7a360c99963253384ff.jpg",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/40e49fbd098140a69e897dcce736cba5eae8662f/ss_40e49fbd098140a69e897dcce736cba5eae8662f.1920x1080.jpg?t=1780453564",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/8be802aef40ce301104a3ff5d3c6462913d57807/ss_8be802aef40ce301104a3ff5d3c6462913d57807.1920x1080.jpg?t=1780453564",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/b8d1f33e7777aa1d1a0a2b9af5e84fb52e1f2e1c/ss_b8d1f33e7777aa1d1a0a2b9af5e84fb52e1f2e1c.1920x1080.jpg?t=1780453564",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/4ee71e56889c1dc82b55e013d6bbe7f2cd2d1027/ss_4ee71e56889c1dc82b55e013d6bbe7f2cd2d1027.1920x1080.jpg?t=1780453564",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/faa6433a23818f7684f5c4220708d60e4e71dc13/ss_faa6433a23818f7684f5c4220708d60e4e71dc13.1920x1080.jpg?t=1780453564",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/884ef55e720a36debf01d36f742a6db07e12320f/ss_884ef55e720a36debf01d36f742a6db07e12320f.1920x1080.jpg?t=1780453564",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/ca28a3116080d0d6ab309545d08171d1b4cc7dc5/ss_ca28a3116080d0d6ab309545d08171d1b4cc7dc5.1920x1080.jpg?t=1780453564",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/38db13c961be5bb407a0c42387e7c111886ced5f/ss_38db13c961be5bb407a0c42387e7c111886ced5f.1920x1080.jpg?t=1780453564",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/40619d87927fcd2cccc4cc4c93815ce719bb8dbb/ss_40619d87927fcd2cccc4cc4c93815ce719bb8dbb.1920x1080.jpg?t=1780453564",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/609dd99944f8928f8a8bd35bb08a6695f7e1fdca/ss_609dd99944f8928f8a8bd35bb08a6695f7e1fdca.1920x1080.jpg?t=1780453564",
+        "https://media.rawg.io/media/screenshots/a34/a3444739430f1b440bbef6d493a62585.jpg",
+        "https://media.rawg.io/media/screenshots/184/18431ea009b07288111a9fb3743a2830.jpg",
+        "https://media.rawg.io/media/screenshots/bb8/bb82117127b5839995ea4c7186354190.jpg",
+        "https://media.rawg.io/media/screenshots/965/9653d36f42d6a7a360c99963253384ff.jpg"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 0,
+          "timestamps": [],
+          "isMain": true,
+          "youtubePlaylist": "",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        },
+        "demo": {
+          "stream_count": 1,
+          "timestamps": [
+            {
+              "date": 1780553954000,
+              "videoId": "9AcTaZ-35TA",
+              "duration": 3144,
+              "startTime": 1780553954000,
+              "endTime": 1780557098000
+            }
+          ],
+          "isMain": false,
+          "youtubePlaylist": "PLLzuld5NPO9A--03sI349d7FiRvJArP_E",
+          "displayName": "Demo",
+          "label": "Completed"
+        }
+      },
+      "details": {
+        "developer": "CAPCOM Co., Ltd.",
+        "publisher": "CAPCOM Co., Ltd.",
+        "releaseDate": "24 Sep, 2026",
+        "genres": "Action, Adventure, RPG",
+        "tags": "Unknown",
+        "steamUrl": "https://store.steampowered.com/app/2638890/",
+        "notOnSteam": false
+      }
+    },
     "2680010": {
       "game_name": "The First Berserker: Khazan",
       "release_year": "2025",
@@ -5134,7 +5197,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 3,
+          "stream_count": 4,
           "timestamps": [
             {
               "date": 1780202925000,
@@ -5153,9 +5216,16 @@
             {
               "date": 1780505366000,
               "videoId": "JCr4qgYc-5Q",
-              "duration": 5378,
+              "duration": 5374,
               "startTime": 1780505366000,
               "endTime": 1780510744000
+            },
+            {
+              "date": 1780579821000,
+              "videoId": "OPtVKX0UA9c",
+              "duration": 4834,
+              "startTime": 1780579821000,
+              "endTime": 1780584655000
             }
           ],
           "isMain": true,
@@ -7363,7 +7433,8 @@
     "excludedTags": [
       "Subtitle Options",
       "Kickstarter",
-      "Local Co-Op"
+      "Local Co-Op",
+      "Crowdfunded"
     ],
     "statsLeftWidth": 5,
     "statsRightWidth": 5,

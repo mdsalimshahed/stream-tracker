@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "6/19/2026, 11:58:39 PM",
+  "exportDate": "6/24/2026, 2:01:04 PM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -292,6 +292,63 @@
         "notOnSteam": false
       },
       "cover_image": "https://media.rawg.io/media/games/8fd/8fd2e8317849fd265ad8781c324d4ec2.jpg"
+    },
+    "1245620": {
+      "game_name": "ELDEN RING",
+      "release_year": "2022",
+      "cover_image": "https://media.rawg.io/media/games/b29/b294fdd866dcdb643e7bab370a552855.jpg",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_943bf6fe62352757d9070c1d33e50b92fe8539f1.1920x1080.jpg?t=1767883716",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_dcdac9e4b26ac0ee5248bfd2967d764fd00cdb42.1920x1080.jpg?t=1767883716",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_3c41384a24d86dddd58a8f61db77f9dc0bfda8b5.1920x1080.jpg?t=1767883716",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_e0316c76f8197405c1312d072b84331dd735d60b.1920x1080.jpg?t=1767883716",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_ef61b771ee6b269b1f0cb484233e07a0bfb5f81b.1920x1080.jpg?t=1767883716",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_b1b91299d7e4b94201ac840aa64de54d9f5cb7f3.1920x1080.jpg?t=1767883716",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_510a02cf3045e841e180f2b77fb87545e0c8b59d.1920x1080.jpg?t=1767883716",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_c494372930ca791bdc6221eca134f2270fb2cb9f.1920x1080.jpg?t=1767883716",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_fa6b881ef7c30522012ab2b2b83001e79baee093.1920x1080.jpg?t=1767883716",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_c2baf8aada6140beee79d701d14043899e91af47.1920x1080.jpg?t=1767883716",
+        "https://media.rawg.io/media/screenshots/36f/36f941f72e2b2a41629f5fb3bd448688.jpg",
+        "https://media.rawg.io/media/screenshots/290/29096848622521df7555850000236cb6.jpg",
+        "https://media.rawg.io/media/screenshots/807/807685454ea8fb87363eedd49677f49b.jpg",
+        "https://media.rawg.io/media/screenshots/2ee/2eea4d4cce2836f689d9d39d2a4a94d5.jpg",
+        "https://media.rawg.io/media/screenshots/de9/de9b28bdd0bdb9937c7f82e55f845bb6.jpg",
+        "https://media.rawg.io/media/screenshots/3a2/3a2e5f31e2061bc566bcfd30fda56a17.jpg"
+      ],
+      "cycles": {
+        "convergence_mod_3.0": {
+          "stream_count": 2,
+          "timestamps": [
+            {
+              "date": 1782270701000,
+              "videoId": "2ZSXnRbAXvk",
+              "duration": 4752,
+              "startTime": 1782270701000,
+              "endTime": 1782275453000
+            },
+            {
+              "date": 1782280471000,
+              "videoId": "wKCWyol2U_g",
+              "duration": 7170,
+              "startTime": 1782280471000,
+              "endTime": 1782287642000
+            }
+          ],
+          "isMain": false,
+          "youtubePlaylist": "PLLzuld5NPO9DbzbeEQM1TjRwbX1NmCXNe",
+          "displayName": "Convergence Mod 3.0",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "FromSoftware, Inc.",
+        "publisher": "FromSoftware, Inc., Bandai Namco Entertainment",
+        "releaseDate": "24 Feb, 2022",
+        "genres": "Action, RPG",
+        "tags": "Singleplayer, Steam Achievements, Multiplayer, Atmospheric, Great Soundtrack, RPG, Co-op, Open World, cooperative, Third Person, Online Co-Op, Fantasy, Difficult, Violent, Action RPG, PvP, 3D, Dark Fantasy, Online PvP, Epic, Souls-like, history",
+        "steamUrl": "https://store.steampowered.com/app/1245620/",
+        "notOnSteam": false
+      }
     },
     "1275550": {
       "game_name": "Arctic Awakening",
@@ -883,17 +940,17 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_77abcbc203685b38a50a8cee383bd7f47488f090.1920x1080.jpg?t=1777975568",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_9013f64f459b341d91a4e65bcad2e9c78a9f61af.1920x1080.jpg?t=1777975568",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/ss_b863918a1655050ee6200846cf8abb71137fa13e.1920x1080.jpg?t=1777975568",
-        "https://media.rawg.io/media/games/d84/d842fec4ae7bbd782d330f678c980f7f.jpg",
         "https://media.rawg.io/media/screenshots/9a8/9a8ecc33989862e3be29132189c3f7f6.jpg",
         "https://media.rawg.io/media/screenshots/741/741f7625ce8adfe138b43608f1e8e01c.jpg",
         "https://media.rawg.io/media/screenshots/616/616c2a598520d24c1a56d8b1aa90217b.jpg",
         "https://media.rawg.io/media/screenshots/cc5/cc5951ae93265c9a3ccd550ce58fbfa8.jpg",
         "https://media.rawg.io/media/screenshots/0ce/0ce56603d0deb0f66f969ccdee51284b.jpg",
-        "https://media.rawg.io/media/screenshots/ab2/ab2e1086144e9722aba95d012aadcc66.jpg"
+        "https://media.rawg.io/media/screenshots/ab2/ab2e1086144e9722aba95d012aadcc66.jpg",
+        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.gamer.org%2Fwp-content%2Fuploads%2F2025%2F05%2FHow-to-Romance-Margaret-in-Kingdom-Come_-Deliverance-2.png&f=1&nofb=1&ipt=1ca4d5fd509d98ef384ec0b8b48fca4b0fb0bd0181b1f487cc5efae3bfa6d574"
       ],
       "cycles": {
         "main": {
-          "stream_count": 49,
+          "stream_count": 55,
           "timestamps": [
             {
               "date": 1747452383000,
@@ -1150,7 +1207,7 @@
             {
               "date": 1764653116000,
               "videoId": "PQwSlNoxpdY",
-              "duration": 5209,
+              "duration": 5210,
               "startTime": 1764653116000,
               "endTime": 1764658326000
             },
@@ -1237,6 +1294,48 @@
               "duration": 9519,
               "startTime": 1769356976000,
               "endTime": 1769366493000
+            },
+            {
+              "date": 1782036618000,
+              "videoId": "kIAgQR4JzA0",
+              "duration": 5747,
+              "startTime": 1782036618000,
+              "endTime": 1782042367000
+            },
+            {
+              "date": 1782044201000,
+              "videoId": "-x7lfRMLoG0",
+              "duration": 9424,
+              "startTime": 1782044201000,
+              "endTime": 1782056375000
+            },
+            {
+              "date": 1782061046000,
+              "videoId": "hBaEpR4cg94",
+              "duration": 6951,
+              "startTime": 1782061046000,
+              "endTime": 1782068538000
+            },
+            {
+              "date": 1782105227000,
+              "videoId": "rKilbaFRKSA",
+              "duration": 8056,
+              "startTime": 1782105227000,
+              "endTime": 1782113283000
+            },
+            {
+              "date": 1782121386000,
+              "videoId": "wPSCNO9vJO4",
+              "duration": 11265,
+              "startTime": 1782121386000,
+              "endTime": 1782132651000
+            },
+            {
+              "date": 1782144484000,
+              "videoId": "2MovOl5dCYA",
+              "duration": 7217,
+              "startTime": 1782144484000,
+              "endTime": 1782151702000
             }
           ],
           "label": "Completed",
@@ -7294,14 +7393,14 @@
             {
               "date": 1781865265000,
               "videoId": "XZootxsC-a0",
-              "duration": 11510,
+              "duration": 9659,
               "startTime": 1781865265000,
               "endTime": 1781876776000
             },
             {
               "date": 1781889943000,
               "videoId": "fCslq0P-ScY",
-              "duration": 1639,
+              "duration": 1642,
               "startTime": 1781889943000,
               "endTime": 1781891582000
             }
@@ -7329,10 +7428,10 @@
     "titleSize": 110,
     "subtitleSize": 66,
     "titleAlign": "center",
-    "titleYOffset": 30,
+    "titleYOffset": 10,
     "titleSpacing": 25,
     "strokeWidth": 16,
-    "splitTitle": true,
+    "splitTitle": false,
     "streamCountSize": 93,
     "cycleSize": 52,
     "bottomSpacing": 70,

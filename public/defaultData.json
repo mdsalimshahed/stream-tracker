@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "6/24/2026, 5:36:41 PM",
+  "exportDate": "6/25/2026, 10:41:24 AM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -950,7 +950,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 55,
+          "stream_count": 59,
           "timestamps": [
             {
               "date": 1747452383000,
@@ -1319,7 +1319,7 @@
             {
               "date": 1782105227000,
               "videoId": "rKilbaFRKSA",
-              "duration": 8056,
+              "duration": 8060,
               "startTime": 1782105227000,
               "endTime": 1782113283000
             },
@@ -1333,9 +1333,37 @@
             {
               "date": 1782144484000,
               "videoId": "2MovOl5dCYA",
-              "duration": 7217,
+              "duration": 7172,
               "startTime": 1782144484000,
               "endTime": 1782151702000
+            },
+            {
+              "date": 1782307606000,
+              "videoId": "91caPJ896y0",
+              "duration": 7171,
+              "startTime": 1782307606000,
+              "endTime": 1782314776000
+            },
+            {
+              "date": 1782321757000,
+              "videoId": "sSWON-jRkgg",
+              "duration": 4010,
+              "startTime": 1782321757000,
+              "endTime": 1782325768000
+            },
+            {
+              "date": 1782357356000,
+              "videoId": "8aIFzqzrRH0",
+              "duration": 3330,
+              "startTime": 1782357356000,
+              "endTime": 1782360687000
+            },
+            {
+              "date": 1782361211000,
+              "videoId": "MXiphpZpYPw",
+              "duration": 864,
+              "startTime": 1782361211000,
+              "endTime": 1782362076000
             }
           ],
           "label": "Completed",
@@ -7436,7 +7464,7 @@
     "subtitleSize": 66,
     "titleAlign": "center",
     "titleYOffset": 10,
-    "titleSpacing": 25,
+    "titleSpacing": 29,
     "strokeWidth": 16,
     "splitTitle": false,
     "streamCountSize": 93,
@@ -7506,7 +7534,7 @@
       "fillOpacity": 1,
       "strokeOpacity": 0.78
     },
-    "titleLetterSpacing": 2,
+    "titleLetterSpacing": 0,
     "subtitleLetterSpacing": 2,
     "titleDropShadow": false,
     "subtitleDropShadow": true,

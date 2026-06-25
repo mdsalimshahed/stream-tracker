@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "6/25/2026, 10:41:24 AM",
+  "exportDate": "6/25/2026, 11:56:32 PM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -7416,7 +7416,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 3,
+          "stream_count": 8,
           "timestamps": [
             {
               "date": 1781865265000,
@@ -7435,9 +7435,44 @@
             {
               "date": 1782293773000,
               "videoId": "f-pAXVgXs1Y",
-              "duration": 6961,
+              "duration": 6958,
               "startTime": 1782293773000,
               "endTime": 1782300734000
+            },
+            {
+              "date": 1782363996000,
+              "videoId": "Rd7pF8Mz4Ok",
+              "duration": 8623,
+              "startTime": 1782363996000,
+              "endTime": 1782372620000
+            },
+            {
+              "date": 1782385401000,
+              "videoId": "r8LcJdFEh4w",
+              "duration": 1467,
+              "startTime": 1782385401000,
+              "endTime": 1782386869000
+            },
+            {
+              "date": 1782394172000,
+              "videoId": "MFlxQ8LyfKw",
+              "duration": 2590,
+              "startTime": 1782394172000,
+              "endTime": 1782396762000
+            },
+            {
+              "date": 1782399425000,
+              "videoId": "nG0k-0gsZgI",
+              "duration": 2715,
+              "startTime": 1782399425000,
+              "endTime": 1782402141000
+            },
+            {
+              "date": 1782404012000,
+              "videoId": "YNFS_k5xMnE",
+              "duration": 5832,
+              "startTime": 1782404012000,
+              "endTime": 1782409844000
             }
           ],
           "isMain": true,
@@ -7459,7 +7494,7 @@
   },
   "thumbnailConfig": {
     "customFont": "Book Antiqua",
-    "bgZoom": 100,
+    "bgZoom": 98,
     "titleSize": 110,
     "subtitleSize": 66,
     "titleAlign": "center",

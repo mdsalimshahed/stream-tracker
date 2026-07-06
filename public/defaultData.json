@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "6/26/2026, 11:54:50 AM",
+  "exportDate": "7/7/2026, 12:07:23 AM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -20,7 +20,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 4,
+          "stream_count": 7,
           "timestamps": [
             {
               "date": 1748174674000,
@@ -49,6 +49,27 @@
               "duration": 3845,
               "startTime": 1780677966000,
               "endTime": 1780681811000
+            },
+            {
+              "date": 1783228165000,
+              "videoId": "uYHJY3lKrI0",
+              "duration": 8230,
+              "startTime": 1783228165000,
+              "endTime": 1783236398000
+            },
+            {
+              "date": 1783254077000,
+              "videoId": "Gc1MHLPoQl4",
+              "duration": 8056,
+              "startTime": 1783254077000,
+              "endTime": 1783262134000
+            },
+            {
+              "date": 1783340176000,
+              "videoId": "iVy62rhaUUU",
+              "duration": 10560,
+              "startTime": 1783340176000,
+              "endTime": 1783350737000
             }
           ],
           "label": "Ongoing",
@@ -279,7 +300,7 @@
           "displayName": "First Playthrough",
           "isMain": false,
           "youtubePlaylist": "PLLzuld5NPO9D143vwHKEk-p2Nhw_cehRU",
-          "label": "Ongoing"
+          "label": "Abandoned"
         }
       },
       "details": {
@@ -317,7 +338,7 @@
       ],
       "cycles": {
         "convergence_mod_3.0": {
-          "stream_count": 2,
+          "stream_count": 3,
           "timestamps": [
             {
               "date": 1782270701000,
@@ -329,9 +350,16 @@
             {
               "date": 1782280471000,
               "videoId": "wKCWyol2U_g",
-              "duration": 7170,
+              "duration": 7163,
               "startTime": 1782280471000,
               "endTime": 1782287642000
+            },
+            {
+              "date": 1783355766000,
+              "videoId": "Lb8ekzUV5is",
+              "duration": 5306,
+              "startTime": 1783355766000,
+              "endTime": 1783361073000
             }
           ],
           "isMain": false,
@@ -4743,7 +4771,8 @@
           ],
           "isMain": false,
           "youtubePlaylist": "PLLzuld5NPO9A4lzgmDFtY2N34tx8b-Gfc",
-          "label": "Ongoing"
+          "label": "Abandoned",
+          "displayName": "First Playthrough"
         }
       },
       "details": {
@@ -5439,7 +5468,7 @@
           "isMain": false,
           "youtubePlaylist": "PLLzuld5NPO9CLPC8BlsYIXRehSXU7Ys0t",
           "displayName": "First Playthrough",
-          "label": "Ongoing"
+          "label": "Abandoned"
         }
       },
       "details": {
@@ -5477,7 +5506,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 74,
+          "stream_count": 77,
           "timestamps": [
             {
               "date": 1774375141000,
@@ -5996,6 +6025,27 @@
               "duration": 7626,
               "startTime": 1779122652000,
               "endTime": 1779130284000
+            },
+            {
+              "date": 1783169352000,
+              "videoId": "bo-Jw1VSUxk",
+              "duration": 7870,
+              "startTime": 1783169352000,
+              "endTime": 1783177226000
+            },
+            {
+              "date": 1783267877000,
+              "videoId": "efsjfXlBftY",
+              "duration": 4856,
+              "startTime": 1783267877000,
+              "endTime": 1783272734000
+            },
+            {
+              "date": 1783313742000,
+              "videoId": "agR-gZSIVxE",
+              "duration": 8445,
+              "startTime": 1783313742000,
+              "endTime": 1783322187000
             }
           ],
           "isMain": false,
@@ -6665,14 +6715,15 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564740/03da26ae9ec58be50d495a431a6626ba8d528c8f/ss_03da26ae9ec58be50d495a431a6626ba8d528c8f.1920x1080.jpg?t=1777516538",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564740/f21bedd53966f707655b835f6ae34e82012965e3/ss_f21bedd53966f707655b835f6ae34e82012965e3.1920x1080.jpg?t=1777516538",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3564740/080fbc7f0ee74b985fa8610bc3adc52023476a3b/ss_080fbc7f0ee74b985fa8610bc3adc52023476a3b.1920x1080.jpg?t=1777516538",
-        "https://media.rawg.io/media/screenshots/8a7/8a797083d6dd0f810a42bb2fa379a23a.jpg",
         "https://media.rawg.io/media/screenshots/44a/44a0397a487f56f2741c0c3c2ffbc9b1.jpg",
         "https://media.rawg.io/media/screenshots/ad7/ad742d2cefa6380d2632d7cc47228a54.jpg",
-        "https://media.rawg.io/media/screenshots/d83/d83d04a36a5b644bf2567a103fd0857a.jpg"
+        "https://media.rawg.io/media/screenshots/d83/d83d04a36a5b644bf2567a103fd0857a.jpg",
+        "https://images3.alphacoders.com/140/thumb-1920-1402599.jpg",
+        "https://wallpaperaccess.com/full/23988433.jpg"
       ],
       "cycles": {
         "main": {
-          "stream_count": 15,
+          "stream_count": 17,
           "timestamps": [
             {
               "date": 1763177531000,
@@ -6754,7 +6805,7 @@
             {
               "date": 1763628585000,
               "videoId": "AUvoeEkqnaQ",
-              "duration": 7257,
+              "duration": 7258,
               "startTime": 1763628585000,
               "endTime": 1763635845000
             },
@@ -6778,9 +6829,23 @@
               "duration": 3798,
               "startTime": 1765386366000,
               "endTime": 1765390171000
+            },
+            {
+              "date": 1783139682000,
+              "videoId": "6zRm9O-LdSA",
+              "duration": 4105,
+              "startTime": 1783139682000,
+              "endTime": 1783143788000
+            },
+            {
+              "date": 1783154346000,
+              "videoId": "oobctTy94G0",
+              "duration": 4600,
+              "startTime": 1783154346000,
+              "endTime": 1783158946000
             }
           ],
-          "label": "Abandoned",
+          "label": "Ongoing",
           "displayName": "First Playthrough",
           "isMain": false,
           "youtubePlaylist": "PLLzuld5NPO9BJV-_bqp6cSBhF806-FZYn"
@@ -7416,7 +7481,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 9,
+          "stream_count": 12,
           "timestamps": [
             {
               "date": 1781865265000,
@@ -7470,22 +7535,43 @@
             {
               "date": 1782404012000,
               "videoId": "YNFS_k5xMnE",
-              "duration": 5832,
+              "duration": 5829,
               "startTime": 1782404012000,
               "endTime": 1782409844000
             },
             {
               "date": 1782444656000,
               "videoId": "vlnBpn931aQ",
-              "duration": 8074,
+              "duration": 8045,
               "startTime": 1782444656000,
               "endTime": 1782452731000
+            },
+            {
+              "date": 1782467691000,
+              "videoId": "QcJ602xZBJI",
+              "duration": 8431,
+              "startTime": 1782467691000,
+              "endTime": 1782478581000
+            },
+            {
+              "date": 1782481191000,
+              "videoId": "OIdLuqV2YfE",
+              "duration": 4014,
+              "startTime": 1782481191000,
+              "endTime": 1782485207000
+            },
+            {
+              "date": 1783071256000,
+              "videoId": "mZ2TGmOfCms",
+              "duration": 6747,
+              "startTime": 1783071256000,
+              "endTime": 1783078004000
             }
           ],
           "isMain": true,
           "youtubePlaylist": "PLLzuld5NPO9C_lF4pBi8UqwRHoqUfqiRa",
           "displayName": "First Playthrough",
-          "label": "Ongoing"
+          "label": "Completed"
         }
       },
       "details": {
@@ -7501,8 +7587,8 @@
   },
   "thumbnailConfig": {
     "customFont": "Book Antiqua",
-    "bgZoom": 98,
-    "titleSize": 110,
+    "bgZoom": 110,
+    "titleSize": 104,
     "subtitleSize": 66,
     "titleAlign": "center",
     "titleYOffset": 10,

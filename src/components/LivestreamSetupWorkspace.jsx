@@ -27,7 +27,7 @@ export default function LivestreamSetupWorkspace({
   const [title] = useState(generateStreamTitle(game.game_name, year, nC, cycleDisplayName, cycleIsMain));
   
   // --- Workspace State ---
-  const [activeTab, setActiveTab] = useState('thumbnail'); // 'thumbnail' | 'seo'
+  const [activeTab, setActiveTab] = useState('thumbnail'); 
   
   // --- Thumbnail State ---
   const [images, setImages] = useState(() => {
@@ -67,11 +67,58 @@ export default function LivestreamSetupWorkspace({
     }
   }, [config.savedFonts]);
 
-  const saveImagesToStorage = (newImages) => {
-    const updatedGame = JSON.parse(JSON.stringify(streamData[gameId]));
-    updatedGame.thumbnail_urls = newImages.filter(img => img !== game.cover_image);
-    const newStreamData = { ...streamData, [gameId]: updatedGame };
+  // --- Smart Storage Manager ---
+  const saveImagesToStorage = (newImages, newlyAddedImage = null) => {
+    let updatedGame = JSON.parse(JSON.stringify(streamData[gameId]));
+    let currentImages = [...newImages];
+    updatedGame.thumbnail_urls = currentImages.filter(img => img !== game.cover_image);
+    let newStreamData = { ...streamData, [gameId]: updatedGame };
+
+    let success = false;
+    let evicted = false;
+
+    // Test saving to memory and clear space strictly in THIS gallery if it fails
+    while (!success && currentImages.length > 0) {
+      try {
+        localStorage.setItem('streamManagerData', JSON.stringify(newStreamData));
+        success = true;
+      } catch (e) {
+        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+          // Find the oldest local image in THIS game (protect the cover and the new image)
+          const b64Idx = currentImages.findIndex(img => 
+            img.startsWith('data:image') && 
+            img !== newlyAddedImage && 
+            img !== game.cover_image
+          );
+
+          if (b64Idx !== -1) {
+            currentImages.splice(b64Idx, 1);
+            updatedGame.thumbnail_urls = currentImages.filter(img => img !== game.cover_image);
+            newStreamData = { ...streamData, [gameId]: updatedGame };
+            evicted = true;
+          } else {
+            // Cannot clear any more space in this gallery
+            onNotify('Browser storage is completely full! Delete old games from library.', 'error');
+            if (newlyAddedImage) {
+              currentImages = currentImages.filter(img => img !== newlyAddedImage);
+              updatedGame.thumbnail_urls = currentImages.filter(img => img !== game.cover_image);
+              newStreamData = { ...streamData, [gameId]: updatedGame };
+            }
+            break;
+          }
+        } else {
+          console.error("Storage Error:", e);
+          break;
+        }
+      }
+    }
+
+    if (evicted) {
+       onNotify('Memory limit reached: Oldest local image in this gallery automatically removed to make room.', 'info');
+    }
+
     onSave(newStreamData);
+    return currentImages;
   };
 
   useEffect(() => {
@@ -83,9 +130,9 @@ export default function LivestreamSetupWorkspace({
           if (d.results) {
             const u = d.results.map(s => s.image);
             const newImages = [...images, ...u];
-            setImages(newImages);
-            saveImagesToStorage(newImages);
-            if (u.length > 0) setSelImg(u[0]);
+            const finalImages = saveImagesToStorage(newImages);
+            setImages(finalImages);
+            if (u.length > 0 && finalImages.includes(u[0])) setSelImg(u[0]);
           }
         })
         .finally(() => setLoadingS(false));
@@ -122,10 +169,16 @@ export default function LivestreamSetupWorkspace({
         canvas.height = img.height * scale;
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        
         const newImages = [...images, dataUrl];
-        setImages(newImages);
-        setSelImg(dataUrl);
-        saveImagesToStorage(newImages);
+        const finalImages = saveImagesToStorage(newImages, dataUrl);
+        setImages(finalImages);
+        
+        if (finalImages.includes(dataUrl)) {
+          setSelImg(dataUrl);
+        } else {
+          setSelImg(finalImages[0] || null);
+        }
       };
       img.src = ev.target.result;
     };
@@ -135,10 +188,10 @@ export default function LivestreamSetupWorkspace({
   const handleAddUrlImage = () => {
     if (!urlInput.trim()) return;
     const newImages = [...images, urlInput.trim()];
-    setImages(newImages);
-    setSelImg(urlInput.trim());
+    const finalImages = saveImagesToStorage(newImages, urlInput.trim());
+    setImages(finalImages);
+    if (finalImages.includes(urlInput.trim())) setSelImg(urlInput.trim());
     setUrlInput('');
-    saveImagesToStorage(newImages);
   };
 
   const handleFindOnline = () => {
@@ -156,9 +209,9 @@ export default function LivestreamSetupWorkspace({
       onConfirm: () => {
         const newImages = [...images];
         newImages.splice(idx, 1);
-        setImages(newImages);
-        if (selImg === imgUrl) setSelImg(newImages[0] || null);
-        saveImagesToStorage(newImages);
+        const finalImages = saveImagesToStorage(newImages);
+        setImages(finalImages);
+        if (selImg === imgUrl) setSelImg(finalImages[0] || null);
         onNotify('Image deleted', 'info');
         setConfirmDialog(null);
       }
@@ -253,7 +306,7 @@ export default function LivestreamSetupWorkspace({
       sessionSaved.current = true;
       setHasCycleChanges(false);
       onSave(nd);
-      onNotify('Session saved & title copied! (Thumbnail download skipped due to source image security policies)', 'success');
+      onNotify('Session saved & title copied!', 'success');
     } else {
       onSave(nd);
       onNotify(selectedStreamNumber !== null ? 'Session configuration updated!' : 'Session configuration state synchronized successfully!', 'success');

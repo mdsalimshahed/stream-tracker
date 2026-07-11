@@ -92,7 +92,12 @@ export function useStreamData(notify) {
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('streamManagerData', JSON.stringify(streamData));
+    try {
+      localStorage.setItem('streamManagerData', JSON.stringify(streamData));
+    } catch (error) {
+      console.error("Storage Error:", error);
+      // Quota limits are now handled intelligently per-game within the LivestreamSetupWorkspace when adding images
+    }
   }, [streamData]);
 
   // --- Auto-recovery on mount ---
@@ -564,7 +569,7 @@ export function useStreamData(notify) {
             duration: matchingVideo.duration,
             startTime: matchingVideo.startTime, 
             endTime: matchingVideo.endTime,     
-            date: matchingVideo.startTime // Fallback Unix
+            date: matchingVideo.startTime 
           };
         }
         return tsObj;

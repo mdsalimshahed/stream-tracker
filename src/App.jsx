@@ -41,6 +41,10 @@ export default function App() {
   // PRE-CACHE HEAVY DATA 
   const cachedStats = useDebugData(streamData, scaledLayoutPrefs);
 
+  // --- Global API Key State (For instant UI updates) ---
+  const [ytApiKey, setYtApiKey] = useState(() => localStorage.getItem('youtubeApiKey') || '');
+  const [rawgApiKey, setRawgApiKey] = useState(() => localStorage.getItem('rawgApiKey') || '');
+
   // --- Navigation ---
   const [currentView, setCurrentView] = useState(() => {
     try { const s = localStorage.getItem('streamManagerData'); if (s && Object.keys(JSON.parse(s)).length > 0) return 'dashboard'; } catch (e) {}
@@ -80,7 +84,7 @@ export default function App() {
   const handleImport = (importedData) => {
     try {
       const isSettingsOnly = importedData.type === 'settings_only';
-      const isFullBackup = !isSettingsOnly && (importedData.type === 'full_backup' || importedData.streamData !== undefined);
+      const isFullBackup = !isSettingsOnly && (importedData.type === 'full_backup' || importedData.type === 'full_with_keys' || importedData.streamData !== undefined);
       
       if (isFullBackup || (!isSettingsOnly && !isFullBackup)) {
         const dataToMigrate = isFullBackup ? importedData.streamData : importedData;
@@ -93,8 +97,20 @@ export default function App() {
         if (importedData.layoutPrefs) settings.setLayoutPrefs(importedData.layoutPrefs);
         if (importedData.modalBgIntensity !== undefined) settings.setModalBgIntensity(importedData.modalBgIntensity);
         if (importedData.modalPanelOpacity !== undefined) settings.setModalPanelOpacity(importedData.modalPanelOpacity);
+
+        // Instantly handle API Keys on import
+        const newYt = importedData.youtubeApiKey || '';
+        const newRawg = importedData.rawgApiKey || '';
+        
+        setYtApiKey(newYt);
+        if (newYt) localStorage.setItem('youtubeApiKey', newYt);
+        else localStorage.removeItem('youtubeApiKey');
+        
+        setRawgApiKey(newRawg);
+        if (newRawg) localStorage.setItem('rawgApiKey', newRawg);
+        else localStorage.removeItem('rawgApiKey');
       }
-      
+
       notify('Data imported successfully!', 'success');
     } catch (e) { 
       console.error(e);
@@ -113,15 +129,12 @@ export default function App() {
     const dateStr = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
     
     // --- STRIP LOCAL DATA URIs FOR EXPORT ---
-    // We deep clone the stream data and filter out any Base64 data URLs
-    // so they are not included in the exported file, preventing massive file sizes.
     const cleanStreamData = JSON.parse(JSON.stringify(streamData));
     for (const gameId in cleanStreamData) {
       const game = cleanStreamData[gameId];
       if (game.thumbnail_urls) {
         game.thumbnail_urls = game.thumbnail_urls.filter(url => typeof url === 'string' && !url.startsWith('data:image'));
       }
-      // If the cover image itself was a local upload, swap it back to a web URL or placeholder
       if (game.cover_image && typeof game.cover_image === 'string' && game.cover_image.startsWith('data:image')) {
         game.cover_image = game.thumbnail_urls?.[0] || 'https://placehold.co/600x400/1e293b/475569?text=Cover';
       }
@@ -147,7 +160,7 @@ export default function App() {
       }; 
       fileName = `streamtracker_settings_${dateStr}.json`; 
     }
-    else { 
+    else if (type === 'full') { 
       exportData = { 
         ...exportData, 
         type: 'full_backup', 
@@ -159,6 +172,21 @@ export default function App() {
         modalPanelOpacity: settings.modalPanelOpacity 
       }; 
       fileName = `streamtracker_full_backup_${dateStr}.json`; 
+    }
+    else if (type === 'full_with_keys') {
+      exportData = { 
+        ...exportData, 
+        type: 'full_with_keys', 
+        streamData: cleanStreamData, 
+        thumbnailConfig: settings.thumbnailConfig, 
+        systemFonts: settings.systemFonts, 
+        layoutPrefs: settings.layoutPrefs, 
+        modalBgIntensity: settings.modalBgIntensity, 
+        modalPanelOpacity: settings.modalPanelOpacity,
+        youtubeApiKey: ytApiKey,
+        rawgApiKey: rawgApiKey
+      }; 
+      fileName = `streamtracker_full_with_keys_${dateStr}.json`; 
     }
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -173,7 +201,17 @@ export default function App() {
   };
 
   const handleWipeData = (type) => {
-    handleExport(type);
+    // Calling handleExport with 'full' or 'settings' strictly EXCLUDES keys.
+    handleExport(type); 
+    
+    // Instantly wipe keys if user chose to delete settings
+    if (type === 'settings' || type === 'full') {
+      setYtApiKey('');
+      setRawgApiKey('');
+      localStorage.removeItem('youtubeApiKey');
+      localStorage.removeItem('rawgApiKey');
+    }
+
     setTimeout(() => {
       if (type === 'stream' || type === 'full') setStreamData({});
       if (type === 'settings' || type === 'full') settings.resetSettings();
@@ -231,6 +269,8 @@ export default function App() {
                 modalPanelOpacity={settings.modalPanelOpacity} setModalPanelOpacity={settings.setModalPanelOpacity}
                 persistSettings={settings.persistSettings} setPersistSettings={settings.setPersistSettings}
                 onWipeData={handleWipeData} onRunSync={handleManualSync} isSyncing={isSyncing}
+                ytApiKey={ytApiKey} setYtApiKey={setYtApiKey}
+                rawgApiKey={rawgApiKey} setRawgApiKey={setRawgApiKey}
               />
             </div>
           )}
@@ -268,6 +308,8 @@ export default function App() {
           <div className="rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl flex flex-col gap-3 bg-black/85 border border-white/10 backdrop-blur-md" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-2"><h3 className="text-xl font-bold text-white">Export Options</h3><button onClick={() => setShowExportModal(false)} className="p-1 hover:bg-white/10 rounded-full text-white transition-colors"><X size={20} /></button></div>
             <p className="text-sm text-white/70 mb-2">Choose what you want to back up or share:</p>
+            
+            <button onClick={() => handleExport('full_with_keys')} className="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-lg font-medium text-white transition-colors shadow-lg">Data + Settings + API Keys</button>
             <button onClick={() => handleExport('full')} className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-medium text-white transition-colors shadow-lg">Stream Data + Settings (Full)</button>
             <button onClick={() => handleExport('stream')} className="w-full bg-white/10 hover:bg-white/20 py-3 rounded-lg font-medium text-white transition-colors border border-white/5">Stream Data Only (Classic)</button>
             <button onClick={() => handleExport('settings')} className="w-full bg-white/10 hover:bg-white/20 py-3 rounded-lg font-medium text-white transition-colors border border-white/5">Settings Only</button>

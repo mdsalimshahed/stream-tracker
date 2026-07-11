@@ -1,6 +1,6 @@
 // src/components/DataManager.jsx
 import React, { useState } from 'react';
-import { Type, Layout, Eye, AlertTriangle, Trash2, X, RefreshCw, Loader2, Tag, Plus, Check, Key } from 'lucide-react';
+import { Type, Layout, Eye, EyeOff, AlertTriangle, Trash2, X, RefreshCw, Loader2, Tag, Plus, Check, Key } from 'lucide-react';
 import { RangeControl } from './common/UIComponents';
 
 const Toggle = ({ label, description, value, onChange, warning }) => (
@@ -26,26 +26,30 @@ export default function DataManager({
   persistSettings, setPersistSettings,
   onWipeData,
   onRunSync,
-  isSyncing
+  isSyncing,
+  ytApiKey, setYtApiKey,
+  rawgApiKey, setRawgApiKey
 }) {
   const [showWipeModal, setShowWipeModal] = useState(false);
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
 
-  // Local Storage API Key States
-  const [ytApiKey, setYtApiKey] = useState(() => localStorage.getItem('youtubeApiKey') || '');
-  const [rawgApiKey, setRawgApiKey] = useState(() => localStorage.getItem('rawgApiKey') || '');
+  // Visibility Toggles
+  const [showYtKey, setShowYtKey] = useState(false);
+  const [showRawgKey, setShowRawgKey] = useState(false);
 
   const handleYtApiKeyChange = (e) => {
     const val = e.target.value;
     setYtApiKey(val);
-    localStorage.setItem('youtubeApiKey', val);
+    if (val) localStorage.setItem('youtubeApiKey', val);
+    else localStorage.removeItem('youtubeApiKey');
   };
 
   const handleRawgApiKeyChange = (e) => {
     const val = e.target.value;
     setRawgApiKey(val);
-    localStorage.setItem('rawgApiKey', val);
+    if (val) localStorage.setItem('rawgApiKey', val);
+    else localStorage.removeItem('rawgApiKey');
   };
 
   const updateFont = (key, val) => setSystemFonts(prev => ({ ...prev, [key]: val }));
@@ -89,24 +93,44 @@ export default function DataManager({
           <div>
             <h3 className="text-lg font-bold text-white flex items-center gap-2">YouTube Data API v3</h3>
             <p className="text-sm text-white/60 mt-1">Provide your own API key to sync playlists automatically.</p>
-            <input 
-              type="password" 
-              value={ytApiKey}
-              onChange={handleYtApiKeyChange}
-              placeholder="AIzaSy..."
-              className="w-full bg-black/60 border border-white/20 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 text-white transition-colors shadow-inner mt-3"
-            />
+            <div className="relative mt-3">
+              <input 
+                type={showYtKey ? "text" : "password"}
+                value={ytApiKey}
+                onChange={handleYtApiKeyChange}
+                placeholder="AIzaSy..."
+                className="w-full bg-black/60 border border-white/20 rounded-lg p-3 pr-12 text-sm focus:outline-none focus:border-blue-500 text-white transition-colors shadow-inner"
+              />
+              <button 
+                type="button"
+                onClick={() => setShowYtKey(!showYtKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-white transition-colors"
+                title={showYtKey ? "Hide API Key" : "Show API Key"}
+              >
+                {showYtKey ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
           <div className="border-t border-white/10 pt-6">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">RAWG Video Games Database API</h3>
             <p className="text-sm text-white/60 mt-1">Provide your RAWG API key for high-quality game covers, tags, and syncing games not on Steam.</p>
-            <input 
-              type="password" 
-              value={rawgApiKey}
-              onChange={handleRawgApiKeyChange}
-              placeholder="Enter your RAWG API key..."
-              className="w-full bg-black/60 border border-white/20 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 text-white transition-colors shadow-inner mt-3"
-            />
+            <div className="relative mt-3">
+              <input 
+                type={showRawgKey ? "text" : "password"} 
+                value={rawgApiKey}
+                onChange={handleRawgApiKeyChange}
+                placeholder="Enter your RAWG API key..."
+                className="w-full bg-black/60 border border-white/20 rounded-lg p-3 pr-12 text-sm focus:outline-none focus:border-blue-500 text-white transition-colors shadow-inner"
+              />
+              <button 
+                type="button"
+                onClick={() => setShowRawgKey(!showRawgKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-white transition-colors"
+                title={showRawgKey ? "Hide API Key" : "Show API Key"}
+              >
+                {showRawgKey ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
         </div>
 

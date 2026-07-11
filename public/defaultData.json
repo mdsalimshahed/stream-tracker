@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "7/10/2026, 12:03:51 PM",
+  "exportDate": "7/12/2026, 12:40:55 AM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -17,11 +17,14 @@
         "https://media.rawg.io/media/screenshots/396/39632124b68f3ed8795f4e7ee3c1e247.jpeg",
         "https://media.rawg.io/media/screenshots/ac2/ac2d6a559a3a992ab7b169a68efd8dea.jpg",
         "https://media.rawg.io/media/screenshots/88a/88a8ab57cdea653c5ed07f9971884c34.jpg",
-        "https://wallpapercave.com/wp/wp3756528.jpg"
+        "https://wallpapercave.com/wp/wp3756528.jpg",
+        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FfSyqKTr6_Sw%2Fmaxresdefault.jpg&f=1&nofb=1&ipt=c2128445b9f74ef1e420a7080ed40b6ee1013920b5f433d04b2182857ebd4985",
+        "https://images.hdqwalls.com/wallpapers/dark-souls-remastered-4k-3x.jpg",
+        "https://c4.wallpaperflare.com/wallpaper/714/300/33/artorias-artorias-the-abysswalker-dark-souls-knight-fantasy-art-hd-wallpaper-preview.jpg"
       ],
       "cycles": {
         "main": {
-          "stream_count": 13,
+          "stream_count": 19,
           "timestamps": [
             {
               "date": 1748174674000,
@@ -103,16 +106,54 @@
             {
               "date": 1783614837000,
               "videoId": "rQ7UrURW-UY",
-              "duration": 8903,
+              "duration": 8905,
               "startTime": 1783614837000,
               "endTime": 1783623741000
             },
             {
               "date": 1783657712000,
               "videoId": "_vKCFjQokaU",
-              "duration": 5526,
+              "duration": 5528,
               "startTime": 1783657712000,
               "endTime": 1783663238000
+            },
+            {
+              "date": 1783674301000,
+              "videoId": "A_vPU7DVAyM",
+              "duration": 8343,
+              "startTime": 1783674301000,
+              "endTime": 1783682647000
+            },
+            {
+              "date": 1783694312000,
+              "videoId": "B9q6nGE-GtE",
+              "duration": 4415,
+              "startTime": 1783694312000,
+              "endTime": 1783698730000
+            },
+            {
+              "date": 1783700641000,
+              "videoId": "F_dufyZWTZI",
+              "duration": 8779,
+              "startTime": 1783700641000,
+              "endTime": 1783709423000
+            },
+            {
+              "date": 1783752556000,
+              "videoId": "hUjv0U94hkI",
+              "duration": 12117,
+              "startTime": 1783752556000,
+              "endTime": 1783764673000
+            },
+            {
+              "date": 1783773357000,
+              "videoId": "GUTGhFumlV8",
+              "duration": 11553,
+              "startTime": 1783773357000,
+              "endTime": 1783784911000
+            },
+            {
+              "date": 1783790273258
             }
           ],
           "label": "Ongoing",

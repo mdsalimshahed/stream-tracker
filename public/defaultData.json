@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "7/13/2026, 1:32:46 AM",
+  "exportDate": "7/13/2026, 9:31:05 PM",
   "type": "full_backup",
   "streamData": {
     "570940": {
@@ -22,11 +22,14 @@
         "https://images.hdqwalls.com/wallpapers/dark-souls-remastered-4k-3x.jpg",
         "https://c4.wallpaperflare.com/wallpaper/714/300/33/artorias-artorias-the-abysswalker-dark-souls-knight-fantasy-art-hd-wallpaper-preview.jpg",
         "https://staticdelivery.nexusmods.com/images/162/3383119-1350676267.jpg",
-        "https://c4.wallpaperflare.com/wallpaper/116/686/439/artwork-dark-souls-death-digital-art-wallpaper-preview.jpg"
+        "https://c4.wallpaperflare.com/wallpaper/116/686/439/artwork-dark-souls-death-digital-art-wallpaper-preview.jpg",
+        "https://darksouls.wiki.fextralife.com/file/Dark-Souls/tc_pinhead.jpg",
+        "https://c4.wallpaperflare.com/wallpaper/605/650/418/dark-souls-video-games-landscape-bonfire-ash-lake-hd-wallpaper-preview.jpg",
+        "https://wallpaperaccess.com/full/3639869.jpg"
       ],
       "cycles": {
         "main": {
-          "stream_count": 22,
+          "stream_count": 25,
           "timestamps": [
             {
               "date": 1748174674000,
@@ -164,14 +167,14 @@
             {
               "date": 1783847021000,
               "videoId": "EbsF7f-xWPM",
-              "duration": 11787,
+              "duration": 11783,
               "startTime": 1783847021000,
               "endTime": 1783858809000
             },
             {
               "date": 1783860302000,
               "videoId": "1QjVT51A5LQ",
-              "duration": 9621,
+              "duration": 9617,
               "startTime": 1783860302000,
               "endTime": 1783869923000
             },
@@ -181,9 +184,30 @@
               "duration": 6665,
               "startTime": 1783878017000,
               "endTime": 1783884683000
+            },
+            {
+              "date": 1783931801000,
+              "videoId": "v1vox69O_4M",
+              "duration": 4867,
+              "startTime": 1783931801000,
+              "endTime": 1783936668000
+            },
+            {
+              "date": 1783937472000,
+              "videoId": "kN8lDX4Uk6k",
+              "duration": 10763,
+              "startTime": 1783937472000,
+              "endTime": 1783948235000
+            },
+            {
+              "date": 1783952562000,
+              "videoId": "G5eCv0B2iQY",
+              "duration": 3716,
+              "startTime": 1783952562000,
+              "endTime": 1783956278000
             }
           ],
-          "label": "Ongoing",
+          "label": "Completed",
           "displayName": "First Playthrough",
           "isMain": false,
           "youtubePlaylist": "PLLzuld5NPO9D6oeLFf1TmtKdvUii5f33H"
@@ -7720,7 +7744,7 @@
   "thumbnailConfig": {
     "customFont": "Book Antiqua",
     "bgZoom": 110,
-    "titleSize": 104,
+    "titleSize": 93,
     "subtitleSize": 66,
     "titleAlign": "center",
     "titleYOffset": 10,

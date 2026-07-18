@@ -1,8 +1,62 @@
 {
   "version": "2.0.0",
-  "exportDate": "7/13/2026, 9:31:05 PM",
+  "exportDate": "7/19/2026, 12:01:41 AM",
   "type": "full_backup",
   "streamData": {
+    "335300": {
+      "game_name": "DARK SOULS™ II: Scholar of the First Sin",
+      "release_year": "2015",
+      "cover_image": "https://media.rawg.io/media/games/8fc/8fc59e74133fd8a8a436b7e2d0fb36c2.jpg",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_589f08dc4d8580785923c89749101a15014bcdf9.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_724c043f3005c09c71e683e4d4b633711d7ccd49.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_a6af51265aac7894c2f233f67089715899d9fe7c.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_b9e5f5afb7358b242d4a669cf6f622de55edf1a0.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_fe75766ecb5828879ce1ee74b0ff345343ec33b2.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_1fc27c02801d97cce73912de09ecd7d823ac80cf.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_ea36ab9841c656e321ab55a98e60ae37d4a4ebd6.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_7da20d799f2d4ccdbcdf42b980fa8d9485fa29bd.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_cf2d07cac6ada17beec5e7718301fee5a6e00acf.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_fefa2549a53d216fb7fc1ffde6e992225e06fadf.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_fe08dabb3c130ea401666f47e2eee03f6d1abee2.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_3b2006322099225a4ea8f17830b4b9fbd2f78864.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_133aadef5d952a37b52a459224baeecff468742e.1920x1080.jpg?t=1760721873",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/335300/ss_d9d06b75c9aa7fba28479569b7220ae431b79cfd.1920x1080.jpg?t=1760721873",
+        "https://media.rawg.io/media/screenshots/86a/86ab0e65f2868bcafee2562751d8b3e3.jpg",
+        "https://media.rawg.io/media/screenshots/d73/d73a9c405efdbe2b2e0f87bdc90ca81d.jpg",
+        "https://media.rawg.io/media/screenshots/a19/a195bddce3929b8a82a4a4bf26003848.jpg",
+        "https://media.rawg.io/media/screenshots/85f/85f8ad6b52a16cf3a6163ad18ef5d4a7.jpg",
+        "https://media.rawg.io/media/screenshots/06c/06cbffdf298202a575e75b984e354754.jpg",
+        "https://media.rawg.io/media/screenshots/6d1/6d19b52c712dc0967b5c11a57ac7f166.jpg"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 1,
+          "timestamps": [
+            {
+              "date": 1784383493000,
+              "videoId": "zIjtHkkls-0",
+              "duration": 7011,
+              "startTime": 1784383493000,
+              "endTime": null
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLYd0nQ4RJgLI",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "FromSoftware, Inc.",
+        "publisher": "Bandai Namco Entertainment, FromSoftware, Inc.",
+        "releaseDate": "1 Apr, 2015",
+        "genres": "Action, RPG",
+        "tags": "Singleplayer, Steam Achievements, Multiplayer, Atmospheric, RPG, Co-op, Story Rich, cooperative, Third Person, Fantasy, Difficult, Action RPG, Dark, PvP, Character Customization, Dark Fantasy, Medieval, Remake, Lore-Rich",
+        "steamUrl": "https://store.steampowered.com/app/335300/",
+        "notOnSteam": false
+      }
+    },
     "570940": {
       "game_name": "DARK SOULS™: REMASTERED",
       "release_year": "2018",
@@ -188,21 +242,21 @@
             {
               "date": 1783931801000,
               "videoId": "v1vox69O_4M",
-              "duration": 4867,
+              "duration": 4869,
               "startTime": 1783931801000,
               "endTime": 1783936668000
             },
             {
               "date": 1783937472000,
               "videoId": "kN8lDX4Uk6k",
-              "duration": 10763,
+              "duration": 10762,
               "startTime": 1783937472000,
               "endTime": 1783948235000
             },
             {
               "date": 1783952562000,
               "videoId": "G5eCv0B2iQY",
-              "duration": 3716,
+              "duration": 3711,
               "startTime": 1783952562000,
               "endTime": 1783956278000
             }
@@ -5522,7 +5576,7 @@
           "isMain": true,
           "youtubePlaylist": "PLLzuld5NPO9Ah0050wQjboQliHFZhUKmY",
           "displayName": "First Playthrough",
-          "label": "Ongoing"
+          "label": "Abandoned"
         }
       },
       "details": {
@@ -7001,7 +7055,7 @@
               "endTime": 1783158946000
             }
           ],
-          "label": "Ongoing",
+          "label": "Abandoned",
           "displayName": "First Playthrough",
           "isMain": false,
           "youtubePlaylist": "PLLzuld5NPO9BJV-_bqp6cSBhF806-FZYn"
@@ -7745,12 +7799,12 @@
     "customFont": "Book Antiqua",
     "bgZoom": 110,
     "titleSize": 93,
-    "subtitleSize": 66,
+    "subtitleSize": 50,
     "titleAlign": "center",
     "titleYOffset": 10,
     "titleSpacing": 29,
     "strokeWidth": 16,
-    "splitTitle": false,
+    "splitTitle": true,
     "streamCountSize": 93,
     "cycleSize": 52,
     "bottomSpacing": 70,

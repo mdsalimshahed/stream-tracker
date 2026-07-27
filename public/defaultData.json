@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "7/25/2026, 12:12:27 PM",
+  "exportDate": "7/27/2026, 8:46:32 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -665,7 +665,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 4,
+          "stream_count": 7,
           "timestamps": [
             {
               "date": 1784866482000,
@@ -684,7 +684,7 @@
             {
               "date": 1784913222000,
               "videoId": "YkAZ_imZ0mM",
-              "duration": 2746,
+              "duration": 2749,
               "startTime": 1784913222000,
               "endTime": 1784915968000
             },
@@ -694,12 +694,33 @@
               "duration": 6475,
               "startTime": 1784953379000,
               "endTime": 1784959855000
+            },
+            {
+              "date": 1784981406000,
+              "videoId": "BfxPZBHdAu4",
+              "duration": 2023,
+              "startTime": 1784981406000,
+              "endTime": 1784983433000
+            },
+            {
+              "date": 1785152098000,
+              "videoId": "E7i_SycgSPg",
+              "duration": 5621,
+              "startTime": 1785152098000,
+              "endTime": 1785157720000
+            },
+            {
+              "date": 1785158521000,
+              "videoId": "mu7fwB12YpA",
+              "duration": 4522,
+              "startTime": 1785158521000,
+              "endTime": 1785163043000
             }
           ],
           "isMain": true,
           "youtubePlaylist": "PLSvF4m8r86dc",
           "displayName": "First Playthrough",
-          "label": "Ongoing"
+          "label": "Completed"
         }
       },
       "details": {

@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "7/27/2026, 8:47:36 PM",
+  "exportDate": "7/28/2026, 12:13:15 AM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -724,7 +724,7 @@
           "isMain": true,
           "youtubePlaylist": "PLSvF4m8r86dc",
           "displayName": "First Playthrough",
-          "label": "Completed"
+          "label": "Ongoing"
         }
       },
       "details": {
@@ -836,7 +836,7 @@
             {
               "date": 1765976087000,
               "videoId": "Ww3c9_ie120",
-              "duration": 6940,
+              "duration": 6941,
               "startTime": 1765976087000,
               "endTime": 1765983036000
             },
@@ -1463,7 +1463,7 @@
             {
               "date": 1764232983000,
               "videoId": "BIA12FQ6h3c",
-              "duration": 7012,
+              "duration": 7013,
               "startTime": 1764232983000,
               "endTime": 1764239995000
             },
@@ -1491,7 +1491,7 @@
             {
               "date": 1764389462000,
               "videoId": "Ti_k3QnY3Xs",
-              "duration": 11267,
+              "duration": 11268,
               "startTime": 1764389462000,
               "endTime": 1764400732000
             },
@@ -1673,21 +1673,21 @@
             {
               "date": 1782321757000,
               "videoId": "sSWON-jRkgg",
-              "duration": 4010,
+              "duration": 4008,
               "startTime": 1782321757000,
               "endTime": 1782325768000
             },
             {
               "date": 1782357356000,
               "videoId": "8aIFzqzrRH0",
-              "duration": 3330,
+              "duration": 3315,
               "startTime": 1782357356000,
               "endTime": 1782360687000
             },
             {
               "date": 1782361211000,
               "videoId": "MXiphpZpYPw",
-              "duration": 864,
+              "duration": 858,
               "startTime": 1782361211000,
               "endTime": 1782362076000
             }
@@ -2067,7 +2067,7 @@
             {
               "date": 1748016251000,
               "videoId": "509iVjsmx70",
-              "duration": 2178,
+              "duration": 2179,
               "startTime": 1748016251000,
               "endTime": 1748018713000
             },
@@ -2165,7 +2165,7 @@
             {
               "date": 1748844425000,
               "videoId": "BX0dCl08Crs",
-              "duration": 5705,
+              "duration": 5706,
               "startTime": 1748844425000,
               "endTime": 1748850127000
             },
@@ -2531,7 +2531,7 @@
             {
               "date": 1772543015000,
               "videoId": "HOmZ_ZDo-wA",
-              "duration": 3650,
+              "duration": 3651,
               "startTime": 1772543015000,
               "endTime": 1772546664000
             },
@@ -2613,7 +2613,7 @@
             {
               "date": 1767933396000,
               "videoId": "KBKx8JhIE4M",
-              "duration": 5500,
+              "duration": 5501,
               "startTime": 1767933396000,
               "endTime": 1767938895000
             },
@@ -3060,7 +3060,7 @@
             {
               "date": 1761801271000,
               "videoId": "4IZCSFXAfto",
-              "duration": 8853,
+              "duration": 8854,
               "startTime": 1761801271000,
               "endTime": 1761810131000
             },
@@ -3516,7 +3516,7 @@
             {
               "date": 1754735623000,
               "videoId": "s_9p_x8bzjk",
-              "duration": 5461,
+              "duration": 5462,
               "startTime": 1754735623000,
               "endTime": 1754741085000
             },
@@ -3558,7 +3558,7 @@
             {
               "date": 1754888547000,
               "videoId": "-chGfhB9zkU",
-              "duration": 4844,
+              "duration": 4845,
               "startTime": 1754888547000,
               "endTime": 1754893396000
             }
@@ -3849,7 +3849,7 @@
             {
               "date": 1760894693000,
               "videoId": "3cUPvB81_gI",
-              "duration": 1286,
+              "duration": 1287,
               "startTime": 1760894693000,
               "endTime": 1760895981000
             },
@@ -4025,7 +4025,7 @@
             {
               "date": 1751359974000,
               "videoId": "ZSlKyX7INw4",
-              "duration": 8276,
+              "duration": 8277,
               "startTime": 1751359974000,
               "endTime": 1751368252000
             },
@@ -4340,7 +4340,7 @@
             {
               "date": 1764589352000,
               "videoId": "okOLT0qEdIs",
-              "duration": 2848,
+              "duration": 2849,
               "startTime": 1764589352000,
               "endTime": 1764592201000
             },
@@ -4459,7 +4459,7 @@
             {
               "date": 1765108341000,
               "videoId": "3u72G6DWEKw",
-              "duration": 6339,
+              "duration": 6340,
               "startTime": 1765108341000,
               "endTime": 1765114677000
             },
@@ -4713,7 +4713,7 @@
             {
               "date": 1769530136000,
               "videoId": "5I2PZT01mA0",
-              "duration": 8126,
+              "duration": 8127,
               "startTime": 1769530136000,
               "endTime": 1769538272000
             },
@@ -4859,7 +4859,7 @@
             {
               "date": 1772789366000,
               "videoId": "R9ZucBpctYI",
-              "duration": 6232,
+              "duration": 6233,
               "startTime": 1772789366000,
               "endTime": 1772795601000
             },
@@ -4880,7 +4880,7 @@
             {
               "date": 1772809632000,
               "videoId": "a_vAln619KY",
-              "duration": 9213,
+              "duration": 9214,
               "startTime": 1772809632000,
               "endTime": 1772818847000
             },
@@ -5482,7 +5482,7 @@
             {
               "date": 1759063400000,
               "videoId": "YhuIXQQHN-g",
-              "duration": 3364,
+              "duration": 3365,
               "startTime": 1759063400000,
               "endTime": 1759066772000
             },
@@ -5804,7 +5804,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 80,
+          "stream_count": 81,
           "timestamps": [
             {
               "date": 1774375141000,
@@ -6362,9 +6362,16 @@
             {
               "date": 1783567792000,
               "videoId": "JqXaAX1gOz8",
-              "duration": 9773,
+              "duration": 9771,
               "startTime": 1783567792000,
               "endTime": 1783577565000
+            },
+            {
+              "date": 1785169475000,
+              "videoId": "f4oTio5VZsk",
+              "duration": 5121,
+              "startTime": 1785169475000,
+              "endTime": 1785174596000
             }
           ],
           "isMain": false,
@@ -6705,7 +6712,7 @@
             {
               "date": 1758643195000,
               "videoId": "D3Ga3Tb1dsw",
-              "duration": 2331,
+              "duration": 2332,
               "startTime": 1758643195000,
               "endTime": 1758645530000
             },
@@ -6930,7 +6937,7 @@
             {
               "date": 1767629418000,
               "videoId": "mW14_izpIvM",
-              "duration": 3277,
+              "duration": 3278,
               "startTime": 1767629418000,
               "endTime": 1767632693000
             },
@@ -6993,7 +7000,7 @@
             {
               "date": 1775280692000,
               "videoId": "6KTxo677AAQ",
-              "duration": 5959,
+              "duration": 5960,
               "startTime": 1775280692000,
               "endTime": 1775286652000
             },
@@ -7152,14 +7159,14 @@
             {
               "date": 1783139682000,
               "videoId": "6zRm9O-LdSA",
-              "duration": 4105,
+              "duration": 4102,
               "startTime": 1783139682000,
               "endTime": 1783143788000
             },
             {
               "date": 1783154346000,
               "videoId": "oobctTy94G0",
-              "duration": 4600,
+              "duration": 4602,
               "startTime": 1783154346000,
               "endTime": 1783158946000
             }
@@ -7307,7 +7314,7 @@
             {
               "date": 1770025790000,
               "videoId": "6f0Hp7vEikw",
-              "duration": 4815,
+              "duration": 4816,
               "startTime": 1770025790000,
               "endTime": 1770030603000
             },
@@ -7510,7 +7517,7 @@
             {
               "date": 1771686324000,
               "videoId": "tjNXCGAqdzc",
-              "duration": 9560,
+              "duration": 9561,
               "startTime": 1771686324000,
               "endTime": 1771695878000
             },
@@ -7552,7 +7559,7 @@
             {
               "date": 1771910322000,
               "videoId": "vz_fcXZHoNo",
-              "duration": 10082,
+              "duration": 10083,
               "startTime": 1771910322000,
               "endTime": 1771920406000
             },
@@ -7693,7 +7700,7 @@
             {
               "date": 1773643656000,
               "videoId": "2qJoEs023og",
-              "duration": 6083,
+              "duration": 6084,
               "startTime": 1773643656000,
               "endTime": 1773649740000
             },
@@ -7882,7 +7889,7 @@
             {
               "date": 1783071256000,
               "videoId": "mZ2TGmOfCms",
-              "duration": 6747,
+              "duration": 6742,
               "startTime": 1783071256000,
               "endTime": 1783078004000
             }

@@ -111,6 +111,7 @@ export default function DataManager({
               </button>
             </div>
           </div>
+          
           <div className="border-t border-white/10 pt-6">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">RAWG Video Games Database API</h3>
             <p className="text-sm text-white/60 mt-1">Provide your RAWG API key for high-quality game covers, tags, and syncing games not on Steam.</p>
@@ -183,7 +184,6 @@ export default function DataManager({
           <Toggle label="Fluid Animations" description="Smooth morphing between views and sorting." warning="Disable this if your page feels laggy during sorting or view switching." value={layoutPrefs.enableViewTransitions ?? true} onChange={v => updateLayout('enableViewTransitions', v)} />
           <Toggle label="High-Resolution Images" description="Use full-quality 1080p/4K images. Disable to force lower-res thumbnails (saves RAM/bandwidth on older devices)." value={layoutPrefs.highResImages || false} onChange={v => updateLayout('highResImages', v)} />
           <Toggle label="3D Hover Effects" description="Toggles the flipping mosaic background on hover. If disabled, clicking a card once previews it, and clicking twice opens it (saves performance on lower-end computers)." value={layoutPrefs.enableHoverEffects !== false} onChange={v => updateLayout('enableHoverEffects', v)} />
-
           <RangeControl label="Card Panel Opacity" description="Transparency of game cards (History, Library, Add)" value={layoutPrefs.panelFillOpacity ?? 0.1} min={0} max={1} step={0.01} onChange={v => updateLayout('panelFillOpacity', v)} />
           <RangeControl label="App Background Dimming" description="Opacity of the dark overlay on the background" value={layoutPrefs.bgDimming ?? 0.5} min={0} max={1} step={0.01} onChange={v => updateLayout('bgDimming', v)} />
           <RangeControl label="Modal Panel Opacity" description="Transparency of Runs & Logs panels" value={modalPanelOpacity} min={0} max={1} step={0.01} onChange={setModalPanelOpacity} />
@@ -192,7 +192,7 @@ export default function DataManager({
           <RangeControl label="Stats Card Cycle Speed" description="Speed of the yellow gradient line and card flipping (seconds)" value={layoutPrefs.bgCycleInterval ?? 5} min={1} max={30} step={0.5} onChange={v => updateLayout('bgCycleInterval', v)} />
         </div>
 
-        <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2 mt-12"><Tag size={24} /> Word Cloud Settings</h2>
+        <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2"><Tag size={24} /> Word Cloud Settings</h2>
         <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-12 shadow-lg">
           <p className="text-sm text-white/60 mb-4">Exclude specific tags from appearing in the Stats page word cloud.</p>
           <div className="flex flex-wrap items-center gap-2">
@@ -228,8 +228,8 @@ export default function DataManager({
         <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2"><RefreshCw size={24} /> Data Synchronization</h2>
         <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5 mb-12 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-lg">
           <div>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">Sync Library Data</h3>
-            <p className="text-sm text-white/60 mt-1">Manually scan your library to fetch missing Steam URLs, update game details, and normalize developer/publisher names.</p>
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">Sync Playlist Data</h3>
+            <p className="text-sm text-white/60 mt-1">Manually scan your library to fetch and refresh the livestream duration and metadata for your attached YouTube playlists.</p>
           </div>
           <button 
             onClick={onRunSync} 
@@ -254,7 +254,6 @@ export default function DataManager({
             <Trash2 size={16} className="inline mr-2" /> Delete Data
           </button>
         </div>
-
       </div>
 
       {showWipeModal && (
@@ -271,7 +270,6 @@ export default function DataManager({
           </div>
         </div>
       )}
-
     </div>
   );
 }

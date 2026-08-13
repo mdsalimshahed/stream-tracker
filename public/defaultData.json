@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "7/28/2026, 12:13:15 AM",
+  "exportDate": "8/13/2026, 8:17:13 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -31,7 +31,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 2,
+          "stream_count": 4,
           "timestamps": [
             {
               "date": 1784383493000,
@@ -46,6 +46,20 @@
               "duration": 1493,
               "startTime": 1784727576000,
               "endTime": 1784730552000
+            },
+            {
+              "date": 1784807000000,
+              "videoId": "tuU87BHGM5g",
+              "duration": 3405,
+              "startTime": 1784807000000,
+              "endTime": 1784810409000
+            },
+            {
+              "date": 1785227546000,
+              "videoId": "3Sx5y0f_9Xo",
+              "duration": 10876,
+              "startTime": 1785227546000,
+              "endTime": 1785238427000
             }
           ],
           "isMain": true,
@@ -460,7 +474,7 @@
             {
               "date": 1769399062000,
               "videoId": "0t6VdMyM9OM",
-              "duration": 12418,
+              "duration": 12419,
               "startTime": 1769399062000,
               "endTime": 1769411482000
             },
@@ -709,14 +723,14 @@
             {
               "date": 1785152098000,
               "videoId": "E7i_SycgSPg",
-              "duration": 5621,
+              "duration": 5624,
               "startTime": 1785152098000,
               "endTime": 1785157720000
             },
             {
               "date": 1785158521000,
               "videoId": "mu7fwB12YpA",
-              "duration": 4522,
+              "duration": 4518,
               "startTime": 1785158521000,
               "endTime": 1785163043000
             }
@@ -724,7 +738,7 @@
           "isMain": true,
           "youtubePlaylist": "PLSvF4m8r86dc",
           "displayName": "First Playthrough",
-          "label": "Ongoing"
+          "label": "Completed"
         }
       },
       "details": {
@@ -2312,7 +2326,7 @@
             {
               "date": 1765550634000,
               "videoId": "YM2P2yBJ7vw",
-              "duration": 8908,
+              "duration": 8909,
               "startTime": 1765550634000,
               "endTime": 1765559544000
             },
@@ -2794,6 +2808,82 @@
         "tags": "Singleplayer, Steam Achievements, Steam Cloud, Atmospheric, Great Soundtrack, Story Rich, Third Person, Horror, Fantasy, Funny, Female Protagonist, Action-Adventure, Controller, Dark, Captions available, Dark Fantasy, combat, Magic, Surreal, Stylized, 3D Platformer, Family Sharing, Протагонистка, HDR available"
       },
       "cover_image": "https://media.rawg.io/media/games/734/73451dc0abd013bee5b7d88faaacec11.jpg"
+    },
+    "2001760": {
+      "game_name": "Beast of Reincarnation",
+      "release_year": "2026",
+      "cover_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/f55c103953c70b47025b04f0c121b1723d6c1670/ss_f55c103953c70b47025b04f0c121b1723d6c1670.1920x1080.jpg?t=1785194490",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/f55c103953c70b47025b04f0c121b1723d6c1670/ss_f55c103953c70b47025b04f0c121b1723d6c1670.1920x1080.jpg?t=1785194490",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/f9988d54094c2a099e5dafcdd12f045e4ca35f3b/ss_f9988d54094c2a099e5dafcdd12f045e4ca35f3b.1920x1080.jpg?t=1785194490",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/7252f8336988a2830e56428d99cf8792bc172161/ss_7252f8336988a2830e56428d99cf8792bc172161.1920x1080.jpg?t=1785194490",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/2900b5fbc2ef7b5c2bd3fab6007942e89da34020/ss_2900b5fbc2ef7b5c2bd3fab6007942e89da34020.1920x1080.jpg?t=1785194490",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/9759eb253a5c18a6e9840d89e7127f610627c684/ss_9759eb253a5c18a6e9840d89e7127f610627c684.1920x1080.jpg?t=1785194490",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/8c99c5092bae7a08967faff2f77ca9a3e41f72a3/ss_8c99c5092bae7a08967faff2f77ca9a3e41f72a3.1920x1080.jpg?t=1785194490",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/9165d04eccf6fb47c9b71f7a80ed685726502b6f/ss_9165d04eccf6fb47c9b71f7a80ed685726502b6f.1920x1080.jpg?t=1785194490"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 6,
+          "timestamps": [
+            {
+              "date": 1785823420000,
+              "videoId": "BAAUpx7ju2A",
+              "duration": 5742,
+              "startTime": 1785823420000,
+              "endTime": 1785829164000
+            },
+            {
+              "date": 1786028982000,
+              "videoId": "UFf3yUI-cIw",
+              "duration": 2589,
+              "startTime": 1786028982000,
+              "endTime": 1786031574000
+            },
+            {
+              "date": 1786542480000,
+              "videoId": "XtY4MqIf5Hk",
+              "duration": 6259,
+              "startTime": 1786542480000,
+              "endTime": 1786548745000
+            },
+            {
+              "date": 1786594236000,
+              "videoId": "-XOKZgnTHho",
+              "duration": 4449,
+              "startTime": 1786594236000,
+              "endTime": 1786598685000
+            },
+            {
+              "date": 1786600250000,
+              "videoId": "vYcTgDB2VD0",
+              "duration": 7312,
+              "startTime": 1786600250000,
+              "endTime": 1786607562000
+            },
+            {
+              "date": 1786609614000,
+              "videoId": "Tatyq3pl1hw",
+              "duration": 20342,
+              "startTime": 1786609614000,
+              "endTime": 1786629956000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLRyO2pF81_B4",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "GAME FREAK inc.",
+        "publisher": "Fictions",
+        "releaseDate": "3 Aug, 2026",
+        "genres": "Action, Adventure, RPG",
+        "tags": "Unknown",
+        "steamUrl": "https://store.steampowered.com/app/2001760/",
+        "notOnSteam": false
+      }
     },
     "2054970": {
       "game_name": "Dragon's Dogma 2",
@@ -5804,7 +5894,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 81,
+          "stream_count": 82,
           "timestamps": [
             {
               "date": 1774375141000,
@@ -6369,9 +6459,16 @@
             {
               "date": 1785169475000,
               "videoId": "f4oTio5VZsk",
-              "duration": 5121,
+              "duration": 5119,
               "startTime": 1785169475000,
               "endTime": 1785174596000
+            },
+            {
+              "date": 1786249536000,
+              "videoId": "xoMydBUu3y8",
+              "duration": 6202,
+              "startTime": 1786249536000,
+              "endTime": 1786255757000
             }
           ],
           "isMain": false,
@@ -6783,7 +6880,7 @@
             {
               "date": 1750128922000,
               "videoId": "cIOgk0buSBo",
-              "duration": 12931,
+              "duration": 12932,
               "startTime": 1750128922000,
               "endTime": 1750141857000
             },

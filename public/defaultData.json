@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "8/13/2026, 8:17:13 PM",
+  "exportDate": "8/22/2026, 12:45:24 AM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -3989,6 +3989,70 @@
       },
       "cover_image": "https://media.rawg.io/media/games/22e/22e68bb62b3013283972cecf98ed51dc.jpg"
     },
+    "2584270": {
+      "game_name": "Mortal Shell II",
+      "release_year": "2026",
+      "cover_image": "https://media.rawg.io/media/games/c86/c8696c763ec825c6e4d49efbf2635a26.jpg",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/a38e76ebe240fb97b0d81e5a38569c0991d3ca63/ss_a38e76ebe240fb97b0d81e5a38569c0991d3ca63.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/25aef0e6c4291d8708b53c5e8aaa66bc9859592f/ss_25aef0e6c4291d8708b53c5e8aaa66bc9859592f.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/c00a163b2843460386cad95df44de5d47a79fc26/ss_c00a163b2843460386cad95df44de5d47a79fc26.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/c38138e1c7c7c84636a08b2729bd983728f2c597/ss_c38138e1c7c7c84636a08b2729bd983728f2c597.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/5d8abca2b0c59292425e091aeb013f1eca948cbb/ss_5d8abca2b0c59292425e091aeb013f1eca948cbb.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/8109ee13458b04eb59cad18872996c3f802e7d7f/ss_8109ee13458b04eb59cad18872996c3f802e7d7f.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/8297dcfff135bf0d0ab519bf535b183979c1b718/ss_8297dcfff135bf0d0ab519bf535b183979c1b718.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/cb7f0b41a6bbe71705bd0971dcaa0df3dd146381/ss_cb7f0b41a6bbe71705bd0971dcaa0df3dd146381.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/3888851f686fdda4dd9831ec309056bc79b03413/ss_3888851f686fdda4dd9831ec309056bc79b03413.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/20cf47b479113b64ef1284ccdaaf049989073000/ss_20cf47b479113b64ef1284ccdaaf049989073000.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/efa39513f7b6e2ff612323b25b3acb41c950e9fe/ss_efa39513f7b6e2ff612323b25b3acb41c950e9fe.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/4d47af563e868b53a9558073e7b5de0d25b092d3/ss_4d47af563e868b53a9558073e7b5de0d25b092d3.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/4e04867fd22d4ca35ac96a01bb07446b294d056a/ss_4e04867fd22d4ca35ac96a01bb07446b294d056a.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/f3027c3ae8f8ea0ee2acc465d737d90e91ed126f/ss_f3027c3ae8f8ea0ee2acc465d737d90e91ed126f.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/5bda80adfe2880b41978fa797d6749e676986bc4/ss_5bda80adfe2880b41978fa797d6749e676986bc4.1920x1080.jpg?t=1787146410",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/9603a790d6379358d9c3f058204adaf8296ff464/ss_9603a790d6379358d9c3f058204adaf8296ff464.1920x1080.jpg?t=1787146410"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 3,
+          "timestamps": [
+            {
+              "date": 1787158981000,
+              "videoId": "uaPn-3oCUDI",
+              "duration": 3707,
+              "startTime": 1787158981000,
+              "endTime": 1787162691000
+            },
+            {
+              "date": 1787280901000,
+              "videoId": "Dm-pU5iAGLE",
+              "duration": 4687,
+              "startTime": 1787280901000,
+              "endTime": 1787285592000
+            },
+            {
+              "date": 1787314786000,
+              "videoId": "HNiwAQe_apQ",
+              "duration": 7195,
+              "startTime": 1787314786000,
+              "endTime": 1787321981000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLExTSAwz_lXs",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "Cold Symmetry",
+        "publisher": "Playstack",
+        "releaseDate": "20 Aug, 2026",
+        "genres": "Action, RPG",
+        "tags": "Unknown",
+        "steamUrl": "https://store.steampowered.com/app/2584270/",
+        "notOnSteam": false
+      }
+    },
     "2622380": {
       "game_name": "ELDEN RING NIGHTREIGN",
       "release_year": "2025",
@@ -7360,7 +7424,7 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/b2cf85ed0b734ad851c42da74c731db3ca2e9502/ss_b2cf85ed0b734ad851c42da74c731db3ca2e9502.1920x1080.jpg?t=1772090941",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/8f3e5ec42c6f3e1ed92a76541b4fc1245be4e687/ss_8f3e5ec42c6f3e1ed92a76541b4fc1245be4e687.1920x1080.jpg?t=1772090941",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/cdab644c4645c795e44d4b3766bdbd9dcb1613b5/ss_cdab644c4645c795e44d4b3766bdbd9dcb1613b5.1920x1080.jpg?t=1772090941",
-        "https://media.rawg.io/media/games/18f/18f1e09f98c9a0e822b616d68d73c956.jpg"
+        "https://cdn.mos.cms.futurecdn.net/nq3Mb4HzzDetsnRSDXGQyE.jpg"
       ],
       "cycles": {
         "main": {
@@ -7735,6 +7799,22 @@
           "displayName": "First Playthrough",
           "isMain": false,
           "youtubePlaylist": "PLLzuld5NPO9BwHzimFdS83d95V_6zOQvS"
+        },
+        "hell_rising": {
+          "stream_count": 1,
+          "timestamps": [
+            {
+              "date": 1787329851000,
+              "videoId": "Pa3EzZ40zoI",
+              "duration": 7948,
+              "startTime": 1787329851000,
+              "endTime": 1787337799000
+            }
+          ],
+          "isMain": false,
+          "youtubePlaylist": "PLRSJc4u0DW2I",
+          "displayName": "Hell Rising",
+          "label": "Ongoing"
         }
       },
       "details": {

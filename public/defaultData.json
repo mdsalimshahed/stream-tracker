@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "8/22/2026, 12:45:24 AM",
+  "exportDate": "8/22/2026, 5:09:35 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -2850,21 +2850,21 @@
             {
               "date": 1786594236000,
               "videoId": "-XOKZgnTHho",
-              "duration": 4449,
+              "duration": 4439,
               "startTime": 1786594236000,
               "endTime": 1786598685000
             },
             {
               "date": 1786600250000,
               "videoId": "vYcTgDB2VD0",
-              "duration": 7312,
+              "duration": 7310,
               "startTime": 1786600250000,
               "endTime": 1786607562000
             },
             {
               "date": 1786609614000,
               "videoId": "Tatyq3pl1hw",
-              "duration": 20342,
+              "duration": 20341,
               "startTime": 1786609614000,
               "endTime": 1786629956000
             }
@@ -4032,7 +4032,7 @@
             {
               "date": 1787314786000,
               "videoId": "HNiwAQe_apQ",
-              "duration": 7195,
+              "duration": 7193,
               "startTime": 1787314786000,
               "endTime": 1787321981000
             }
@@ -7424,7 +7424,10 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/b2cf85ed0b734ad851c42da74c731db3ca2e9502/ss_b2cf85ed0b734ad851c42da74c731db3ca2e9502.1920x1080.jpg?t=1772090941",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/8f3e5ec42c6f3e1ed92a76541b4fc1245be4e687/ss_8f3e5ec42c6f3e1ed92a76541b4fc1245be4e687.1920x1080.jpg?t=1772090941",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/cdab644c4645c795e44d4b3766bdbd9dcb1613b5/ss_cdab644c4645c795e44d4b3766bdbd9dcb1613b5.1920x1080.jpg?t=1772090941",
-        "https://cdn.mos.cms.futurecdn.net/nq3Mb4HzzDetsnRSDXGQyE.jpg"
+        "https://cdn.mos.cms.futurecdn.net/nq3Mb4HzzDetsnRSDXGQyE.jpg",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTv-26K0c22bTkY8DlQb_ENt0Vg5OUwwMMaBBIVBRYp6UctGccJ0-7VQgo&s=10",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4003950/29f0b69ebbbfa4039a82caf2d6ab7b24ff55f3b7/ss_29f0b69ebbbfa4039a82caf2d6ab7b24ff55f3b7.1920x1080.jpg?t=1787112015",
+        "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2026/02/20c3e4-1.JPG?&fit=crop&w=1600&h=900"
       ],
       "cycles": {
         "main": {
@@ -7801,14 +7804,35 @@
           "youtubePlaylist": "PLLzuld5NPO9BwHzimFdS83d95V_6zOQvS"
         },
         "hell_rising": {
-          "stream_count": 1,
+          "stream_count": 4,
           "timestamps": [
             {
               "date": 1787329851000,
               "videoId": "Pa3EzZ40zoI",
-              "duration": 7948,
+              "duration": 7945,
               "startTime": 1787329851000,
               "endTime": 1787337799000
+            },
+            {
+              "date": 1787375090000,
+              "videoId": "5hJsIuF0xns",
+              "duration": 7906,
+              "startTime": 1787375090000,
+              "endTime": 1787382997000
+            },
+            {
+              "date": 1787389104000,
+              "videoId": "YGhr3qLLG5Q",
+              "duration": 4889,
+              "startTime": 1787389104000,
+              "endTime": 1787393993000
+            },
+            {
+              "date": 1787394365000,
+              "videoId": "U1_hAe1IomY",
+              "duration": 2483,
+              "startTime": 1787394365000,
+              "endTime": 1787396848000
             }
           ],
           "isMain": false,

@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "8/22/2026, 5:09:35 PM",
+  "exportDate": "8/24/2026, 12:36:56 AM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -7427,7 +7427,8 @@
         "https://cdn.mos.cms.futurecdn.net/nq3Mb4HzzDetsnRSDXGQyE.jpg",
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTv-26K0c22bTkY8DlQb_ENt0Vg5OUwwMMaBBIVBRYp6UctGccJ0-7VQgo&s=10",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4003950/29f0b69ebbbfa4039a82caf2d6ab7b24ff55f3b7/ss_29f0b69ebbbfa4039a82caf2d6ab7b24ff55f3b7.1920x1080.jpg?t=1787112015",
-        "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2026/02/20c3e4-1.JPG?&fit=crop&w=1600&h=900"
+        "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2026/02/20c3e4-1.JPG?&fit=crop&w=1600&h=900",
+        "https://www.digitallydownloaded.net/wp-content/uploads/2026/07/Nioh-3-Hell-Rising-DLC-08.jpg"
       ],
       "cycles": {
         "main": {
@@ -7804,7 +7805,7 @@
           "youtubePlaylist": "PLLzuld5NPO9BwHzimFdS83d95V_6zOQvS"
         },
         "hell_rising": {
-          "stream_count": 4,
+          "stream_count": 10,
           "timestamps": [
             {
               "date": 1787329851000,
@@ -7816,23 +7817,65 @@
             {
               "date": 1787375090000,
               "videoId": "5hJsIuF0xns",
-              "duration": 7906,
+              "duration": 7904,
               "startTime": 1787375090000,
               "endTime": 1787382997000
             },
             {
               "date": 1787389104000,
               "videoId": "YGhr3qLLG5Q",
-              "duration": 4889,
+              "duration": 4879,
               "startTime": 1787389104000,
               "endTime": 1787393993000
             },
             {
               "date": 1787394365000,
               "videoId": "U1_hAe1IomY",
-              "duration": 2483,
+              "duration": 2480,
               "startTime": 1787394365000,
               "endTime": 1787396848000
+            },
+            {
+              "date": 1787450725000,
+              "videoId": "8tZMKiT612Y",
+              "duration": 5477,
+              "startTime": 1787450725000,
+              "endTime": 1787456203000
+            },
+            {
+              "date": 1787459461000,
+              "videoId": "Yv1k76gNd6s",
+              "duration": 3964,
+              "startTime": 1787459461000,
+              "endTime": 1787463427000
+            },
+            {
+              "date": 1787463540000,
+              "videoId": "9pzK0bS3foo",
+              "duration": 6574,
+              "startTime": 1787463540000,
+              "endTime": 1787470115000
+            },
+            {
+              "date": 1787489977000,
+              "videoId": "IvfEiPthEGs",
+              "duration": 3316,
+              "startTime": 1787489977000,
+              "endTime": 1787493293000
+            },
+            {
+              "date": 1787496310000,
+              "videoId": "gs96GB93hsM",
+              "duration": 3253,
+              "startTime": 1787496310000,
+              "endTime": 1787499563000
+            },
+            {
+              "date": 1787501865000,
+              "videoId": "UJe-sChJjIo",
+              "duration": 8117,
+              "startTime": 1787501865000,
+              "endTime": 1787509983000
             }
           ],
           "isMain": false,

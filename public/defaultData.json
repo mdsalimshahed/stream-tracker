@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "8/24/2026, 12:36:56 AM",
+  "exportDate": "8/24/2026, 12:12:20 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -7805,7 +7805,7 @@
           "youtubePlaylist": "PLLzuld5NPO9BwHzimFdS83d95V_6zOQvS"
         },
         "hell_rising": {
-          "stream_count": 10,
+          "stream_count": 12,
           "timestamps": [
             {
               "date": 1787329851000,
@@ -7838,7 +7838,7 @@
             {
               "date": 1787450725000,
               "videoId": "8tZMKiT612Y",
-              "duration": 5477,
+              "duration": 5467,
               "startTime": 1787450725000,
               "endTime": 1787456203000
             },
@@ -7852,21 +7852,21 @@
             {
               "date": 1787463540000,
               "videoId": "9pzK0bS3foo",
-              "duration": 6574,
+              "duration": 6571,
               "startTime": 1787463540000,
               "endTime": 1787470115000
             },
             {
               "date": 1787489977000,
               "videoId": "IvfEiPthEGs",
-              "duration": 3316,
+              "duration": 3311,
               "startTime": 1787489977000,
               "endTime": 1787493293000
             },
             {
               "date": 1787496310000,
               "videoId": "gs96GB93hsM",
-              "duration": 3253,
+              "duration": 3254,
               "startTime": 1787496310000,
               "endTime": 1787499563000
             },
@@ -7876,6 +7876,20 @@
               "duration": 8117,
               "startTime": 1787501865000,
               "endTime": 1787509983000
+            },
+            {
+              "date": 1787537226000,
+              "videoId": "rxIU385u9U8",
+              "duration": 5436,
+              "startTime": 1787537226000,
+              "endTime": 1787542663000
+            },
+            {
+              "date": 1787544321000,
+              "videoId": "76qtoM4ZO1I",
+              "duration": 7482,
+              "startTime": 1787544321000,
+              "endTime": 1787551803000
             }
           ],
           "isMain": false,

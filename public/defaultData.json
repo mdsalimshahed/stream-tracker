@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "9/1/2026, 5:41:53 PM",
+  "exportDate": "9/2/2026, 10:03:47 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -5307,11 +5307,12 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2713000/1218579fae82e00d1c459c3ea880d89854494e31/ss_1218579fae82e00d1c459c3ea880d89854494e31.1920x1080.jpg?t=1787925122",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2713000/55987015a15b4af4c98548ffea60f97624c5ebfd/ss_55987015a15b4af4c98548ffea60f97624c5ebfd.1920x1080.jpg?t=1787925122",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2713000/822d39e2d2c1a4920a336de73201bb453ef076c0/ss_822d39e2d2c1a4920a336de73201bb453ef076c0.1920x1080.jpg?t=1787925122",
-        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2713000/8800f39e3437f77dd5e2a410d17345c7ea5856ed/ss_8800f39e3437f77dd5e2a410d17345c7ea5856ed.1920x1080.jpg?t=1787925122"
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2713000/8800f39e3437f77dd5e2a410d17345c7ea5856ed/ss_8800f39e3437f77dd5e2a410d17345c7ea5856ed.1920x1080.jpg?t=1787925122",
+        "https://assetsio.gnwcdn.com/Resonance-A-Plague-Tale-Legacy-Chapter-12---Header.jpg?width=1200&height=600&fit=crop&enable=upscale&auto=webp"
       ],
       "cycles": {
         "main": {
-          "stream_count": 3,
+          "stream_count": 10,
           "timestamps": [
             {
               "date": 1787991414000,
@@ -5323,22 +5324,71 @@
             {
               "date": 1788251396000,
               "videoId": "Q-lk5fNsu-I",
-              "duration": 2781,
+              "duration": 2777,
               "startTime": 1788251396000,
               "endTime": 1788254177000
             },
             {
               "date": 1788258055000,
               "videoId": "rx2O3THO-8M",
-              "duration": 4178,
+              "duration": 4174,
               "startTime": 1788258055000,
               "endTime": 1788262234000
+            },
+            {
+              "date": 1788263795000,
+              "videoId": "OsnJonx4DPs",
+              "duration": 8673,
+              "startTime": 1788263795000,
+              "endTime": 1788272469000
+            },
+            {
+              "date": 1788317229000,
+              "videoId": "t7pN7RQMaIc",
+              "duration": 5189,
+              "startTime": 1788317229000,
+              "endTime": 1788322418000
+            },
+            {
+              "date": 1788331055000,
+              "videoId": "Ft2d1BUJomk",
+              "duration": 3486,
+              "startTime": 1788331055000,
+              "endTime": 1788334542000
+            },
+            {
+              "date": 1788337905000,
+              "videoId": "zoeKRODLiZA",
+              "duration": 3336,
+              "startTime": 1788337905000,
+              "endTime": 1788341241000
+            },
+            {
+              "date": 1788341329000,
+              "videoId": "u67nHzeBjTc",
+              "duration": 5297,
+              "startTime": 1788341329000,
+              "endTime": 1788346626000
+            },
+            {
+              "date": 1788348774000,
+              "videoId": "CNWJhE1DSkY",
+              "duration": 7883,
+              "startTime": 1788348774000,
+              "endTime": 1788356658000
+            },
+            {
+              "date": 1788356729000,
+              "videoId": "pUaKUyg2GLI",
+              "duration": 8152,
+              "startTime": 1788356729000,
+              "endTime": 1788364882000
             }
           ],
           "isMain": true,
           "youtubePlaylist": "PLcEHe0dHNJmA",
           "displayName": "First Playthrough",
-          "label": "Ongoing"
+          "label": "Completed"
         }
       },
       "details": {

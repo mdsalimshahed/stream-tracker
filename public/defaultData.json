@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "9/6/2026, 12:03:55 AM",
+  "exportDate": "9/6/2026, 5:27:45 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -8121,11 +8121,12 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3751260/593eddd88a461156d2d7debae80e7620924d8eba/ss_593eddd88a461156d2d7debae80e7620924d8eba.1920x1080.jpg?t=1788387095",
         "https://sm.ign.com/ign_nordic/feature/t/the-blood-/the-blood-of-dawnwalker-pc-settings-guide-maximize-your-pc-p_utdg.png",
         "https://static0.fextralifeimages.com/wordpress/wp-content/uploads/2025/09/the-blood-of-dawnwalker-first-impressions-clean.jpg?w=1600&h=1200&fit=crop",
-        "https://assetsio.gnwcdn.com/The-Blood-of-Dawnwalker---Screenshot-(6).jpg?width=2048&height=2048&fit=bounds&quality=85&format=jpg&auto=webp"
+        "https://assetsio.gnwcdn.com/The-Blood-of-Dawnwalker---Screenshot-(6).jpg?width=2048&height=2048&fit=bounds&quality=85&format=jpg&auto=webp",
+        "https://assetsio.gnwcdn.com/dawnwalker-leonica.jpg?width=2048&height=2048&fit=bounds&quality=85&format=jpg&auto=webp"
       ],
       "cycles": {
         "main": {
-          "stream_count": 7,
+          "stream_count": 10,
           "timestamps": [
             {
               "date": 1788411376000,
@@ -8144,37 +8145,58 @@
             {
               "date": 1788586851000,
               "videoId": "4gG2XYlYQkU",
-              "duration": 6221,
+              "duration": 6216,
               "startTime": 1788586851000,
               "endTime": 1788593073000
             },
             {
               "date": 1788597229000,
               "videoId": "-bxq02ky58I",
-              "duration": 3697,
+              "duration": 3694,
               "startTime": 1788597229000,
               "endTime": 1788600926000
             },
             {
               "date": 1788602144000,
               "videoId": "SRpV4PwiNEU",
-              "duration": 5089,
+              "duration": 5090,
               "startTime": 1788602144000,
               "endTime": 1788607233000
             },
             {
               "date": 1788609889000,
               "videoId": "h4fGjrtU_js",
-              "duration": 10494,
+              "duration": 10490,
               "startTime": 1788609889000,
               "endTime": 1788620384000
             },
             {
               "date": 1788623685000,
               "videoId": "JeVF60XHC68",
-              "duration": 7627,
+              "duration": 7623,
               "startTime": 1788623685000,
               "endTime": 1788631313000
+            },
+            {
+              "date": 1788666914000,
+              "videoId": "NUB3a27-wA8",
+              "duration": 12323,
+              "startTime": 1788666914000,
+              "endTime": 1788679237000
+            },
+            {
+              "date": 1788683651000,
+              "videoId": "T56VtJMbFzw",
+              "duration": 3985,
+              "startTime": 1788683651000,
+              "endTime": 1788687636000
+            },
+            {
+              "date": 1788687674000,
+              "videoId": "q-f1L00eMBM",
+              "duration": 6182,
+              "startTime": 1788687674000,
+              "endTime": 1788693857000
             }
           ],
           "isMain": true,

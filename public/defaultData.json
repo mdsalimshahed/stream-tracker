@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "9/6/2026, 5:27:45 PM",
+  "exportDate": "9/8/2026, 8:38:51 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -2864,7 +2864,7 @@
             {
               "date": 1786609614000,
               "videoId": "Tatyq3pl1hw",
-              "duration": 20341,
+              "duration": 19870,
               "startTime": 1786609614000,
               "endTime": 1786629956000
             },
@@ -4074,21 +4074,21 @@
             {
               "date": 1787676274000,
               "videoId": "z1ywJ2unoWA",
-              "duration": 6608,
+              "duration": 6409,
               "startTime": 1787676274000,
               "endTime": 1787682881000
             },
             {
               "date": 1787820895000,
               "videoId": "AEU80anfye8",
-              "duration": 2050,
+              "duration": 2042,
               "startTime": 1787820895000,
               "endTime": 1787822946000
             },
             {
               "date": 1787823439000,
               "videoId": "R51Ki1XFVEg",
-              "duration": 4736,
+              "duration": 3715,
               "startTime": 1787823439000,
               "endTime": 1787828175000
             }
@@ -6717,14 +6717,14 @@
             {
               "date": 1788098415000,
               "videoId": "uAdvEmLp1L0",
-              "duration": 1135,
+              "duration": 1102,
               "startTime": 1788098415000,
               "endTime": 1788099550000
             },
             {
               "date": 1788180676000,
               "videoId": "1I6gFbaSmiU",
-              "duration": 8365,
+              "duration": 8357,
               "startTime": 1788180676000,
               "endTime": 1788189041000
             }
@@ -6795,14 +6795,14 @@
             {
               "date": 1776702601000,
               "videoId": "7L3u5hkAQnA",
-              "duration": 10503,
+              "duration": 10504,
               "startTime": 1776702601000,
               "endTime": 1776713107000
             },
             {
               "date": 1776752976000,
               "videoId": "EVEovuLKIhw",
-              "duration": 6893,
+              "duration": 6894,
               "startTime": 1776752976000,
               "endTime": 1776759867000
             },
@@ -8066,21 +8066,21 @@
             {
               "date": 1787501865000,
               "videoId": "UJe-sChJjIo",
-              "duration": 8117,
+              "duration": 8114,
               "startTime": 1787501865000,
               "endTime": 1787509983000
             },
             {
               "date": 1787537226000,
               "videoId": "rxIU385u9U8",
-              "duration": 5436,
+              "duration": 5432,
               "startTime": 1787537226000,
               "endTime": 1787542663000
             },
             {
               "date": 1787544321000,
               "videoId": "76qtoM4ZO1I",
-              "duration": 7482,
+              "duration": 7468,
               "startTime": 1787544321000,
               "endTime": 1787551803000
             }
@@ -8122,11 +8122,15 @@
         "https://sm.ign.com/ign_nordic/feature/t/the-blood-/the-blood-of-dawnwalker-pc-settings-guide-maximize-your-pc-p_utdg.png",
         "https://static0.fextralifeimages.com/wordpress/wp-content/uploads/2025/09/the-blood-of-dawnwalker-first-impressions-clean.jpg?w=1600&h=1200&fit=crop",
         "https://assetsio.gnwcdn.com/The-Blood-of-Dawnwalker---Screenshot-(6).jpg?width=2048&height=2048&fit=bounds&quality=85&format=jpg&auto=webp",
-        "https://assetsio.gnwcdn.com/dawnwalker-leonica.jpg?width=2048&height=2048&fit=bounds&quality=85&format=jpg&auto=webp"
+        "https://assetsio.gnwcdn.com/dawnwalker-leonica.jpg?width=2048&height=2048&fit=bounds&quality=85&format=jpg&auto=webp",
+        "https://www.gamespot.com/wp-content/uploads/2026/09/blood-of-dawnwalker-the-firebrand-under-watchful-eyes-.jpg",
+        "https://static.bandainamcoent.eu/high/dawnwalker/the-blood-of-dawnwalker/03-character-gallery/screenshots/Ambrus/ambrus_3.png",
+        "https://static0.polygonimages.com/wordpress/wp-content/uploads/2026/08/the-blood-of-dawnwalker-a-monk-and-a-saint-quest-1.jpg",
+        "https://blogger.googleusercontent.com/img/a/AVvXsEiY_dJ8dtL0rVnrgMjQ6mUEH-79zL0IGtZFKTwsFvtIcg4LFqTuYfvicqw4vOg7PwvKtwoKEEWzx4HUn54thTeg1smhIbbmlrv6jhHINACnK7XZ98CEzP3jUPMGDy_7kSqGi8YGsLZheaS8wZIJoX6N4ZwEsgB3WyxORm_I1fb7qnifTAwN3s18kMkWScg"
       ],
       "cycles": {
         "main": {
-          "stream_count": 10,
+          "stream_count": 18,
           "timestamps": [
             {
               "date": 1788411376000,
@@ -8180,23 +8184,79 @@
             {
               "date": 1788666914000,
               "videoId": "NUB3a27-wA8",
-              "duration": 12323,
+              "duration": 12325,
               "startTime": 1788666914000,
               "endTime": 1788679237000
             },
             {
               "date": 1788683651000,
               "videoId": "T56VtJMbFzw",
-              "duration": 3985,
+              "duration": 3982,
               "startTime": 1788683651000,
               "endTime": 1788687636000
             },
             {
               "date": 1788687674000,
               "videoId": "q-f1L00eMBM",
-              "duration": 6182,
+              "duration": 6180,
               "startTime": 1788687674000,
               "endTime": 1788693857000
+            },
+            {
+              "date": 1788698424000,
+              "videoId": "7Vloy_Kr_bw",
+              "duration": 5278,
+              "startTime": 1788698424000,
+              "endTime": 1788703708000
+            },
+            {
+              "date": 1788705020000,
+              "videoId": "L45cg6pkBPk",
+              "duration": 2756,
+              "startTime": 1788705020000,
+              "endTime": 1788707780000
+            },
+            {
+              "date": 1788711309000,
+              "videoId": "1nx9cyhHURk",
+              "duration": 6994,
+              "startTime": 1788711309000,
+              "endTime": 1788718306000
+            },
+            {
+              "date": 1788769496000,
+              "videoId": "8AbPAkN4zjU",
+              "duration": 3513,
+              "startTime": 1788769496000,
+              "endTime": 1788773006000
+            },
+            {
+              "date": 1788839280000,
+              "videoId": "hdcN7N6XQBk",
+              "duration": 7954,
+              "startTime": 1788839280000,
+              "endTime": 1788847234000
+            },
+            {
+              "date": 1788847245000,
+              "videoId": "FJdaBKUksEM",
+              "duration": 5339,
+              "startTime": 1788847245000,
+              "endTime": 1788852584000
+            },
+            {
+              "date": 1788856585000,
+              "videoId": "XwBFCt-sU_8",
+              "duration": 9516,
+              "startTime": 1788856585000,
+              "endTime": 1788866102000
+            },
+            {
+              "date": 1788871139000,
+              "videoId": "0X0K4TlEwTg",
+              "duration": 6846,
+              "startTime": 1788871139000,
+              "endTime": 1788877986000
             }
           ],
           "isMain": true,

@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "9/9/2026, 8:49:53 PM",
+  "exportDate": "9/14/2026, 12:09:57 AM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -2814,17 +2814,17 @@
       "release_year": "2026",
       "cover_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/f55c103953c70b47025b04f0c121b1723d6c1670/ss_f55c103953c70b47025b04f0c121b1723d6c1670.1920x1080.jpg?t=1785194490",
       "thumbnail_urls": [
-        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/f55c103953c70b47025b04f0c121b1723d6c1670/ss_f55c103953c70b47025b04f0c121b1723d6c1670.1920x1080.jpg?t=1785194490",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/f9988d54094c2a099e5dafcdd12f045e4ca35f3b/ss_f9988d54094c2a099e5dafcdd12f045e4ca35f3b.1920x1080.jpg?t=1785194490",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/7252f8336988a2830e56428d99cf8792bc172161/ss_7252f8336988a2830e56428d99cf8792bc172161.1920x1080.jpg?t=1785194490",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/2900b5fbc2ef7b5c2bd3fab6007942e89da34020/ss_2900b5fbc2ef7b5c2bd3fab6007942e89da34020.1920x1080.jpg?t=1785194490",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/9759eb253a5c18a6e9840d89e7127f610627c684/ss_9759eb253a5c18a6e9840d89e7127f610627c684.1920x1080.jpg?t=1785194490",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/8c99c5092bae7a08967faff2f77ca9a3e41f72a3/ss_8c99c5092bae7a08967faff2f77ca9a3e41f72a3.1920x1080.jpg?t=1785194490",
-        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/9165d04eccf6fb47c9b71f7a80ed685726502b6f/ss_9165d04eccf6fb47c9b71f7a80ed685726502b6f.1920x1080.jpg?t=1785194490"
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/9165d04eccf6fb47c9b71f7a80ed685726502b6f/ss_9165d04eccf6fb47c9b71f7a80ed685726502b6f.1920x1080.jpg?t=1785194490",
+        "https://4kwallpapers.com/images/wallpapers/beast-of-3840x2160-25200.jpg"
       ],
       "cycles": {
         "main": {
-          "stream_count": 7,
+          "stream_count": 8,
           "timestamps": [
             {
               "date": 1785823420000,
@@ -2874,6 +2874,13 @@
               "duration": 3307,
               "startTime": 1787582586000,
               "endTime": 1787585899000
+            },
+            {
+              "date": 1788517702000,
+              "videoId": "dGVpahZHVqk",
+              "duration": 701,
+              "startTime": 1788517702000,
+              "endTime": 1788529809000
             }
           ],
           "isMain": true,
@@ -8130,7 +8137,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 22,
+          "stream_count": 32,
           "timestamps": [
             {
               "date": 1788411376000,
@@ -8240,7 +8247,7 @@
             {
               "date": 1788847245000,
               "videoId": "FJdaBKUksEM",
-              "duration": 5340,
+              "duration": 5137,
               "startTime": 1788847245000,
               "endTime": 1788852584000
             },
@@ -8268,23 +8275,93 @@
             {
               "date": 1788926370000,
               "videoId": "dx8i_X_yvk0",
-              "duration": 12516,
+              "duration": 12503,
               "startTime": 1788926370000,
               "endTime": 1788938887000
             },
             {
               "date": 1788942805000,
               "videoId": "pH4yrUrOlmI",
-              "duration": 8956,
+              "duration": 8953,
               "startTime": 1788942805000,
               "endTime": 1788951761000
             },
             {
               "date": 1788958095000,
               "videoId": "VJbVn3wawgk",
-              "duration": 6761,
+              "duration": 6753,
               "startTime": 1788958095000,
               "endTime": 1788964857000
+            },
+            {
+              "date": 1788971026000,
+              "videoId": "tU9YfvIE47Q",
+              "duration": 7593,
+              "startTime": 1788971026000,
+              "endTime": 1788978625000
+            },
+            {
+              "date": 1789015495000,
+              "videoId": "TSpphowo4l8",
+              "duration": 8558,
+              "startTime": 1789015495000,
+              "endTime": 1789025799000
+            },
+            {
+              "date": 1789183919000,
+              "videoId": "Zx9nBPOg_nQ",
+              "duration": 9919,
+              "startTime": 1789183919000,
+              "endTime": 1789193845000
+            },
+            {
+              "date": 1789194055000,
+              "videoId": "dUmPNO8M2lY",
+              "duration": 4268,
+              "startTime": 1789194055000,
+              "endTime": 1789198325000
+            },
+            {
+              "date": 1789202535000,
+              "videoId": "ChG_J6XhseI",
+              "duration": 2569,
+              "startTime": 1789202535000,
+              "endTime": 1789205110000
+            },
+            {
+              "date": 1789205240000,
+              "videoId": "hM99k5RwIeE",
+              "duration": 8638,
+              "startTime": 1789205240000,
+              "endTime": 1789213884000
+            },
+            {
+              "date": 1789219019000,
+              "videoId": "vynLWjBxHFs",
+              "duration": 3924,
+              "startTime": 1789219019000,
+              "endTime": 1789222945000
+            },
+            {
+              "date": 1789225025000,
+              "videoId": "dExxjsK5FBk",
+              "duration": 8746,
+              "startTime": 1789225025000,
+              "endTime": 1789233774000
+            },
+            {
+              "date": 1789308329000,
+              "videoId": "MC5x-f9K0z4",
+              "duration": 6221,
+              "startTime": 1789308329000,
+              "endTime": 1789314551000
+            },
+            {
+              "date": 1789316387000,
+              "videoId": "bth1RHzIPBw",
+              "duration": 6402,
+              "startTime": 1789316387000,
+              "endTime": 1789322789000
             }
           ],
           "isMain": true,

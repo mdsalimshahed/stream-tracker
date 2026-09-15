@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "9/14/2026, 12:09:57 AM",
+  "exportDate": "9/15/2026, 4:11:03 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -4988,8 +4988,12 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 0,
-          "timestamps": [],
+          "stream_count": 1,
+          "timestamps": [
+            {
+              "date": 1789374531817
+            }
+          ],
           "isMain": true,
           "youtubePlaylist": "",
           "displayName": "First Playthrough",
@@ -8137,7 +8141,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 32,
+          "stream_count": 36,
           "timestamps": [
             {
               "date": 1788411376000,
@@ -8352,22 +8356,50 @@
             {
               "date": 1789308329000,
               "videoId": "MC5x-f9K0z4",
-              "duration": 6221,
+              "duration": 6220,
               "startTime": 1789308329000,
               "endTime": 1789314551000
             },
             {
               "date": 1789316387000,
               "videoId": "bth1RHzIPBw",
-              "duration": 6402,
+              "duration": 6401,
               "startTime": 1789316387000,
               "endTime": 1789322789000
+            },
+            {
+              "date": 1789358651000,
+              "videoId": "QesRiFMkCdU",
+              "duration": 7342,
+              "startTime": 1789358651000,
+              "endTime": 1789365993000
+            },
+            {
+              "date": 1789391040000,
+              "videoId": "sIKsFEZGXw4",
+              "duration": 5769,
+              "startTime": 1789391040000,
+              "endTime": 1789396810000
+            },
+            {
+              "date": 1789396966000,
+              "videoId": "o-1fxtV9lUk",
+              "duration": 11481,
+              "startTime": 1789396966000,
+              "endTime": 1789408453000
+            },
+            {
+              "date": 1789460245000,
+              "videoId": "2G9YjMehWJA",
+              "duration": 6644,
+              "startTime": 1789460245000,
+              "endTime": 1789466889000
             }
           ],
           "isMain": true,
           "youtubePlaylist": "PLZ--WoPQxty4",
           "displayName": "First Playthrough",
-          "label": "Ongoing"
+          "label": "Completed"
         }
       },
       "details": {
@@ -8649,7 +8681,7 @@
     "titleYOffset": 10,
     "titleSpacing": 29,
     "strokeWidth": 16,
-    "splitTitle": true,
+    "splitTitle": false,
     "streamCountSize": 93,
     "cycleSize": 52,
     "bottomSpacing": 70,

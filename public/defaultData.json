@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "9/15/2026, 4:11:03 PM",
+  "exportDate": "9/29/2026, 8:39:29 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -1638,7 +1638,7 @@
             {
               "date": 1782036618000,
               "videoId": "kIAgQR4JzA0",
-              "duration": 5747,
+              "duration": 5748,
               "startTime": 1782036618000,
               "endTime": 1782042367000
             },
@@ -2824,7 +2824,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 8,
+          "stream_count": 12,
           "timestamps": [
             {
               "date": 1785823420000,
@@ -2881,6 +2881,34 @@
               "duration": 701,
               "startTime": 1788517702000,
               "endTime": 1788529809000
+            },
+            {
+              "date": 1789635670000,
+              "videoId": "dwNrYNfYTr8",
+              "duration": 3406,
+              "startTime": 1789635670000,
+              "endTime": 1789639081000
+            },
+            {
+              "date": 1789650377000,
+              "videoId": "VQTLGF9VNx4",
+              "duration": 3398,
+              "startTime": 1789650377000,
+              "endTime": 1789653807000
+            },
+            {
+              "date": 1789741327000,
+              "videoId": "s7PMXJV4NKM",
+              "duration": 6892,
+              "startTime": 1789741327000,
+              "endTime": 1789748220000
+            },
+            {
+              "date": 1789748359000,
+              "videoId": "3g5TRDuLEXs",
+              "duration": 6942,
+              "startTime": 1789748359000,
+              "endTime": 1789755303000
             }
           ],
           "isMain": true,
@@ -4988,14 +5016,25 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 1,
+          "stream_count": 2,
           "timestamps": [
             {
-              "date": 1789374531817
+              "date": 1789374470000,
+              "videoId": "2D-f9CEXDHM",
+              "duration": 8878,
+              "startTime": 1789374470000,
+              "endTime": 1789383350000
+            },
+            {
+              "date": 1789621830000,
+              "videoId": "8f_jtZcne1c",
+              "duration": 7259,
+              "startTime": 1789621830000,
+              "endTime": 1789629122000
             }
           ],
           "isMain": true,
-          "youtubePlaylist": "",
+          "youtubePlaylist": "PLaE8JeLH4RaU",
           "displayName": "First Playthrough",
           "label": "Ongoing"
         },
@@ -8141,7 +8180,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 36,
+          "stream_count": 37,
           "timestamps": [
             {
               "date": 1788411376000,
@@ -8389,9 +8428,16 @@
               "endTime": 1789408453000
             },
             {
+              "date": 1789444017000,
+              "videoId": "gXNXmW92Aws",
+              "duration": 11171,
+              "startTime": 1789444017000,
+              "endTime": 1789455189000
+            },
+            {
               "date": 1789460245000,
               "videoId": "2G9YjMehWJA",
-              "duration": 6644,
+              "duration": 6645,
               "startTime": 1789460245000,
               "endTime": 1789466889000
             }
@@ -8587,7 +8633,7 @@
             {
               "date": 1782293773000,
               "videoId": "f-pAXVgXs1Y",
-              "duration": 6958,
+              "duration": 6959,
               "startTime": 1782293773000,
               "endTime": 1782300734000
             },

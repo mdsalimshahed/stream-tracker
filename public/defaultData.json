@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "9/29/2026, 8:39:29 PM",
+  "exportDate": "10/12/2026, 10:48:48 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -31,7 +31,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 4,
+          "stream_count": 5,
           "timestamps": [
             {
               "date": 1784383493000,
@@ -60,6 +60,9 @@
               "duration": 10876,
               "startTime": 1785227546000,
               "endTime": 1785238427000
+            },
+            {
+              "date": 1791443622403
             }
           ],
           "isMain": true,
@@ -5016,7 +5019,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 2,
+          "stream_count": 3,
           "timestamps": [
             {
               "date": 1789374470000,
@@ -5031,6 +5034,13 @@
               "duration": 7259,
               "startTime": 1789621830000,
               "endTime": 1789629122000
+            },
+            {
+              "date": 1791367295000,
+              "videoId": "J3_n9c4vpqs",
+              "duration": 1113,
+              "startTime": 1791367295000,
+              "endTime": 1791368408000
             }
           ],
           "isMain": true,
@@ -8727,7 +8737,7 @@
     "titleYOffset": 10,
     "titleSpacing": 29,
     "strokeWidth": 16,
-    "splitTitle": false,
+    "splitTitle": true,
     "streamCountSize": 93,
     "cycleSize": 52,
     "bottomSpacing": 70,

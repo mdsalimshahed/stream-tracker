@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 
 // Hooks
@@ -30,10 +30,35 @@ import { getLowResUrl } from './utils/helpers';
 
 export default function App() {
   const [toast, setToast] = useState(null);
-  const notify = (msg, type) => setToast({ message: msg, type });
+  const notify = useCallback((msg, type) => setToast({ message: msg, type }), []);
+
+  const [defaultInitializationMode] = useState(() => {
+    try {
+      const initialized = localStorage.getItem('streamTrackerDefaultsInitialized') === 'true';
+      if (initialized) {
+        return localStorage.getItem('streamTrackerDefaultSettingsInitialized') === 'true'
+          ? 'none'
+          : 'repair-settings';
+      }
+      const storedData = localStorage.getItem('streamManagerData');
+      return !storedData || Object.keys(JSON.parse(storedData)).length === 0
+        ? 'initialize'
+        : 'none';
+    } catch {
+      return 'none';
+    }
+  });
+  const [isLoadingDefaultData, setIsLoadingDefaultData] = useState(defaultInitializationMode === 'initialize');
 
   // --- Hooks ---
   const settings = useSettings();
+  const {
+    setThumbnailConfig,
+    setSystemFonts,
+    setLayoutPrefs,
+    setModalBgIntensity,
+    setModalPanelOpacity,
+  } = settings;
   const { streamData, setStreamData, isSyncing, handleManualSync, handleAddGame, updateGameLink, editGameDetails, deleteGame, deleteCycle, deleteTimestamp, updateCycle, addCycle } = useStreamData(notify);
   const { scaledSystemFonts, scaledLayoutPrefs } = useScaling(settings.systemFonts, settings.layoutPrefs);
   const { searchQuery, setSearchQuery, searchResults, isSearching, handleSearch } = useSearch();
@@ -46,10 +71,7 @@ export default function App() {
   const [rawgApiKey, setRawgApiKey] = useState(() => localStorage.getItem('rawgApiKey') || '');
 
   // --- Navigation ---
-  const [currentView, setCurrentView] = useState(() => {
-    try { const s = localStorage.getItem('streamManagerData'); if (s && Object.keys(JSON.parse(s)).length > 0) return 'dashboard'; } catch (e) {}
-    return 'data';
-  });
+  const [currentView, setCurrentView] = useState('library');
 
   // --- Modals ---
   const [selectedGameId, setSelectedGameId] = useState(null);
@@ -81,7 +103,7 @@ export default function App() {
   }
 
   // --- Import / Export ---
-  const handleImport = (importedData) => {
+  const handleImport = useCallback((importedData, { silent = false } = {}) => {
     try {
       const isSettingsOnly = importedData.type === 'settings_only';
       const isFullBackup = !isSettingsOnly && (importedData.type === 'full_backup' || importedData.type === 'full_with_keys' || importedData.streamData !== undefined);
@@ -90,13 +112,12 @@ export default function App() {
         const dataToMigrate = isFullBackup ? importedData.streamData : importedData;
         setStreamData(migrateLabels(dataToMigrate).data);
       }
-      
       if (isFullBackup || isSettingsOnly) {
-        if (importedData.thumbnailConfig) settings.setThumbnailConfig(importedData.thumbnailConfig);
-        if (importedData.systemFonts) settings.setSystemFonts(importedData.systemFonts);
-        if (importedData.layoutPrefs) settings.setLayoutPrefs(importedData.layoutPrefs);
-        if (importedData.modalBgIntensity !== undefined) settings.setModalBgIntensity(importedData.modalBgIntensity);
-        if (importedData.modalPanelOpacity !== undefined) settings.setModalPanelOpacity(importedData.modalPanelOpacity);
+        if (importedData.thumbnailConfig) setThumbnailConfig(importedData.thumbnailConfig);
+        if (importedData.systemFonts) setSystemFonts(importedData.systemFonts);
+        if (importedData.layoutPrefs) setLayoutPrefs(importedData.layoutPrefs);
+        if (importedData.modalBgIntensity !== undefined) setModalBgIntensity(importedData.modalBgIntensity);
+        if (importedData.modalPanelOpacity !== undefined) setModalPanelOpacity(importedData.modalPanelOpacity);
 
         // Instantly handle API Keys on import
         const newYt = importedData.youtubeApiKey || '';
@@ -111,12 +132,12 @@ export default function App() {
         else localStorage.removeItem('rawgApiKey');
       }
 
-      notify('Data imported successfully!', 'success');
+      if (!silent) notify('Data imported successfully!', 'success');
     } catch (e) { 
       console.error(e);
       notify('Failed to parse import file', 'error'); 
     }
-  };
+  }, [notify, setStreamData, setThumbnailConfig, setSystemFonts, setLayoutPrefs, setModalBgIntensity, setModalPanelOpacity]);
 
   const handleExport = (type) => {
     const now = new Date();
@@ -225,6 +246,67 @@ export default function App() {
       .catch(() => notify('Could not find defaultData.json', 'error'));
   };
 
+  useEffect(() => {
+    if (defaultInitializationMode === 'none') return;
+
+    let cancelled = false;
+    fetch('defaultData.json')
+      .then(res => {
+        if (!res.ok) throw new Error(`Default data request failed: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (cancelled) return;
+
+        const initializeLibrary = defaultInitializationMode === 'initialize';
+        if (initializeLibrary && localStorage.getItem('streamTrackerDefaultsInitialized') === 'true') {
+          setIsLoadingDefaultData(false);
+          return;
+        }
+        if (!data.streamData || typeof data.streamData !== 'object' || Array.isArray(data.streamData)) {
+          throw new Error('Default data does not contain a valid stream library.');
+        }
+
+        if (initializeLibrary) {
+          const storedData = localStorage.getItem('streamManagerData');
+          if (storedData && Object.keys(JSON.parse(storedData)).length > 0) {
+            localStorage.setItem('streamTrackerDefaultsInitialized', 'true');
+            setIsLoadingDefaultData(false);
+            return;
+          }
+          handleImport({ ...data, type: 'full_backup' }, { silent: true });
+          localStorage.setItem('streamTrackerDefaultsInitialized', 'true');
+        } else {
+          const storedData = JSON.parse(localStorage.getItem('streamManagerData') || '{}');
+          const storedIds = Object.keys(storedData).sort();
+          const defaultIds = Object.keys(data.streamData).sort();
+          const isBundledDefaultLibrary = storedIds.length === defaultIds.length &&
+            storedIds.every((id, index) =>
+              id === defaultIds[index] && storedData[id]?.game_name === data.streamData[id]?.game_name
+            );
+
+          if (isBundledDefaultLibrary) {
+              if (data.thumbnailConfig) setThumbnailConfig(data.thumbnailConfig);
+              if (data.systemFonts) setSystemFonts(data.systemFonts);
+              if (data.layoutPrefs) setLayoutPrefs(data.layoutPrefs);
+              if (data.modalBgIntensity !== undefined) setModalBgIntensity(data.modalBgIntensity);
+              if (data.modalPanelOpacity !== undefined) setModalPanelOpacity(data.modalPanelOpacity);
+          }
+        }
+        localStorage.setItem('streamTrackerDefaultSettingsInitialized', 'true');
+        if (initializeLibrary) setIsLoadingDefaultData(false);
+      })
+      .catch(error => {
+        if (!cancelled) {
+          console.error('Could not load default stream data.', error);
+          notify('Could not load default stream data', 'error');
+          if (defaultInitializationMode === 'initialize') setIsLoadingDefaultData(false);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [defaultInitializationMode, handleImport, notify, setThumbnailConfig, setSystemFonts, setLayoutPrefs, setModalBgIntensity, setModalPanelOpacity]);
+
   const onAddGame = async (g) => {
     const rid = g.id.toString();
     if (streamData[rid]) { openGameProfile(rid); setCurrentView('library'); return; }
@@ -278,7 +360,11 @@ export default function App() {
             <Dashboard {...cardProps} handleCardClick={(e, id, gid, cid) => handleCardClick(e, id, gid, openGameProfile, cid)} onImportDefault={handleImportDefault} hasCustomSettings={settings.hasCustomSettings} />
           )}
           {currentView === 'library' && (
-            <Library {...cardProps} handleCardClick={(e, id, gid) => handleCardClick(e, id, gid, openGameProfile)} onDeleteGame={deleteGame} onUpdateGameLink={updateGameLink} onEditGame={editGameDetails} onImportDefault={handleImportDefault} hasCustomSettings={settings.hasCustomSettings} />
+            isLoadingDefaultData ? (
+              <div className="flex flex-1 items-center justify-center text-white/60">Loading your library...</div>
+            ) : (
+              <Library {...cardProps} handleCardClick={(e, id, gid) => handleCardClick(e, id, gid, openGameProfile)} onDeleteGame={deleteGame} onUpdateGameLink={updateGameLink} onEditGame={editGameDetails} onImportDefault={handleImportDefault} hasCustomSettings={settings.hasCustomSettings} />
+            )
           )}
           {currentView === 'stats' && (
             <Stats streamData={streamData} systemFonts={scaledSystemFonts} layoutPrefs={scaledLayoutPrefs} cachedStats={cachedStats} />

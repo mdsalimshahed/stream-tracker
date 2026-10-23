@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "10/17/2026, 3:22:04 PM",
+  "exportDate": "10/23/2026, 9:07:42 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -2921,7 +2921,7 @@
           "isMain": true,
           "youtubePlaylist": "PLRyO2pF81_B4",
           "displayName": "First Playthrough",
-          "label": "Ongoing"
+          "label": "Abandoned"
         }
       },
       "details": {
@@ -4138,7 +4138,7 @@
           "isMain": true,
           "youtubePlaylist": "PLExTSAwz_lXs",
           "displayName": "First Playthrough",
-          "label": "Ongoing"
+          "label": "Abandoned"
         }
       },
       "details": {
@@ -5462,6 +5462,50 @@
         "genres": "Action, Adventure",
         "tags": "Unknown",
         "steamUrl": "https://store.steampowered.com/app/2713000/",
+        "notOnSteam": false
+      }
+    },
+    "2828710": {
+      "game_name": "Valor Mortis",
+      "release_year": "2026",
+      "cover_image": "https://media.rawg.io/media/games/61d/61d1431d20f9f6e19b27cb89aa4a4402.jpg",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2828710/11d8d079855974437fbda10fa80c9db27c8f8b75/ss_11d8d079855974437fbda10fa80c9db27c8f8b75.1920x1080.jpg?t=1791924072",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2828710/6d8ffdc4542763619c8d09ba0d986edbd67c7aa7/ss_6d8ffdc4542763619c8d09ba0d986edbd67c7aa7.1920x1080.jpg?t=1791924072",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2828710/8011321f88ddce6e0b2aff5bc79770ff6012bae4/ss_8011321f88ddce6e0b2aff5bc79770ff6012bae4.1920x1080.jpg?t=1791924072",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2828710/9355ee1b4fd2764210c2b18111e4811cab08f48a/ss_9355ee1b4fd2764210c2b18111e4811cab08f48a.1920x1080.jpg?t=1791924072",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2828710/4470f8c5367b2df36733998c77bfe44ff04eeb3f/ss_4470f8c5367b2df36733998c77bfe44ff04eeb3f.1920x1080.jpg?t=1791924072",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2828710/b3ec71bcc16e2906aa595b6801f5d8568d36a521/ss_b3ec71bcc16e2906aa595b6801f5d8568d36a521.1920x1080.jpg?t=1791924072",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2828710/cc1e8cc2c426583e5bf91bd5f63885649638b683/ss_cc1e8cc2c426583e5bf91bd5f63885649638b683.1920x1080.jpg?t=1791924072",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2828710/35eb932066f9921b682dbeeae0c428b433ba74fa/ss_35eb932066f9921b682dbeeae0c428b433ba74fa.1920x1080.jpg?t=1791924072",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2828710/a516debbe805da903f4bf53ea78d064ccb5db71e/ss_a516debbe805da903f4bf53ea78d064ccb5db71e.1920x1080.jpg?t=1791924072",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2828710/a31ea2aa3ca2d44f5e57676032ad96da1f10c902/ss_a31ea2aa3ca2d44f5e57676032ad96da1f10c902.1920x1080.jpg?t=1791924072"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 1,
+          "timestamps": [
+            {
+              "date": 1792758777000,
+              "videoId": "FaUTJsSpf9Y",
+              "duration": 8931,
+              "startTime": 1792758777000,
+              "endTime": 1792767708000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLOi3DkSOHcz4",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "One More Level",
+        "publisher": "Lyrical Games, One More Level",
+        "releaseDate": "13 Oct, 2026",
+        "genres": "Action, Adventure, RPG",
+        "tags": "Unknown",
+        "steamUrl": "https://store.steampowered.com/app/2828710/",
         "notOnSteam": false
       }
     },

@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "10/25/2026, 7:35:52 PM",
+  "exportDate": "10/26/2026, 8:35:19 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -4148,6 +4148,64 @@
         "genres": "Action, RPG",
         "tags": "Unknown",
         "steamUrl": "https://store.steampowered.com/app/2584270/",
+        "notOnSteam": false
+      }
+    },
+    "2593290": {
+      "game_name": "Dragon's Dogma 2: Dark Arisen Expansion",
+      "release_year": "2026",
+      "cover_image": "https://media.rawg.io/media/games/639/639ce7d7fecbb9f0717e9fbc1180f8f8.jpg",
+      "thumbnail_urls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2593290/5ed2cb7b124dd248376bb16270c72dfd53aec6e2/ss_5ed2cb7b124dd248376bb16270c72dfd53aec6e2.1920x1080.jpg?t=1791505231",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2593290/cc02ece45b0d71242553c699cd43f022b4773439/ss_cc02ece45b0d71242553c699cd43f022b4773439.1920x1080.jpg?t=1791505231",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2593290/86a9be8521d2bf7514e48db9900780f5813d61ad/ss_86a9be8521d2bf7514e48db9900780f5813d61ad.1920x1080.jpg?t=1791505231",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2593290/eb7b164c5a2672c7af07210abf1820df7f590423/ss_eb7b164c5a2672c7af07210abf1820df7f590423.1920x1080.jpg?t=1791505231",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2593290/b8eede3f0b9c6fa4761cd585e3f38f17d3140ebf/ss_b8eede3f0b9c6fa4761cd585e3f38f17d3140ebf.1920x1080.jpg?t=1791505231",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2593290/ba6844525ddc10399e0810bb1dcf9cb5e722306d/ss_ba6844525ddc10399e0810bb1dcf9cb5e722306d.1920x1080.jpg?t=1791505231",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2593290/9f0194a990cb3de995974eba904a42b783f816ba/ss_9f0194a990cb3de995974eba904a42b783f816ba.1920x1080.jpg?t=1791505231",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2593290/fc9a5843991b4bb95f765fec822b423f55946370/ss_fc9a5843991b4bb95f765fec822b423f55946370.1920x1080.jpg?t=1791505231",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2593290/95c0156fece4331d76e0737452d266f7825156ea/ss_95c0156fece4331d76e0737452d266f7825156ea.1920x1080.jpg?t=1791505231",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2593290/0dec21bef8a3a4b09bd905a8b2a377879a68e517/ss_0dec21bef8a3a4b09bd905a8b2a377879a68e517.1920x1080.jpg?t=1791505231"
+      ],
+      "cycles": {
+        "main": {
+          "stream_count": 3,
+          "timestamps": [
+            {
+              "date": 1793002136000,
+              "videoId": "4u_vX6o54Fs",
+              "duration": 8172,
+              "startTime": 1793002136000,
+              "endTime": 1793010309000
+            },
+            {
+              "date": 1793010560000,
+              "videoId": "UELKOlXwn5A",
+              "duration": 3350,
+              "startTime": 1793010560000,
+              "endTime": 1793013910000
+            },
+            {
+              "date": 1793016958000,
+              "videoId": "Mn7FuMRJyzk",
+              "duration": 8241,
+              "startTime": 1793016958000,
+              "endTime": 1793025199000
+            }
+          ],
+          "isMain": true,
+          "youtubePlaylist": "PLQEVXlOQl2UI",
+          "displayName": "First Playthrough",
+          "label": "Ongoing"
+        }
+      },
+      "details": {
+        "developer": "CAPCOM Co., Ltd.",
+        "publisher": "CAPCOM Co., Ltd.",
+        "releaseDate": "8 Oct, 2026",
+        "genres": "Action, RPG",
+        "tags": "Unknown",
+        "steamUrl": "https://store.steampowered.com/app/2593290/",
         "notOnSteam": false
       }
     },

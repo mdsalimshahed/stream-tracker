@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "10/31/2026, 9:57:11 PM",
+  "exportDate": "11/4/2026, 1:00:09 AM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -6314,11 +6314,13 @@
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/da5b8d5347b66aa994119fc7052ca43896971da9/ss_da5b8d5347b66aa994119fc7052ca43896971da9.1920x1080.jpg?t=1787682679",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/b64711208534731f57e0a4595241cdbb43a0cbc2/ss_b64711208534731f57e0a4595241cdbb43a0cbc2.1920x1080.jpg?t=1787682679",
         "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/65dce9f0199332d1dc43aa5dd3684e1967d7a551/ss_65dce9f0199332d1dc43aa5dd3684e1967d7a551.1920x1080.jpg?t=1787682679",
-        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/54b5c0b89a83fd2383b67861c148144461d5a87c/ss_54b5c0b89a83fd2383b67861c148144461d5a87c.1920x1080.jpg?t=1787682679"
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/54b5c0b89a83fd2383b67861c148144461d5a87c/ss_54b5c0b89a83fd2383b67861c148144461d5a87c.1920x1080.jpg?t=1787682679",
+        "https://ingametor.com/wp-content/uploads/2026/07/crimson-desert-golden-star-boss-fight-guide.jpg",
+        "https://images.immediate.co.uk/production/volatile/sites/3/2026/03/crimson-desert-how-to-get-dragon-mount-blackstar-a9f694a.jpg?resize=1366,911"
       ],
       "cycles": {
         "main": {
-          "stream_count": 86,
+          "stream_count": 91,
           "timestamps": [
             {
               "date": 1774375141000,
@@ -6921,12 +6923,47 @@
               "duration": 8357,
               "startTime": 1788180676000,
               "endTime": 1788189041000
+            },
+            {
+              "date": 1793505656000,
+              "videoId": "v8Q63dpm9yg",
+              "duration": 11136,
+              "startTime": 1793505656000,
+              "endTime": 1793516791000
+            },
+            {
+              "date": 1793683604000,
+              "videoId": "kj3NmXrqdRs",
+              "duration": 6415,
+              "startTime": 1793683604000,
+              "endTime": 1793690019000
+            },
+            {
+              "date": 1793695129000,
+              "videoId": "6UJbl8Foeyo",
+              "duration": 8518,
+              "startTime": 1793695129000,
+              "endTime": 1793703648000
+            },
+            {
+              "date": 1793707805000,
+              "videoId": "A--Ll0kJz88",
+              "duration": 6177,
+              "startTime": 1793707805000,
+              "endTime": 1793713983000
+            },
+            {
+              "date": 1793720904000,
+              "videoId": "2p78kKNuNHo",
+              "duration": 11304,
+              "startTime": 1793720904000,
+              "endTime": 1793732208000
             }
           ],
           "isMain": false,
           "youtubePlaylist": "PLLzuld5NPO9DIfpiKjxOYNxTfsq1l0Ewt",
           "displayName": "First Playthrough",
-          "label": "Ongoing"
+          "label": "Completed"
         }
       },
       "details": {
@@ -8942,7 +8979,7 @@
     "titleYOffset": 10,
     "titleSpacing": 29,
     "strokeWidth": 16,
-    "splitTitle": false,
+    "splitTitle": true,
     "streamCountSize": 93,
     "cycleSize": 52,
     "bottomSpacing": 70,

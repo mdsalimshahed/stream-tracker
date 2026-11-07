@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "11/4/2026, 4:12:27 PM",
+  "exportDate": "11/8/2026, 12:23:49 AM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -6320,7 +6320,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 93,
+          "stream_count": 96,
           "timestamps": [
             {
               "date": 1774375141000,
@@ -6962,16 +6962,37 @@
             {
               "date": 1793771532000,
               "videoId": "T0AkysWW28k",
-              "duration": 6206,
+              "duration": 6205,
               "startTime": 1793771532000,
               "endTime": 1793777739000
             },
             {
               "date": 1793780022000,
               "videoId": "_r55tQYburQ",
-              "duration": 6701,
+              "duration": 6705,
               "startTime": 1793780022000,
               "endTime": 1793786723000
+            },
+            {
+              "date": 1793794591000,
+              "videoId": "a1-V5h6kNVc",
+              "duration": 8735,
+              "startTime": 1793794591000,
+              "endTime": 1793803430000
+            },
+            {
+              "date": 1793861312000,
+              "videoId": "r7OQZbJroyc",
+              "duration": 2937,
+              "startTime": 1793861312000,
+              "endTime": 1793864250000
+            },
+            {
+              "date": 1793868073000,
+              "videoId": "6P_mGO1gJNs",
+              "duration": 6879,
+              "startTime": 1793868073000,
+              "endTime": 1793874952000
             }
           ],
           "isMain": false,
@@ -8929,7 +8950,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 5,
+          "stream_count": 13,
           "timestamps": [
             {
               "date": 1793289534000,
@@ -8948,23 +8969,79 @@
             {
               "date": 1793421158000,
               "videoId": "sd-9g5R_2LE",
-              "duration": 9223,
+              "duration": 9216,
               "startTime": 1793421158000,
               "endTime": 1793430382000
             },
             {
               "date": 1793434881000,
               "videoId": "0F65l--6nhM",
-              "duration": 9625,
+              "duration": 9622,
               "startTime": 1793434881000,
               "endTime": 1793444506000
             },
             {
               "date": 1793456334000,
               "videoId": "4KdyqVSVewM",
-              "duration": 5000,
+              "duration": 4992,
               "startTime": 1793456334000,
               "endTime": 1793461334000
+            },
+            {
+              "date": 1793887685000,
+              "videoId": "VGlN3johOk8",
+              "duration": 5241,
+              "startTime": 1793887685000,
+              "endTime": 1793892934000
+            },
+            {
+              "date": 1793897090000,
+              "videoId": "iVykpNNmdQc",
+              "duration": 6654,
+              "startTime": 1793897090000,
+              "endTime": 1793903747000
+            },
+            {
+              "date": 1793939637000,
+              "videoId": "I16fSSXvglw",
+              "duration": 5118,
+              "startTime": 1793939637000,
+              "endTime": 1793944761000
+            },
+            {
+              "date": 1793955681000,
+              "videoId": "Geainnwmy3s",
+              "duration": 3528,
+              "startTime": 1793955681000,
+              "endTime": 1793959212000
+            },
+            {
+              "date": 1794025676000,
+              "videoId": "I56b4qbP56w",
+              "duration": 6205,
+              "startTime": 1794025676000,
+              "endTime": 1794031881000
+            },
+            {
+              "date": 1794056163000,
+              "videoId": "Q8jl0qMTe_M",
+              "duration": 3307,
+              "startTime": 1794056163000,
+              "endTime": 1794059471000
+            },
+            {
+              "date": 1794060768000,
+              "videoId": "DS2uvZzNqw0",
+              "duration": 5173,
+              "startTime": 1794060768000,
+              "endTime": 1794065942000
+            },
+            {
+              "date": 1794069116000,
+              "videoId": "Lv3hVF3cLWo",
+              "duration": 6579,
+              "startTime": 1794069116000,
+              "endTime": 1794075695000
             }
           ],
           "isMain": true,

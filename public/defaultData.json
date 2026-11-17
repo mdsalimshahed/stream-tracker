@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "exportDate": "11/14/2026, 11:59:21 PM",
+  "exportDate": "11/17/2026, 7:36:59 PM",
   "type": "full_backup",
   "streamData": {
     "335300": {
@@ -5582,7 +5582,7 @@
           "isMain": true,
           "youtubePlaylist": "PLOi3DkSOHcz4",
           "displayName": "First Playthrough",
-          "label": "Ongoing"
+          "label": "Abandoned"
         }
       },
       "details": {
@@ -8950,7 +8950,7 @@
       ],
       "cycles": {
         "main": {
-          "stream_count": 33,
+          "stream_count": 35,
           "timestamps": [
             {
               "date": 1793289534000,
@@ -9158,18 +9158,44 @@
             {
               "date": 1794644710000,
               "videoId": "zwrXsvylLTE",
-              "duration": 8644,
+              "duration": 8645,
               "startTime": 1794644710000,
               "endTime": 1794653355000
             },
             {
-              "date": 1794670821535
+              "date": 1794666629000,
+              "videoId": "dnyZ1TWgIlE",
+              "duration": 3751,
+              "startTime": 1794666629000,
+              "endTime": 1794670388000
             },
             {
-              "date": 1794674480674
+              "date": 1794671173000,
+              "videoId": "AnfQeO-U6YA",
+              "duration": 3201,
+              "startTime": 1794671173000,
+              "endTime": 1794674377000
             },
             {
-              "date": 1794679109220
+              "date": 1794675232000,
+              "videoId": "zhFhA8ITUsQ",
+              "duration": 3787,
+              "startTime": 1794675232000,
+              "endTime": 1794679016000
+            },
+            {
+              "date": 1794903834000,
+              "videoId": "saWDtoy0vOs",
+              "duration": 10012,
+              "startTime": 1794903834000,
+              "endTime": 1794913847000
+            },
+            {
+              "date": 1794918773000,
+              "videoId": "xzCJx9dpxKM",
+              "duration": 3080,
+              "startTime": 1794918773000,
+              "endTime": 1794921853000
             }
           ],
           "isMain": true,
